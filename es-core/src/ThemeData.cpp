@@ -9,7 +9,7 @@
 #include <pugixml/src/pugixml.hpp>
 #include <algorithm>
 
-std::vector<std::string> ThemeData::sSupportedViews { { "system" }, { "basic" }, { "detailed" }, { "grid" }, { "video" } };
+std::vector<std::string> ThemeData::sSupportedViews { { "system" }, { "basic" }, { "detailed" },{ "grid" },{ "gridex" },{ "video" } };
 std::vector<std::string> ThemeData::sSupportedFeatures { { "video" }, { "carousel" }, { "z-index" } };
 
 std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> ThemeData::sElementMap {
@@ -40,7 +40,8 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "backgroundCornerSize", NORMALIZED_PAIR },
 		{ "backgroundColor", COLOR },
 		{ "backgroundCenterColor", COLOR },
-		{ "backgroundEdgeColor", COLOR } } },
+		{ "backgroundEdgeColor", COLOR },
+		{ "imageSizeMode", STRING } } },		
 	{ "text", {
 		{ "pos", NORMALIZED_PAIR },
 		{ "size", NORMALIZED_PAIR },
@@ -202,7 +203,7 @@ ThemeData::ThemeData()
 	mVersion = 0;
 }
 
-void ThemeData::loadFile(std::map<std::string, std::string> sysDataMap, const std::string& path)
+void ThemeData::loadFile(std::string system, const std::string& path)
 {
 	mPaths.push_back(path);
 
@@ -214,9 +215,12 @@ void ThemeData::loadFile(std::map<std::string, std::string> sysDataMap, const st
 
 	mVersion = 0;
 	mViews.clear();
-	mVariables.clear();
 
-	mVariables.insert(sysDataMap.cbegin(), sysDataMap.cend());
+	mSystemThemeFolder = system;
+
+	mVariables.clear();	
+	//mVariables.insert(system, system);
+	//mVariables.insert(sysDataMap.cbegin(), sysDataMap.cend());
 
 	pugi::xml_document doc;
 	pugi::xml_parse_result res = doc.load_file(path.c_str());
@@ -232,6 +236,9 @@ void ThemeData::loadFile(std::map<std::string, std::string> sysDataMap, const st
 	if(mVersion == -404)
 		throw error << "<formatVersion> tag missing!\n   It's either out of date or you need to add <formatVersion>" << CURRENT_THEME_FORMAT_VERSION << "</formatVersion> inside your <theme> tag.";
 
+	if (root.attribute("defaultView"))
+		mDefaultView = root.attribute("defaultView").as_string();
+
 	if(mVersion < MINIMUM_THEME_FORMAT_VERSION)
 		throw error << "Theme uses format version " << mVersion << ". Minimum supported version is " << MINIMUM_THEME_FORMAT_VERSION << ".";
 
@@ -240,6 +247,22 @@ void ThemeData::loadFile(std::map<std::string, std::string> sysDataMap, const st
 	parseViews(root);
 	parseFeatures(root);
 }
+
+std::string ThemeData::resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path)
+{
+	std::string result = path;
+
+	size_t start_pos = result.find("$system");
+	if (start_pos == std::string::npos)
+		return path;
+
+	result.replace(start_pos, 7, systemThemeFolder);
+
+	//result.replace("$system", systemThemeFolder);
+	//boost::algorithm::replace_first(result, "$system", systemThemeFolder);
+	return result;
+}
+
 
 void ThemeData::parseIncludes(const pugi::xml_node& root)
 {
@@ -250,8 +273,11 @@ void ThemeData::parseIncludes(const pugi::xml_node& root)
 	{
 		std::string relPath = resolvePlaceholders(node.text().as_string());
 		std::string path = Utils::FileSystem::resolveRelativePath(relPath, mPaths.back(), true);
-		if(!ResourceManager::getInstance()->fileExists(path))
-			throw error << "Included file \"" << relPath << "\" not found! (resolved to \"" << path << "\")";
+		path = resolveSystemVariable(mSystemThemeFolder, path);
+
+		if (!ResourceManager::getInstance()->fileExists(path))
+			continue;
+			//throw error << "Included file \"" << relPath << "\" not found! (resolved to \"" << path << "\")";
 
 		error << "    from included file \"" << relPath << "\":\n    ";
 
@@ -340,6 +366,12 @@ void ThemeData::parseViews(const pugi::xml_node& root)
 			{
 				ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
 				parseView(node, view);
+				
+				if (viewKey == "grid" && (int) nameAttr.find("gridex") < 0)
+				{
+					ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>("gridex", ThemeView())).first->second;
+					parseView(node, view);
+				}
 			}
 		}
 	}
@@ -390,10 +422,11 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 	for(pugi::xml_node node = root.first_child(); node; node = node.next_sibling())
 	{
 		auto typeIt = typeMap.find(node.name());
-		if(typeIt == typeMap.cend())
-			throw error << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
+		if (typeIt == typeMap.cend())
+			continue;
+			//throw error << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
 
-		std::string str = resolvePlaceholders(node.text().as_string());
+		std::string str = resolveSystemVariable(mSystemThemeFolder, resolvePlaceholders(node.text().as_string()));
 
 		switch(typeIt->second)
 		{
@@ -492,8 +525,8 @@ const std::shared_ptr<ThemeData>& ThemeData::getDefault()
 		{
 			try
 			{
-				std::map<std::string, std::string> emptyMap;
-				theme->loadFile(emptyMap, path);
+				//std::map<std::string, std::string> emptyMap;
+				theme->loadFile("", path); // emptyMap
 			} catch(ThemeException& e)
 			{
 				LOG(LogError) << e.what();

@@ -11,6 +11,14 @@
 class FileData;
 class FileFilterIndex;
 class ThemeData;
+class Window;
+
+struct EmulatorData
+{
+	std::string mName;
+	std::string mCommandLine;
+	std::vector<std::string> mCores;
+};
 
 struct SystemEnvironmentData
 {
@@ -18,6 +26,52 @@ struct SystemEnvironmentData
 	std::vector<std::string> mSearchExtensions;
 	std::string mLaunchCommand;
 	std::vector<PlatformIds::PlatformId> mPlatformIds;
+
+//	std::string mDefaultCore;
+
+	std::vector<EmulatorData> mEmulators;
+
+	std::vector<std::string> getCores(std::string emulatorName) 
+	{
+		std::vector<std::string> list;
+
+		for (auto& emulator : mEmulators)
+			if (emulatorName == emulator.mName)
+				return emulator.mCores;
+
+		return list;
+	}
+
+	std::string getDefaultEmulator()
+	{
+		for (auto& emulator : mEmulators)
+			return emulator.mName;
+
+		return "";
+	}
+
+	std::string getDefaultCore(std::string emulatorName)
+	{
+		for (auto& emulator : mEmulators)
+		{
+			if (emulatorName == emulator.mName)
+			{
+				for (auto core : emulator.mCores)
+					return core;
+			}
+		}
+
+		return "";
+	}
+
+	std::string getEmulatorCommandLine(std::string emulatorName)
+	{
+		for (auto& emulator : mEmulators)
+			if (emulatorName == emulator.mName)
+				return emulator.mCommandLine;
+
+		return "";
+	}
 };
 
 class SystemData
@@ -46,7 +100,7 @@ public:
 	unsigned int getDisplayedGameCount() const;
 
 	static void deleteSystems();
-	static bool loadConfig(); //Load the system config file at getConfigPath(). Returns true if no errors were encountered. An example will be written if the file doesn't exist.
+	static bool loadConfig(Window* window); //Load the system config file at getConfigPath(). Returns true if no errors were encountered. An example will be written if the file doesn't exist.
 	static void writeExampleConfig(const std::string& path);
 	static std::string getConfigPath(bool forWrite); // if forWrite, will only return ~/.emulationstation/es_systems.cfg, never /etc/emulationstation/es_systems.cfg
 

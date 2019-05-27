@@ -28,6 +28,10 @@ namespace Utils
 		std::string  format             (const char* _string, ...);      
 		std::string  scramble           (const std::string& _input, const std::string& key);
 
+#if defined(_WIN32)
+		const std::string convertFromWideString(const std::wstring wstring);
+		const std::wstring convertToWideString(const std::string string);
+#endif
 	} // String::
 
 } // Utils::

@@ -8,7 +8,7 @@
 class GuiScreensaverOptions : public GuiComponent
 {
 public:
-	GuiScreensaverOptions(Window* window, const char* title);
+	GuiScreensaverOptions(Window* window, std::string title);
 	virtual ~GuiScreensaverOptions(); // just calls save();
 
 	virtual void save();

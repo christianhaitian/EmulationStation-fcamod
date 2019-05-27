@@ -40,3 +40,4 @@ Makefile
 CPackConfig.cmake
 CPackSourceConfig.cmake
 *.cbp
+/.vs

@@ -78,8 +78,8 @@ Font::Font(int size, const std::string& path) : mSize(size), mPath(path)
 		initLibrary();
 
 	// always initialize ASCII characters
-	for(unsigned int i = 32; i < 128; i++)
-		getGlyph(i);
+//	for(unsigned int i = 32; i < 128; i++)
+	//	getGlyph(i);
 
 	clearFaceCache();
 }
@@ -247,6 +247,10 @@ std::vector<std::string> getFallbackFontPaths()
 	for(unsigned int i = 0; i < sizeof(fontNames) / sizeof(fontNames[0]); i++)
 	{
 		std::string path = fontDir + fontNames[i];
+
+		if (i == 0)
+			path = ":/fontawesome_webfont.ttf";
+
 		if(ResourceManager::getInstance()->fileExists(path))
 			fontPaths.push_back(path);
 	}

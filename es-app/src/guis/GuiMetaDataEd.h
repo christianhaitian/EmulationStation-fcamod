@@ -5,17 +5,20 @@
 #include "components/ComponentGrid.h"
 #include "components/NinePatchComponent.h"
 #include "scrapers/Scraper.h"
+#include "components/MenuComponent.h"
+#include "components/OptionListComponent.h"
 #include "GuiComponent.h"
 #include "MetaData.h"
 
 class ComponentList;
 class TextComponent;
+class FileData;
 
 class GuiMetaDataEd : public GuiComponent
 {
 public:
 	GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector<MetaDataDecl>& mdd, ScraperSearchParams params, 
-		const std::string& header, std::function<void()> savedCallback, std::function<void()> deleteFunc);
+		const std::string& header, std::function<void()> savedCallback, std::function<void()> deleteFunc, FileData* file);
 	
 	bool input(InputConfig* config, Input input) override;
 	void onSizeChanged() override;
@@ -37,6 +40,9 @@ private:
 	std::shared_ptr<ComponentGrid> mButtons;
 
 	ScraperSearchParams mScraperParams;
+
+	// typedef OptionListComponent<char> CoreList;
+	//std::shared_ptr<CoreList> mCoreList;
 
 	std::vector< std::shared_ptr<GuiComponent> > mEditors;
 

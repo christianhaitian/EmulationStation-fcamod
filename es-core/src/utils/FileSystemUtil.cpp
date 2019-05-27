@@ -147,7 +147,12 @@ namespace Utils
 			{
 				// this should give us something like "/home/YOUR_USERNAME" on Linux and "C:/Users/YOUR_USERNAME/" on Windows
 				char* envHome = getenv("HOME");
-				if(envHome)
+
+#ifdef _DEBUG
+				  envHome = "H:/[Emulz]/EmulationStation/";
+#endif
+
+				if (envHome)
 					path = getGenericPath(envHome);
 
 #if defined(_WIN32)
@@ -174,10 +179,7 @@ namespace Utils
 		std::string getCWDPath()
 		{
 			char temp[512];
-
-			// return current working directory path
 			return (getcwd(temp, 512) ? getGenericPath(temp) : "");
-
 		} // getCWDPath
 
 		std::string getExePath()
@@ -185,14 +187,22 @@ namespace Utils
 			static std::string path;
 
 			// only construct the exepath once
-			if(!path.length())
+			if (!path.length())
 			{
-				path = getCanonicalPath(Settings::getInstance()->getString("ExePath"));
-
-				if(isRegularFile(path))
+#if defined(_WIN32)
+				char buffer[MAX_PATH];
+				DWORD size = MAX_PATH;
+				DWORD result = GetModuleFileNameA(NULL, buffer, size);
+				if (result)
 				{
-					path = getParent(path);
+					std::string ret = buffer;
+					path = getParent(ret);
+					return ret;
 				}
+#endif
+				path = getCanonicalPath(Settings::getInstance()->getString("ExePath"));
+				if (isRegularFile(path))
+					path = getParent(path);
 			}
 
 			// return constructed exepath
@@ -644,7 +654,7 @@ namespace Utils
 #endif // _WIN32
 
 			// filenames starting with . are hidden in linux, we do this check for windows as well
-			if(getFileName(path)[0] == '.')
+			if (getFileName(path)[0] == '.')
 				return true;
 
 			// not hidden

@@ -3,10 +3,38 @@
 #include <algorithm>
 #include <stdarg.h>
 
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
+
 namespace Utils
 {
 	namespace String
 	{
+#if defined(_WIN32)
+		const std::string convertFromWideString(const std::wstring wstring)
+		{
+			int numBytes = WideCharToMultiByte(CP_UTF8, 0, wstring.c_str(), (int)wstring.length(), nullptr, 0, nullptr, nullptr);
+
+			std::string string;
+			string.resize(numBytes);
+			WideCharToMultiByte(CP_UTF8, 0, wstring.c_str(), (int)wstring.length(), (char*)string.c_str(), numBytes, nullptr, nullptr);
+
+			return string;
+		}
+	
+		const std::wstring convertToWideString(const std::string string)
+		{
+			int numBytes = MultiByteToWideChar(CP_UTF8, 0, string.c_str(), (int)string.length(), nullptr, 0);
+
+			std::wstring wstring;
+			wstring.resize(numBytes);
+			MultiByteToWideChar(CP_UTF8, 0, string.c_str(), (int)string.length(), (WCHAR*)wstring.c_str(), numBytes);
+
+			return wstring;
+		}
+#endif
+
 		unsigned int chars2Unicode(const std::string& _string, size_t& _cursor)
 		{
 			const char&  c      = _string[_cursor];
@@ -148,13 +176,22 @@ namespace Utils
 
 		std::string toUpper(const std::string& _string)
 		{
+		
+#if defined(_WIN32)
+			std::wstring stringW = convertToWideString(_string);
+
+			auto& f = std::use_facet<std::ctype<wchar_t>>(std::locale());
+			f.toupper(&stringW[0], &stringW[0] + stringW.size());
+
+			return convertFromWideString(stringW);
+#else
 			std::string string;
 
 			for(size_t i = 0; i < _string.length(); ++i)
 				string += (char)toupper(_string[i]);
 
 			return string;
-
+#endif
 		} // toUpper
 
 		std::string trim(const std::string& _string)

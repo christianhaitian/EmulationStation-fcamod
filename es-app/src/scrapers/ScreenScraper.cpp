@@ -125,7 +125,17 @@ void screenscraper_generate_scraper_requests(const ScraperSearchParams& params,
 
 	ScreenScraperRequest::ScreenScraperConfig ssConfig;
 
-	path = ssConfig.getGameSearchUrl(params.game->getFileName());
+	if (params.nameOverride.length() == 0)
+	{
+		path = ssConfig.getGameSearchUrl(params.game->getFileName());
+		path += "&romtype=rom";
+	}
+	else
+	{
+		path = ssConfig.getGameSearchUrl(params.nameOverride);
+		path += "&romtype=jeu";
+	}
+
 	auto& platforms = params.system->getPlatformIds();
 
 	for (auto platformIt = platforms.cbegin(); platformIt != platforms.cend(); platformIt++)
@@ -142,7 +152,6 @@ void screenscraper_generate_scraper_requests(const ScraperSearchParams& params,
 
 		requests.push(std::unique_ptr<ScraperRequest>(new ScreenScraperRequest(requests, results, path)));
 	}
-
 }
 
 void ScreenScraperRequest::process(const std::unique_ptr<HttpReq>& req, std::vector<ScraperSearchResult>& results)

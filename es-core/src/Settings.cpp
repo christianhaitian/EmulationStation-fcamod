@@ -61,7 +61,7 @@ void Settings::setDefaults()
 	mBoolMap["ShowHiddenFiles"] = false;
 	mBoolMap["DrawFramerate"] = false;
 	mBoolMap["ShowExit"] = true;
-	mBoolMap["FullscreenBorderless"] = false;
+	mBoolMap["FullscreenBorderless"] = true;
 	mBoolMap["Windowed"] = false;
 	mBoolMap["SplashScreen"] = true;
 	mBoolMap["SplashScreenProgress"] = true;
@@ -91,8 +91,11 @@ void Settings::setDefaults()
 	#else
 		mIntMap["MaxVRAM"] = 100;
 	#endif
-
-	mStringMap["TransitionStyle"] = "fade";
+		
+	mBoolMap["HideWindow"] = true;
+	mStringMap["GameTransitionStyle"] = "fade";
+	mStringMap["TransitionStyle"] = "slide";
+	mStringMap["Language"] = "en";	
 	mStringMap["ThemeSet"] = "";
 	mStringMap["ScreenSaverBehavior"] = "dim";
 	mStringMap["Scraper"] = "TheGamesDB";

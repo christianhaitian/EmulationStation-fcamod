@@ -8,6 +8,103 @@
 #include "Window.h"
 #include <algorithm>
 
+
+#if defined(_WIN32)
+#define _conv(x) GuiTextTool::convertFromWideString(L ## x)
+#else
+#define _conv(x) x
+#endif
+
+#include <fstream>
+#include <string>
+#include "resources\ResourceManager.h"
+
+std::vector<LocalizationItem*> GuiTextTool::mItems;
+std::string GuiTextTool::mCurrentLanguage = "en";
+bool GuiTextTool::mCurrentLanguageLoaded = false;
+
+void GuiTextTool::setLanguage(std::string lang)
+{
+	mCurrentLanguage = lang;
+	mCurrentLanguageLoaded = false;
+}
+
+void GuiTextTool::ensureLocalisation()
+{
+	if (mCurrentLanguageLoaded)
+	{
+		if (Settings::getInstance()->getString("Language") == mCurrentLanguage)
+			return;
+
+		mCurrentLanguage = Settings::getInstance()->getString("Language");
+	}
+
+	mCurrentLanguageLoaded = true;
+
+	for (std::vector<LocalizationItem*>::const_iterator it = mItems.cbegin(); it != mItems.cend(); ++it)
+		delete (*it);
+
+	mItems.clear();
+
+	std::string xmlpath = ResourceManager::getInstance()->getResourcePath(":/locale/"+ mCurrentLanguage +"/emulationstation2.po");
+	if (Utils::FileSystem::exists(xmlpath))
+	{				
+		LocalizationItem* currentItem = NULL;
+
+		std::ifstream file(xmlpath);
+		std::string str;
+		while (std::getline(file, str))
+		{
+			if (str.length() > 0 && str[0] == '#')
+			{
+				if (currentItem != NULL && currentItem->msgid.length() > 0 && currentItem->msgstr.length() > 0)
+					mItems.push_back(currentItem);
+
+				currentItem = new LocalizationItem();
+			}
+
+			if (currentItem != NULL && str.find("msgid") == 0)
+			{
+				auto start = str.find("\"");
+				if (start != std::string::npos)
+				{
+					auto end = str.find("\"", start + 1);
+					if (end != std::string::npos)
+						currentItem->msgid = str.substr(start + 1, end - start - 1);
+				}
+			}
+
+			if (currentItem != NULL && str.find("msgstr") == 0)
+			{
+				auto start = str.find("\"");
+				if (start != std::string::npos)
+				{
+					auto end = str.find("\"", start + 1);
+					if (end != std::string::npos)
+						currentItem->msgstr = str.substr(start + 1, end - start - 1);
+				}
+			}
+		}
+
+		if (currentItem != NULL)
+			delete currentItem;
+	}
+}
+
+
+const std::string GuiTextTool::localize(const std::string text)
+{
+	ensureLocalisation();
+
+	for (std::vector<LocalizationItem*>::const_iterator it = mItems.cbegin(); it != mItems.cend(); ++it)
+	{
+		if (text == (*it)->msgid)
+			return (*it)->msgstr;		
+	}
+
+	return text;	
+}
+
 GuiComponent::GuiComponent(Window* window) : mWindow(window), mParent(NULL), mOpacity(255),
 	mPosition(Vector3f::Zero()), mOrigin(Vector2f::Zero()), mRotationOrigin(0.5, 0.5),
 	mSize(Vector2f::Zero()), mTransform(Transform4x4f::Identity()), mIsProcessing(false)
@@ -279,6 +376,16 @@ void GuiComponent::setValue(const std::string& /*value*/)
 std::string GuiComponent::getValue() const
 {
 	return "";
+}
+
+void GuiComponent::setTag(const std::string& value)
+{
+	mTag = value;
+}
+
+std::string GuiComponent::getTag() const
+{
+	return mTag;
 }
 
 void GuiComponent::textInput(const char* text)

@@ -37,7 +37,7 @@ namespace Renderer
 	{
 		LOG(LogInfo) << "Creating surface...";
 
-		if(SDL_Init(SDL_INIT_VIDEO) != 0)
+		if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		{
 			LOG(LogError) << "Error initializing SDL!\n	" << SDL_GetError();
 			return false;
@@ -62,25 +62,27 @@ namespace Renderer
 
 		SDL_DisplayMode dispMode;
 		SDL_GetDesktopDisplayMode(0, &dispMode);
-		windowWidth   = Settings::getInstance()->getInt("WindowWidth")   ? Settings::getInstance()->getInt("WindowWidth")   : dispMode.w;
-		windowHeight  = Settings::getInstance()->getInt("WindowHeight")  ? Settings::getInstance()->getInt("WindowHeight")  : dispMode.h;
-		screenWidth   = Settings::getInstance()->getInt("ScreenWidth")   ? Settings::getInstance()->getInt("ScreenWidth")   : windowWidth;
-		screenHeight  = Settings::getInstance()->getInt("ScreenHeight")  ? Settings::getInstance()->getInt("ScreenHeight")  : windowHeight;
+
+		windowWidth = Settings::getInstance()->getInt("WindowWidth") ? Settings::getInstance()->getInt("WindowWidth") : dispMode.w;
+		windowHeight = Settings::getInstance()->getInt("WindowHeight") ? Settings::getInstance()->getInt("WindowHeight") : dispMode.h;
+		screenWidth = Settings::getInstance()->getInt("ScreenWidth") ? Settings::getInstance()->getInt("ScreenWidth") : windowWidth;
+		screenHeight = Settings::getInstance()->getInt("ScreenHeight") ? Settings::getInstance()->getInt("ScreenHeight") : windowHeight;
 		screenOffsetX = Settings::getInstance()->getInt("ScreenOffsetX") ? Settings::getInstance()->getInt("ScreenOffsetX") : 0;
 		screenOffsetY = Settings::getInstance()->getInt("ScreenOffsetY") ? Settings::getInstance()->getInt("ScreenOffsetY") : 0;
-		screenRotate  = Settings::getInstance()->getInt("ScreenRotate")  ? Settings::getInstance()->getInt("ScreenRotate")  : 0;
-
-		sdlWindow = SDL_CreateWindow("EmulationStation", 
-			SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-			windowWidth, windowHeight, 
+		screenRotate = Settings::getInstance()->getInt("ScreenRotate") ? Settings::getInstance()->getInt("ScreenRotate") : 0;
+		
+		sdlWindow = SDL_CreateWindow("EmulationStation",
+			SDL_WINDOWPOS_UNDEFINED, 
+			SDL_WINDOWPOS_UNDEFINED,
+			windowWidth, windowHeight,
 			SDL_WINDOW_OPENGL | (Settings::getInstance()->getBool("Windowed") ? 0 : (Settings::getInstance()->getBool("FullscreenBorderless") ? SDL_WINDOW_BORDERLESS : SDL_WINDOW_FULLSCREEN)));
-
-		if(sdlWindow == NULL)
+				
+		if (sdlWindow == NULL)
 		{
 			LOG(LogError) << "Error creating SDL window!\n\t" << SDL_GetError();
 			return false;
 		}
-
+		
 		LOG(LogInfo) << "Created window successfully.";
 
 		//support screen rotation
@@ -125,7 +127,7 @@ namespace Renderer
 		sdlContext = SDL_GL_CreateContext(sdlWindow);
 
 		// vsync
-		if(Settings::getInstance()->getBool("VSync"))
+	//	if(Settings::getInstance()->getBool("VSync"))
 		{
 			// SDL_GL_SetSwapInterval(0) for immediate updates (no vsync, default), 
 			// 1 for updates synchronized with the vertical retrace, 
@@ -133,11 +135,11 @@ namespace Renderer
 			// SDL_GL_SetSwapInterval returns 0 on success, -1 on error.
 			// if vsync is requested, try normal vsync; if that doesn't work, try late swap tearing
 			// if that doesn't work, report an error
-			if(SDL_GL_SetSwapInterval(1) != 0 && SDL_GL_SetSwapInterval(-1) != 0)
+			if (SDL_GL_SetSwapInterval(1) != 0 && SDL_GL_SetSwapInterval(-1) != 0)
 				LOG(LogWarning) << "Tried to enable vsync, but failed! (" << SDL_GetError() << ")";
 		}
-		else
-			SDL_GL_SetSwapInterval(0);
+	//	else
+	//		SDL_GL_SetSwapInterval(0);
 
 		return true;
 	}
@@ -215,7 +217,7 @@ namespace Renderer
 	}
 
 	void swapBuffers()
-	{
+	{		
 		SDL_GL_SwapWindow(sdlWindow);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}

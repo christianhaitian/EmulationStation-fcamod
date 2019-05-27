@@ -16,7 +16,7 @@ public:
 	HelpStyle getHelpStyle() override;
 
 private:
-	void addEntry(const char* name, unsigned int color, bool add_arrow, const std::function<void()>& func);
+	void addEntry(std::string name, unsigned int color, bool add_arrow, const std::function<void()>& func);
 	void addVersionInfo();
 	void openCollectionSystemSettings();
 	void openConfigInput();

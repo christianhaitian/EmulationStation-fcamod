@@ -7,6 +7,7 @@
 #include "components/ScrollableContainer.h"
 #include "components/ImageGridComponent.h"
 #include "views/gamelist/ISimpleGameListView.h"
+#include "views/gamelist/BasicGameListView.h"
 
 class GridGameListView : public ISimpleGameListView
 {
@@ -20,10 +21,18 @@ public:
 
 	virtual bool input(InputConfig* config, Input input) override;
 
-	virtual const char* getName() const override { return "grid"; }
+	virtual const char* getName() const override 
+	{ 
+		if (mGridEx)
+			return "gridex";
+
+		return "grid"; 
+	}
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 	virtual void launch(FileData* game) override;
+
+	void setGridEx();
 
 protected:
 	virtual std::string getQuickSystemSelectRightButton() override;
@@ -51,6 +60,10 @@ private:
 	DateTimeComponent mLastPlayed;
 	TextComponent mPlayCount;
 	TextComponent mName;
+	ImageComponent mImage;
+
+	bool mImageVisible;
+	bool mGridEx;
 
 	std::vector<TextComponent*> getMDLabels();
 	std::vector<GuiComponent*> getMDValues();

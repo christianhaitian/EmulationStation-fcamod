@@ -10,6 +10,10 @@
 #include <functional>
 #include <memory>
 
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
+
 class Animation;
 class AnimationController;
 class Font;
@@ -109,6 +113,10 @@ public:
 	virtual std::string getValue() const;
 	virtual void setValue(const std::string& value);
 
+
+	virtual std::string getTag() const;
+	virtual void setTag(const std::string& value);
+
 	virtual void onFocusGained() {};
 	virtual void onFocusLost() {};
 
@@ -145,6 +153,8 @@ protected:
 	GuiComponent* mParent;
 	std::vector<GuiComponent*> mChildren;
 
+	std::string mTag;
+
 	Vector3f mPosition;
 	Vector2f mOrigin;
 	Vector2f mRotationOrigin;
@@ -165,5 +175,48 @@ private:
 	Transform4x4f mTransform; //Don't access this directly! Use getTransform()!
 	AnimationController* mAnimationMap[MAX_ANIMATIONS];
 };
+
+
+
+class LocalizationItem
+{
+public:
+	std::string	msgid;
+	std::string	msgstr;
+};
+
+class GuiTextTool
+{
+public:	
+#if defined(_WIN32)
+	static const std::string convertFromWideString(const std::wstring wstring)
+	{		
+		int numBytes = WideCharToMultiByte(CP_UTF8, 0, wstring.c_str(), (int)wstring.length(), nullptr, 0, nullptr, nullptr);
+		
+		std::string string;
+		string.resize(numBytes);
+		WideCharToMultiByte(CP_UTF8, 0, wstring.c_str(), (int)wstring.length(), (char*)string.c_str(), numBytes, nullptr, nullptr);
+
+		return string;
+	}
+#endif
+	static void ensureLocalisation();
+	static const std::string localize(const std::string text);
+
+	static void setLanguage(std::string lang);
+
+private:
+	static std::vector<LocalizationItem*> mItems;
+	static std::string mCurrentLanguage;
+	static bool mCurrentLanguageLoaded;
+};
+
+#if defined(_WIN32)
+#define _T(x) GuiTextTool::localize(GuiTextTool::convertFromWideString(L ## x))
+#define _L(x) GuiTextTool::localize(x)
+#else
+#define _T(x) GuiTextTool::localize(x)
+#define _L(x) GuiTextTool::localize(x)
+#endif // _WIN32
 
 #endif // ES_CORE_GUI_COMPONENT_H
