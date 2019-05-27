@@ -258,6 +258,9 @@ void CollectionSystemManager::updateCollectionSystem(FileData* file, CollectionS
 			if (name == "favorites" && file->metadata.get("favorite") == "false") {
 				// need to check if still marked as favorite, if not remove
 				ViewController::get()->getGameListView(curSys).get()->remove(collectionEntry, false);
+				
+				ViewController::get()->onFileChanged(file, FILE_METADATA_CHANGED);
+				ViewController::get()->getGameListView(curSys)->onFileChanged(collectionEntry, FILE_METADATA_CHANGED);
 			}
 			else
 			{
@@ -274,6 +277,7 @@ void CollectionSystemManager::updateCollectionSystem(FileData* file, CollectionS
 				CollectionFileData* newGame = new CollectionFileData(file, curSys);
 				rootFolder->addChild(newGame);
 				fileIndex->addToIndex(newGame);
+				
 				ViewController::get()->onFileChanged(file, FILE_METADATA_CHANGED);
 				ViewController::get()->getGameListView(curSys)->onFileChanged(newGame, FILE_METADATA_CHANGED);
 			}
@@ -453,6 +457,13 @@ void CollectionSystemManager::exitEditMode()
 // adds or removes a game from a specific collection
 bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 {
+	/*
+	if (file->getType() == FOLDER)
+	{
+		if (file->findUniqueGameForFolder() == NULL)
+			return false;
+	}
+	*/
 	if (file->getType() == GAME)
 	{
 		GuiInfoPopup* s;
@@ -707,7 +718,8 @@ void CollectionSystemManager::populateAutoCollection(CollectionSystemData* sysDa
 	for(auto sysIt = SystemData::sSystemVector.cbegin(); sysIt != SystemData::sSystemVector.cend(); sysIt++)
 	{
 		// we won't iterate all collections
-		if ((*sysIt)->isGameSystem() && !(*sysIt)->isCollection()) {
+		if ((*sysIt)->isGameSystem() && !(*sysIt)->isCollection()) 
+		{
 			std::vector<FileData*> files = (*sysIt)->getRootFolder()->getFilesRecursive(GAME);
 			for(auto gameIt = files.cbegin(); gameIt != files.cend(); gameIt++)
 			{

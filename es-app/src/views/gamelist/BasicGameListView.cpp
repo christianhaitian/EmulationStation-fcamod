@@ -29,7 +29,7 @@ void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 
 void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
 {
-	if(change == FILE_METADATA_CHANGED)
+	if (change == FILE_METADATA_CHANGED)
 	{
 		// might switch to a detailed view
 		ViewController::get()->reloadGameListView(this);
@@ -42,12 +42,40 @@ void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
 void BasicGameListView::populateList(const std::vector<FileData*>& files)
 {
 	mList.clear();
-	mHeaderText.setText(mRoot->getSystem()->getFullName());
+
+	std::string systemName = mRoot->getSystem()->getFullName();
+	mHeaderText.setText(systemName);
+
+	bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles");
+
 	if (files.size() > 0)
 	{
-		for(auto it = files.cbegin(); it != files.cend(); it++)
+		for (auto it = files.cbegin(); it != files.cend(); it++)
 		{
-			mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+			if ((*it)->getFavorite())
+				if (showHiddenFiles || !(*it)->getHidden())
+				{
+					if (systemName == "favorites")
+						mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+					else
+
+						mList.add(_T("\uF006 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
+				}
+		}
+		/*
+		for (auto it = files.cbegin(); it != files.cend(); it++)
+		{
+			if (!(*it)->getFavorite() && ((*it)->getType() == FOLDER))
+				if (showHiddenFiles || !(*it)->getHidden())
+					mList.add("[Folder] "+(*it)->getName(), *it, ((*it)->getType() == FOLDER));
+
+		}*/
+
+		for (auto it = files.cbegin(); it != files.cend(); it++)
+		{
+			if (!(*it)->getFavorite())
+				if (showHiddenFiles || !(*it)->getHidden())				
+					mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
 		}
 	}
 	else
@@ -146,17 +174,24 @@ std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
 	std::vector<HelpPrompt> prompts;
 
 	if(Settings::getInstance()->getBool("QuickSystemSelect"))
-		prompts.push_back(HelpPrompt("left/right", "system"));
-	prompts.push_back(HelpPrompt("up/down", "choose"));
-	prompts.push_back(HelpPrompt("a", "launch"));
-	prompts.push_back(HelpPrompt("b", "back"));
+		prompts.push_back(HelpPrompt("left/right", _T("SYSTEM")));
+
+	prompts.push_back(HelpPrompt("up/down", _T("CHOOSE")));
+	prompts.push_back(HelpPrompt("a", _T("LAUNCH")));
+	prompts.push_back(HelpPrompt("b", _T("BACK")));
+
 	if(!UIModeController::getInstance()->isUIModeKid())
-		prompts.push_back(HelpPrompt("select", "options"));
+		prompts.push_back(HelpPrompt("select", _T("options")));
+	
 	if(mRoot->getSystem()->isGameSystem())
-		prompts.push_back(HelpPrompt("x", "random"));
+		prompts.push_back(HelpPrompt("x", _T("RANDOM")));
+
 	if(mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
 	{
 		std::string prompt = CollectionSystemManager::get()->getEditingCollection();
+		if (prompt == "Favorites")
+			prompt = "FAVORIS";
+
 		prompts.push_back(HelpPrompt("y", prompt));
 	}
 	return prompts;

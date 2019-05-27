@@ -7,7 +7,7 @@
 
 #define TITLE_HEIGHT (mTitle->getFont()->getLetterHeight() + TITLE_VERT_PADDING)
 
-MenuComponent::MenuComponent(Window* window, const char* title, const std::shared_ptr<Font>& titleFont) : GuiComponent(window),
+MenuComponent::MenuComponent(Window* window, std::string title, const std::shared_ptr<Font>& titleFont) : GuiComponent(window),
 	mBackground(window), mGrid(window, Vector2i(1, 3))
 {
 	addChild(&mBackground);
@@ -19,7 +19,7 @@ MenuComponent::MenuComponent(Window* window, const char* title, const std::share
 	mTitle = std::make_shared<TextComponent>(mWindow);
 	mTitle->setHorizontalAlignment(ALIGN_CENTER);
 	mTitle->setColor(0x555555FF);
-	setTitle(title, titleFont);
+	setTitle(title.c_str(), titleFont);
 	mGrid.setEntry(mTitle, Vector2i(0, 0), false);
 
 	// set up list which will never change (externally, anyway)

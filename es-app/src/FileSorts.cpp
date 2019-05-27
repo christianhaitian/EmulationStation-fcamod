@@ -17,8 +17,8 @@ namespace FileSorts
 		FileData::SortType(&compareLastPlayed, true, "last played, ascending"),
 		FileData::SortType(&compareLastPlayed, false, "last played, descending"),
 
-		FileData::SortType(&compareNumPlayers, true, "number players, ascending"),
-		FileData::SortType(&compareNumPlayers, false, "number players, descending"),
+		FileData::SortType(&compareNumPlayers, true, "number of players, ascending"),
+		FileData::SortType(&compareNumPlayers, false, "number of players, descending"),
 
 		FileData::SortType(&compareReleaseDate, true, "release date, ascending"),
 		FileData::SortType(&compareReleaseDate, false, "release date, descending"),

@@ -135,7 +135,7 @@ public:
 	ThemeData();
 
 	// throws ThemeException
-	void loadFile(std::map<std::string, std::string> sysDataMap, const std::string& path);
+	void loadFile(std::string system, const std::string& path);
 
 	enum ElementPropertyType
 	{
@@ -159,6 +159,9 @@ public:
 	static std::map<std::string, ThemeSet> getThemeSets();
 	static std::string getThemeFromCurrentSet(const std::string& system);
 
+	std::string getDefaultView() { return mDefaultView; };
+
+
 private:
 	static std::map< std::string, std::map<std::string, ElementPropertyType> > sElementMap;
 	static std::vector<std::string> sSupportedFeatures;
@@ -167,6 +170,8 @@ private:
 	std::deque<std::string> mPaths;
 	float mVersion;
 
+	std::string mDefaultView;
+
 	void parseFeatures(const pugi::xml_node& themeRoot);
 	void parseIncludes(const pugi::xml_node& themeRoot);
 	void parseVariables(const pugi::xml_node& root);
@@ -174,7 +179,10 @@ private:
 	void parseView(const pugi::xml_node& viewNode, ThemeView& view);
 	void parseElement(const pugi::xml_node& elementNode, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element);
 
+	std::string resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path);
+
 	std::map<std::string, ThemeView> mViews;
+	std::string mSystemThemeFolder;
 };
 
 #endif // ES_CORE_THEME_DATA_H

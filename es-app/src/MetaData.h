@@ -20,7 +20,8 @@ enum MetaDataType
 	MD_PATH,
 	MD_RATING,
 	MD_DATE,
-	MD_TIME //used for lastplayed
+	MD_TIME, //used for lastplayed
+	MD_PLIST
 };
 
 struct MetaDataDecl

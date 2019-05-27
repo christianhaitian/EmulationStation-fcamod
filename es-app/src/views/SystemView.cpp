@@ -259,7 +259,7 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 		if (!getSelected()->isGameSystem())
 			ss << "CONFIGURATION";
 		else
-			ss << gameCount << " GAMES AVAILABLE";
+			ss << gameCount << " " << _T("GAMES AVAILABLE");
 
 		mSystemInfo.setText(ss.str());
 	}, false, 1);
@@ -376,14 +376,15 @@ std::vector<HelpPrompt> SystemView::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts;
 	if (mCarousel.type == VERTICAL || mCarousel.type == VERTICAL_WHEEL)
-		prompts.push_back(HelpPrompt("up/down", "choose"));
+		prompts.push_back(HelpPrompt("up/down", _T("CHOOSE")));
 	else
-		prompts.push_back(HelpPrompt("left/right", "choose"));
-	prompts.push_back(HelpPrompt("a", "select"));
-	prompts.push_back(HelpPrompt("x", "random"));
+		prompts.push_back(HelpPrompt("left/right", _T("CHOOSE")));
 
-	if (!UIModeController::getInstance()->isUIModeKid() && Settings::getInstance()->getBool("ScreenSaverControls"))
-		prompts.push_back(HelpPrompt("select", "launch screensaver"));
+	prompts.push_back(HelpPrompt("a", _T("SELECT")));
+	//prompts.push_back(HelpPrompt("x", "random"));
+
+//	if (!UIModeController::getInstance()->isUIModeKid() && Settings::getInstance()->getBool("ScreenSaverControls"))
+	//	prompts.push_back(HelpPrompt("select", "launch screensaver"));
 
 	return prompts;
 }

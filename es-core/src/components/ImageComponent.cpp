@@ -133,23 +133,22 @@ void ImageComponent::setDefaultImage(std::string path)
 
 void ImageComponent::setImage(std::string path, bool tile)
 {
-	if(path.empty() || !ResourceManager::getInstance()->fileExists(path))
+	if (path.empty() || !ResourceManager::getInstance()->fileExists(path))
 	{
-		if(mDefaultPath.empty() || !ResourceManager::getInstance()->fileExists(mDefaultPath))
+		if (mDefaultPath.empty() || !ResourceManager::getInstance()->fileExists(mDefaultPath))
 			mTexture.reset();
 		else
 			mTexture = TextureResource::get(mDefaultPath, tile, mForceLoad, mDynamic);
-	} else {
+	} 
+	else 
 		mTexture = TextureResource::get(path, tile, mForceLoad, mDynamic);
-	}
-
+	
 	resize();
 }
 
 void ImageComponent::setImage(const char* path, size_t length, bool tile)
 {
 	mTexture.reset();
-
 	mTexture = TextureResource::get("", tile);
 	mTexture->initFromMemory(path, length);
 	
@@ -263,7 +262,7 @@ void ImageComponent::setOpacity(unsigned char opacity)
 
 void ImageComponent::updateVertices()
 {
-	if(!mTexture || !mTexture->isInitialized())
+	if (!mTexture || !mTexture->isInitialized())
 		return;
 
 	// we go through this mess to make sure everything is properly rounded
@@ -274,6 +273,7 @@ void ImageComponent::updateVertices()
 
 	mVertices[0].pos = Vector2f(topLeft.x(), topLeft.y());
 	mVertices[1].pos = Vector2f(topLeft.x(), bottomRight.y());
+
 	mVertices[2].pos = Vector2f(bottomRight.x(), topLeft.y());
 
 	mVertices[3].pos = Vector2f(bottomRight.x(), topLeft.y());
@@ -281,11 +281,13 @@ void ImageComponent::updateVertices()
 	mVertices[5].pos = Vector2f(bottomRight.x(), bottomRight.y());
 
 	float px, py;
-	if(mTexture->isTiled())
+	if (mTexture->isTiled())
 	{
 		px = mSize.x() / getTextureSize().x();
 		py = mSize.y() / getTextureSize().y();
-	}else{
+	}
+	else
+	{
 		px = 1;
 		py = 1;
 	}
@@ -298,12 +300,13 @@ void ImageComponent::updateVertices()
 	mVertices[4].tex = Vector2f(mTopLeftCrop.x(), 1 - mBottomRightCrop.y());
 	mVertices[5].tex = Vector2f(px * mBottomRightCrop.x(), 1 - mBottomRightCrop.y());
 
-	if(mFlipX)
+	if (mFlipX)
 	{
 		for(int i = 0; i < 6; i++)
 			mVertices[i].tex[0] = px - mVertices[i].tex[0];
 	}
-	if(mFlipY)
+
+	if (mFlipY)
 	{
 		for(int i = 0; i < 6; i++)
 			mVertices[i].tex[1] = py - mVertices[i].tex[1];
@@ -320,14 +323,16 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 	Transform4x4f trans = parentTrans * getTransform();
 	Renderer::setMatrix(trans);
 
-	if(mTexture && mOpacity > 0)
+	if (mTexture && mOpacity > 0)
 	{
-		if(Settings::getInstance()->getBool("DebugImage")) {
+		if (Settings::getInstance()->getBool("DebugImage")) 
+		{
 			Vector2f targetSizePos = (mTargetSize - mSize) * mOrigin * -1;
 			Renderer::drawRect(targetSizePos.x(), targetSizePos.y(), mTargetSize.x(), mTargetSize.y(), 0xFF000033);
 			Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000033);
 		}
-		if(mTexture->isInitialized())
+
+		if (mTexture->isInitialized())
 		{
 			// actually draw the image
 			// The bind() function returns false if the texture is not currently loaded. A blank
@@ -355,7 +360,9 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_BLEND);
-		}else{
+		}
+		else
+		{
 			LOG(LogError) << "Image texture is not initialized!";
 			mTexture.reset();
 		}
@@ -471,6 +478,6 @@ void ImageComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 std::vector<HelpPrompt> ImageComponent::getHelpPrompts()
 {
 	std::vector<HelpPrompt> ret;
-	ret.push_back(HelpPrompt("a", "select"));
+	ret.push_back(HelpPrompt("a", "SELECTIONNER"));
 	return ret;
 }

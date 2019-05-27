@@ -87,7 +87,7 @@ private:
 				mMenu.addRow(row, (!mParent->mMultiSelect && it->selected));
 			}
 
-			mMenu.addButton("BACK", "accept", [this] { delete this; });
+			mMenu.addButton(_T("BACK"), "accept", [this] { delete this; });
 
 			if(mParent->mMultiSelect)
 			{
@@ -128,7 +128,7 @@ private:
 		std::vector<HelpPrompt> getHelpPrompts() override
 		{
 			auto prompts = mMenu.getHelpPrompts();
-			prompts.push_back(HelpPrompt("b", "back"));
+			prompts.push_back(HelpPrompt("b", _T("BACK")));
 			return prompts;
 		}
 	};
@@ -205,6 +205,9 @@ public:
 
 				}else if(config->isMappedLike("right", input))
 				{
+					if (mEntries.size() == 0)
+						return true;
+
 					// move selection to next
 					unsigned int i = getSelectedId();
 					int next = (i + 1) % mEntries.size();
@@ -268,6 +271,31 @@ public:
 		onSelectedChanged();
 	}
 
+	void selectFirstItem()
+	{
+		for (unsigned int i = 0; i < mEntries.size(); i++)
+			mEntries.at(i).selected = false;
+
+		if (mEntries.size() > 0)
+			mEntries.at(0).selected = true;
+
+		onSelectedChanged();
+	}
+
+	void clear() {
+		mEntries.clear();
+	}
+
+	inline void invalidate() {
+		onSelectedChanged();
+	}
+
+	void setSelectedChangedCallback(const std::function<void(const T&)>& callback) 
+	{
+		mSelectedChangedCallback = callback;
+	}
+
+
 private:
 	unsigned int getSelectedId()
 	{
@@ -287,6 +315,7 @@ private:
 		mWindow->pushGui(new OptionListPopup(mWindow, this, mName));
 	}
 
+
 	void onSelectedChanged()
 	{
 		if(mMultiSelect)
@@ -303,26 +332,29 @@ private:
 			// display currently selected + l/r cursors
 			for(auto it = mEntries.cbegin(); it != mEntries.cend(); it++)
 			{
-				if(it->selected)
+				if (it->selected)
 				{
 					mText.setText(Utils::String::toUpper(it->name));
 					mText.setSize(0, mText.getSize().y());
 					setSize(mText.getSize().x() + mLeftArrow.getSize().x() + mRightArrow.getSize().x() + 24, mText.getSize().y());
-					if(mParent) // hack since theres no "on child size changed" callback atm...
+					if (mParent) // hack since theres no "on child size changed" callback atm...
 						mParent->onSizeChanged();
 					break;
 				}
 			}
 		}
+
+		if (mSelectedChangedCallback)
+			mSelectedChangedCallback(mEntries.at(getSelectedId()).object);		
 	}
 
 	std::vector<HelpPrompt> getHelpPrompts() override
 	{
 		std::vector<HelpPrompt> prompts;
 		if(!mMultiSelect)
-			prompts.push_back(HelpPrompt("left/right", "change"));
+			prompts.push_back(HelpPrompt("left/right", "MODIFIER"));
 
-		prompts.push_back(HelpPrompt("a", "select"));
+		prompts.push_back(HelpPrompt("a", "SELECTIONNER"));
 		return prompts;
 	}
 
@@ -334,6 +366,7 @@ private:
 	ImageComponent mRightArrow;
 
 	std::vector<OptionListData> mEntries;
+	std::function<void(const T&)> mSelectedChangedCallback;
 };
 
 #endif // ES_CORE_COMPONENTS_OPTION_LIST_COMPONENT_H

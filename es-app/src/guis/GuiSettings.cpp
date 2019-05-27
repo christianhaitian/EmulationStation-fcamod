@@ -5,11 +5,11 @@
 #include "SystemData.h"
 #include "Window.h"
 
-GuiSettings::GuiSettings(Window* window, const char* title) : GuiComponent(window), mMenu(window, title)
+GuiSettings::GuiSettings(Window* window, std::string title) : GuiComponent(window), mMenu(window, title)
 {
 	addChild(&mMenu);
 
-	mMenu.addButton("BACK", "go back", [this] { delete this; });
+	mMenu.addButton(_T("BACK"), _T("BACK"), [this] { delete this; });
 
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 	mMenu.setPosition((mSize.x() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.15f);
@@ -62,8 +62,8 @@ std::vector<HelpPrompt> GuiSettings::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
 
-	prompts.push_back(HelpPrompt("b", "back"));
-	prompts.push_back(HelpPrompt("start", "close"));
+	prompts.push_back(HelpPrompt("b", _T("BACK")));
+	prompts.push_back(HelpPrompt("start", _T("CLOSE")));
 
 	return prompts;
 }

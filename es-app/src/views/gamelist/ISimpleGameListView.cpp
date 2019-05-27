@@ -80,14 +80,24 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 {
 	if(input.value != 0)
 	{
-		if(config->isMappedTo("a", input))
+		if (config->isMappedTo("a", input))
 		{
 			FileData* cursor = getCursor();
-			if(cursor->getType() == GAME)
+
+			if (cursor->getType() == FOLDER)
+			{
+				FileData* gameOfFolder = cursor->findUniqueGameForFolder();
+				if (gameOfFolder != NULL)
+					cursor = gameOfFolder;
+			}
+
+			if (cursor->getType() == GAME)
 			{
 				Sound::getFromTheme(getTheme(), getName(), "launch")->play();
 				launch(cursor);
-			}else{
+			}
+			else
+			{
 				// it's a folder
 				if(cursor->getChildren().size() > 0)
 				{
@@ -99,7 +109,8 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			}
 
 			return true;
-		}else if(config->isMappedTo("b", input))
+		}
+		else if(config->isMappedTo("b", input))
 		{
 			if(mCursorStack.size())
 			{
@@ -118,7 +129,8 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			}
 
 			return true;
-		}else if(config->isMappedLike(getQuickSystemSelectRightButton(), input))
+		}
+		else if(config->isMappedLike(getQuickSystemSelectRightButton(), input))
 		{
 			if(Settings::getInstance()->getBool("QuickSystemSelect"))
 			{
@@ -126,7 +138,8 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				ViewController::get()->goToNextGameList();
 				return true;
 			}
-		}else if(config->isMappedLike(getQuickSystemSelectLeftButton(), input))
+		}
+		else if(config->isMappedLike(getQuickSystemSelectLeftButton(), input))
 		{
 			if(Settings::getInstance()->getBool("QuickSystemSelect"))
 			{
@@ -134,7 +147,8 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				ViewController::get()->goToPrevGameList();
 				return true;
 			}
-		}else if (config->isMappedTo("x", input))
+		}
+		else if (config->isMappedTo("x", input))
 		{
 			if (mRoot->getSystem()->isGameSystem())
 			{
@@ -146,7 +160,8 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				}
 				return true;
 			}
-		}else if (config->isMappedTo("y", input) && UIModeController::getInstance()->isUIModeFull())
+		}
+		else if (config->isMappedTo("y", input) && UIModeController::getInstance()->isUIModeFull())
 		{
 			if(mRoot->getSystem()->isGameSystem())
 			{

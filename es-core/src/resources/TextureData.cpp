@@ -135,6 +135,7 @@ bool TextureData::load()
 	if (!mPath.empty())
 	{
 		std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
+
 		const ResourceData& data = rm->getFileData(mPath);
 		// is it an SVG?
 		if (mPath.substr(mPath.size() - 4, std::string::npos) == ".svg")
@@ -163,6 +164,9 @@ bool TextureData::uploadAndBind()
 	if (mTextureID != 0)
 	{
 		glBindTexture(GL_TEXTURE_2D, mTextureID);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 	else
 	{
@@ -182,12 +186,13 @@ bool TextureData::uploadAndBind()
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)mWidth, (GLsizei)mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, mDataRGBA);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		const GLint wrapMode = mTile ? GL_REPEAT : GL_CLAMP_TO_EDGE;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
 	}
+
 	return true;
 }
 

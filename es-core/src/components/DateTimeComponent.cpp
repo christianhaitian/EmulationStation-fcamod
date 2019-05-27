@@ -51,7 +51,7 @@ std::string DateTimeComponent::getDisplayString() const
 	if (mDisplayRelative) {
 		//relative time
 		if(mTime.getTime() == 0)
-			return "never";
+			return _T("never");
 
 		Utils::Time::DateTime now(Utils::Time::now());
 		Utils::Time::Duration dur(now.getTime() - mTime.getTime());
@@ -71,7 +71,7 @@ std::string DateTimeComponent::getDisplayString() const
 	}
 
 	if(mTime.getTime() == 0)
-		return "unknown";
+		return _T("unknown");
 
 	return Utils::Time::timeToString(mTime.getTime(), mFormat);
 }

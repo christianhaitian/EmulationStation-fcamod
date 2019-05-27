@@ -32,29 +32,29 @@ DetailedGameListView::DetailedGameListView(Window* window, FileData* root) :
 	addChild(&mImage);
 
 	// metadata labels + values
-	mLblRating.setText("Rating: ");
+	mLblRating.setText(_T("Rating") + ": ");
 	addChild(&mLblRating);
 	addChild(&mRating);
-	mLblReleaseDate.setText("Released: ");
+	mLblReleaseDate.setText(_T("Released") + ": ");
 	addChild(&mLblReleaseDate);
 	addChild(&mReleaseDate);
-	mLblDeveloper.setText("Developer: ");
+	mLblDeveloper.setText(_T("Developer") + ": ");
 	addChild(&mLblDeveloper);
 	addChild(&mDeveloper);
-	mLblPublisher.setText("Publisher: ");
+	mLblPublisher.setText(_T("Publisher")+": ");
 	addChild(&mLblPublisher);
 	addChild(&mPublisher);
-	mLblGenre.setText("Genre: ");
+	mLblGenre.setText(_T("Genre") + ": ");
 	addChild(&mLblGenre);
 	addChild(&mGenre);
-	mLblPlayers.setText("Players: ");
+	mLblPlayers.setText(_T("Players") + ": ");
 	addChild(&mLblPlayers);
 	addChild(&mPlayers);
-	mLblLastPlayed.setText("Last played: ");
+	mLblLastPlayed.setText(_T("Last played") + ": ");
 	addChild(&mLblLastPlayed);
 	mLastPlayed.setDisplayRelative(true);
 	addChild(&mLastPlayed);
-	mLblPlayCount.setText("Times played: ");
+	mLblPlayCount.setText(_T("Times played"));
 	addChild(&mLblPlayCount);
 	addChild(&mPlayCount);
 
@@ -188,6 +188,15 @@ void DetailedGameListView::initMDValues()
 	mDescContainer.setSize(mDescContainer.getSize().x(), mSize.y() - mDescContainer.getPosition().y());
 }
 
+std::string DetailedGameListView::getMetadata(FileData* file, std::string name)
+{
+	std::string ret = file->metadata.get(name);
+	if (ret == "unknown")
+		return _L(ret);
+
+	return ret;
+}
+
 void DetailedGameListView::updateInfoPanel()
 {
 	FileData* file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
@@ -199,22 +208,27 @@ void DetailedGameListView::updateInfoPanel()
 		//mDescription.setText("");
 		fadingOut = true;
 	}else{
-		mImage.setImage(file->getImagePath());
-		mDescription.setText(file->metadata.get("desc"));
+
+		if (file->getImagePath().empty())
+			mImage.setImage(file->getThumbnailPath());
+		else
+			mImage.setImage(file->getImagePath());
+
+		mDescription.setText(getMetadata(file, "desc"));
 		mDescContainer.reset();
 
-		mRating.setValue(file->metadata.get("rating"));
-		mReleaseDate.setValue(file->metadata.get("releasedate"));
-		mDeveloper.setValue(file->metadata.get("developer"));
-		mPublisher.setValue(file->metadata.get("publisher"));
-		mGenre.setValue(file->metadata.get("genre"));
-		mPlayers.setValue(file->metadata.get("players"));
-		mName.setValue(file->metadata.get("name"));
+		mRating.setValue(getMetadata(file, "rating"));
+		mReleaseDate.setValue(getMetadata(file, "releasedate"));
+		mDeveloper.setValue(getMetadata(file, "developer"));
+		mPublisher.setValue(getMetadata(file, "publisher"));
+		mGenre.setValue(getMetadata(file, "genre"));
+		mPlayers.setValue(getMetadata(file, "players"));
+		mName.setValue(getMetadata(file, "name"));
 
 		if(file->getType() == GAME)
 		{
-			mLastPlayed.setValue(file->metadata.get("lastplayed"));
-			mPlayCount.setValue(file->metadata.get("playcount"));
+			mLastPlayed.setValue(getMetadata(file, "lastplayed"));
+			mPlayCount.setValue(getMetadata(file, "playcount"));
 		}
 		
 		fadingOut = false;

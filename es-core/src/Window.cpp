@@ -76,7 +76,6 @@ bool Window::init()
 	}
 
 	InputManager::getInstance()->init();
-
 	ResourceManager::getInstance()->reloadAll();
 
 	//keep a reference to the default fonts, so they don't keep getting destroyed/recreated
@@ -91,7 +90,7 @@ bool Window::init()
 	mBackgroundOverlay->setResize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 
 	// update our help because font sizes probably changed
-	if(peekGui())
+	if (peekGui())
 		peekGui()->updateHelpPrompts();
 
 	return true;
@@ -299,15 +298,15 @@ void Window::setAllowSleep(bool sleep)
 }
 
 void Window::renderLoadingScreen(std::string text)
-{
+{	
 	Transform4x4f trans = Transform4x4f::Identity();
 	Renderer::setMatrix(trans);
 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x000000FF);
-
+	
 	ImageComponent splash(this, true);
-	splash.setResize(Renderer::getScreenWidth() * 0.6f, 0.0f);
+	splash.setResize(Renderer::getScreenWidth() * 0.5f, 0.0f);
 	splash.setImage(":/splash.svg");
-	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.6f);
+	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.7f);
 	splash.render(trans);
 
 	auto& font = mDefaultFonts.at(1);
@@ -322,6 +321,36 @@ void Window::renderLoadingScreen(std::string text)
 
 	Renderer::swapBuffers();
 }
+
+void Window::renderBlackScreen(std::string text)
+{
+	Transform4x4f trans = Transform4x4f::Identity();
+	Renderer::setMatrix(trans);
+	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x000000FF);
+	/*
+	ImageComponent splash(this, true);
+	splash.setResize(Renderer::getScreenWidth() * 0.5f, 0.0f);
+	splash.setImage(":/splash.svg");
+	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.7f);
+	splash.render(trans);
+	*/
+
+	if (text.length() > 0)
+	{
+		auto& font = mDefaultFonts.at(1);
+		TextCache* cache = font->buildTextCache(text, 0, 0, 0x656565FF);
+
+		float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);
+		float y = Math::round(Renderer::getScreenHeight() * 0.835f);
+		trans = trans.translate(Vector3f(x, y, 0.0f));
+		Renderer::setMatrix(trans);
+		font->renderTextCache(cache);
+		delete cache;
+	}
+
+	Renderer::swapBuffers();
+}
+
 
 void Window::renderHelpPromptsEarly()
 {
