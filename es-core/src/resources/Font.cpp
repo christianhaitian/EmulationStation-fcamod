@@ -249,7 +249,7 @@ std::vector<std::string> getFallbackFontPaths()
 		std::string path = fontDir + fontNames[i];
 
 		if (i == 0)
-			path = ":/fontawesome_webfont.ttf";
+			path = ":/glyphs.ttf";
 
 		if(ResourceManager::getInstance()->fileExists(path))
 			fontPaths.push_back(path);
