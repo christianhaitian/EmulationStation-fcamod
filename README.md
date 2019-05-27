@@ -9,6 +9,7 @@ Changes in my branch
 
 - Support for Multiple Emulators/Cores in es_systems.cfg, and setting Emulator/Core per game.
 
+```xml
   <command>%HOME%\RetroArch\retroarch.exe -L %HOME%\RetroArch\cores\%CORE%_libretro.dll %ROM%</command>
   <emulators>
       <emulator name="mame">
@@ -23,7 +24,7 @@ Changes in my branch
         </cores>
       </emulator>
     </emulators>
-
+```
 - Better Grid view (animations, layout, selection...)
 - Created a 'GridEx' mode, which inherits from grid, in order to create a 'preview bar' including a game screenshot.
 - Changed 'Automatic' view mode. Switchs to grid if "thumbnails" exist in gamelist. Switchs to gridex if "thumbnails" and "image" exist in gamelist. 
