@@ -16,6 +16,8 @@
 #include <Windows.h>
 #endif
 
+#include "Window.h"
+
 std::vector<SystemData*> SystemData::sSystemVector;
 
 SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem) :
@@ -24,15 +26,19 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 	mFilterIndex = new FileFilterIndex();
 
 	// if it's an actual system, initialize it, if not, just create the data structure
-	if(!CollectionSystem)
+	if (!CollectionSystem)
 	{
 		mRootFolder = new FileData(FOLDER, mEnvData->mStartPath, mEnvData, this);
 		mRootFolder->metadata.set("name", mFullName);
 
-		if(!Settings::getInstance()->getBool("ParseGamelistOnly"))
+		if (!Settings::getInstance()->getBool("ParseGamelistOnly"))
+		{
 			populateFolder(mRootFolder);
+			if (mRootFolder->getChildren().size() == 0)
+				return;
+		}
 
-		if(!Settings::getInstance()->getBool("IgnoreGamelist"))
+		if (!Settings::getInstance()->getBool("IgnoreGamelist"))
 			parseGamelist(this);
 
 		mRootFolder->sort(FileSorts::SortTypes.at(0));
@@ -50,12 +56,6 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 
 SystemData::~SystemData()
 {
-	//save changed game data back to xml
-	if(!Settings::getInstance()->getBool("IgnoreGamelist") && Settings::getInstance()->getBool("SaveGamelistsOnExit") && !mIsCollectionSystem)
-	{
-		updateGamelist(this);
-	}
-
 	delete mRootFolder;
 	delete mFilterIndex;
 }
@@ -68,6 +68,12 @@ void SystemData::setIsGameSystemStatus()
 	mIsGameSystem = (mName != "retropie");
 }
 
+char _easytolower(char in) {
+	if (in <= 'Z' && in >= 'A')
+		return in - ('Z' - 'z');
+	return in;
+}
+
 void SystemData::populateFolder(FileData* folder)
 {
 	const std::string& folderPath = folder->getPath();
@@ -76,6 +82,11 @@ void SystemData::populateFolder(FileData* folder)
 		LOG(LogWarning) << "Error - folder with path \"" << folderPath << "\" is not a directory!";
 		return;
 	}
+
+	int di = folderPath.rfind("downloaded_images");
+	int md = folderPath.rfind("media");
+	if (di > 0 || md > 0)
+		return;
 
 	//make sure that this isn't a symlink to a thing we already have
 	if(Utils::FileSystem::isSymlink(folderPath))
@@ -87,7 +98,7 @@ void SystemData::populateFolder(FileData* folder)
 			return;
 		}
 	}
-
+	
 	std::string filePath;
 	std::string extension;
 	bool isGame;
@@ -104,6 +115,7 @@ void SystemData::populateFolder(FileData* folder)
 		//this is a little complicated because we allow a list of extensions to be defined (delimited with a space)
 		//we first get the extension of the file itself:
 		extension = Utils::FileSystem::getExtension(filePath);
+		std::transform(extension.begin(), extension.end(), extension.begin(), ::_easytolower);
 
 		//fyi, folders *can* also match the extension and be added as games - this is mostly just to support higan
 		//see issue #75: https://github.com/Aloshi/EmulationStation/issues/75
@@ -120,18 +132,23 @@ void SystemData::populateFolder(FileData* folder)
 				isGame = true;
 			}
 		}
-
+		
 		//add directories that also do not match an extension as folders
 		if(!isGame && Utils::FileSystem::isDirectory(filePath))
 		{
-			FileData* newFolder = new FileData(FOLDER, filePath, mEnvData, this);
-			populateFolder(newFolder);
+			if (filePath.rfind("downloaded_images") == std::string::npos &&
+				filePath.rfind("media") == std::string::npos)
+			{
+				FileData* newFolder = new FileData(FOLDER, filePath, mEnvData, this);
+				populateFolder(newFolder);
 
-			//ignore folders that do not contain games
-			if(newFolder->getChildrenByFilename().size() == 0)
-				delete newFolder;
-			else
-				folder->addChild(newFolder);
+				if (newFolder->getChildrenByFilename().size() == 0)
+					delete newFolder;
+				else if (newFolder->findUniqueGameForFolder() != NULL)
+					delete newFolder;
+				else
+					folder->addChild(newFolder);
+			}
 		}
 	}
 }
@@ -168,7 +185,7 @@ std::vector<std::string> readList(const std::string& str, const char* delims = "
 }
 
 //creates systems from information located in a config file
-bool SystemData::loadConfig()
+bool SystemData::loadConfig(Window* window)
 {
 	deleteSystems();
 
@@ -201,17 +218,65 @@ bool SystemData::loadConfig()
 		LOG(LogError) << "es_systems.cfg is missing the <systemList> tag!";
 		return false;
 	}
+	
+	for (pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system"))
+	{		
+		std::vector<EmulatorData> emulatorList;
+		
 
-	for(pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system"))
-	{
-		std::string name, fullname, path, cmd, themeFolder;
+	//	std::vector<std::string> coreList;
 
+		std::string name, fullname, path, cmd, themeFolder, defaultCore;
+		
 		name = system.child("name").text().get();
 		fullname = system.child("fullname").text().get();
 		path = system.child("path").text().get();
+		defaultCore = system.child("defaultCore").text().get();
+		
+		pugi::xml_node emulators = system.child("emulators");
+		if (emulators != NULL)
+		{
+			for (pugi::xml_node emulator : emulators.children())
+			{
+				EmulatorData emulatorData;
+				emulatorData.mName = emulator.attribute("name").value();
+				emulatorData.mCommandLine = emulator.attribute("command").value();
+
+				pugi::xml_node cores = emulator.child("cores");
+				if (cores != NULL)
+				{
+					for (pugi::xml_node core : cores.children())
+					{
+						const std::string& corename = core.text().get();
+
+						if (defaultCore.length() == 0)
+							defaultCore = corename;
+
+						emulatorData.mCores.push_back(corename);
+					//	coreList.push_back(corename);
+					}
+				}
+
+				emulatorList.push_back(emulatorData);
+			}
+		}
+		
+		if (window != NULL)
+			window->renderLoadingScreen(fullname);
 
 		// convert extensions list from a string into a vector of strings
-		std::vector<std::string> extensions = readList(system.child("extension").text().get());
+
+		std::vector<std::string> list = readList(system.child("extension").text().get());
+		std::vector<std::string> extensions;
+
+		for (auto extension = list.cbegin(); extension != list.cend(); extension++)		
+		{
+			std::string xt = (*extension);
+			std::transform(xt.begin(), xt.end(), xt.begin(), ::_easytolower);
+			
+			if (std::find(extensions.begin(), extensions.end(), xt) == extensions.end())
+				extensions.push_back(xt);
+		}
 
 		cmd = system.child("command").text().get();
 
@@ -253,7 +318,7 @@ bool SystemData::loadConfig()
 		path = Utils::FileSystem::getGenericPath(path);
 
 		//expand home symbol if the startpath contains ~
-		if(path[0] == '~')
+		if (path[0] == '~')
 		{
 			path.erase(0, 1);
 			path.insert(0, Utils::FileSystem::getHomePath());
@@ -265,18 +330,25 @@ bool SystemData::loadConfig()
 		envData->mSearchExtensions = extensions;
 		envData->mLaunchCommand = cmd;
 		envData->mPlatformIds = platformIds;
+		// envData->mDefaultCore = defaultCore;
+		envData->mEmulators = emulatorList;
+
+	//	envData->mCores = coreList;
 
 		SystemData* newSys = new SystemData(name, fullname, envData, themeFolder);
 		if(newSys->getRootFolder()->getChildrenByFilename().size() == 0)
 		{
 			LOG(LogWarning) << "System \"" << name << "\" has no games! Ignoring it.";
 			delete newSys;
-		}else{
-			sSystemVector.push_back(newSys);
 		}
+		else
+			sSystemVector.push_back(newSys);
 	}
-	CollectionSystemManager::get()->loadCollectionSystems();
 
+	if (window != NULL)
+		window->renderLoadingScreen("Favoris");
+
+	CollectionSystemManager::get()->loadCollectionSystems();
 	return true;
 }
 
@@ -328,10 +400,18 @@ void SystemData::writeExampleConfig(const std::string& path)
 
 void SystemData::deleteSystems()
 {
+	bool saveOnExit = !Settings::getInstance()->getBool("IgnoreGamelist") && Settings::getInstance()->getBool("SaveGamelistsOnExit");
+
 	for(unsigned int i = 0; i < sSystemVector.size(); i++)
 	{
-		delete sSystemVector.at(i);
+		SystemData* pData = sSystemVector.at(i);
+
+		if (saveOnExit && !pData->mIsCollectionSystem)
+			updateGamelist(pData);
+
+		delete pData;
 	}
+
 	sSystemVector.clear();
 }
 
@@ -495,8 +575,9 @@ void SystemData::loadTheme()
 		sysData.insert(std::pair<std::string, std::string>("system.theme", getThemeFolder()));
 		sysData.insert(std::pair<std::string, std::string>("system.fullName", getFullName()));
 		
-		mTheme->loadFile(sysData, path);
-	} catch(ThemeException& e)
+		mTheme->loadFile(getThemeFolder(), path);
+	} 
+	catch(ThemeException& e)
 	{
 		LOG(LogError) << e.what();
 		mTheme = std::make_shared<ThemeData>(); // reset to empty

@@ -8,7 +8,7 @@
 #include "guis/GuiVideoScreensaverOptions.h"
 #include "Settings.h"
 
-GuiGeneralScreensaverOptions::GuiGeneralScreensaverOptions(Window* window, const char* title) : GuiScreensaverOptions(window, title)
+GuiGeneralScreensaverOptions::GuiGeneralScreensaverOptions(Window* window, std::string title) : GuiScreensaverOptions(window, title)
 {
 	// screensaver time
 	auto screensaver_time = std::make_shared<SliderComponent>(mWindow, 0.f, 30.f, 1.f, "m");

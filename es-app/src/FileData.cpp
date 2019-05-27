@@ -22,7 +22,9 @@ FileData::FileData(FileType type, const std::string& path, SystemEnvironmentData
 	// metadata needs at least a name field (since that's what getName() will return)
 	if(metadata.get("name").empty())
 		metadata.set("name", getDisplayName());
-	mSystemName = system->getName();
+
+	mSystemName = system->getName();	
+	// mDefaultCore = system->getSystemEnvData()->mDefaultCore;
 }
 
 FileData::~FileData()
@@ -58,7 +60,7 @@ const std::string FileData::getThumbnailPath() const
 	if(thumbnail.empty())
 	{
 		thumbnail = metadata.get("image");
-
+		/*
 		// no image, try to use local image
 		if(thumbnail.empty() && Settings::getInstance()->getBool("LocalArt"))
 		{
@@ -72,10 +74,21 @@ const std::string FileData::getThumbnailPath() const
 						thumbnail = path;
 				}
 			}
-		}
+		}*/
 	}
 
 	return thumbnail;
+}
+
+const bool FileData::getFavorite()
+{
+	return metadata.get("favorite") == "true";
+}
+
+
+const bool FileData::getHidden()
+{
+	return metadata.get("hidden") == "true";
 }
 
 const std::string& FileData::getName()
@@ -89,6 +102,26 @@ const std::string& FileData::getSortName()
 		return metadata.get("name");
 	else
 		return metadata.get("sortname");
+}
+
+FileData* FileData::findUniqueGameForFolder()
+{
+	std::vector<FileData*> children = getChildren();
+
+	if (children.size() == 1 && children.at(0)->getType() == GAME)
+		return children.at(0);
+
+	for (std::vector<FileData*>::const_iterator it = children.cbegin(); it != children.cend(); ++it)
+	{
+		if ((*it)->getType() == GAME)
+			return NULL;
+
+		FileData* ret = (*it)->findUniqueGameForFolder();
+		if (ret != NULL)
+			return ret;
+	}
+
+	return NULL;
 }
 
 const std::vector<FileData*>& FileData::getChildrenListToDisplay() {
@@ -111,10 +144,20 @@ const std::vector<FileData*>& FileData::getChildrenListToDisplay() {
 	}
 }
 
+const std::string FileData::getCore() const
+{
+	return metadata.get("core");	
+}
+
+const std::string FileData::getEmulator() const
+{
+	return metadata.get("emulator");
+}
+
 const std::string FileData::getVideoPath() const
 {
 	std::string video = metadata.get("video");
-
+	/*
 	// no video, try to use local video
 	if(video.empty() && Settings::getInstance()->getBool("LocalArt"))
 	{
@@ -122,7 +165,7 @@ const std::string FileData::getVideoPath() const
 		if(Utils::FileSystem::exists(path))
 			video = path;
 	}
-
+	*/
 	return video;
 }
 
@@ -199,12 +242,13 @@ std::string FileData::getKey() {
 
 const bool FileData::isArcadeAsset()
 {
-	const std::string stem = Utils::FileSystem::getStem(mPath);
-	return (
-		(mSystem && (mSystem->hasPlatformId(PlatformIds::ARCADE) || mSystem->hasPlatformId(PlatformIds::NEOGEO)))
-		&&
-		(MameNames::getInstance()->isBios(stem) || MameNames::getInstance()->isDevice(stem))
-	);
+	if (mSystem && (mSystem->hasPlatformId(PlatformIds::ARCADE) || mSystem->hasPlatformId(PlatformIds::NEOGEO)))
+	{	
+		const std::string stem = Utils::FileSystem::getStem(mPath);	
+		return MameNames::getInstance()->isBios(stem) || MameNames::getInstance()->isDevice(stem);		
+	}
+
+	return false;
 }
 
 FileData* FileData::getSourceFileData()
@@ -271,44 +315,68 @@ void FileData::launchGame(Window* window)
 
 	AudioManager::getInstance()->deinit();
 	VolumeControl::getInstance()->deinit();
-	window->deinit();
+
+	bool hideWindow = Settings::getInstance()->getBool("HideWindow");
+	if (hideWindow)
+		window->deinit();
 
 	std::string command = mEnvData->mLaunchCommand;
 
-	const std::string rom      = Utils::FileSystem::getEscapedPath(getPath());
+	const std::string rom = Utils::FileSystem::getEscapedPath(getPath());
 	const std::string basename = Utils::FileSystem::getStem(getPath());
-	const std::string rom_raw  = Utils::FileSystem::getPreferredPath(getPath());
+	const std::string rom_raw = Utils::FileSystem::getPreferredPath(getPath());
+	
+	std::string emulator = getEmulator();
+	if (emulator.length() == 0)
+		emulator = mEnvData->getDefaultEmulator();
+
+	std::string core = getCore();
+	if (core.length() == 0)
+		core = mEnvData->getDefaultCore(emulator);
+
+	std::string customCommandLine = mEnvData->getEmulatorCommandLine(emulator);
+	if (customCommandLine.length() > 0)
+		command = customCommandLine;
+	
+	command = Utils::String::replace(command, "%EMULATOR%", emulator);
+	command = Utils::String::replace(command, "%CORE%", core);
 
 	command = Utils::String::replace(command, "%ROM%", rom);
 	command = Utils::String::replace(command, "%BASENAME%", basename);
-	command = Utils::String::replace(command, "%ROM_RAW%", rom_raw);
+	command = Utils::String::replace(command, "%ROM_RAW%", rom_raw);		
+	command = Utils::String::replace(command, "%SYSTEM%", mSystemName);
+	command = Utils::String::replace(command, "%HOME%", Utils::FileSystem::getHomePath());
 
 	Scripting::fireEvent("game-start", rom, basename);
 
 	LOG(LogInfo) << "	" << command;
-	int exitCode = runSystemCommand(command);
 
-	if(exitCode != 0)
+	int exitCode = runSystemCommand(command, getDisplayName(), hideWindow ? NULL : window);
+	if (exitCode != 0)
 	{
 		LOG(LogWarning) << "...launch terminated with nonzero exit code " << exitCode << "!";
 	}
 
 	Scripting::fireEvent("game-end");
 
-	window->init();
+	if (hideWindow)
+		window->init();
+
 	VolumeControl::getInstance()->init();
 	window->normalizeNextUpdate();
 
 	//update number of times the game has been launched
+	if (exitCode == 0)
+	{
+		FileData* gameToUpdate = getSourceFileData();
 
-	FileData* gameToUpdate = getSourceFileData();
+		int timesPlayed = gameToUpdate->metadata.getInt("playcount") + 1;
+		gameToUpdate->metadata.set("playcount", std::to_string(static_cast<long long>(timesPlayed)));
 
-	int timesPlayed = gameToUpdate->metadata.getInt("playcount") + 1;
-	gameToUpdate->metadata.set("playcount", std::to_string(static_cast<long long>(timesPlayed)));
-
-	//update last played time
-	gameToUpdate->metadata.set("lastplayed", Utils::Time::DateTime(Utils::Time::now()));
-	CollectionSystemManager::get()->refreshCollectionSystems(gameToUpdate);
+		//update last played time
+		gameToUpdate->metadata.set("lastplayed", Utils::Time::DateTime(Utils::Time::now()));
+		CollectionSystemManager::get()->refreshCollectionSystems(gameToUpdate);
+	}
 }
 
 CollectionFileData::CollectionFileData(FileData* file, SystemData* system)

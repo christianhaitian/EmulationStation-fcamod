@@ -66,11 +66,13 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 				LOG(LogWarning) << "gameList: folder doesn't already exist, won't create";
 				return NULL;
 			}
-
+			
 			// create missing folder
+
+			/* FCA TODO -> 1 seul jeu dans le folder ?
 			FileData* folder = new FileData(FOLDER, Utils::FileSystem::getStem(treeNode->getPath()) + "/" + *path_it, system->getSystemEnvData(), system);
 			treeNode->addChild(folder);
-			treeNode = folder;
+			treeNode = folder;*/
 		}
 
 		path_it++;
@@ -81,11 +83,11 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 
 void parseGamelist(SystemData* system)
 {
-	bool trustGamelist = Settings::getInstance()->getBool("ParseGamelistOnly");
 	std::string xmlpath = system->getGamelistPath(false);
-
-	if(!Utils::FileSystem::exists(xmlpath))
+	if (!Utils::FileSystem::exists(xmlpath))
 		return;
+
+	bool trustGamelist = Settings::getInstance()->getBool("ParseGamelistOnly");
 
 	LOG(LogInfo) << "Parsing XML file \"" << xmlpath << "\"...";
 
@@ -107,39 +109,41 @@ void parseGamelist(SystemData* system)
 
 	std::string relativeTo = system->getStartPath();
 
-	const char* tagList[2] = { "game", "folder" };
-	FileType typeList[2] = { GAME, FOLDER };
-	for(int i = 0; i < 2; i++)
+	for (pugi::xml_node fileNode : root.children())
 	{
-		const char* tag = tagList[i];
-		FileType type = typeList[i];
-		for(pugi::xml_node fileNode = root.child(tag); fileNode; fileNode = fileNode.next_sibling(tag))
+		FileType type = GAME;
+
+		std::string tag = fileNode.name();
+
+		if (tag == "folder")
+			type = FOLDER;
+		else if (tag != "game")
+			continue;
+			
+		const std::string path = Utils::FileSystem::resolveRelativePath(fileNode.child("path").text().get(), relativeTo, false);
+		
+		if (!trustGamelist && !Utils::FileSystem::exists(path))
 		{
-			const std::string path = Utils::FileSystem::resolveRelativePath(fileNode.child("path").text().get(), relativeTo, false);
+			LOG(LogWarning) << "File \"" << path << "\" does not exist! Ignoring.";
+			continue;
+		}
+		
+		FileData* file = findOrCreateFile(system, path, type);
+		if(!file)
+		{
+			LOG(LogError) << "Error finding/creating FileData for \"" << path << "\", skipping.";
+			continue;
+		}
+		else if(!file->isArcadeAsset())
+		{
+			std::string defaultName = file->metadata.get("name");
+			file->metadata = MetaDataList::createFromXML(GAME_METADATA, fileNode, relativeTo);
 
-			if(!trustGamelist && !Utils::FileSystem::exists(path))
-			{
-				LOG(LogWarning) << "File \"" << path << "\" does not exist! Ignoring.";
-				continue;
-			}
+			//make sure name gets set if one didn't exist
+			if (file->metadata.get("name").empty())
+				file->metadata.set("name", defaultName);
 
-			FileData* file = findOrCreateFile(system, path, type);
-			if(!file)
-			{
-				LOG(LogError) << "Error finding/creating FileData for \"" << path << "\", skipping.";
-				continue;
-			}
-			else if(!file->isArcadeAsset())
-			{
-				std::string defaultName = file->metadata.get("name");
-				file->metadata = MetaDataList::createFromXML(GAME_METADATA, fileNode, relativeTo);
-
-				//make sure name gets set if one didn't exist
-				if(file->metadata.get("name").empty())
-					file->metadata.set("name", defaultName);
-
-				file->metadata.resetChangedFlag();
-			}
+			file->metadata.resetChangedFlag();
 		}
 	}
 }

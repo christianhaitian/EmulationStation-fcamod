@@ -11,6 +11,7 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 	ISimpleGameListView(window, root),
 	mGrid(window),
 	mDescContainer(window), mDescription(window),
+	mImage(window),
 
 	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window),
 	mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),
@@ -21,12 +22,21 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 {
 	const float padding = 0.01f;
 
+	mGridEx = false;
+
 	mGrid.setPosition(mSize.x() * 0.1f, mSize.y() * 0.1f);
 	mGrid.setDefaultZIndex(20);
 	mGrid.setCursorChangedCallback([&](const CursorState& /*state*/) { updateInfoPanel(); });
 	addChild(&mGrid);
 
 	populateList(root->getChildrenListToDisplay());
+
+	// image
+	mImage.setOrigin(0.5f, 0.5f);
+	//mImage.setPosition(mSize.x() * 0.25f, mList.getPosition().y() + mSize.y() * 0.2125f);
+	//mImage.setMaxSize(mSize.x() * (0.50f - 2 * padding), mSize.y() * 0.4f);
+	mImage.setDefaultZIndex(30);
+	addChild(&mImage);
 
 	// metadata labels + values
 	mLblRating.setText("Rating: ");
@@ -78,6 +88,12 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 	updateInfoPanel();
 }
 
+void GridGameListView::setGridEx()
+{
+	mGridEx = true;
+	mGrid.setThemeName(getName());
+}
+
 FileData* GridGameListView::getCursor()
 {
 	return mGrid.getSelected();
@@ -116,10 +132,21 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 	mHeaderText.setText(mRoot->getSystem()->getFullName());
 	if (files.size() > 0)
 	{
+		std::string systemName = mRoot->getSystem()->getFullName();
+		bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles");
+
 		for (auto it = files.cbegin(); it != files.cend(); it++)
-		{
-			mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it);
-		}
+			if ((*it)->getFavorite() && (showHiddenFiles || !(*it)->getHidden()))
+			{
+				if (systemName == "favorites")
+					mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it);
+				else
+					mGrid.add(_T("\uF006 ") + (*it)->getName(), (*it)->getThumbnailPath(), *it);
+			}
+
+		for (auto it = files.cbegin(); it != files.cend(); it++)
+			if (!(*it)->getFavorite() && (showHiddenFiles || !(*it)->getHidden()))
+				mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it);
 	}
 	else
 	{
@@ -135,6 +162,14 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 
 	mGrid.applyTheme(theme, getName(), "gamegrid", ALL);
 	mName.applyTheme(theme, getName(), "md_name", ALL);
+
+	if (theme->getElement(getName(), "md_image", "image"))
+	{
+		mImageVisible = true;
+		mImage.applyTheme(theme, getName(), "md_image", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);
+	}
+	else
+		mImageVisible = false;
 
 	initMDLabels();
 	std::vector<TextComponent*> labels = getMDLabels();
@@ -168,6 +203,7 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	mDescription.applyTheme(theme, getName(), "md_description", ALL ^ (POSITION | ThemeFlags::SIZE | ThemeFlags::ORIGIN | TEXT | ROTATION));
 
 	sortChildren();
+	updateInfoPanel();
 }
 
 void GridGameListView::initMDLabels()
@@ -240,11 +276,23 @@ void GridGameListView::updateInfoPanel()
 	FileData* file = (mGrid.size() == 0 || mGrid.isScrolling()) ? NULL : mGrid.getSelected();
 
 	bool fadingOut;
-	if(file == NULL)
+	if (file == NULL)
 	{
 		//mDescription.setText("");
 		fadingOut = true;
-	}else{
+	}
+	else
+	{
+		if (mImageVisible)
+		{
+			if (file->getImagePath().empty())
+				mImage.setImage(file->getThumbnailPath());
+			else
+				mImage.setImage(file->getImagePath());
+		}
+		else 
+			mImage.setImage("");
+
 		mDescription.setText(file->metadata.get("desc"));
 		mDescContainer.reset();
 
@@ -266,11 +314,12 @@ void GridGameListView::updateInfoPanel()
 	}
 
 	std::vector<GuiComponent*> comps = getMDValues();
+	comps.push_back(&mImage);
 	comps.push_back(&mDescription);
 	comps.push_back(&mName);
 	std::vector<TextComponent*> labels = getMDLabels();
 	comps.insert(comps.cend(), labels.cbegin(), labels.cend());
-
+	
 	for(auto it = comps.cbegin(); it != comps.cend(); it++)
 	{
 		GuiComponent* comp = *it;
@@ -364,14 +413,15 @@ std::vector<HelpPrompt> GridGameListView::getHelpPrompts()
 	std::vector<HelpPrompt> prompts;
 
 	if(Settings::getInstance()->getBool("QuickSystemSelect"))
-		prompts.push_back(HelpPrompt("lr", "system"));
-	prompts.push_back(HelpPrompt("up/down/left/right", "choose"));
-	prompts.push_back(HelpPrompt("a", "launch"));
-	prompts.push_back(HelpPrompt("b", "back"));
+		prompts.push_back(HelpPrompt("lr", _T("SYSTEM")));
+	prompts.push_back(HelpPrompt("up/down/left/right", _T("CHOOSE")));
+	prompts.push_back(HelpPrompt("a", _T("LAUNCH")));
+	prompts.push_back(HelpPrompt("b", _T("BACK")));
 	if(!UIModeController::getInstance()->isUIModeKid())
-		prompts.push_back(HelpPrompt("select", "options"));
+		prompts.push_back(HelpPrompt("select", _T("OPTIONS")));
 	if(mRoot->getSystem()->isGameSystem())
-		prompts.push_back(HelpPrompt("x", "random"));
+		prompts.push_back(HelpPrompt("x", _T("RANDOM")));
+
 	if(mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
 	{
 		std::string prompt = CollectionSystemManager::get()->getEditingCollection();

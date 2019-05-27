@@ -21,9 +21,11 @@
 	#define GLHEADER <SDL_opengl.h>
 #endif
 
+class Window;
+
 int runShutdownCommand(); // shut down the system (returns 0 if successful)
 int runRestartCommand(); // restart the system (returns 0 if successful)
-int runSystemCommand(const std::string& cmd_utf8); // run a utf-8 encoded in the shell (requires wstring conversion on Windows)
+int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Window* window); // run a utf-8 encoded in the shell (requires wstring conversion on Windows)
 int quitES(const std::string& filename);
 void touch(const std::string& filename);
 

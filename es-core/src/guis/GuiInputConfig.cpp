@@ -133,8 +133,9 @@ GuiInputConfig::GuiInputConfig(Window* window, InputConfig* target, bool reconfi
 				return false;
 			}
 
-			// apply filtering for quirks related to trigger mapping
-			if(filterTrigger(input, config, i))
+
+			// filter for input quirks specific to Sony DualShock 3
+			if(filterTrigger(input, config))
 				return false;
 
 			// we are configuring
@@ -336,26 +337,21 @@ void GuiInputConfig::clearAssignment(int inputId)
 	mTargetConfig->unmapInput(GUI_INPUT_CONFIG_LIST[inputId].name);
 }
 
-bool GuiInputConfig::filterTrigger(Input input, InputConfig* config, int inputId)
+bool GuiInputConfig::filterTrigger(Input input, InputConfig* config)
 {
 #if defined(__linux__)
 	// match PlayStation joystick with 6 axes only
 	if((strstr(config->getDeviceName().c_str(), "PLAYSTATION") != NULL \
-	  || strstr(config->getDeviceName().c_str(), "PS3 Ga") != NULL \
-	  || strstr(config->getDeviceName().c_str(), "PS(R) Ga") != NULL) \
+	  || strstr(config->getDeviceName().c_str(), "PS3 Game") != NULL \
+	  || strstr(config->getDeviceName().c_str(), "PS(R) Game") != NULL) \
 	  && InputManager::getInstance()->getAxisCountByDevice(config->getDeviceId()) == 6)
 	{
 		// digital triggers are unwanted
 		if (input.type == TYPE_BUTTON && (input.id == 6 || input.id == 7))
 			return true;
-	}
-
-	// ignore negative pole for axes 2/5 only when triggers are being configured
-	if((mSkipAxis || strstr(GUI_INPUT_CONFIG_LIST[inputId].name, "Trigger") != NULL) \
-	  && input.type == TYPE_AXIS && (input.id == 2 || input.id == 5) && input.value < 0)
-	{
-		mSkipAxis = true;
-		return true;
+		// ignore analog values < 0
+		if (input.type == TYPE_AXIS && (input.id == 2 || input.id == 5) && input.value < 0)
+			return true;
 	}
 #endif
 

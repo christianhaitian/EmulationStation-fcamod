@@ -7,7 +7,7 @@
 class GuiGeneralScreensaverOptions : public GuiScreensaverOptions
 {
 public:
-	GuiGeneralScreensaverOptions(Window* window, const char* title);
+	GuiGeneralScreensaverOptions(Window* window, std::string title);
 	virtual ~GuiGeneralScreensaverOptions();
 
 private:

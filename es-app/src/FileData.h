@@ -50,6 +50,14 @@ public:
 	virtual const std::string getMarqueePath() const;
 	virtual const std::string getImagePath() const;
 
+	virtual const std::string getCore() const;
+	virtual const std::string getEmulator() const;
+
+	virtual const bool getHidden();
+	virtual const bool getFavorite();
+
+	FileData* findUniqueGameForFolder();
+
 	const std::vector<FileData*>& getChildrenListToDisplay();
 	std::vector<FileData*> getFilesRecursive(unsigned int typeMask, bool displayedOnly = false) const;
 
@@ -94,6 +102,7 @@ protected:
 	FileData* mSourceFileData;
 	FileData* mParent;
 	std::string mSystemName;
+	//std::string mDefaultCore;
 
 private:
 	FileType mType;

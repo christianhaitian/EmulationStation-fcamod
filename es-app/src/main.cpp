@@ -35,7 +35,7 @@ bool parseArgs(int argc, char* argv[])
 
 	for(int i = 1; i < argc; i++)
 	{
-		if(strcmp(argv[i], "--resolution") == 0)
+		if (strcmp(argv[i], "--resolution") == 0)
 		{
 			if(i >= argc - 2)
 			{
@@ -48,9 +48,10 @@ bool parseArgs(int argc, char* argv[])
 			i += 2; // skip the argument value
 			Settings::getInstance()->setInt("WindowWidth", width);
 			Settings::getInstance()->setInt("WindowHeight", height);
-		}else if(strcmp(argv[i], "--screensize") == 0)
+		}
+		else if (strcmp(argv[i], "--screensize") == 0)
 		{
-			if(i >= argc - 2)
+			if (i >= argc - 2)
 			{
 				std::cerr << "Invalid screensize supplied.";
 				return false;
@@ -61,7 +62,8 @@ bool parseArgs(int argc, char* argv[])
 			i += 2; // skip the argument value
 			Settings::getInstance()->setInt("ScreenWidth", width);
 			Settings::getInstance()->setInt("ScreenHeight", height);
-		}else if(strcmp(argv[i], "--screenoffset") == 0)
+		}
+		else if (strcmp(argv[i], "--screenoffset") == 0)
 		{
 			if(i >= argc - 2)
 			{
@@ -74,7 +76,8 @@ bool parseArgs(int argc, char* argv[])
 			i += 2; // skip the argument value
 			Settings::getInstance()->setInt("ScreenOffsetX", x);
 			Settings::getInstance()->setInt("ScreenOffsetY", y);
-		}else if (strcmp(argv[i], "--screenrotate") == 0)
+		}
+		else if (strcmp(argv[i], "--screenrotate") == 0)
 		{
 			if (i >= argc - 1)
 			{
@@ -85,44 +88,60 @@ bool parseArgs(int argc, char* argv[])
 			int rotate = atoi(argv[i + 1]);
 			++i; // skip the argument value
 			Settings::getInstance()->setInt("ScreenRotate", rotate);
-		}else if(strcmp(argv[i], "--gamelist-only") == 0)
+		}
+		else if (strcmp(argv[i], "--gamelist-only") == 0)
 		{
 			Settings::getInstance()->setBool("ParseGamelistOnly", true);
-		}else if(strcmp(argv[i], "--ignore-gamelist") == 0)
+		}
+		else if (strcmp(argv[i], "--ignore-gamelist") == 0)
 		{
 			Settings::getInstance()->setBool("IgnoreGamelist", true);
-		}else if(strcmp(argv[i], "--show-hidden-files") == 0)
+		}
+		else if (strcmp(argv[i], "--show-hidden-files") == 0)
 		{
 			Settings::getInstance()->setBool("ShowHiddenFiles", true);
-		}else if(strcmp(argv[i], "--draw-framerate") == 0)
+		}
+		else if (strcmp(argv[i], "--draw-framerate") == 0)
 		{
 			Settings::getInstance()->setBool("DrawFramerate", true);
-		}else if(strcmp(argv[i], "--no-exit") == 0)
+		}
+		else if (strcmp(argv[i], "--no-exit") == 0)
 		{
 			Settings::getInstance()->setBool("ShowExit", false);
-		}else if(strcmp(argv[i], "--no-splash") == 0)
+		}
+		else if (strcmp(argv[i], "--no-splash") == 0)
 		{
 			Settings::getInstance()->setBool("SplashScreen", false);
-		}else if(strcmp(argv[i], "--debug") == 0)
+		}
+		else if (strcmp(argv[i], "--debug") == 0)
 		{
 			Settings::getInstance()->setBool("Debug", true);
 			Settings::getInstance()->setBool("HideConsole", false);
 			Log::setReportingLevel(LogDebug);
-		}else if(strcmp(argv[i], "--fullscreen-borderless") == 0)
+		}
+		else if (strcmp(argv[i], "--fullscreen-borderless") == 0)
 		{
 			Settings::getInstance()->setBool("FullscreenBorderless", true);
-		}else if(strcmp(argv[i], "--windowed") == 0)
+		}
+		else if (strcmp(argv[i], "--fullscreen") == 0)
+		{
+			Settings::getInstance()->setBool("FullscreenBorderless", false);
+		}
+		else if (strcmp(argv[i], "--windowed") == 0 || strcmp(argv[i], "-windowed") == 0)
 		{
 			Settings::getInstance()->setBool("Windowed", true);
-		}else if(strcmp(argv[i], "--vsync") == 0)
-		{
-			bool vsync = (strcmp(argv[i + 1], "on") == 0 || strcmp(argv[i + 1], "1") == 0) ? true : false;
+		}
+		else if (strcmp(argv[i], "--vsync") == 0 || strcmp(argv[i], "-vsync") == 0)
+		{			
+			bool vsync = strlen(argv[i]) <= 7 ? true : (strcmp(argv[i + 1], "on") == 0 || strcmp(argv[i + 1], "1") == 0) ? true : false;
 			Settings::getInstance()->setBool("VSync", vsync);
 			i++; // skip vsync value
-		}else if(strcmp(argv[i], "--scrape") == 0)
+		}
+		else if (strcmp(argv[i], "--scrape") == 0)
 		{
 			scrape_cmdline = true;
-		}else if(strcmp(argv[i], "--max-vram") == 0)
+		}
+		else if (strcmp(argv[i], "--max-vram") == 0)
 		{
 			int maxVRAM = atoi(argv[i + 1]);
 			Settings::getInstance()->setInt("MaxVRAM", maxVRAM);
@@ -197,25 +216,29 @@ bool verifyHomeFolderExists()
 }
 
 // Returns true if everything is OK,
-bool loadSystemConfigFile(const char** errorString)
+bool loadSystemConfigFile(Window* window, const char** errorString)
 {
 	*errorString = NULL;
-
-	if(!SystemData::loadConfig())
+	
+	if(!SystemData::loadConfig(window))
 	{
 		LOG(LogError) << "Error while parsing systems configuration file!";
+
 		*errorString = "IT LOOKS LIKE YOUR SYSTEMS CONFIGURATION FILE HAS NOT BEEN SET UP OR IS INVALID. YOU'LL NEED TO DO THIS BY HAND, UNFORTUNATELY.\n\n"
 			"VISIT EMULATIONSTATION.ORG FOR MORE INFORMATION.";
+
 		return false;
 	}
 
 	if(SystemData::sSystemVector.size() == 0)
 	{
 		LOG(LogError) << "No systems found! Does at least one system have a game present? (check that extensions match!)\n(Also, make sure you've updated your es_systems.cfg for XML!)";
+
 		*errorString = "WE CAN'T FIND ANY SYSTEMS!\n"
 			"CHECK THAT YOUR PATHS ARE CORRECT IN THE SYSTEMS CONFIGURATION FILE, "
 			"AND YOUR GAME DIRECTORY HAS AT LEAST ONE GAME WITH THE CORRECT EXTENSION.\n\n"
 			"VISIT EMULATIONSTATION.ORG FOR MORE INFORMATION.";
+
 		return false;
 	}
 
@@ -232,8 +255,9 @@ int main(int argc, char* argv[])
 {
 	srand((unsigned int)time(NULL));
 
-	std::locale::global(std::locale("C"));
-
+	//std::locale::global(std::locale("C"));
+	std::locale::global(std::locale("en-US"));
+	
 	if(!parseArgs(argc, argv))
 		return 0;
 
@@ -311,29 +335,33 @@ int main(int argc, char* argv[])
 		LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "ok" : "MISSING");
 		if(splashScreen)
 		{
-			std::string progressText = "Loading...";
+			std::string progressText = "Chargement";
+
 			if (splashScreenProgress)
-				progressText = "Loading system config...";
+				progressText = "Chargement de la configuration";
+
 			window.renderLoadingScreen(progressText);
 		}
 	}
 
 	const char* errorMsg = NULL;
-	if(!loadSystemConfigFile(&errorMsg))
+	if(!loadSystemConfigFile(&window, &errorMsg))
 	{
 		// something went terribly wrong
-		if(errorMsg == NULL)
+		if (errorMsg == NULL)
 		{
 			LOG(LogError) << "Unknown error occured while parsing system config file.";
-			if(!scrape_cmdline)
+
+			if (!scrape_cmdline)
 				Renderer::deinit();
+
 			return 1;
 		}
 
 		// we can't handle es_systems.cfg file problems inside ES itself, so display the error message then quit
 		window.pushGui(new GuiMsgBox(&window,
 			errorMsg,
-			"QUIT", [] {
+			_T("QUIT"), [] {
 				SDL_Event* quit = new SDL_Event();
 				quit->type = SDL_QUIT;
 				SDL_PushEvent(quit);
@@ -341,30 +369,26 @@ int main(int argc, char* argv[])
 	}
 
 	//run the command line scraper then quit
-	if(scrape_cmdline)
-	{
+	if (scrape_cmdline)
 		return run_scraper_cmdline();
-	}
 
 	//dont generate joystick events while we're loading (hopefully fixes "automatically started emulator" bug)
 	SDL_JoystickEventState(SDL_DISABLE);
 
 	// preload what we can right away instead of waiting for the user to select it
 	// this makes for no delays when accessing content, but a longer startup time
-	ViewController::get()->preload();
-
-	if(splashScreen && splashScreenProgress)
-		window.renderLoadingScreen("Done.");
+	// ViewController::get()->preload();
+	
+	if (splashScreen && splashScreenProgress)	
+		window.renderLoadingScreen(_T("Starting UI"));
 
 	//choose which GUI to open depending on if an input configuration already exists
 	if(errorMsg == NULL)
 	{
-		if(Utils::FileSystem::exists(InputManager::getConfigPath()) && InputManager::getInstance()->getNumConfiguredDevices() > 0)
-		{
-			ViewController::get()->goToStart();
-		}else{
-			window.pushGui(new GuiDetectDevice(&window, true, [] { ViewController::get()->goToStart(); }));
-		}
+		if (Utils::FileSystem::exists(InputManager::getConfigPath()) && InputManager::getInstance()->getNumConfiguredDevices() > 0)
+			ViewController::get()->goToStart(true);
+		else
+			window.pushGui(new GuiDetectDevice(&window, true, [] { ViewController::get()->goToStart(true); }));		
 	}
 
 	//generate joystick events since we're done loading
@@ -386,9 +410,10 @@ int main(int argc, char* argv[])
 			{
 				InputManager::getInstance()->parseEvent(event, &window);
 
-				if(event.type == SDL_QUIT)
+				if (event.type == SDL_QUIT)
 					running = false;
-			} while(SDL_PollEvent(&event));
+			} 
+			while(SDL_PollEvent(&event));
 
 			// triggered if exiting from SDL_WaitEvent due to event
 			if (ps_standby)
@@ -429,6 +454,7 @@ int main(int argc, char* argv[])
 
 	while(window.peekGui() != ViewController::get())
 		delete window.peekGui();
+
 	window.deinit();
 
 	MameNames::deinit();
