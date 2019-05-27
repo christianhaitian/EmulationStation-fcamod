@@ -1,8 +1,46 @@
 EmulationStation
 ================
 
-This is a fork of EmulationStation for RetroPie.
+This is a fork of EmulationStation from jrassa.
 EmulationStation is a cross-platform graphical front-end for emulators with controller navigation.
+
+Changes in my branch
+====================
+
+- Support for Multiple Emulators/Cores in es_systems.cfg, and setting Emulator/Core per game.
+
+  <command>%HOME%\RetroArch\retroarch.exe -L %HOME%\RetroArch\cores\%CORE%_libretro.dll %ROM%</command>
+  <emulators>
+      <emulator name="mame">
+        <cores>
+          <core>mame2003_plus</core>
+          <core>mame2003</core>
+        </cores>
+      </emulator>
+      <emulator name="fbalpha">
+        <cores>
+          <core>fbalpha2012</core>
+        </cores>
+      </emulator>
+    </emulators>
+
+- Better Grid view (animations, layout, selection...)
+- Created a 'GridEx' mode, which inherits from grid, in order to create a 'preview bar' including a game screenshot.
+- Changed 'Automatic' view mode. Switchs to grid if "thumbnails" exist in gamelist. Switchs to gridex if "thumbnails" and "image" exist in gamelist. 
+- Don't show Directories that contains only one Game : just Show the game.
+- Don't show Games what are marked Hidden in gamelist.
+- Cleaned menus + changed menu item order (by interest). Simplified "Quit" menu item ( no more popup )
+- Case insensitive file extensions.
+- Skip parsing 'downloaded_images' and 'media' folders ( loading time boost )
+- Localisation (French actually supported)
+- Corrected favorites ( and custom lists ) management.
+- Don't load all fields in Medadata Editor ( too tricky to use on windows, better use an external tool ).
+- Windows is now "Windowed No border" by default. On Windows, Exclusive fullscreen can be annoying...
+- Theming : Ability to force default view ( attribute defaultView )
+- Windows : Stop using _wsystem for launching games. Run games with ShellExecuteEx instead ( avoids command window )
+- Add an option to leave ES open with a black screen" Chargement en cours..." when launching games ( avoids showing windows desktop )
+
+Je crois que c'est à peu près tout....
 
 Building
 ========
