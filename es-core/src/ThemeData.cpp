@@ -562,8 +562,11 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 				if(node.text().get() != path)
 					ss << "(which resolved to \"" << path << "\") ";
 
-				LOG(LogWarning) << ss.str();
-				OutputDebugString(ss.str().c_str());
+				LOG(LogWarning) << ss.str();				
+
+				auto test = element.properties[node.name()];
+				if (test.s.empty())
+					element.properties[node.name()] = path;
 			}
 			else
 				element.properties[node.name()] = path;
