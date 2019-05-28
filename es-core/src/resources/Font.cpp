@@ -78,9 +78,11 @@ Font::Font(int size, const std::string& path) : mSize(size), mPath(path)
 		initLibrary();
 
 	// always initialize ASCII characters
-//	for(unsigned int i = 32; i < 128; i++)
-	//	getGlyph(i);
+	for (unsigned int i = 32; i < 128; i++)
+		getGlyph(i);
 
+	// getGlyph(61446);
+	
 	clearFaceCache();
 }
 
@@ -140,7 +142,7 @@ Font::FontTexture::~FontTexture()
 
 bool Font::FontTexture::findEmpty(const Vector2i& size, Vector2i& cursor_out)
 {
-	if(size.x() >= textureSize.x() || size.y() >= textureSize.y())
+	if (size.x() >= textureSize.x() || size.y() >= textureSize.y())
 		return false;
 
 	if(writePos.x() + size.x() >= textureSize.x() &&
@@ -235,9 +237,10 @@ std::vector<std::string> getFallbackFontPaths()
 	fontDir += "\\Fonts\\";
 
 	const char* fontNames[] = {
+		"glyphs.ttf",   // latin		
+		"arial.ttf",   // latin		
 		"meiryo.ttc", // japanese
-		"simhei.ttf", // chinese
-		"arial.ttf"   // latin
+		"simhei.ttf" // chinese		
 	};
 
 	//prepend to font file names
@@ -249,9 +252,9 @@ std::vector<std::string> getFallbackFontPaths()
 		std::string path = fontDir + fontNames[i];
 
 		if (i == 0)
-			path = ":/fontawesome_webfont.ttf";
+			path = ":/glyphs.ttf";
 
-		if(ResourceManager::getInstance()->fileExists(path))
+		if (ResourceManager::getInstance()->fileExists(path))
 			fontPaths.push_back(path);
 	}
 
@@ -288,18 +291,17 @@ FT_Face Font::getFaceForChar(unsigned int id)
 	for(unsigned int i = 0; i < fallbackFonts.size() + 1; i++)
 	{
 		auto fit = mFaceCache.find(i);
-
-		if(fit == mFaceCache.cend()) // doesn't exist yet
-		{
+		if (fit == mFaceCache.cend()) // doesn't exist yet
+		{		
 			// i == 0 -> mPath
 			// otherwise, take from fallbackFonts
 			const std::string& path = (i == 0 ? mPath : fallbackFonts.at(i - 1));
-			ResourceData data = ResourceManager::getInstance()->getFileData(path);
-			mFaceCache[i] = std::unique_ptr<FontFace>(new FontFace(std::move(data), mSize));
+			ResourceData data = ResourceManager::getInstance()->getFileData(path);			
+			mFaceCache[i] = std::unique_ptr<FontFace>(new FontFace(std::move(data), i == 1 && mMaxGlyphHeight > 0 ? mMaxGlyphHeight : mSize)); // Reduce size of gyphs ????
 			fit = mFaceCache.find(i);
 		}
 
-		if(FT_Get_Char_Index(fit->second->face, id) != 0)
+		if (FT_Get_Char_Index(fit->second->face, id) != 0)
 			return fit->second->face;
 	}
 
@@ -316,7 +318,7 @@ Font::Glyph* Font::getGlyph(unsigned int id)
 {
 	// is it already loaded?
 	auto it = mGlyphMap.find(id);
-	if(it != mGlyphMap.cend())
+	if (it != mGlyphMap.cend())
 		return &it->second;
 
 	// nope, need to make a glyph
@@ -329,7 +331,7 @@ Font::Glyph* Font::getGlyph(unsigned int id)
 
 	FT_GlyphSlot g = face->glyph;
 
-	if(FT_Load_Char(face, id, FT_LOAD_RENDER))
+	if (FT_Load_Char(face, id, FT_LOAD_RENDER))
 	{
 		LOG(LogError) << "Could not find glyph for character " << id << " for font " << mPath << ", size " << mSize << "!";
 		return NULL;
@@ -352,9 +354,10 @@ Font::Glyph* Font::getGlyph(unsigned int id)
 	Glyph& glyph = mGlyphMap[id];
 	
 	glyph.texture = tex;
+
 	glyph.texPos = Vector2f(cursor.x() / (float)tex->textureSize.x(), cursor.y() / (float)tex->textureSize.y());
 	glyph.texSize = Vector2f(glyphSize.x() / (float)tex->textureSize.x(), glyphSize.y() / (float)tex->textureSize.y());
-
+	
 	glyph.advance = Vector2f((float)g->metrics.horiAdvance / 64.0f, (float)g->metrics.vertAdvance / 64.0f);
 	glyph.bearing = Vector2f((float)g->metrics.horiBearingX / 64.0f, (float)g->metrics.horiBearingY / 64.0f);
 
@@ -364,7 +367,7 @@ Font::Glyph* Font::getGlyph(unsigned int id)
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// update max glyph height
-	if(glyphSize.y() > mMaxGlyphHeight)
+	if (id != 61446 && glyphSize.y() > mMaxGlyphHeight)
 		mMaxGlyphHeight = glyphSize.y();
 
 	// done

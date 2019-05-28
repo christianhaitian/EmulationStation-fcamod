@@ -149,7 +149,7 @@ namespace Utils
 				char* envHome = getenv("HOME");
 
 #ifdef _DEBUG
-				  envHome = "H:/[Emulz]/EmulationStation/";
+				    // envHome = "H:/[Emulz]/EmulationStation/";
 #endif
 
 				if (envHome)

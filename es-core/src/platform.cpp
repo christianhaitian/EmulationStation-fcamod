@@ -1,15 +1,17 @@
 #include "platform.h"
-
 #include <SDL_events.h>
+
 #ifdef WIN32
 #include <codecvt>
+#include <windows.h>
 #else
 #include <unistd.h>
 #endif
 #include <fcntl.h>
 
-#include <windows.h>
 #include "Window.h"
+
+#include "GuiComponent.h"
 
 int runShutdownCommand()
 {
@@ -84,7 +86,7 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 {
 #ifdef WIN32
 	if (window != NULL)
-		window->renderBlackScreen("Chargement en cours...");
+		window->renderGameLoadingScreen();
 
 	// on Windows we use _wsystem to support non-ASCII paths
 	// which requires converting from utf8 to a wstring
@@ -124,7 +126,7 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 					polled = true;
 
 				if (window != NULL && polled)
-					window->renderBlackScreen("Chargement en cours...");
+					window->renderGameLoadingScreen();
 			}
 		}
 		

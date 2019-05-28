@@ -11,11 +11,15 @@
 #include <algorithm>
 #include <iomanip>
 
+#include <SDL_events.h>
+
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
 	mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false), mInfoPopup(NULL)
 {
 	mHelp = new HelpComponent(this);
 	mBackgroundOverlay = new ImageComponent(this);
+	mSplash = NULL;
+
 }
 
 Window::~Window()
@@ -297,20 +301,94 @@ void Window::setAllowSleep(bool sleep)
 	mAllowSleep = sleep;
 }
 
-void Window::renderLoadingScreen(std::string text)
+void Window::endRenderLoadingScreen()
+{
+	mSplash = NULL;
+}
+
+void Window::renderLoadingScreen(std::string text, float percent)
 {	
+#if defined(_WIN32)
+	// Avoid Window Freezing on Windows
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) ;
+#endif
+
 	Transform4x4f trans = Transform4x4f::Identity();
 	Renderer::setMatrix(trans);
 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x000000FF);
 	
+	if (percent > 0)
+	{
+		float baseHeight = 0.04f;
+
+		float w = Renderer::getScreenWidth() / 2;
+		float h = Renderer::getScreenHeight() * baseHeight;
+
+		float x = Renderer::getScreenWidth() / 2 - w / 2;
+		float y = Renderer::getScreenHeight() - (Renderer::getScreenHeight() * 3 * baseHeight);
+
+		Renderer::drawRect(x, y, w, h, 0x252525FF);
+		Renderer::drawRect(x + 1, y + 1, (w*percent) - 2, h - 2, 0x656565FF); // 0xFFFFFFFF
+	}
+
+
 	ImageComponent splash(this, true);
-	splash.setResize(Renderer::getScreenWidth() * 0.5f, 0.0f);
-	splash.setImage(":/splash.svg");
+	splash.setResize(Renderer::getScreenWidth() * 0.4f, 0.0f);	
+
+#if defined(_WIN32)
+	if (mSplash == NULL)
+		mSplash = TextureResource::get(":/splash.svg", false, true, true);
+#endif
+
+	if (mSplash != NULL)
+		splash.setImage(mSplash);
+	else
+		splash.setImage(":/splash.svg");
+
 	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.7f);
 	splash.render(trans);
 
+
 	auto& font = mDefaultFonts.at(1);
 	TextCache* cache = font->buildTextCache(text, 0, 0, 0x656565FF);
+
+	float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);
+	float y = Math::round(Renderer::getScreenHeight() * 0.8f); // 35
+	trans = trans.translate(Vector3f(x, y, 0.0f));
+	Renderer::setMatrix(trans);
+	font->renderTextCache(cache);
+	delete cache;
+
+
+	Renderer::swapBuffers();
+}
+
+void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
+{
+	Transform4x4f trans = Transform4x4f::Identity();
+	Renderer::setMatrix(trans);
+	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x00000000 | (unsigned char)(opacity * 255));
+	
+	ImageComponent splash(this, true);
+	splash.setResize(Renderer::getScreenWidth() * 0.4f, 0.0f);
+
+#if defined(_WIN32)
+	if (mSplash == NULL)
+		mSplash = TextureResource::get(":/splash.svg", false, true, true);
+#endif
+
+	if (mSplash != NULL)
+		splash.setImage(mSplash);
+	else
+		splash.setImage(":/splash.svg");
+
+	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.7f);
+	splash.setColorShift(0xFFFFFF00 | (unsigned char)(opacity * 255));
+	splash.render(trans);
+	
+	auto& font = mDefaultFonts.at(1);
+	TextCache* cache = font->buildTextCache(_T("Loading..."), 0, 0, 0x65656500 | (unsigned char)(opacity * 255));
 
 	float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);
 	float y = Math::round(Renderer::getScreenHeight() * 0.835f);
@@ -319,36 +397,8 @@ void Window::renderLoadingScreen(std::string text)
 	font->renderTextCache(cache);
 	delete cache;
 
-	Renderer::swapBuffers();
-}
-
-void Window::renderBlackScreen(std::string text)
-{
-	Transform4x4f trans = Transform4x4f::Identity();
-	Renderer::setMatrix(trans);
-	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x000000FF);
-	/*
-	ImageComponent splash(this, true);
-	splash.setResize(Renderer::getScreenWidth() * 0.5f, 0.0f);
-	splash.setImage(":/splash.svg");
-	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.7f);
-	splash.render(trans);
-	*/
-
-	if (text.length() > 0)
-	{
-		auto& font = mDefaultFonts.at(1);
-		TextCache* cache = font->buildTextCache(text, 0, 0, 0x656565FF);
-
-		float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);
-		float y = Math::round(Renderer::getScreenHeight() * 0.835f);
-		trans = trans.translate(Vector3f(x, y, 0.0f));
-		Renderer::setMatrix(trans);
-		font->renderTextCache(cache);
-		delete cache;
-	}
-
-	Renderer::swapBuffers();
+	if (swapBuffers)
+		Renderer::swapBuffers();
 }
 
 

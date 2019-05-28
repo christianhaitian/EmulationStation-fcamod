@@ -302,10 +302,13 @@ void GridTileComponent::setSelected(bool selected, Vector3f* pPosition)
 
 		auto func = [this](float t)
 		{
-			this->setSelectedZoom(t);
+			t -= 1; // cubic ease out
+			float pct = Math::lerp(0, 1, t*t*t + 1);
+
+			this->setSelectedZoom(pct);
 		};
 
-		setAnimation(new LambdaAnimation(func, 100), 0, [this] {
+		setAnimation(new LambdaAnimation(func, 200), 0, [this] {
 			this->setSelectedZoom(1);
 			mAnimPosition = Vector3f(0, 0, 0);
 		}, false, 3);

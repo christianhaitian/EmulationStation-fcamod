@@ -16,6 +16,7 @@
 #include <Windows.h>
 #endif
 
+#include "GuiComponent.h"
 #include "Window.h"
 
 std::vector<SystemData*> SystemData::sSystemVector;
@@ -218,11 +219,15 @@ bool SystemData::loadConfig(Window* window)
 		LOG(LogError) << "es_systems.cfg is missing the <systemList> tag!";
 		return false;
 	}
-	
+
+	float systemCount = 1;
+	for (pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system"))
+		systemCount++;
+
+	float currentSystem = 0;
 	for (pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system"))
 	{		
-		std::vector<EmulatorData> emulatorList;
-		
+		std::vector<EmulatorData> emulatorList;		
 
 	//	std::vector<std::string> coreList;
 
@@ -262,7 +267,9 @@ bool SystemData::loadConfig(Window* window)
 		}
 		
 		if (window != NULL)
-			window->renderLoadingScreen(fullname);
+			window->renderLoadingScreen(fullname, systemCount == 0 ? 0 : currentSystem / systemCount);
+
+		currentSystem++;
 
 		// convert extensions list from a string into a vector of strings
 
@@ -346,7 +353,9 @@ bool SystemData::loadConfig(Window* window)
 	}
 
 	if (window != NULL)
-		window->renderLoadingScreen("Favoris");
+		window->renderLoadingScreen(_T("Favorites"), systemCount == 0 ? 0 : currentSystem / systemCount);
+
+	currentSystem++;
 
 	CollectionSystemManager::get()->loadCollectionSystems();
 	return true;
@@ -575,7 +584,7 @@ void SystemData::loadTheme()
 		sysData.insert(std::pair<std::string, std::string>("system.theme", getThemeFolder()));
 		sysData.insert(std::pair<std::string, std::string>("system.fullName", getFullName()));
 		
-		mTheme->loadFile(getThemeFolder(), path);
+		mTheme->loadFile(getThemeFolder(), sysData, path);
 	} 
 	catch(ThemeException& e)
 	{
