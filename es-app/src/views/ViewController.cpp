@@ -61,12 +61,13 @@ void ViewController::goToStart(bool forceImmediate)
 		// Requested system doesn't exist
 		Settings::getInstance()->setString("StartupSystem", "");
 	}
+
 	goToSystemView(SystemData::sSystemVector.at(0), forceImmediate);
 }
 
 void ViewController::ReloadAndGoToStart()
 {
-	mWindow->renderLoadingScreen("Chargement");
+	mWindow->renderLoadingScreen(_T("Loading..."));
 
 	ViewController::get()->reloadAll();
 	ViewController::get()->goToStart(false);
@@ -235,8 +236,8 @@ void ViewController::launch(FileData* game, Vector3f center)
 		setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this, game, fadeFunc]
 		{
 			game->launchGame(mWindow);
-			setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this] { mLockInput = false; }, true);
-			this->onFileChanged(game, FILE_METADATA_CHANGED);
+			setAnimation(new LambdaAnimation(fadeFunc, 800), 0, [this] { mLockInput = false; mWindow->endRenderLoadingScreen(); }, true);
+			this->onFileChanged(game, FILE_METADATA_CHANGED);			
 		});
 	} else if (transition_style == "slide"){
 		// move camera to zoom in on center + fade out, launch game, come back in
@@ -244,7 +245,7 @@ void ViewController::launch(FileData* game, Vector3f center)
 		{
 			game->launchGame(mWindow);			
 			mCamera = origCamera;
-			setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 600), 0, [this] { mLockInput = false; }, true);
+			setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 600), 0, [this] { mLockInput = false; mWindow->endRenderLoadingScreen(); }, true);
 			this->onFileChanged(game, FILE_METADATA_CHANGED);
 		});
 	} else { // instant
@@ -252,7 +253,7 @@ void ViewController::launch(FileData* game, Vector3f center)
 		{
 			game->launchGame(mWindow);
 			mCamera = origCamera;
-			setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this] { mLockInput = false; }, true);
+			setAnimation(new LaunchAnimation(mCamera, mFadeOpacity, center, 10), 0, [this] { mLockInput = false; mWindow->endRenderLoadingScreen(); }, true);
 			this->onFileChanged(game, FILE_METADATA_CHANGED);
 		});
 	}
@@ -420,7 +421,7 @@ bool ViewController::input(InputConfig* config, Input input)
 		return true;
 	}
 
-	if(mCurrentView)
+	if (mCurrentView)
 		return mCurrentView->input(config, input);
 
 	return false;
@@ -468,10 +469,15 @@ void ViewController::render(const Transform4x4f& parentTrans)
 		mWindow->renderHelpPromptsEarly();
 
 	// fade out
-	if(mFadeOpacity)
+	if (mFadeOpacity)
 	{
-		Renderer::setMatrix(parentTrans);
-		Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x00000000 | (unsigned char)(mFadeOpacity * 255));
+		if (Settings::getInstance()->getBool("HideWindow"))
+		{		
+			Renderer::setMatrix(parentTrans);		
+			Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x00000000 | (unsigned char)(mFadeOpacity * 255));
+		}
+		else 
+			mWindow->renderGameLoadingScreen(mFadeOpacity, false);
 	}
 }
 

@@ -519,20 +519,29 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 		}
 		else
 		{
-			file->getSourceFileData()->getSystem()->getIndex()->removeFromIndex(file);
+			SystemData* sysData = file->getSourceFileData()->getSystem();
+			sysData->getIndex()->removeFromIndex(file);
+
 			MetaDataList* md = &file->getSourceFileData()->metadata;
+
 			std::string value = md->get("favorite");
 			if (value == "false")
-			{
 				md->set("favorite", "true");
-			}
 			else
 			{
 				adding = false;
 				md->set("favorite", "false");
 			}
-			file->getSourceFileData()->getSystem()->getIndex()->addToIndex(file);
+			sysData->getIndex()->addToIndex(file);
+
 			refreshCollectionSystems(file->getSourceFileData());
+
+			SystemData* systemViewToUpdate = getSystemToView(sysData);
+			if (systemViewToUpdate != NULL)
+			{
+				ViewController::get()->onFileChanged(file, FILE_METADATA_CHANGED);
+				ViewController::get()->getGameListView(systemViewToUpdate)->onFileChanged(file, FILE_METADATA_CHANGED);
+			}
 		}
 		if (adding)
 		{

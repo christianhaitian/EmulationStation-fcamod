@@ -322,7 +322,7 @@ int main(int argc, char* argv[])
 	bool splashScreen = Settings::getInstance()->getBool("SplashScreen");
 	bool splashScreenProgress = Settings::getInstance()->getBool("SplashScreenProgress");
 
-	if(!scrape_cmdline)
+	if (!scrape_cmdline)
 	{
 		if(!window.init())
 		{
@@ -333,15 +333,9 @@ int main(int argc, char* argv[])
 		std::string glExts = (const char*)glGetString(GL_EXTENSIONS);
 		LOG(LogInfo) << "Checking available OpenGL extensions...";
 		LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "ok" : "MISSING");
-		if(splashScreen)
-		{
-			std::string progressText = "Chargement";
 
-			if (splashScreenProgress)
-				progressText = "Chargement de la configuration";
-
-			window.renderLoadingScreen(progressText);
-		}
+		if (splashScreen)
+			window.renderLoadingScreen(_T("Loading..."));
 	}
 
 	const char* errorMsg = NULL;
@@ -383,7 +377,7 @@ int main(int argc, char* argv[])
 		window.renderLoadingScreen(_T("Starting UI"));
 
 	//choose which GUI to open depending on if an input configuration already exists
-	if(errorMsg == NULL)
+	if (errorMsg == NULL)
 	{
 		if (Utils::FileSystem::exists(InputManager::getConfigPath()) && InputManager::getInstance()->getNumConfiguredDevices() > 0)
 			ViewController::get()->goToStart(true);
@@ -393,6 +387,8 @@ int main(int argc, char* argv[])
 
 	//generate joystick events since we're done loading
 	SDL_JoystickEventState(SDL_ENABLE);
+
+	window.endRenderLoadingScreen();
 
 	int lastTime = SDL_GetTicks();
 	int ps_time = SDL_GetTicks();

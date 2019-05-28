@@ -19,12 +19,13 @@
 #include <SDL_events.h>
 #include <algorithm>
 
+#include "animations/LambdaAnimation.h"
+
 GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _T("MAIN MENU")), mVersion(window)
 
 {
 	bool isFullUI = UIModeController::getInstance()->isUIModeFull();
-
-
+	
 	if (isFullUI)
 	{
 		addEntry(_T("UI SETTINGS"), 0x777777FF, true, [this] { openUISettings(); });
@@ -41,15 +42,38 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _T("MAIN 
 		addEntry(_T("GAME COLLECTION SETTINGS"), 0x777777FF, true, [this] { openCollectionSystemSettings(); });
 		addEntry(_T("ADVANCED SETTINGS"), 0x777777FF, true, [this] { openOtherSettings(); });
 	}
-
-
+	
+#if defined(_WIN32)
 	addEntry(_T("QUIT"), 0x777777FF, false, [this] {openQuitMenu(); });
+#else
+	addEntry(_T("QUIT"), 0x777777FF, true, [this] {openQuitMenu(); });
+#endif
 
 	addChild(&mMenu);
 	addVersionInfo();
 
 	setSize(mMenu.getSize());
-	setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, Renderer::getScreenHeight() * 0.15f);
+	
+	float y1 = Renderer::getScreenHeight();
+	float y2 = (Renderer::getScreenHeight() - mMenu.getSize().y()) / 2;
+
+	setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y1);
+
+	auto fadeFunc = [this, y1, y2](float t) {
+		
+		t -= 1; // cubic ease out
+		float pct = Math::lerp(0, 1, t*t*t + 1);
+
+		float y = y1 * (1 - pct) + y2 * pct;
+		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y);
+	};
+
+	setAnimation(new LambdaAnimation(fadeFunc, 350), 0, [this, fadeFunc, y2]
+	{
+		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y2);
+	});
+	
+	setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y2);
 }
 
 void GuiMenu::openScraperSettings()
@@ -402,13 +426,13 @@ void GuiMenu::openUISettings()
 	screensaver_row.makeAcceptInputHandler(std::bind(&GuiMenu::openScreensaverOptions, this));
 	s->addRow(screensaver_row);
 
-
+#if defined(_WIN32)
 	// quick system select (left/right in game list view)
 	auto hideWindowScreen = std::make_shared<SwitchComponent>(mWindow);
 	hideWindowScreen->setState(Settings::getInstance()->getBool("HideWindow"));
 	s->addWithLabel(_T("HIDE WHEN RUNNING GAME"), hideWindowScreen);
 	s->addSaveFunc([hideWindowScreen] { Settings::getInstance()->setBool("HideWindow", hideWindowScreen->getState()); });
-
+#endif
 
 	// quick system select (left/right in game list view)
 	auto quick_sys_select = std::make_shared<SwitchComponent>(mWindow);
@@ -551,9 +575,11 @@ void GuiMenu::openConfigInput()
 
 void GuiMenu::openQuitMenu()
 {
+#if defined(_WIN32)
 	Scripting::fireEvent("quit");
 	quitES("");
 	return;
+#endif
 
 	auto s = new GuiSettings(mWindow, _T("QUIT"));
 
@@ -572,8 +598,6 @@ void GuiMenu::openQuitMenu()
 		});
 		row.addElement(std::make_shared<TextComponent>(window, "RESTART EMULATIONSTATION", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 		s->addRow(row);
-
-
 
 		if(Settings::getInstance()->getBool("ShowExit"))
 		{

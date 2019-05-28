@@ -135,7 +135,7 @@ public:
 	ThemeData();
 
 	// throws ThemeException
-	void loadFile(std::string system, const std::string& path);
+	void loadFile(std::string system, std::map<std::string, std::string> sysDataMap, const std::string& path);
 
 	enum ElementPropertyType
 	{
@@ -178,6 +178,8 @@ private:
 	void parseViews(const pugi::xml_node& themeRoot);
 	void parseView(const pugi::xml_node& viewNode, ThemeView& view);
 	void parseElement(const pugi::xml_node& elementNode, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element);
+	bool parseRegion(const pugi::xml_node& node);
+	bool parseSubset(const pugi::xml_node& node);
 
 	std::string resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path);
 

@@ -203,7 +203,7 @@ ThemeData::ThemeData()
 	mVersion = 0;
 }
 
-void ThemeData::loadFile(std::string system, const std::string& path)
+void ThemeData::loadFile(std::string system, std::map<std::string, std::string> sysDataMap, const std::string& path)
 {
 	mPaths.push_back(path);
 
@@ -219,8 +219,7 @@ void ThemeData::loadFile(std::string system, const std::string& path)
 	mSystemThemeFolder = system;
 
 	mVariables.clear();	
-	//mVariables.insert(system, system);
-	//mVariables.insert(sysDataMap.cbegin(), sysDataMap.cend());
+	mVariables.insert(sysDataMap.cbegin(), sysDataMap.cend());
 
 	pugi::xml_document doc;
 	pugi::xml_parse_result res = doc.load_file(path.c_str());
@@ -263,6 +262,67 @@ std::string ThemeData::resolveSystemVariable(const std::string& systemThemeFolde
 	return result;
 }
 
+bool ThemeData::parseSubset(const pugi::xml_node& node)
+{
+	bool parse = true;
+
+	if (node.attribute("subset"))
+	{
+		parse = false;
+		const std::string subsetAttr = node.attribute("subset").as_string();
+		const std::string nameAttr = node.attribute("name").as_string();
+
+		if (subsetAttr == "iconset" || subsetAttr == "gamelistview")
+		{
+			if (nameAttr.rfind("1-") != std::string::npos)
+			{
+				parse = true;
+				return parse;
+			}
+		}
+		else if (subsetAttr == "systemview")
+		{
+			if (nameAttr.rfind("8-") != std::string::npos)
+			{
+				parse = true;
+				return parse;
+			}
+		}
+		else if (nameAttr.rfind("2-") != std::string::npos)
+		{
+			parse = true;
+			return parse;
+		}
+		/*
+		if (subsetAttr == "colorset" && nameAttr == mColorset)
+		{
+			parse = true;
+			return parse;
+		}
+		if (subsetAttr == "iconset" && nameAttr == mIconset)
+		{
+			parse = true;
+			return parse;
+		}
+		if (subsetAttr == "menu" && nameAttr == mMenu)
+		{
+			parse = true;
+			return parse;
+		}
+		if (subsetAttr == "systemview" && nameAttr == mSystemview)
+		{
+			parse = true;
+			return parse;
+		}
+		if (subsetAttr == "gamelistview" && nameAttr == mGamelistview)
+		{
+			parse = true;
+			return parse;
+		}*/
+	}
+
+	return parse;
+}
 
 void ThemeData::parseIncludes(const pugi::xml_node& root)
 {
@@ -271,6 +331,9 @@ void ThemeData::parseIncludes(const pugi::xml_node& root)
 
 	for(pugi::xml_node node = root.child("include"); node; node = node.next_sibling("include"))
 	{
+		if (!parseSubset(node))
+			continue;
+
 		std::string relPath = resolvePlaceholders(node.text().as_string());
 		std::string path = Utils::FileSystem::resolveRelativePath(relPath, mPaths.back(), true);
 		path = resolveSystemVariable(mSystemThemeFolder, path);
@@ -391,23 +454,56 @@ void ThemeData::parseView(const pugi::xml_node& root, ThemeView& view)
 		if(elemTypeIt == sElementMap.cend())
 			throw error << "Unknown element of type \"" << node.name() << "\"!";
 
+		if (parseRegion(node))
+		{
+			const char* delim = " \t\r\n,";
+			const std::string nameAttr = node.attribute("name").as_string();
+			size_t prevOff = nameAttr.find_first_not_of(delim, 0);
+			size_t off = nameAttr.find_first_of(delim, prevOff);
+			while (off != std::string::npos || prevOff != std::string::npos)
+			{
+				std::string elemKey = nameAttr.substr(prevOff, off - prevOff);
+				prevOff = nameAttr.find_first_not_of(delim, off);
+				off = nameAttr.find_first_of(delim, prevOff);
+
+				parseElement(node, elemTypeIt->second,
+					view.elements.insert(std::pair<std::string, ThemeElement>(elemKey, ThemeElement())).first->second);
+
+				if (std::find(view.orderedKeys.cbegin(), view.orderedKeys.cend(), elemKey) == view.orderedKeys.cend())
+					view.orderedKeys.push_back(elemKey);
+			}
+		}
+	}
+}
+
+bool ThemeData::parseRegion(const pugi::xml_node& node)
+{
+	bool parse = true;
+
+	if (node.attribute("region"))
+	{
+		std::string regionsetting = "us"; // Settings::getInstance()->getString("ThemeRegionName");
+
+		parse = false;
 		const char* delim = " \t\r\n,";
-		const std::string nameAttr = node.attribute("name").as_string();
+		const std::string nameAttr = node.attribute("region").as_string();
 		size_t prevOff = nameAttr.find_first_not_of(delim, 0);
-		size_t off =  nameAttr.find_first_of(delim, prevOff);
-		while(off != std::string::npos || prevOff != std::string::npos)
+		size_t off = nameAttr.find_first_of(delim, prevOff);
+		while (off != std::string::npos || prevOff != std::string::npos)
 		{
 			std::string elemKey = nameAttr.substr(prevOff, off - prevOff);
 			prevOff = nameAttr.find_first_not_of(delim, off);
 			off = nameAttr.find_first_of(delim, prevOff);
-			
-			parseElement(node, elemTypeIt->second, 
-				view.elements.insert(std::pair<std::string, ThemeElement>(elemKey, ThemeElement())).first->second);
-
-			if(std::find(view.orderedKeys.cbegin(), view.orderedKeys.cend(), elemKey) == view.orderedKeys.cend())
-				view.orderedKeys.push_back(elemKey);
+			if (elemKey == regionsetting)
+			{
+				parse = true;
+				return parse;
+			}
 		}
+
 	}
+	return parse;
+
 }
 
 
@@ -450,16 +546,28 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 		case PATH:
 		{
 			std::string path = Utils::FileSystem::resolveRelativePath(str, mPaths.back(), true);
-			if(!ResourceManager::getInstance()->fileExists(path))
+
+			if (!ResourceManager::getInstance()->fileExists(path))
+			{
+				std::string rootPath = Utils::FileSystem::resolveRelativePath(str, mPaths.front(), true);
+				if (ResourceManager::getInstance()->fileExists(rootPath))
+					path = rootPath;
+			}
+
+			if (!ResourceManager::getInstance()->fileExists(path))
 			{
 				std::stringstream ss;
 				ss << "  Warning " << error.msg; // "from theme yadda yadda, included file yadda yadda
 				ss << "could not find file \"" << node.text().get() << "\" ";
 				if(node.text().get() != path)
 					ss << "(which resolved to \"" << path << "\") ";
+
 				LOG(LogWarning) << ss.str();
+				OutputDebugString(ss.str().c_str());
 			}
-			element.properties[node.name()] = path;
+			else
+				element.properties[node.name()] = path;
+
 			break;
 		}
 		case COLOR:
@@ -525,8 +633,8 @@ const std::shared_ptr<ThemeData>& ThemeData::getDefault()
 		{
 			try
 			{
-				//std::map<std::string, std::string> emptyMap;
-				theme->loadFile("", path); // emptyMap
+				std::map<std::string, std::string> emptyMap;
+				theme->loadFile("", emptyMap, path);
 			} catch(ThemeException& e)
 			{
 				LOG(LogError) << e.what();

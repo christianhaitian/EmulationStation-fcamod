@@ -16,6 +16,8 @@ class ImageComponent;
 class InputConfig;
 class TextCache;
 class Transform4x4f;
+class TextureResource;
+
 struct HelpStyle;
 
 class Window
@@ -64,8 +66,9 @@ public:
 	bool getAllowSleep();
 	void setAllowSleep(bool sleep);
 
-	void renderLoadingScreen(std::string text);
-	void renderBlackScreen(std::string text);
+	void endRenderLoadingScreen();
+	void renderLoadingScreen(std::string text, float percent = -1);
+	void renderGameLoadingScreen(float opacity=1, bool swapBuffers=true);
 
 	void renderHelpPromptsEarly(); // used to render HelpPrompts before a fade
 	void setHelpPrompts(const std::vector<HelpPrompt>& prompts, const HelpStyle& style);
@@ -90,6 +93,8 @@ private:
 	ScreenSaver*	mScreenSaver;
 	InfoPopup*		mInfoPopup;
 	bool			mRenderScreenSaver;
+
+	std::shared_ptr<TextureResource> mSplash;
 
 	std::vector<GuiComponent*> mGuiStack;
 
