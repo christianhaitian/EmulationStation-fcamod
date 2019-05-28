@@ -93,6 +93,10 @@ msgid "New Collection Name"
 msgstr "Nom de la collection"
 
 #: 
+msgid "Loading..."
+msgstr "Chargement en cours..."
+
+#: 
 msgid "GROUP UNTHEMED CUSTOM COLLECTIONS"
 msgstr "GROUPER LES COLLECTIONS SANS THEME"
 

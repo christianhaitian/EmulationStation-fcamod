@@ -11,6 +11,8 @@
 #include "GuiMetaDataEd.h"
 #include "SystemData.h"
 
+#include "animations/LambdaAnimation.h"
+
 GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window),
 	mSystem(system), mMenu(window, "OPTIONS"), fromPlaceholder(false), mFiltersChanged(false)
 {
@@ -118,7 +120,32 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 
 	// center the menu
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
-	mMenu.setPosition((mSize.x() - mMenu.getSize().x()) / 2, (mSize.y() - mMenu.getSize().y()) / 2);
+	//mMenu.setPosition((mSize.x() - mMenu.getSize().x()) / 2, (mSize.y() - mMenu.getSize().y()) / 2);
+
+	float x0 = (mSize.x() - mMenu.getSize().x()) / 2;
+
+	float y1 = Renderer::getScreenHeight();
+	float y2 = (mSize.y() - mMenu.getSize().y()) / 2;
+	//float y1 = mMenu.getSize().y();
+	//float y2 = (mSize.y() - mMenu.getSize().y()) / 2;
+
+	setPosition(x0, y1);
+
+	auto fadeFunc = [this, x0, y1, y2](float t) {
+
+		t -= 1; // cubic ease out
+		float pct = Math::lerp(0, 1, t*t*t + 1);
+
+		float y = y1 * (1 - pct) + y2 * pct;
+		setPosition(x0, y);
+	};
+
+	setAnimation(new LambdaAnimation(fadeFunc, 350), 0, [this, fadeFunc, x0, y2]
+	{
+		setPosition(x0, y2);
+	});
+
+	setPosition(x0, y2);
 }
 
 GuiGamelistOptions::~GuiGamelistOptions()

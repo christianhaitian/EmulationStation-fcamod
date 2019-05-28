@@ -92,7 +92,11 @@ void Settings::setDefaults()
 		mIntMap["MaxVRAM"] = 100;
 	#endif
 		
+#if defined(_WIN32)
+	mBoolMap["HideWindow"] = false;
+#else
 	mBoolMap["HideWindow"] = true;
+#endif
 	mStringMap["GameTransitionStyle"] = "fade";
 	mStringMap["TransitionStyle"] = "slide";
 	mStringMap["Language"] = "en";	
