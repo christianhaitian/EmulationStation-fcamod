@@ -318,7 +318,7 @@ void Window::renderLoadingScreen(std::string text, float percent)
 	Renderer::setMatrix(trans);
 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x000000FF);
 	
-	if (percent > 0)
+	if (percent >= 0)
 	{
 		float baseHeight = 0.04f;
 
@@ -354,7 +354,7 @@ void Window::renderLoadingScreen(std::string text, float percent)
 	TextCache* cache = font->buildTextCache(text, 0, 0, 0x656565FF);
 
 	float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);
-	float y = Math::round(Renderer::getScreenHeight() * 0.8f); // 35
+	float y = Math::round(Renderer::getScreenHeight() * 0.78f); // 35
 	trans = trans.translate(Vector3f(x, y, 0.0f));
 	Renderer::setMatrix(trans);
 	font->renderTextCache(cache);
