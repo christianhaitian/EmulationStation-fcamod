@@ -24,7 +24,9 @@ std::vector<const char*> settings_dont_save {
 	{ "ShowExit" },
 	{ "SplashScreen" },
 	{ "SplashScreenProgress" },
+#if !defined(_WIN32)
 	{ "VSync" },
+#endif
 	{ "FullscreenBorderless" },
 	{ "Windowed" },
 	{ "WindowWidth" },
@@ -67,7 +69,11 @@ void Settings::setDefaults()
 	mBoolMap["SplashScreenProgress"] = true;
 	mStringMap["StartupSystem"] = "";
 
+#if defined(_WIN32)
 	mBoolMap["VSync"] = true;
+#else
+	mBoolMap["VSync"] = false;
+#endif
 
 	mBoolMap["EnableSounds"] = true;
 	mBoolMap["ShowHelpPrompts"] = true;

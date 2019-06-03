@@ -62,6 +62,7 @@ void PowerSaver::updateMode()
 	} else {
 		mMode = DEFAULT;
 	}
+
 	updateTimeouts();
 }
 

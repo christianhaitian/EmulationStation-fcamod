@@ -8,6 +8,11 @@ GuiTextEditPopup::GuiTextEditPopup(Window* window, const std::string& title, con
 	const std::function<void(const std::string&)>& okCallback, bool multiLine, const char* acceptBtnText)
 	: GuiComponent(window), mBackground(window, ":/frame.png"), mGrid(window, Vector2i(1, 3)), mMultiLine(multiLine)
 {
+	auto theme = ThemeData::getMenuTheme();
+	mBackground.setImagePath(theme->Background.path); // ":/frame.png"
+	mBackground.setCenterColor(theme->Background.color);
+	mBackground.setEdgeColor(theme->Background.color);
+
 	addChild(&mBackground);
 	addChild(&mGrid);
 

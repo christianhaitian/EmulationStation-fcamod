@@ -134,14 +134,12 @@ void ViewController::goToGameList(SystemData* system)
 	mState.system = system;
 
 	if (mCurrentView)
-	{
 		mCurrentView->onHide();
-	}
+
 	mCurrentView = getGameListView(system);
 	if (mCurrentView)
-	{
-		mCurrentView->onShow();
-	}
+		mCurrentView->onShow();		
+
 	playViewTransition(false);
 }
 
@@ -156,7 +154,7 @@ void ViewController::playViewTransition(bool forceImmediate)
 		return;
 
 	std::string transition_style = Settings::getInstance()->getString("TransitionStyle");
-	if(!forceImmediate && transition_style == "fade")
+	if (!forceImmediate && transition_style == "fade")
 	{
 		// fade
 		// stop whatever's currently playing, leaving mFadeOpacity wherever it is
@@ -175,20 +173,24 @@ void ViewController::playViewTransition(bool forceImmediate)
 		});
 
 		// fast-forward animation if we're partway faded
-		if(target == -mCamera.translation())
+		if (target == -mCamera.translation())
 		{
 			// not changing screens, so cancel the first half entirely
 			advanceAnimation(0, FADE_DURATION);
 			advanceAnimation(0, FADE_WAIT);
 			advanceAnimation(0, FADE_DURATION - (int)(mFadeOpacity * FADE_DURATION));
-		}else{
-			advanceAnimation(0, (int)(mFadeOpacity * FADE_DURATION));
 		}
-	} else if (!forceImmediate && transition_style == "slide"){
+		else
+			advanceAnimation(0, (int)(mFadeOpacity * FADE_DURATION));		
+	} 
+	else if (!forceImmediate && transition_style == "slide")
+	{
 		// slide or simple slide
 		setAnimation(new MoveCameraAnimation(mCamera, target));
 		updateHelpPrompts(); // update help prompts immediately
-	} else {
+	} 
+	else 
+	{
 		// instant
 		setAnimation(new LambdaAnimation(
 			[this, target](float /*t*/)
@@ -450,9 +452,15 @@ void ViewController::render(const Transform4x4f& parentTrans)
 	// Keep track of UI mode changes.
 	UIModeController::getInstance()->monitorUIMode();
 
-	// draw systemview
-	getSystemListView()->render(trans);
+	// clipping
+	Vector3f sysStart = getSystemListView()->getPosition();
+	Vector3f sysEnd = getSystemListView()->getPosition() + Vector3f(getSystemListView()->getSize().x(), getSystemListView()->getSize().y(), 0);
 
+	// draw systemview
+//	if ((sysStart.x() == viewStart.x() && sysStart.y() < viewStart.y() && sysEnd.x() > viewEnd.x() && sysEnd.y() > viewEnd.y()) ||
+//		(sysStart.x() < viewEnd.x() && sysStart.y() < viewEnd.y() && sysEnd.x() > viewStart.x() && sysEnd.y() > viewStart.y()))
+		getSystemListView()->render(trans);
+	
 	// draw gamelists
 	for(auto it = mGameListViews.cbegin(); it != mGameListViews.cend(); it++)
 	{
@@ -460,8 +468,8 @@ void ViewController::render(const Transform4x4f& parentTrans)
 		Vector3f guiStart = it->second->getPosition();
 		Vector3f guiEnd = it->second->getPosition() + Vector3f(it->second->getSize().x(), it->second->getSize().y(), 0);
 
-		if(guiEnd.x() >= viewStart.x() && guiEnd.y() >= viewStart.y() &&
-			guiStart.x() <= viewEnd.x() && guiStart.y() <= viewEnd.y())
+//		if ((guiStart.x() == viewStart.x() && guiStart.y() < viewStart.y() && guiEnd.x() > viewEnd.x() && guiEnd.y() > viewEnd.y()) ||
+//			(guiStart.x() < viewEnd.x() && guiStart.y() < viewEnd.y() && guiEnd.x() > viewStart.x() && guiEnd.y() > viewStart.y()))
 			it->second->render(trans);
 	}
 
@@ -486,14 +494,10 @@ void ViewController::preload()
 	uint32_t i = 0;
 	for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
 	{
-		if(Settings::getInstance()->getBool("SplashScreen") &&
-			Settings::getInstance()->getBool("SplashScreenProgress"))
+		if (Settings::getInstance()->getBool("SplashScreen") && Settings::getInstance()->getBool("SplashScreenProgress"))
 		{
 			i++;
-			char buffer[100];
-			sprintf (buffer, "Chargement de '%s' (%d/%d)",
-				(*it)->getFullName().c_str(), i, (int)SystemData::sSystemVector.size());
-			mWindow->renderLoadingScreen(std::string(buffer));
+			mWindow->renderLoadingScreen(_T("Preloading UI"), (float) i / (float) SystemData::sSystemVector.size());
 		}
 
 		(*it)->getIndex()->resetFilters();

@@ -64,10 +64,21 @@ public:
 	inline MetaDataListType getType() const { return mType; }
 	inline const std::vector<MetaDataDecl>& getMDD() const { return getMDDByType(getType()); }
 
+	const std::string getSortName() const {
+		return mSortName;
+	}
+
 private:
 	MetaDataListType mType;
 	std::map<std::string, std::string> mMap;
 	bool mWasChanged;
+
+	static std::map<std::string, std::string> mDefaultGameMap;
+	static std::map<std::string, std::string> mDefaultFolderMap;
+
+	static std::map<std::string, std::string> BuildDefaultMap(MetaDataListType type);
+
+	std::string mSortName;
 };
 
 #endif // ES_APP_META_DATA_H

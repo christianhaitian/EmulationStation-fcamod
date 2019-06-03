@@ -41,15 +41,114 @@ namespace Utils
 		} // convertFromWideString
 #endif // _WIN32
 
-		stringList getDirContent(const std::string& _path, const bool _recursive)
+		bool compareFileInfo(const FileInfo& first, const FileInfo& second)
+		{
+			unsigned int i = 0;
+			while ((i < first.path.length()) && (i < second.path.length()))
+			{
+				if (tolower(first.path[i]) < tolower(second.path[i])) return true;
+				else if (tolower(first.path[i]) > tolower(second.path[i])) return false;
+				++i;
+			}
+			return (first.path.length() < second.path.length());			
+		}
+
+		fileList getDirInfo(const std::string& _path, const bool _recursive)
+		{
+			std::string path = getGenericPath(_path);
+			fileList  contentList;
+
+			// only parse the directory, if it's a directory
+			if (isDirectory(path))
+			{
+#if defined(_WIN32)
+				WIN32_FIND_DATAW findData;
+				std::string      wildcard = path + "/*";
+				HANDLE           hFind = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
+
+				if (hFind != INVALID_HANDLE_VALUE)
+				{
+					// loop over all files in the directory
+					do
+					{
+						std::string name = convertFromWideString(findData.cFileName);
+
+						// ignore "." and ".."
+						if ((name != ".") && (name != ".."))
+						{
+							std::string fullName(getGenericPath(path + "/" + name));
+
+							FileInfo fi;
+							fi.path = fullName;
+							fi.readOnly = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN;
+							fi.directory = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
+							contentList.push_back(fi);
+							
+							if (_recursive && fi.directory)
+							{
+								fileList fl = getDirInfo(fullName, true);
+								for (auto it = fl.cbegin(); it != fl.cend(); ++it)
+									contentList.push_back(*it);
+							}							
+						}
+					} while (FindNextFileW(hFind, &findData));
+
+					FindClose(hFind);
+				}
+#else // _WIN32
+				DIR* dir = opendir(path.c_str());
+
+				if (dir != NULL)
+				{
+					struct dirent* entry;
+
+					// loop over all files in the directory
+					while ((entry = readdir(dir)) != NULL)
+					{
+						std::string name(entry->d_name);
+
+						// ignore "." and ".."
+						if ((name != ".") && (name != ".."))
+						{
+							std::string fullName(getGenericPath(path + "/" + name));
+
+							FileInfo fi;
+							fi.path = fullName;
+							fi.readOnly = Utils::FileSystem::isHidden(fullName);
+							fi.directory = isDirectory(fullName);
+							contentList.push_back(fi);
+
+							if (_recursive && fi.directory)
+							{
+								fileList fl = getDirInfo(fullName, true);
+								for (auto it = fl.cbegin(); it != fl.cend(); ++it)
+									contentList.push_back(*it);
+							}
+						}
+					}
+
+					closedir(dir);
+				}
+#endif // _WIN32
+
+			}
+
+			// sort the content list
+			// Why loose time -> It will be sorted later ????		contentList.sort(compareFileInfo);
+
+			// return the content list
+			return contentList;
+
+		} // getDirContent
+		
+		stringList getDirContent(const std::string& _path, const bool _recursive, const bool includeHidden)
 		{
 			std::string path = getGenericPath(_path);
 			stringList  contentList;
 
 			// only parse the directory, if it's a directory
 			if(isDirectory(path))
-			{
-
+			{				
 #if defined(_WIN32)
 				WIN32_FIND_DATAW findData;
 				std::string      wildcard = path + "/*";
@@ -66,10 +165,14 @@ namespace Utils
 						if((name != ".") && (name != ".."))
 						{
 							std::string fullName(getGenericPath(path + "/" + name));
+
+							if (!includeHidden && (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN)
+								continue;
+							
 							contentList.push_back(fullName);
 
-							if(_recursive && isDirectory(fullName))
-								contentList.merge(getDirContent(fullName, true));
+							if(_recursive && (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+								contentList.merge(getDirContent(fullName, true, includeHidden));
 						}
 					}
 					while(FindNextFileW(hFind, &findData));
@@ -92,6 +195,10 @@ namespace Utils
 						if((name != ".") && (name != ".."))
 						{
 							std::string fullName(getGenericPath(path + "/" + name));
+
+							if (!includeHidden && Utils::FileSystem::isHidden(fullName))
+								continue;
+
 							contentList.push_back(fullName);
 
 							if(_recursive && isDirectory(fullName))
@@ -106,7 +213,7 @@ namespace Utils
 			}
 
 			// sort the content list
-			contentList.sort();
+// Why loose time -> It will be sorted later ????			contentList.sort();
 
 			// return the content list
 			return contentList;
@@ -147,9 +254,9 @@ namespace Utils
 			{
 				// this should give us something like "/home/YOUR_USERNAME" on Linux and "C:/Users/YOUR_USERNAME/" on Windows
 				char* envHome = getenv("HOME");
-
+				envHome = "H:/[Emulz]/EmulationStation/";
 #ifdef _DEBUG
-				    // envHome = "H:/[Emulz]/EmulationStation/";
+				     envHome = "H:/[Emulz]/EmulationStation/";
 #endif
 
 				if (envHome)

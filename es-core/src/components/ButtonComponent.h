@@ -38,7 +38,7 @@ private:
 	bool mEnabled;
 	unsigned int mTextColorFocused;
 	unsigned int mTextColorUnfocused;
-	
+
 	unsigned int getCurTextColor() const;
 	void updateImage();
 
@@ -46,6 +46,7 @@ private:
 	std::string mHelpText;
 	std::unique_ptr<TextCache> mTextCache;
 	NinePatchComponent mBox;
+	unsigned int mColor;
 };
 
 #endif // ES_CORE_COMPONENTS_BUTTON_COMPONENT_H

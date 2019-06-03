@@ -111,7 +111,7 @@ private:
 	SystemData* mSystem;
 	std::unordered_map<std::string,FileData*> mChildrenByFilename;
 	std::vector<FileData*> mChildren;
-	std::vector<FileData*> mFilteredChildren;
+	std::vector<FileData*> mFilteredChildren;	
 };
 
 class CollectionFileData : public FileData

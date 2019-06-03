@@ -4,6 +4,7 @@
 
 #include "math/Vector2f.h"
 #include "utils/FileSystemUtil.h"
+
 #include <deque>
 #include <map>
 #include <memory>
@@ -21,6 +22,7 @@ class NinePatchComponent;
 class Sound;
 class TextComponent;
 class Window;
+class Font;
 
 namespace ThemeFlags
 {
@@ -81,9 +83,31 @@ struct ThemeSet
 	inline std::string getThemePath(const std::string& system) const { return path + "/" + system + "/theme.xml"; }
 };
 
+struct MenuElement {
+	unsigned int color;
+	unsigned int selectedColor;
+	unsigned int selectorColor;
+	unsigned int separatorColor;
+	std::string path;
+	std::string fadePath;
+	std::shared_ptr<Font> font;
+};
+
 class ThemeData
 {
 public:
+	class ThemeMenu
+	{
+	public:
+		ThemeMenu(ThemeData& theme);
+
+		MenuElement Background{ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, ":/frame.png", ":/scroll_gradient.png", nullptr };
+		MenuElement Title{ 0x555555FF, 0x555555FF, 0x555555FF, 0xFFFFFFFF, "", "", nullptr };
+		MenuElement Text{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, "", "", nullptr };
+		MenuElement TextSmall{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, "", "", nullptr };
+		MenuElement Footer{ 0xC6C6C6FF, 0xC6C6C6FF, 0xC6C6C6FF, 0xFFFFFFFF, "", "", nullptr };
+	};
+
 
 	class ThemeElement
 	{
@@ -130,6 +154,7 @@ private:
 		std::vector<std::string> orderedKeys;
 	};
 
+
 public:
 
 	ThemeData();
@@ -161,6 +186,7 @@ public:
 
 	std::string getDefaultView() { return mDefaultView; };
 
+	static const std::shared_ptr<ThemeData::ThemeMenu>& getMenuTheme() { return MenuTheme; }
 
 private:
 	static std::map< std::string, std::map<std::string, ElementPropertyType> > sElementMap;
@@ -171,7 +197,7 @@ private:
 	float mVersion;
 
 	std::string mDefaultView;
-
+	
 	void parseFeatures(const pugi::xml_node& themeRoot);
 	void parseIncludes(const pugi::xml_node& themeRoot);
 	void parseVariables(const pugi::xml_node& root);
@@ -180,11 +206,13 @@ private:
 	void parseElement(const pugi::xml_node& elementNode, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element);
 	bool parseRegion(const pugi::xml_node& node);
 	bool parseSubset(const pugi::xml_node& node);
-
+	
 	std::string resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path);
 
 	std::map<std::string, ThemeView> mViews;
 	std::string mSystemThemeFolder;
+
+	static std::shared_ptr<ThemeData::ThemeMenu> MenuTheme;
 };
 
 #endif // ES_CORE_THEME_DATA_H

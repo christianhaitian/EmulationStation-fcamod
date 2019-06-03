@@ -19,9 +19,10 @@ void GuiGamelistFilter::initializeMenu()
 
 	ComponentListRow row;
 
+	
 	// show filtered menu
 	row.elements.clear();
-	row.addElement(std::make_shared<TextComponent>(mWindow, _T("RESET ALL FILTERS"), Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	row.addElement(std::make_shared<TextComponent>(mWindow, _T("RESET ALL FILTERS"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 	row.makeAcceptInputHandler(std::bind(&GuiGamelistFilter::resetAllFilters, this));
 	mMenu.addRow(row);
 	row.elements.clear();

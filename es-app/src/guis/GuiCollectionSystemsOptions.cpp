@@ -27,7 +27,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	std::vector<std::string> unusedFolders = CollectionSystemManager::get()->getUnusedSystemsFromTheme();
 	if (unusedFolders.size() > 0)
 	{
-		addEntry(_T("CREATE NEW CUSTOM COLLECTION FROM THEME"), 0x777777FF, true,
+		addEntry(_T("CREATE NEW CUSTOM COLLECTION FROM THEME"), ThemeData::getMenuTheme()->Text.color, true,
 		[this, unusedFolders] {
 			auto s = new GuiSettings(mWindow, _T("SELECT THEME FOLDER"));
 			std::shared_ptr< OptionListComponent<std::string> > folderThemes = std::make_shared< OptionListComponent<std::string> >(mWindow, "SELECT THEME FOLDER", true);
@@ -47,12 +47,14 @@ void GuiCollectionSystemsOptions::initializeMenu()
 				row.addElement(themeFolder, true);
 				s->addRow(row);
 			}
+
+			s->updatePosition();
 			mWindow->pushGui(s);
 		});
 	}
 
 	ComponentListRow row;
-	row.addElement(std::make_shared<TextComponent>(mWindow, _T("CREATE NEW CUSTOM COLLECTION"), Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	row.addElement(std::make_shared<TextComponent>(mWindow, _T("CREATE NEW CUSTOM COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 	auto createCustomCollection = [this](const std::string& newVal) {
 		std::string name = newVal;
 		// we need to store the first Gui and remove it, as it'll be deleted by the actual Gui
@@ -85,16 +87,18 @@ void GuiCollectionSystemsOptions::initializeMenu()
 
 	mMenu.addButton(_T("BACK"), _T("BACK"), std::bind(&GuiCollectionSystemsOptions::applySettings, this));
 
-	mMenu.setPosition((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.15f);
+	mMenu.setPosition((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, (Renderer::getScreenHeight() - mMenu.getSize().y()) / 2);
 }
 
 void GuiCollectionSystemsOptions::addEntry(std::string name, unsigned int color, bool add_arrow, const std::function<void()>& func)
 {
-	std::shared_ptr<Font> font = Font::get(FONT_SIZE_MEDIUM);
+	auto theme = ThemeData::getMenuTheme();
+
+	std::shared_ptr<Font> font = theme->Text.font; // Font::get(FONT_SIZE_MEDIUM);
 
 	// populate the list
 	ComponentListRow row;
-	row.addElement(std::make_shared<TextComponent>(mWindow, name, font, color), true);
+	row.addElement(std::make_shared<TextComponent>(mWindow, name, font, theme->Text.color), true);
 
 	if(add_arrow)
 	{

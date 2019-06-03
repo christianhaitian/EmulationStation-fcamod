@@ -49,6 +49,7 @@ private:
 	Vector2f mLabelSize;
 
 	bool mLabelVisible;
+	bool mLabelMerged;
 
 	NinePatchComponent mBackground;
 

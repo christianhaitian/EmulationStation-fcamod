@@ -23,6 +23,8 @@ public:
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 
+	void setColor(unsigned int color);
+
 private:
 	void onStateChanged();
 

@@ -15,6 +15,7 @@ namespace Renderer {
 	};
 
 	std::stack<ClipRect> clipStack;
+	std::stack<ClipRect> nativeClipStack;
 
 	void setColor4bArray(GLubyte* array, unsigned int color)
 	{
@@ -62,7 +63,7 @@ namespace Renderer {
 		}
 
 		//make sure the box fits within clipStack.top(), and clip further accordingly
-		if(clipStack.size())
+		if (clipStack.size())
 		{
 			const ClipRect& top = clipStack.top();
 			if(top.x > box.x)
@@ -81,6 +82,7 @@ namespace Renderer {
 			box.h = 0;
 
 		clipStack.push(box);
+		nativeClipStack.push(ClipRect(pos.x(), pos.y(), dim.x(), dim.y()));
 
 		glScissor(box.x, box.y, box.w, box.h);
 		glEnable(GL_SCISSOR_TEST);
@@ -95,14 +97,59 @@ namespace Renderer {
 		}
 
 		clipStack.pop();
+		nativeClipStack.pop();
+
 		if(clipStack.empty())
 		{
 			glDisable(GL_SCISSOR_TEST);
-		}else{
+		}
+		else
+		{
 			const ClipRect& top = clipStack.top();
 			glScissor(top.x, top.y, top.w, top.h);
 		}
 	}
+
+	bool valueInRange(int value, int min, int max)
+	{
+		return (value >= min) && (value <= max);
+	}
+
+	bool rectOverlap(ClipRect A, ClipRect B)
+	{
+		bool xOverlap = valueInRange(A.x, B.x, B.x + B.w) ||
+			valueInRange(B.x, A.x, A.x + A.w);
+
+		bool yOverlap = valueInRange(A.y, B.y, B.y + B.h) ||
+			valueInRange(B.y, A.y, A.y + A.h);
+
+		return xOverlap && yOverlap;
+	}
+
+	bool isVisibleOnScreen(float x, float y, float w, float h)
+	{		
+		ClipRect screen = ClipRect(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
+		ClipRect box = ClipRect(x, y, w, h);
+
+		if (w > 0 && x + w <= 0)
+			return false;
+
+		if (h > 0 && y + h <= 0)
+			return false;
+		
+		if (x == screen.w || y == screen.h)
+			return false;
+
+		if (!rectOverlap(screen, box))
+			return false;
+
+		if (clipStack.empty())
+			return true;
+		
+		screen = nativeClipStack.top();
+		return rectOverlap(screen, box);
+	}
+
 
 	void drawRect(float x, float y, float w, float h, unsigned int color, GLenum blend_sfactor, GLenum blend_dfactor)
 	{

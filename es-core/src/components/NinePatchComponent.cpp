@@ -106,6 +106,10 @@ void NinePatchComponent::render(const Transform4x4f& parentTrans)
 	Transform4x4f trans = parentTrans * getTransform();
 	trans.round();
 	
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
+
 	if(mTexture && mVertices != NULL)
 	{
 		Renderer::setMatrix(trans);
@@ -166,18 +170,27 @@ void NinePatchComponent::fitTo(Vector2f size, Vector3f position, Vector2f paddin
 
 void NinePatchComponent::setImagePath(const std::string& path)
 {
+	if (mPath == path)
+		return;
+
 	mPath = path;
 	buildVertices();
 }
 
 void NinePatchComponent::setEdgeColor(unsigned int edgeColor)
 {
+	if (mEdgeColor == edgeColor)
+		return;
+
 	mEdgeColor = edgeColor;
 	updateColors();
 }
 
 void NinePatchComponent::setCenterColor(unsigned int centerColor)
 {
+	if (mCenterColor == centerColor)
+		return;
+
 	mCenterColor = centerColor;
 	updateColors();
 }

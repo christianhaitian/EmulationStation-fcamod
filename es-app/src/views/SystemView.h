@@ -38,6 +38,7 @@ struct SystemViewCarousel
 	unsigned int color;
 	int maxLogoCount; // number of logos shown on the carousel
 	Vector2f logoSize;
+	Vector2f logoPos;
 	float zIndex;
 };
 
