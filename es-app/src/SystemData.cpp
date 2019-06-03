@@ -51,6 +51,7 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 		// virtual systems are updated afterwards, we're just creating the data structure
 		mRootFolder = new FileData(FOLDER, "" + name, mEnvData, this);
 	}
+
 	setIsGameSystemStatus();
 	loadTheme();
 }
@@ -84,11 +85,6 @@ void SystemData::populateFolder(FileData* folder)
 		return;
 	}
 
-	int di = folderPath.rfind("downloaded_images");
-	int md = folderPath.rfind("media");
-	if (di > 0 || md > 0)
-		return;
-
 	//make sure that this isn't a symlink to a thing we already have
 	if(Utils::FileSystem::isSymlink(folderPath))
 	{
@@ -100,34 +96,36 @@ void SystemData::populateFolder(FileData* folder)
 		}
 	}
 	
-	std::string filePath;
+//	std::string filePath;
 	std::string extension;
 	bool isGame;
 	bool showHidden = Settings::getInstance()->getBool("ShowHiddenFiles");
-	Utils::FileSystem::stringList dirContent = Utils::FileSystem::getDirContent(folderPath);
-	for(Utils::FileSystem::stringList::const_iterator it = dirContent.cbegin(); it != dirContent.cend(); ++it)
+	
+	Utils::FileSystem::fileList dirContent = Utils::FileSystem::getDirInfo(folderPath, false);
+	for(Utils::FileSystem::fileList::const_iterator it = dirContent.cbegin(); it != dirContent.cend(); ++it)
 	{
-		filePath = *it;
+		auto fileInfo = *it;
+		//filePath = *it;
 
 		// skip hidden files and folders
-		if(!showHidden && Utils::FileSystem::isHidden(filePath))
+		if(!showHidden && fileInfo.readOnly)
 			continue;
 
 		//this is a little complicated because we allow a list of extensions to be defined (delimited with a space)
 		//we first get the extension of the file itself:
-		extension = Utils::FileSystem::getExtension(filePath);
+		extension = Utils::FileSystem::getExtension(fileInfo.path);
 		std::transform(extension.begin(), extension.end(), extension.begin(), ::_easytolower);
 
 		//fyi, folders *can* also match the extension and be added as games - this is mostly just to support higan
 		//see issue #75: https://github.com/Aloshi/EmulationStation/issues/75
-
+		
 		isGame = false;
 		if(std::find(mEnvData->mSearchExtensions.cbegin(), mEnvData->mSearchExtensions.cend(), extension) != mEnvData->mSearchExtensions.cend())
 		{
-			FileData* newGame = new FileData(GAME, filePath, mEnvData, this);
+			FileData* newGame = new FileData(GAME, fileInfo.path, mEnvData, this);
 
 			// preventing new arcade assets to be added
-			if(!newGame->isArcadeAsset())
+			if (extension != ".zip" || !newGame->isArcadeAsset())
 			{
 				folder->addChild(newGame);
 				isGame = true;
@@ -135,21 +133,20 @@ void SystemData::populateFolder(FileData* folder)
 		}
 		
 		//add directories that also do not match an extension as folders
-		if(!isGame && Utils::FileSystem::isDirectory(filePath))
+		if (!isGame && fileInfo.directory)
 		{
-			if (filePath.rfind("downloaded_images") == std::string::npos &&
-				filePath.rfind("media") == std::string::npos)
-			{
-				FileData* newFolder = new FileData(FOLDER, filePath, mEnvData, this);
-				populateFolder(newFolder);
+			if (fileInfo.path.rfind("downloaded_images") != std::string::npos || fileInfo.path.rfind("media") != std::string::npos)
+				continue;
 
-				if (newFolder->getChildrenByFilename().size() == 0)
-					delete newFolder;
-				else if (newFolder->findUniqueGameForFolder() != NULL)
-					delete newFolder;
-				else
-					folder->addChild(newFolder);
-			}
+			FileData* newFolder = new FileData(FOLDER, fileInfo.path, mEnvData, this);
+			populateFolder(newFolder);
+
+			if (newFolder->getChildrenByFilename().size() == 0)
+				delete newFolder;
+			else if (newFolder->findUniqueGameForFolder() != NULL)
+				delete newFolder;
+			else
+				folder->addChild(newFolder);
 		}
 	}
 }
@@ -229,8 +226,6 @@ bool SystemData::loadConfig(Window* window)
 	{		
 		std::vector<EmulatorData> emulatorList;		
 
-	//	std::vector<std::string> coreList;
-
 		std::string name, fullname, path, cmd, themeFolder, defaultCore;
 		
 		name = system.child("name").text().get();
@@ -258,7 +253,6 @@ bool SystemData::loadConfig(Window* window)
 							defaultCore = corename;
 
 						emulatorData.mCores.push_back(corename);
-					//	coreList.push_back(corename);
 					}
 				}
 
@@ -337,10 +331,7 @@ bool SystemData::loadConfig(Window* window)
 		envData->mSearchExtensions = extensions;
 		envData->mLaunchCommand = cmd;
 		envData->mPlatformIds = platformIds;
-		// envData->mDefaultCore = defaultCore;
 		envData->mEmulators = emulatorList;
-
-	//	envData->mCores = coreList;
 
 		SystemData* newSys = new SystemData(name, fullname, envData, themeFolder);
 		if(newSys->getRootFolder()->getChildrenByFilename().size() == 0)
@@ -572,8 +563,7 @@ void SystemData::loadTheme()
 	mTheme = std::make_shared<ThemeData>();
 
 	std::string path = getThemePath();
-
-	if(!Utils::FileSystem::exists(path)) // no theme available for this platform
+	if (!Utils::FileSystem::exists(path)) // no theme available for this platform
 		return;
 
 	try

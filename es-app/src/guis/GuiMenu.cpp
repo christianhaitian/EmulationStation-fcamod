@@ -22,31 +22,32 @@
 #include "animations/LambdaAnimation.h"
 
 GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _T("MAIN MENU")), mVersion(window)
-
 {
-	bool isFullUI = UIModeController::getInstance()->isUIModeFull();
+	auto theme = ThemeData::getMenuTheme();
+
+	bool isFullUI = UIModeController::getInstance()->isUIModeFull();	
 	
 	if (isFullUI)
 	{
-		addEntry(_T("UI SETTINGS"), 0x777777FF, true, [this] { openUISettings(); });
-		addEntry(_T("CONFIGURE INPUT"), 0x777777FF, true, [this] { openConfigInput(); });
+		addEntry(_T("UI SETTINGS"), theme->Text.color, true, [this] { openUISettings(); });
+		addEntry(_T("CONFIGURE INPUT"), theme->Text.color, true, [this] { openConfigInput(); });
 	}
 
-	addEntry(_T("SOUND SETTINGS"), 0x777777FF, true, [this] { openSoundSettings(); });
+	addEntry(_T("SOUND SETTINGS"), theme->Text.color, true, [this] { openSoundSettings(); });
 
 	if (isFullUI)
-		addEntry(_T("SCRAPER"), 0x777777FF, true, [this] { openScraperSettings(); });
+		addEntry(_T("SCRAPER"), theme->Text.color, true, [this] { openScraperSettings(); });
 
 	if (isFullUI)
 	{
-		addEntry(_T("GAME COLLECTION SETTINGS"), 0x777777FF, true, [this] { openCollectionSystemSettings(); });
-		addEntry(_T("ADVANCED SETTINGS"), 0x777777FF, true, [this] { openOtherSettings(); });
+		addEntry(_T("GAME COLLECTION SETTINGS"), theme->Text.color, true, [this] { openCollectionSystemSettings(); });
+		addEntry(_T("ADVANCED SETTINGS"), theme->Text.color, true, [this] { openOtherSettings(); });
 	}
 	
 #if defined(_WIN32)
-	addEntry(_T("QUIT"), 0x777777FF, false, [this] {openQuitMenu(); });
+	addEntry(_T("QUIT"), theme->Text.color, false, [this] {openQuitMenu(); });
 #else
-	addEntry(_T("QUIT"), 0x777777FF, true, [this] {openQuitMenu(); });
+	addEntry(_T("QUIT"), theme->Text.color, true, [this] {openQuitMenu(); });
 #endif
 
 	addChild(&mMenu);
@@ -78,23 +79,23 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _T("MAIN 
 
 void GuiMenu::openScraperSettings()
 {
-	auto s = new GuiSettings(mWindow, "SCRAPER");
+	auto s = new GuiSettings(mWindow, _T("SCRAPER"));
 
 	// scrape from
-	auto scraper_list = std::make_shared< OptionListComponent< std::string > >(mWindow, "SCRAPE FROM", false);
+	auto scraper_list = std::make_shared< OptionListComponent< std::string > >(mWindow, _T("SCRAPE FROM"), false);
 	std::vector<std::string> scrapers = getScraperList();
 
 	// Select either the first entry of the one read from the settings, just in case the scraper from settings has vanished.
 	for(auto it = scrapers.cbegin(); it != scrapers.cend(); it++)
 		scraper_list->add(*it, *it, *it == Settings::getInstance()->getString("Scraper"));
 
-	s->addWithLabel("SCRAPE FROM", scraper_list);
+	s->addWithLabel(_T("SCRAPE FROM"), scraper_list);
 	s->addSaveFunc([scraper_list] { Settings::getInstance()->setString("Scraper", scraper_list->getSelected()); });
 
 	// scrape ratings
 	auto scrape_ratings = std::make_shared<SwitchComponent>(mWindow);
 	scrape_ratings->setState(Settings::getInstance()->getBool("ScrapeRatings"));
-	s->addWithLabel("SCRAPE RATINGS", scrape_ratings);
+	s->addWithLabel(_T("SCRAPE RATINGS"), scrape_ratings);
 	s->addSaveFunc([scrape_ratings] { Settings::getInstance()->setBool("ScrapeRatings", scrape_ratings->getState()); });
 
 	// scrape now
@@ -104,12 +105,13 @@ void GuiMenu::openScraperSettings()
 	openAndSave = [s, openAndSave] { s->save(); openAndSave(); };
 	row.makeAcceptInputHandler(openAndSave);
 
-	auto scrape_now = std::make_shared<TextComponent>(mWindow, "SCRAPE NOW", Font::get(FONT_SIZE_MEDIUM), 0x777777FF);
+	auto scrape_now = std::make_shared<TextComponent>(mWindow, _T("SCRAPE NOW"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color);
 	auto bracket = makeArrow(mWindow);
 	row.addElement(scrape_now, true);
 	row.addElement(bracket, false);
 	s->addRow(row);
 
+	s->updatePosition();
 	mWindow->pushGui(s);
 }
 
@@ -223,6 +225,7 @@ void GuiMenu::openSoundSettings()
 #endif
 	}
 
+	s->updatePosition();
 	mWindow->pushGui(s);
 
 }
@@ -232,6 +235,7 @@ void GuiMenu::openUISettings()
 	auto s = new GuiSettings(mWindow, _T("UI SETTINGS"));
 
 	// theme set
+	auto theme = ThemeData::getMenuTheme();
 	auto themeSets = ThemeData::getThemeSets();
 
 	if (!themeSets.empty())
@@ -421,7 +425,7 @@ void GuiMenu::openUISettings()
 	// screensaver
 	ComponentListRow screensaver_row;
 	screensaver_row.elements.clear();
-	screensaver_row.addElement(std::make_shared<TextComponent>(mWindow, _T("SCREENSAVER SETTINGS"), Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+	screensaver_row.addElement(std::make_shared<TextComponent>(mWindow, _T("SCREENSAVER SETTINGS"), theme->Text.font, theme->Text.color), true);
 	screensaver_row.addElement(makeArrow(mWindow), false);
 	screensaver_row.makeAcceptInputHandler(std::bind(&GuiMenu::openScreensaverOptions, this));
 	s->addRow(screensaver_row);
@@ -471,6 +475,7 @@ void GuiMenu::openUISettings()
 		if (enable_filter->getState() != filter_is_enabled) ViewController::get()->ReloadAndGoToStart();
 	});
 
+	s->updatePosition();
 	mWindow->pushGui(s);
 
 }
@@ -548,14 +553,41 @@ void GuiMenu::openOtherSettings()
 
 #endif
 
+#if defined(_WIN32)
+	// vsync
+	auto vsync = std::make_shared<SwitchComponent>(mWindow);
+	vsync->setState(Settings::getInstance()->getBool("VSync"));
+	s->addWithLabel(_T("VSYNC"), vsync);
+	s->addSaveFunc([vsync] 
+	{ 
+		Settings::getInstance()->setBool("VSync", vsync->getState()); 
+
+		// vsync
+		if (Settings::getInstance()->getBool("VSync"))
+		{
+			// SDL_GL_SetSwapInterval(0) for immediate updates (no vsync, default), 
+			// 1 for updates synchronized with the vertical retrace, 
+			// or -1 for late swap tearing.
+			// SDL_GL_SetSwapInterval returns 0 on success, -1 on error.
+			// if vsync is requested, try normal vsync; if that doesn't work, try late swap tearing
+			// if that doesn't work, report an error
+			if (SDL_GL_SetSwapInterval(1) != 0 && SDL_GL_SetSwapInterval(-1) != 0)
+				LOG(LogWarning) << "Tried to enable vsync, but failed! (" << SDL_GetError() << ")";
+		}
+		else
+			SDL_GL_SetSwapInterval(0);
+	});
+#endif
+
 	// framerate
-	/*
+	
 	auto framerate = std::make_shared<SwitchComponent>(mWindow);
 	framerate->setState(Settings::getInstance()->getBool("DrawFramerate"));
 	s->addWithLabel(_T("SHOW FRAMERATE"), framerate);
 	s->addSaveFunc([framerate] { Settings::getInstance()->setBool("DrawFramerate", framerate->getState()); });
-	*/
+	
 
+	s->updatePosition();
 	mWindow->pushGui(s);
 
 }
@@ -639,6 +671,7 @@ void GuiMenu::openQuitMenu()
 	row.addElement(std::make_shared<TextComponent>(window, "SHUTDOWN SYSTEM", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 	s->addRow(row);
 
+	s->updatePosition();
 	mWindow->pushGui(s);
 }
 
@@ -646,8 +679,13 @@ void GuiMenu::addVersionInfo()
 {
 	std::string  buildDate = (Settings::getInstance()->getBool("Debug") ? std::string( "   (" + Utils::String::toUpper(PROGRAM_BUILT_STRING) + ")") : (""));
 
-	mVersion.setFont(Font::get(FONT_SIZE_SMALL));
-	mVersion.setColor(0x5E5E5EFF);
+	auto theme = ThemeData::getMenuTheme();
+//	mVersion.setFont(Font::get(FONT_SIZE_SMALL));
+//	mVersion.setColor(0x5E5E5EFF);
+
+	mVersion.setFont(theme->Footer.font);
+	mVersion.setColor(theme->Footer.color);
+
 	mVersion.setText("EMULATIONSTATION V" + Utils::String::toUpper(PROGRAM_VERSION_STRING) + buildDate);
 	mVersion.setHorizontalAlignment(ALIGN_CENTER);
 	addChild(&mVersion);
@@ -669,20 +707,21 @@ void GuiMenu::onSizeChanged()
 
 void GuiMenu::addEntry(std::string name, unsigned int color, bool add_arrow, const std::function<void()>& func)
 {
-	std::shared_ptr<Font> font = Font::get(FONT_SIZE_MEDIUM);
+	auto theme = ThemeData::getMenuTheme();
+	std::shared_ptr<Font> font = theme->Text.font;
+	color = theme->Text.color;
 
 	// populate the list
 	ComponentListRow row;
 	row.addElement(std::make_shared<TextComponent>(mWindow, name, font, color), true);
 
-	if(add_arrow)
+	if (add_arrow)
 	{
 		std::shared_ptr<ImageComponent> bracket = makeArrow(mWindow);
 		row.addElement(bracket, false);
 	}
 
 	row.makeAcceptInputHandler(func);
-
 	mMenu.addRow(row);
 }
 

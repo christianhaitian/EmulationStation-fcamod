@@ -120,7 +120,11 @@ private:
 		Vector2f bearing;
 	};
 
-	std::map<unsigned int, Glyph> mGlyphMap;
+	// used to cache 255 first chars
+	Glyph* mGlyphCacheArray[255];
+	
+	// used to cache every char
+	std::map<unsigned int, Glyph*> mGlyphMap;
 
 	Glyph* getGlyph(unsigned int id);
 

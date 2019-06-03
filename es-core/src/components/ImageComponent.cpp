@@ -25,6 +25,7 @@ ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : G
 	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f)
 {
 	updateColors();
+	mSizeChanged = false;
 }
 
 ImageComponent::~ImageComponent()
@@ -33,17 +34,22 @@ ImageComponent::~ImageComponent()
 
 void ImageComponent::resize()
 {
-	if(!mTexture)
+	if (!mTexture)
 		return;
 
 	const Vector2f textureSize = mTexture->getSourceImageSize();
-	if(textureSize == Vector2f::Zero())
+	if (textureSize == Vector2f::Zero())
 		return;
 
-	if(mTexture->isTiled())
+	int ox = mSize.x();
+	int oy = mSize.y();
+
+	if (mTexture->isTiled())
 	{
 		mSize = mTargetSize;
-	}else{
+	}
+	else
+	{
 		// SVG rasterization is determined by height (see SVGResource.cpp), and rasterization is done in terms of pixels
 		// if rounding is off enough in the rasterization step (for images with extreme aspect ratios), it can cause cutoff when the aspect ratio breaks
 		// so, we always make sure the resultant height is an integer to make sure cutoff doesn't happen, and scale width from that 
@@ -115,8 +121,12 @@ void ImageComponent::resize()
 
 	mSize[0] = Math::round(mSize.x());
 	mSize[1] = Math::round(mSize.y());
+
+	if (ox != mSize.x() || oy != mSize.y())
+		mSizeChanged = true;
+
 	// mSize.y() should already be rounded
-	mTexture->rasterizeAt((size_t)mSize.x(), (size_t)mSize.y());
+	//mTexture->rasterizeAt((size_t)mSize.x(), (size_t)mSize.y());
 
 	onSizeChanged();
 }
@@ -323,13 +333,23 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 	Transform4x4f trans = parentTrans * getTransform();
 	Renderer::setMatrix(trans);
 
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
+
 	if (mTexture && mOpacity > 0)
 	{
+		if (mSizeChanged)
+		{
+			mSizeChanged = false;
+			mTexture->rasterizeAt((size_t)mSize.x(), (size_t)mSize.y());
+		}
+
 		if (Settings::getInstance()->getBool("DebugImage")) 
 		{
 			Vector2f targetSizePos = (mTargetSize - mSize) * mOrigin * -1;
 			Renderer::drawRect(targetSizePos.x(), targetSizePos.y(), mTargetSize.x(), mTargetSize.y(), 0xFF000033);
-			Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000033);
+			Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000033);			
 		}
 
 		if (mTexture->isInitialized())

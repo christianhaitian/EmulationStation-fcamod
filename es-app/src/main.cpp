@@ -133,9 +133,23 @@ bool parseArgs(int argc, char* argv[])
 		}
 		else if (strcmp(argv[i], "--vsync") == 0 || strcmp(argv[i], "-vsync") == 0)
 		{			
-			bool vsync = strlen(argv[i]) <= 7 ? true : (strcmp(argv[i + 1], "on") == 0 || strcmp(argv[i + 1], "1") == 0) ? true : false;
+			bool vsync = false;
+			if (i == argc - 1)
+				vsync = true;
+			else
+			{
+				std::string arg = argv[i + 1];
+				if (arg.find("-") == 0)
+					vsync = true;
+				else
+				{
+					vsync = (strcmp(argv[i + 1], "on") == 0 || strcmp(argv[i + 1], "1") == 0) ? true : false;
+					i++; // skip vsync value
+				}
+			}
+
 			Settings::getInstance()->setBool("VSync", vsync);
-			i++; // skip vsync value
+			
 		}
 		else if (strcmp(argv[i], "--scrape") == 0)
 		{
@@ -390,6 +404,22 @@ int main(int argc, char* argv[])
 
 	window.endRenderLoadingScreen();
 
+#ifdef WIN32	
+	DWORD displayFrequency = 60;
+
+	DEVMODE lpDevMode;
+	memset(&lpDevMode, 0, sizeof(DEVMODE));
+	lpDevMode.dmSize = sizeof(DEVMODE);
+	lpDevMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFLAGS | DM_DISPLAYFREQUENCY;
+	lpDevMode.dmDriverExtra = 0;
+
+	if (EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &lpDevMode) != 0) {
+		displayFrequency = lpDevMode.dmDisplayFrequency; // default value if cannot retrieve from user settings.
+	}
+	
+	int timeLimit = (1000 / displayFrequency) - 5;	 // Margin for vsync
+#endif
+
 	int lastTime = SDL_GetTicks();
 	int ps_time = SDL_GetTicks();
 
@@ -397,10 +427,12 @@ int main(int argc, char* argv[])
 
 	while(running)
 	{
+		int processStart = SDL_GetTicks();
+
 		SDL_Event event;
 		bool ps_standby = PowerSaver::getState() && (int) SDL_GetTicks() - ps_time > PowerSaver::getMode();
 
-		if(ps_standby ? SDL_WaitEventTimeout(&event, PowerSaver::getTimeout()) : SDL_PollEvent(&event))
+		if (ps_standby ? SDL_WaitEventTimeout(&event, PowerSaver::getTimeout()) : SDL_PollEvent(&event))
 		{
 			do
 			{
@@ -423,13 +455,13 @@ int main(int argc, char* argv[])
 		{
 			// If exitting SDL_WaitEventTimeout due to timeout. Trail considering
 			// timeout as an event
-			ps_time = SDL_GetTicks();
+			ps_time = SDL_GetTicks();			
 		}
 
-		if(window.isSleeping())
+		if (window.isSleeping())
 		{
 			lastTime = SDL_GetTicks();
-			SDL_Delay(1); // this doesn't need to be accurate, we're just giving up our CPU time until something wakes us up
+			SDL_Delay(10); // this doesn't need to be accurate, we're just giving up our CPU time until something wakes us up
 			continue;
 		}
 
@@ -438,14 +470,33 @@ int main(int argc, char* argv[])
 		lastTime = curTime;
 
 		// cap deltaTime if it ever goes negative
-		if(deltaTime < 0)
+		if (deltaTime < 0)
 			deltaTime = 1000;
 
 		window.update(deltaTime);
 		window.render();
-		Renderer::swapBuffers();
-
+		
 		Log::flush();
+
+		int processDuration = SDL_GetTicks() - processStart;
+		
+#ifdef WIN32		
+		if (processDuration < timeLimit)
+			Sleep(timeLimit - processDuration);
+
+		int swapStart = SDL_GetTicks();
+#endif
+
+		Renderer::swapBuffers();				
+/*
+#ifdef WIN32	
+		int swapDuration = SDL_GetTicks() - swapStart;
+		
+		char buffer[100];
+		sprintf_s(buffer, "px=%d swap=%d, sleep=%d\n", processDuration, swapDuration, timeLimit - processDuration);
+		OutputDebugStringA(buffer);
+#endif
+*/
 	}
 
 	while(window.peekGui() != ViewController::get())

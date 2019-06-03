@@ -5,11 +5,12 @@
 
 using namespace GridFlags;
 
-ComponentGrid::ComponentGrid(Window* window, const Vector2i& gridDimensions) : GuiComponent(window), 
+ComponentGrid::ComponentGrid(Window* window, const Vector2i& gridDimensions, unsigned int separatorColor) : GuiComponent(window),
 	mGridSize(gridDimensions), mCursor(0, 0)
 {
 	assert(gridDimensions.x() > 0 && gridDimensions.y() > 0);
 
+	mSeparatorColor = separatorColor;
 	mCells.reserve(gridDimensions.x() * gridDimensions.y());
 
 	mColWidths = new float[gridDimensions.x()];
@@ -195,7 +196,7 @@ void ComponentGrid::updateSeparators()
 	}
 
 	mLineColors.reserve(mLines.size());
-	Renderer::buildGLColorArray((GLubyte*)mLineColors.data(), 0xC6C7C6FF, (unsigned int)mLines.size());
+	Renderer::buildGLColorArray((GLubyte*)mLineColors.data(), mSeparatorColor, (unsigned int)mLines.size());
 }
 
 void ComponentGrid::onSizeChanged()

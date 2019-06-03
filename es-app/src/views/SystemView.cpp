@@ -234,7 +234,6 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 	if(abs(target - posMax - startPos) < dist)
 		endPos = target - posMax; // loop around the start (max - 1 -> -1)
 
-
 	// animate mSystemInfo's opacity (fade out, wait, fade back in)
 
 	cancelAnimation(1);
@@ -270,8 +269,12 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 		mSystemInfo.setOpacity((unsigned char)(Math::lerp(0.f, 1.f, t) * 255));
 	}, goFast ? 10 : 300);
 
+// 		ViewController::get()->getGameListView(mEntries.at(mCursor).object); // fake preload
+
 	// wait 600ms to fade in
-	setAnimation(infoFadeIn, goFast ? 0 : 500, nullptr, false, 2);
+	setAnimation(infoFadeIn, goFast ? 0 : 500, [this] {
+		ViewController::get()->getGameListView(mEntries.at(mCursor).object); // fake preload
+	}, false, 2);
 
 	// no need to animate transition, we're not going anywhere (probably mEntries.size() == 1)
 	if(endPos == mCamOffset && endPos == mExtrasCamOffset)
@@ -348,6 +351,10 @@ void SystemView::render(const Transform4x4f& parentTrans)
 		return;  // nothing to render
 
 	Transform4x4f trans = getTransform() * parentTrans;
+
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
 
 	auto systemInfoZIndex = mSystemInfo.getZIndex();
 	auto minMax = std::minmax(mCarousel.zIndex, systemInfoZIndex);
@@ -488,6 +495,12 @@ void SystemView::renderCarousel(const Transform4x4f& trans)
 			break;
 	}
 
+	if (mCarousel.logoPos.x() >= 0)
+		xOff = mCarousel.logoPos.x() - (mCarousel.type == HORIZONTAL ? (mCamOffset * logoSpacing[0]) : 0);
+
+	if (mCarousel.logoPos.y() >= 0)
+		yOff = mCarousel.logoPos.y() - (mCarousel.type == VERTICAL ? (mCamOffset * logoSpacing[1]) : 0);
+
 	int center = (int)(mCamOffset);
 	int logoCount = Math::min(mCarousel.maxLogoCount, (int)mEntries.size());
 
@@ -495,7 +508,7 @@ void SystemView::renderCarousel(const Transform4x4f& trans)
 	int bufferIndex = getScrollingVelocity() + 1;
 	int bufferLeft = logoBuffersLeft[bufferIndex];
 	int bufferRight = logoBuffersRight[bufferIndex];
-	if (logoCount == 1)
+	if (logoCount == 1 && mCamOffset == 0)
 	{
 		bufferLeft = 0;
 		bufferRight = 0;
@@ -610,6 +623,7 @@ void  SystemView::getDefaultElements(void)
 	mCarousel.logoRotationOrigin.y() = 0.5;
 	mCarousel.logoSize.x() = 0.25f * mSize.x();
 	mCarousel.logoSize.y() = 0.155f * mSize.y();
+	mCarousel.logoPos = Vector2f(-1, -1);
 	mCarousel.maxLogoCount = 3;
 	mCarousel.zIndex = 40;
 
@@ -649,6 +663,8 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 		mCarousel.logoScale = elem->get<float>("logoScale");
 	if (elem->has("logoSize"))
 		mCarousel.logoSize = elem->get<Vector2f>("logoSize") * mSize;
+	if (elem->has("logoPos"))
+		mCarousel.logoPos = elem->get<Vector2f>("logoPos") * mSize;
 	if (elem->has("maxLogoCount"))
 		mCarousel.maxLogoCount = (int)Math::round(elem->get<float>("maxLogoCount"));
 	if (elem->has("zIndex"))

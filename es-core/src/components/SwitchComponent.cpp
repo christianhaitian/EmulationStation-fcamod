@@ -5,9 +5,17 @@
 
 SwitchComponent::SwitchComponent(Window* window, bool state) : GuiComponent(window), mImage(window), mState(state)
 {
+	auto menuTheme = ThemeData::getMenuTheme();
+
 	mImage.setImage(":/off.svg");
 	mImage.setResize(0, Font::get(FONT_SIZE_MEDIUM)->getLetterHeight());
+	mImage.setColorShift(menuTheme->Text.color);
+
 	mSize = mImage.getSize();
+}
+
+void SwitchComponent::setColor(unsigned int color) {
+	mImage.setColorShift(color);
 }
 
 void SwitchComponent::onSizeChanged()

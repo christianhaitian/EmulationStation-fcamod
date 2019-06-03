@@ -8,16 +8,19 @@
 GuiSettings::GuiSettings(Window* window, std::string title) : GuiComponent(window), mMenu(window, title)
 {
 	addChild(&mMenu);
-
 	mMenu.addButton(_T("BACK"), _T("BACK"), [this] { delete this; });
-
-	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
-	mMenu.setPosition((mSize.x() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.15f);
+	updatePosition();
 }
 
 GuiSettings::~GuiSettings()
 {
 	save();
+}
+
+void GuiSettings::updatePosition()
+{
+	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
+	mMenu.setPosition((mSize.x() - mMenu.getSize().x()) / 2, (mSize.y() - mMenu.getSize().y()) / 2);
 }
 
 void GuiSettings::save()

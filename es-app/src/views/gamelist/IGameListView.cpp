@@ -44,6 +44,10 @@ void IGameListView::render(const Transform4x4f& parentTrans)
 {
 	Transform4x4f trans = parentTrans * getTransform();
 
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
+
 	float scaleX = trans.r0().x();
 	float scaleY = trans.r1().y();
 

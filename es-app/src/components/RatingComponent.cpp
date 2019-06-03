@@ -114,6 +114,11 @@ void RatingComponent::render(const Transform4x4f& parentTrans)
 {
 	Transform4x4f trans = parentTrans * getTransform();
 	trans.round();
+
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
+
 	Renderer::setMatrix(trans);
 
 	glEnable(GL_TEXTURE_2D);

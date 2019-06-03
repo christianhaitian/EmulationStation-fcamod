@@ -9,7 +9,7 @@
 #include <pugixml/src/pugixml.hpp>
 #include <algorithm>
 
-std::vector<std::string> ThemeData::sSupportedViews { { "system" }, { "basic" }, { "detailed" },{ "grid" },{ "gridex" },{ "video" } };
+std::vector<std::string> ThemeData::sSupportedViews { { "system" }, { "basic" }, { "detailed" },{ "grid" },{ "gridex" },{ "video" }, { "menu" } };
 std::vector<std::string> ThemeData::sSupportedFeatures { { "video" }, { "carousel" }, { "z-index" } };
 
 std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> ThemeData::sElementMap {
@@ -37,11 +37,11 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "padding", NORMALIZED_PAIR },
 		{ "imageColor", COLOR },
 		{ "backgroundImage", PATH },
-		{ "backgroundCornerSize", NORMALIZED_PAIR },
+		{ "backgroundCornerSize", NORMALIZED_PAIR },		
 		{ "backgroundColor", COLOR },
 		{ "backgroundCenterColor", COLOR },
 		{ "backgroundEdgeColor", COLOR },
-		{ "imageSizeMode", STRING } } },		
+		{ "imageSizeMode", STRING } } },
 	{ "text", {
 		{ "pos", NORMALIZED_PAIR },
 		{ "size", NORMALIZED_PAIR },
@@ -146,10 +146,31 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "logoRotation", FLOAT },
 		{ "logoRotationOrigin", NORMALIZED_PAIR },
 		{ "logoSize", NORMALIZED_PAIR },
+		{ "logoPos", NORMALIZED_PAIR },
 		{ "logoAlignment", STRING },
 		{ "maxLogoCount", FLOAT },
-		{ "zIndex", FLOAT } } }
+		{ "zIndex", FLOAT } } },
+
+	{ "menuText", {
+		{ "fontPath", PATH },
+		{ "fontSize", FLOAT },
+		{ "separatorColor", COLOR },
+		{ "selectorColor", COLOR },
+		{ "selectedColor", COLOR },
+		{ "color", COLOR } } },
+
+	{ "menuTextSmall", {
+		{ "fontPath", PATH },
+		{ "fontSize", FLOAT },
+		{ "color", COLOR } } },
+
+	{ "menuBackground", {
+		{ "path", PATH },
+		{ "fadePath", PATH },
+		{ "color", COLOR } } }
 };
+
+std::shared_ptr<ThemeData::ThemeMenu> ThemeData::MenuTheme;
 
 #define MINIMUM_THEME_FORMAT_VERSION 3
 #define CURRENT_THEME_FORMAT_VERSION 6
@@ -158,12 +179,20 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 unsigned int getHexColor(const char* str)
 {
 	ThemeException error;
-	if(!str)
-		throw error << "Empty color";
+	if (!str)
+	{
+		//throw error << "Empty color";
+		LOG(LogWarning) << "Empty color";
+		return 0;
+	}		
 
 	size_t len = strlen(str);
-	if(len != 6 && len != 8)
-		throw error << "Invalid color (bad length, \"" << str << "\" - must be 6 or 8)";
+	if (len != 6 && len != 8)
+	{
+		//throw error << "Invalid color (bad length, \"" << str << "\" - must be 6 or 8)";
+		LOG(LogWarning) << "Invalid color (bad length, \"" << str << "\" - must be 6 or 8)";
+		return 0;
+	}
 
 	unsigned int val;
 	std::stringstream ss;
@@ -199,7 +228,7 @@ std::string resolvePlaceholders(const char* in)
 }
 
 ThemeData::ThemeData()
-{
+{	
 	mVersion = 0;
 }
 
@@ -235,16 +264,18 @@ void ThemeData::loadFile(std::string system, std::map<std::string, std::string> 
 	if(mVersion == -404)
 		throw error << "<formatVersion> tag missing!\n   It's either out of date or you need to add <formatVersion>" << CURRENT_THEME_FORMAT_VERSION << "</formatVersion> inside your <theme> tag.";
 
-	if (root.attribute("defaultView"))
-		mDefaultView = root.attribute("defaultView").as_string();
-
 	if(mVersion < MINIMUM_THEME_FORMAT_VERSION)
 		throw error << "Theme uses format version " << mVersion << ". Minimum supported version is " << MINIMUM_THEME_FORMAT_VERSION << ".";
 
+	if (root.attribute("defaultView"))
+		mDefaultView = root.attribute("defaultView").as_string();
+
 	parseVariables(root);
 	parseIncludes(root);
-	parseViews(root);
+	parseViews(root);	
 	parseFeatures(root);
+
+	MenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(*this));
 }
 
 std::string ThemeData::resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path)
@@ -256,9 +287,6 @@ std::string ThemeData::resolveSystemVariable(const std::string& systemThemeFolde
 		return path;
 
 	result.replace(start_pos, 7, systemThemeFolder);
-
-	//result.replace("$system", systemThemeFolder);
-	//boost::algorithm::replace_first(result, "$system", systemThemeFolder);
 	return result;
 }
 
@@ -339,10 +367,11 @@ void ThemeData::parseIncludes(const pugi::xml_node& root)
 		path = resolveSystemVariable(mSystemThemeFolder, path);
 
 		if (!ResourceManager::getInstance()->fileExists(path))
-			continue;
+		{
 			//throw error << "Included file \"" << relPath << "\" not found! (resolved to \"" << path << "\")";
-
-		error << "    from included file \"" << relPath << "\":\n    ";
+			LOG(LogWarning) << "Included file \"" << relPath << "\" not found! (resolved to \"" << path << "\")";
+			continue;			
+		}
 
 		mPaths.push_back(path);
 
@@ -403,13 +432,14 @@ void ThemeData::parseVariables(const pugi::xml_node& root)
 	}
 }
 
+
 void ThemeData::parseViews(const pugi::xml_node& root)
 {
 	ThemeException error;
 	error.setFiles(mPaths);
 
 	// parse views
-	for(pugi::xml_node node = root.child("view"); node; node = node.next_sibling("view"))
+	for (pugi::xml_node node = root.child("view"); node; node = node.next_sibling("view"))
 	{
 		if(!node.attribute("name"))
 			throw error << "View missing \"name\" attribute!";
@@ -440,19 +470,28 @@ void ThemeData::parseViews(const pugi::xml_node& root)
 	}
 }
 
+
 void ThemeData::parseView(const pugi::xml_node& root, ThemeView& view)
 {
 	ThemeException error;
 	error.setFiles(mPaths);
 
-	for(pugi::xml_node node = root.first_child(); node; node = node.next_sibling())
+	for (pugi::xml_node node = root.first_child(); node; node = node.next_sibling())
 	{
-		if(!node.attribute("name"))
-			throw error << "Element of type \"" << node.name() << "\" missing \"name\" attribute!";
+		if (!node.attribute("name"))
+		{
+			//throw error << "Element of type \"" << node.name() << "\" missing \"name\" attribute!";
+			LOG(LogWarning) << "Element of type \"" << node.name() << "\" missing \"name\" attribute!";
+			continue;
+		}
 
 		auto elemTypeIt = sElementMap.find(node.name());
-		if(elemTypeIt == sElementMap.cend())
-			throw error << "Unknown element of type \"" << node.name() << "\"!";
+		if (elemTypeIt == sElementMap.cend())
+		{
+			//throw error << "Unknown element of type \"" << node.name() << "\"!";
+			LOG(LogWarning) << "Unknown element of type \"" << node.name() << "\"!";
+			continue;
+		}
 
 		if (parseRegion(node))
 		{
@@ -519,8 +558,11 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 	{
 		auto typeIt = typeMap.find(node.name());
 		if (typeIt == typeMap.cend())
-			continue;
+		{
 			//throw error << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
+			LOG(LogWarning) << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
+			continue;
+		}
 
 		std::string str = resolveSystemVariable(mSystemThemeFolder, resolvePlaceholders(node.text().as_string()));
 
@@ -529,8 +571,12 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 		case NORMALIZED_PAIR:
 		{
 			size_t divider = str.find(' ');
-			if(divider == std::string::npos) 
-				throw error << "invalid normalized pair (property \"" << node.name() << "\", value \"" << str.c_str() << "\")";
+			if (divider == std::string::npos)
+			{
+				// throw error << "invalid normalized pair (property \"" << node.name() << "\", value \"" << str.c_str() << "\")";
+				LOG(LogWarning) << "invalid normalized pair (property \"" << node.name() << "\", value \"" << str.c_str() << "\")";
+				break;
+			}
 
 			std::string first = str.substr(0, divider);
 			std::string second = str.substr(divider, std::string::npos);
@@ -594,7 +640,8 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 			break;
 		}
 		default:
-			throw error << "Unknown ElementPropertyType for \"" << root.attribute("name").as_string() << "\", property " << node.name();
+			LOG(LogWarning) << "Unknown ElementPropertyType for \"" << root.attribute("name").as_string() << "\", property " << node.name();
+			break; // throw error << "Unknown ElementPropertyType for \"" << root.attribute("name").as_string() << "\", property " << node.name();
 		}
 	}
 }
@@ -727,4 +774,76 @@ std::string ThemeData::getThemeFromCurrentSet(const std::string& system)
 	}
 
 	return set->second.getThemePath(system);
+}
+
+ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
+{
+	Title.font = Font::get(FONT_SIZE_LARGE);
+	Footer.font = Font::get(FONT_SIZE_SMALL);
+	Text.font = Font::get(FONT_SIZE_MEDIUM);
+	TextSmall.font = Font::get(FONT_SIZE_SMALL);
+
+	auto elem = theme.getElement("menu", "menubg", "menuBackground");
+	if (elem)
+	{
+		if (elem->has("path") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("path")))
+			Background.path = elem->get<std::string>("path");
+
+		if (elem->has("fadePath") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("fadePath")))
+			Background.fadePath = elem->get<std::string>("fadePath");
+
+		if (elem->has("color"))
+			Background.color = elem->get<unsigned int>("color");
+	}
+
+	elem = theme.getElement("menu", "menutitle", "menuText");
+	if (elem)
+	{
+		if (elem->has("fontPath") || elem->has("fontSize"))
+			Title.font = Font::getFromTheme(elem, ThemeFlags::ALL, Font::get(FONT_SIZE_LARGE));
+		if (elem->has("color"))
+			Title.color = elem->get<unsigned int>("color");
+	}
+
+	elem = theme.getElement("menu", "menufooter", "menuText");
+
+	if (elem)
+	{
+		if (elem->has("fontPath") || elem->has("fontSize"))
+			Footer.font = Font::getFromTheme(elem, ThemeFlags::ALL, Font::get(FONT_SIZE_SMALL));
+		if (elem->has("color"))
+			Footer.color = elem->get<unsigned int>("color");
+	}
+
+	elem = theme.getElement("menu", "menutextsmall", "menuTextSmall");
+
+	if (elem)
+	{
+		if (elem->has("fontPath") || elem->has("fontSize"))
+			TextSmall.font = Font::getFromTheme(elem, ThemeFlags::ALL, Font::get(FONT_SIZE_SMALL));
+
+		if (elem->has("color"))
+			TextSmall.color = elem->get<unsigned int>("color");
+		if (elem->has("selectedColor"))
+			Text.selectedColor = elem->get<unsigned int>("selectedColor");
+		if (elem->has("selectorColor"))
+			Text.selectedColor = elem->get<unsigned int>("selectorColor");
+	}
+
+	elem = theme.getElement("menu", "menutext", "menuText");
+
+	if (elem)
+	{
+		if (elem->has("fontPath") || elem->has("fontSize"))
+			Text.font = Font::getFromTheme(elem, ThemeFlags::ALL, Font::get(FONT_SIZE_MEDIUM));
+
+		if (elem->has("color"))
+			Text.color = elem->get<unsigned int>("color");
+		if (elem->has("separatorColor"))
+			Text.separatorColor = elem->get<unsigned int>("separatorColor");
+		if (elem->has("selectedColor"))
+			Text.selectedColor = elem->get<unsigned int>("selectedColor");
+		if (elem->has("selectorColor"))
+			Text.selectorColor = elem->get<unsigned int>("selectorColor");
+	}
 }

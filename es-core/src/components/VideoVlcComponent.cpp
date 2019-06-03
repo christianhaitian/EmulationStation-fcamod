@@ -135,6 +135,7 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	float x, y;
 
 	Transform4x4f trans = parentTrans * getTransform();
+
 	GuiComponent::renderChildren(trans);
 
 	Renderer::setMatrix(trans);

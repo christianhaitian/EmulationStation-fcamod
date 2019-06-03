@@ -22,6 +22,7 @@ Font::FontFace::FontFace(ResourceData&& d, int size) : data(d)
 
 Font::FontFace::~FontFace()
 {
+
 	if(face)
 		FT_Done_Face(face);
 }
@@ -74,8 +75,11 @@ Font::Font(int size, const std::string& path) : mSize(size), mPath(path)
 	
 	mMaxGlyphHeight = 0;
 
-	if(!sLibrary)
+	if (!sLibrary)
 		initLibrary();
+
+	for (unsigned int i = 0; i < 255; i++)
+		mGlyphCacheArray[i] = NULL;
 
 	// always initialize ASCII characters
 	for (unsigned int i = 32; i < 128; i++)
@@ -88,6 +92,9 @@ Font::Font(int size, const std::string& path) : mSize(size), mPath(path)
 
 Font::~Font()
 {
+	for (auto it = mGlyphMap.cbegin(); it != mGlyphMap.cend(); it++)
+		delete it->second;
+
 	unload(ResourceManager::getInstance());
 }
 
@@ -316,10 +323,20 @@ void Font::clearFaceCache()
 
 Font::Glyph* Font::getGlyph(unsigned int id)
 {
-	// is it already loaded?
-	auto it = mGlyphMap.find(id);
-	if (it != mGlyphMap.cend())
-		return &it->second;
+	if (id < 255)
+	{
+		// FCA : optimisation : array is always really fastest than a map
+		Glyph* fastCache = mGlyphCacheArray[id];
+		if (fastCache != NULL)
+			return fastCache;
+	}
+	else
+	{
+		// is it already loaded?
+		auto it = mGlyphMap.find(id);
+		if (it != mGlyphMap.cend())
+			return it->second;
+	}
 
 	// nope, need to make a glyph
 	FT_Face face = getFaceForChar(id);
@@ -351,15 +368,13 @@ Font::Glyph* Font::getGlyph(unsigned int id)
 	}
 
 	// create glyph
-	Glyph& glyph = mGlyphMap[id];
+	Glyph* pGlyph = new Glyph();
 	
-	glyph.texture = tex;
-
-	glyph.texPos = Vector2f(cursor.x() / (float)tex->textureSize.x(), cursor.y() / (float)tex->textureSize.y());
-	glyph.texSize = Vector2f(glyphSize.x() / (float)tex->textureSize.x(), glyphSize.y() / (float)tex->textureSize.y());
-	
-	glyph.advance = Vector2f((float)g->metrics.horiAdvance / 64.0f, (float)g->metrics.vertAdvance / 64.0f);
-	glyph.bearing = Vector2f((float)g->metrics.horiBearingX / 64.0f, (float)g->metrics.horiBearingY / 64.0f);
+	pGlyph->texture = tex;
+	pGlyph->texPos = Vector2f(cursor.x() / (float)tex->textureSize.x(), cursor.y() / (float)tex->textureSize.y());
+	pGlyph->texSize = Vector2f(glyphSize.x() / (float)tex->textureSize.x(), glyphSize.y() / (float)tex->textureSize.y());	
+	pGlyph->advance = Vector2f((float)g->metrics.horiAdvance / 64.0f, (float)g->metrics.vertAdvance / 64.0f);
+	pGlyph->bearing = Vector2f((float)g->metrics.horiBearingX / 64.0f, (float)g->metrics.horiBearingY / 64.0f);
 
 	// upload glyph bitmap to texture
 	glBindTexture(GL_TEXTURE_2D, tex->textureId);
@@ -370,8 +385,12 @@ Font::Glyph* Font::getGlyph(unsigned int id)
 	if (id != 61446 && glyphSize.y() > mMaxGlyphHeight)
 		mMaxGlyphHeight = glyphSize.y();
 
-	// done
-	return &glyph;
+	mGlyphMap[id] = pGlyph;
+
+	if (id < 255)
+		mGlyphCacheArray[id] = pGlyph;
+
+	return pGlyph;
 }
 
 // completely recreate the texture data for all textures based on mGlyphs information
@@ -379,9 +398,7 @@ void Font::rebuildTextures()
 {
 	// recreate OpenGL textures
 	for(auto it = mTextures.begin(); it != mTextures.end(); it++)
-	{
 		it->initTexture();
-	}
 
 	// reupload the texture data
 	for(auto it = mGlyphMap.cbegin(); it != mGlyphMap.cend(); it++)
@@ -392,11 +409,11 @@ void Font::rebuildTextures()
 		// load the glyph bitmap through FT
 		FT_Load_Char(face, it->first, FT_LOAD_RENDER);
 
-		FontTexture* tex = it->second.texture;
+		FontTexture* tex = it->second->texture;
 		
 		// find the position/size
-		Vector2i cursor((int)(it->second.texPos.x() * tex->textureSize.x()), (int)(it->second.texPos.y() * tex->textureSize.y()));
-		Vector2i glyphSize((int)(it->second.texSize.x() * tex->textureSize.x()), (int)(it->second.texSize.y() * tex->textureSize.y()));
+		Vector2i cursor((int)(it->second->texPos.x() * tex->textureSize.x()), (int)(it->second->texPos.y() * tex->textureSize.y()));
+		Vector2i glyphSize((int)(it->second->texSize.x() * tex->textureSize.x()), (int)(it->second->texSize.y() * tex->textureSize.y()));
 		
 		// upload to texture
 		glBindTexture(GL_TEXTURE_2D, tex->textureId);
@@ -708,18 +725,26 @@ void TextCache::setColor(unsigned int color)
 std::shared_ptr<Font> Font::getFromTheme(const ThemeData::ThemeElement* elem, unsigned int properties, const std::shared_ptr<Font>& orig)
 {
 	using namespace ThemeFlags;
-	if(!(properties & FONT_PATH) && !(properties & FONT_SIZE))
+	if (!(properties & FONT_PATH) && !(properties & FONT_SIZE))
 		return orig;
-	
+
 	std::shared_ptr<Font> font;
 	int size = (orig ? orig->mSize : FONT_SIZE_MEDIUM);
 	std::string path = (orig ? orig->mPath : getDefaultPath());
 
 	float sh = (float)Renderer::getScreenHeight();
-	if(properties & FONT_SIZE && elem->has("fontSize")) 
-		size = (int)(sh * elem->get<float>("fontSize"));
-	if(properties & FONT_PATH && elem->has("fontPath"))
-		path = elem->get<std::string>("fontPath");
+	if (properties & FONT_SIZE && elem->has("fontSize"))
+	{
+		if ((int)(sh * elem->get<float>("fontSize")) > 0)
+			size = (int)(sh * elem->get<float>("fontSize"));
+	}
+
+	if (properties & FONT_PATH && elem->has("fontPath"))
+	{
+		std::string tmppath = elem->get<std::string>("fontPath");
+		if (ResourceManager::getInstance()->fileExists(tmppath))
+			path = tmppath;
+	}
 
 	return get(size, path);
 }

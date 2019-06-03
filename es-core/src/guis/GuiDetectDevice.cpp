@@ -14,6 +14,12 @@
 GuiDetectDevice::GuiDetectDevice(Window* window, bool firstRun, const std::function<void()>& doneCallback) : GuiComponent(window), mFirstRun(firstRun), 
 	mBackground(window, ":/frame.png"), mGrid(window, Vector2i(1, 5))
 {
+	auto theme = ThemeData::getMenuTheme();
+	mBackground.setImagePath(theme->Background.path); // ":/frame.png"
+	mBackground.setCenterColor(theme->Background.color);
+	mBackground.setEdgeColor(theme->Background.color);
+	mGrid.setSeparatorColor(theme->Text.separatorColor);
+
 	mHoldingConfig = NULL;
 	mHoldTime = 0;
 	mDoneCallback = doneCallback;
@@ -23,9 +29,10 @@ GuiDetectDevice::GuiDetectDevice(Window* window, bool firstRun, const std::funct
 	
 	// title
 	mTitle = std::make_shared<TextComponent>(mWindow, firstRun ? "WELCOME" : "CONFIGURE INPUT", 
-		Font::get(FONT_SIZE_LARGE), 0x555555FF, ALIGN_CENTER);
-	mGrid.setEntry(mTitle, Vector2i(0, 0), false, true, Vector2i(1, 1), GridFlags::BORDER_BOTTOM);
+		ThemeData::getMenuTheme()->Title.font, ThemeData::getMenuTheme()->Title.color, ALIGN_CENTER);
 
+	mGrid.setEntry(mTitle, Vector2i(0, 0), false, true, Vector2i(1, 1), GridFlags::BORDER_BOTTOM);
+	
 	// device info
 	std::stringstream deviceInfo;
 	int numDevices = InputManager::getInstance()->getNumJoysticks();
@@ -34,15 +41,15 @@ GuiDetectDevice::GuiDetectDevice(Window* window, bool firstRun, const std::funct
 		deviceInfo << numDevices << " GAMEPAD" << (numDevices > 1 ? "S" : "") << " DETECTED";
 	else
 		deviceInfo << "NO GAMEPADS DETECTED";
-	mDeviceInfo = std::make_shared<TextComponent>(mWindow, deviceInfo.str(), Font::get(FONT_SIZE_SMALL), 0x999999FF, ALIGN_CENTER);
+	mDeviceInfo = std::make_shared<TextComponent>(mWindow, deviceInfo.str(), ThemeData::getMenuTheme()->TextSmall.font, 0x999999FF, ALIGN_CENTER);
 	mGrid.setEntry(mDeviceInfo, Vector2i(0, 1), false, true);
 
 	// message
-	mMsg1 = std::make_shared<TextComponent>(mWindow, "HOLD A BUTTON ON YOUR DEVICE TO CONFIGURE IT.", Font::get(FONT_SIZE_SMALL), 0x777777FF, ALIGN_CENTER);
+	mMsg1 = std::make_shared<TextComponent>(mWindow, "HOLD A BUTTON ON YOUR DEVICE TO CONFIGURE IT.", ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color, ALIGN_CENTER);
 	mGrid.setEntry(mMsg1, Vector2i(0, 2), false, true);
 
 	const char* msg2str = firstRun ? "PRESS F4 TO QUIT AT ANY TIME." : "PRESS ESC TO CANCEL.";
-	mMsg2 = std::make_shared<TextComponent>(mWindow, msg2str, Font::get(FONT_SIZE_SMALL), 0x777777FF, ALIGN_CENTER);
+	mMsg2 = std::make_shared<TextComponent>(mWindow, msg2str, ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color, ALIGN_CENTER);
 	mGrid.setEntry(mMsg2, Vector2i(0, 3), false, true);
 
 	// currently held device

@@ -135,7 +135,7 @@ void ComponentList::updateCameraOffset()
 {
 	// move the camera to scroll
 	const float totalHeight = getTotalRowHeight();
-	if(totalHeight > mSize.y())
+	if (totalHeight > mSize.y() && mCursor < mEntries.size())
 	{
 		float target = mSelectorBarOffset + getRowHeight(mEntries.at(mCursor).data)/2 - (mSize.y() / 2);
 
@@ -162,10 +162,17 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 	if(!size())
 		return;
 
+	auto menuTheme = ThemeData::getMenuTheme();
+	unsigned int selectorColor = menuTheme->Text.selectorColor;
+	unsigned int selectedColor = menuTheme->Text.selectedColor;
+	unsigned int bgColor = menuTheme->Background.color;
+	unsigned int separatorColor = menuTheme->Text.separatorColor;
+	unsigned int textColor = menuTheme->Text.color;
+
 	Transform4x4f trans = parentTrans * getTransform();
 	trans.round();
 
-	// clip everything to be inside our bounds
+	// clip everything to be inside our boundsz
 	Vector3f dim(mSize.x(), mSize.y(), 0);
 	dim = trans * dim - trans.translation();
 	Renderer::pushClipRect(Vector2i((int)trans.translation().x(), (int)trans.translation().y()),
@@ -183,10 +190,11 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 		drawAll = !mFocused || i != (unsigned int)mCursor;
 		for(auto it = entry.data.elements.cbegin(); it != entry.data.elements.cend(); it++)
 		{
-			if(drawAll || it->invert_when_selected)
+			if (drawAll || it->invert_when_selected)
 			{
+				it->component->setColor(textColor);
 				it->component->render(trans);
-			}else{
+			} else {
 				drawAfterCursor.push_back(it->component.get());
 			}
 		}
@@ -196,7 +204,7 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 	Renderer::setMatrix(trans);
 
 	// draw selector bar
-	if(mFocused)
+	if (mFocused)
 	{
 		// inversion: src * (1 - dst) + dst * 0 = where src = 1
 		// need a function that goes roughly 0x777777 -> 0xFFFFFF
@@ -204,20 +212,33 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 		// (1 - dst) + 0x77
 
 		const float selectedRowHeight = getRowHeight(mEntries.at(mCursor).data);
-		Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, 0xFFFFFFFF,
-			GL_ONE_MINUS_DST_COLOR, GL_ZERO);
-		Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, 0x777777FF,
-			GL_ONE, GL_ONE);
-
+		
+		if ((selectorColor != bgColor) && ((selectorColor & 0xFF) != 0x00)) {
+			//Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+			Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+			Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, selectorColor, GL_ONE, GL_ONE);
+		}
+		
+	//	Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, 0xFFFFFFFF, GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+	//	Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, 0x777777FF, GL_ONE, GL_ONE);
+		
 		// hack to draw 2px dark on left/right of the bar
-		Renderer::drawRect(0.0f, mSelectorBarOffset, 2.0f, selectedRowHeight, 0x878787FF);
-		Renderer::drawRect(mSize.x() - 2.0f, mSelectorBarOffset, 2.0f, selectedRowHeight, 0x878787FF);
+		//Renderer::drawRect(0.0f, mSelectorBarOffset, 2.0f, selectedRowHeight, 0x878787FF);
+		//Renderer::drawRect(mSize.x() - 2.0f, mSelectorBarOffset, 2.0f, selectedRowHeight, 0x878787FF);
 
+		
+		auto& entry = mEntries.at(mCursor);
+		for (auto& element : entry.data.elements)
+		{
+			element.component->setColor(selectedColor);
+			drawAfterCursor.push_back(element.component.get());
+		}
+		
 		for(auto it = drawAfterCursor.cbegin(); it != drawAfterCursor.cend(); it++)
 			(*it)->render(trans);
 
 		// reset matrix if one of these components changed it
-		if(drawAfterCursor.size())
+		if (drawAfterCursor.size())
 			Renderer::setMatrix(trans);
 	}
 
@@ -225,10 +246,10 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 	float y = 0;
 	for(unsigned int i = 0; i < mEntries.size(); i++)
 	{
-		Renderer::drawRect(0.0f, y, mSize.x(), 1.0f, 0xC6C7C6FF);
+		Renderer::drawRect(0.0f, y, mSize.x(), 1.0f, separatorColor);
 		y += getRowHeight(mEntries.at(i).data);
 	}
-	Renderer::drawRect(0.0f, y, mSize.x(), 1.0f, 0xC6C7C6FF);
+	Renderer::drawRect(0.0f, y, mSize.x(), 1.0f, separatorColor);
 
 	Renderer::popClipRect();
 }

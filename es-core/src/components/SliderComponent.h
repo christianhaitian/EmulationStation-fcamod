@@ -25,6 +25,7 @@ public:
 	void onSizeChanged() override;
 	
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
+	virtual void setColor(unsigned int color);
 
 private:
 	void onValueChanged();
@@ -40,6 +41,8 @@ private:
 	std::string mSuffix;
 	std::shared_ptr<Font> mFont;
 	std::shared_ptr<TextCache> mValueCache;
+
+	unsigned int mColor;
 };
 
 #endif // ES_CORE_COMPONENTS_SLIDER_COMPONENT_H
