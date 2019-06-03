@@ -11,6 +11,8 @@ public:
 	GuiSettings(Window* window, std::string title);
 	virtual ~GuiSettings(); // just calls save();
 
+
+	void updatePosition();
 	void save();
 	inline void addRow(const ComponentListRow& row) { mMenu.addRow(row); };
 	inline void addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp) { mMenu.addWithLabel(label, comp); };

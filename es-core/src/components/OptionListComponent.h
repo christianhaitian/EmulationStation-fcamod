@@ -39,7 +39,10 @@ private:
 		OptionListPopup(Window* window, OptionListComponent<T>* parent, const std::string& title) : GuiComponent(window),
 			mMenu(window, title.c_str()), mParent(parent)
 		{
-			auto font = Font::get(FONT_SIZE_MEDIUM);
+			auto menuTheme = ThemeData::getMenuTheme();
+			auto font = menuTheme->Text.font;
+			auto color = menuTheme->Text.color;
+			
 			ComponentListRow row;
 
 			// for select all/none
@@ -48,7 +51,7 @@ private:
 			for(auto it = mParent->mEntries.begin(); it != mParent->mEntries.end(); it++)
 			{
 				row.elements.clear();
-				row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(it->name), font, 0x777777FF), true);
+				row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(it->name), font, color), true);
 
 				OptionListData& e = *it;
 
@@ -87,11 +90,11 @@ private:
 				mMenu.addRow(row, (!mParent->mMultiSelect && it->selected));
 			}
 
-			mMenu.addButton(_T("BACK"), "accept", [this] { delete this; });
+			mMenu.addButton(_T("BACK"), _T("accept"), [this] { delete this; });
 
 			if(mParent->mMultiSelect)
 			{
-				mMenu.addButton("SELECT ALL", "select all", [this, checkboxes] {
+				mMenu.addButton(_T("SELECT ALL"), _T("SELECT ALL"), [this, checkboxes] {
 					for(unsigned int i = 0; i < mParent->mEntries.size(); i++)
 					{
 						mParent->mEntries.at(i).selected = true;
@@ -100,7 +103,7 @@ private:
 					mParent->onSelectedChanged();
 				});
 
-				mMenu.addButton("SELECT NONE", "select none", [this, checkboxes] {
+				mMenu.addButton(_T("SELECT NONE"), _T("SELECT NONE"), [this, checkboxes] {
 					for(unsigned int i = 0; i < mParent->mEntries.size(); i++)
 					{
 						mParent->mEntries.at(i).selected = false;
@@ -110,7 +113,10 @@ private:
 				});
 			}
 
-			mMenu.setPosition((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.15f);
+			mMenu.setPosition(
+				(Renderer::getScreenWidth() - mMenu.getSize().x()) / 2,
+				(Renderer::getScreenHeight() - mMenu.getSize().y()) / 2);
+				//Renderer::getScreenHeight() * 0.15f);
 			addChild(&mMenu);
 		}
 
@@ -137,29 +143,42 @@ public:
 	OptionListComponent(Window* window, const std::string& name, bool multiSelect = false) : GuiComponent(window), mMultiSelect(multiSelect), mName(name),
 		 mText(window), mLeftArrow(window), mRightArrow(window)
 	{
-		auto font = Font::get(FONT_SIZE_MEDIUM, FONT_PATH_LIGHT);
-		mText.setFont(font);
-		mText.setColor(0x777777FF);
+		auto theme = ThemeData::getMenuTheme();
+		
+	//	auto font = Font::get(FONT_SIZE_MEDIUM, FONT_PATH_LIGHT);
+		mText.setFont(theme->Text.font); // font
+		mText.setColor(theme->Text.color); // 0x777777FF
 		mText.setHorizontalAlignment(ALIGN_CENTER);
 		addChild(&mText);
 
 		mLeftArrow.setResize(0, mText.getFont()->getLetterHeight());
 		mRightArrow.setResize(0, mText.getFont()->getLetterHeight());
 
-		if(mMultiSelect)
+		if (mMultiSelect)
 		{
 			mRightArrow.setImage(":/arrow.svg");
+			mRightArrow.setColorShift(theme->Text.color);
 			addChild(&mRightArrow);
-		}else{
+		} else {
 			mLeftArrow.setImage(":/option_arrow.svg");
+			mLeftArrow.setColorShift(theme->Text.color);
 			mLeftArrow.setFlipX(true);
 			addChild(&mLeftArrow);
 
 			mRightArrow.setImage(":/option_arrow.svg");
+			mLeftArrow.setColorShift(theme->Text.color);
 			addChild(&mRightArrow);
 		}
 
-		setSize(mLeftArrow.getSize().x() + mRightArrow.getSize().x(), font->getHeight());
+		setSize(mLeftArrow.getSize().x() + mRightArrow.getSize().x(), theme->Text.font->getHeight());
+	}
+
+
+	virtual void setColor(unsigned int color)
+	{
+		mText.setColor(color);
+		mLeftArrow.setColorShift(color);
+		mRightArrow.setColorShift(color);		
 	}
 
 	// handles positioning/resizing of text and arrows

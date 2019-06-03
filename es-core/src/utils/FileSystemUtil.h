@@ -9,9 +9,19 @@ namespace Utils
 {
 	namespace FileSystem
 	{
-		typedef std::list<std::string> stringList;
+		struct FileInfo
+		{
+		public:
+			std::string path;
+			bool readOnly;
+			bool directory;
+		};
 
-		stringList  getDirContent      (const std::string& _path, const bool _recursive = false);
+		typedef std::list<std::string> stringList;
+		typedef std::list<FileInfo> fileList;
+
+		fileList  getDirInfo(const std::string& _path, const bool _recursive = false);
+		stringList  getDirContent      (const std::string& _path, const bool _recursive = false, const bool includeHidden = true);
 		stringList  getPathList        (const std::string& _path);
 		std::string getHomePath        ();
 		std::string getCWDPath         ();
@@ -39,6 +49,8 @@ namespace Utils
 		bool        isHidden           (const std::string& _path);
 
 	} // FileSystem::
+
+
 
 } // Utils::
 

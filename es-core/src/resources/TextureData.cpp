@@ -98,8 +98,10 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 			return true;
 	}
 
-	std::vector<unsigned char> imageRGBA = ImageIO::loadFromMemoryRGBA32((const unsigned char*)(fileData), length, width, height);
-	if (imageRGBA.size() == 0)
+	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height);
+
+//	std::vector<unsigned char> imageRGBA = ImageIO::loadFromMemoryRGBA32((const unsigned char*)(fileData), length, width, height);
+	if (imageRGBA == NULL)
 	{
 		LOG(LogError) << "Could not initialize texture from memory, invalid data!  (file path: " << mPath << ", data ptr: " << (size_t)fileData << ", reported size: " << length << ")";
 		return false;
@@ -109,7 +111,7 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 	mSourceHeight = (float) height;
 	mScalable = false;
 
-	return initFromRGBA(imageRGBA.data(), width, height);
+	return initFromRGBAEx(imageRGBA, width, height);
 }
 
 bool TextureData::initFromRGBA(const unsigned char* dataRGBA, size_t width, size_t height)
@@ -122,6 +124,20 @@ bool TextureData::initFromRGBA(const unsigned char* dataRGBA, size_t width, size
 	// Take a copy
 	mDataRGBA = new unsigned char[width * height * 4];
 	memcpy(mDataRGBA, dataRGBA, width * height * 4);
+	mWidth = width;
+	mHeight = height;
+	return true;
+}
+
+bool TextureData::initFromRGBAEx(unsigned char* dataRGBA, size_t width, size_t height)
+{
+	// If already initialised then don't read again
+	std::unique_lock<std::mutex> lock(mMutex);
+	if (mDataRGBA)
+		return true;
+
+	// Take a copy
+	mDataRGBA = dataRGBA;
 	mWidth = width;
 	mHeight = height;
 	return true;

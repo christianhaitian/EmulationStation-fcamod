@@ -41,16 +41,8 @@ namespace FileSorts
 	//returns if file1 should come before file2
 	bool compareName(const FileData* file1, const FileData* file2)
 	{
-		// we compare the actual metadata name, as collection files have the system appended which messes up the order
-		std::string name1 = Utils::String::toUpper(file1->metadata.get("sortname"));
-		std::string name2 = Utils::String::toUpper(file2->metadata.get("sortname"));
-		if(name1.empty()){
-			name1 = Utils::String::toUpper(file1->metadata.get("name"));
-		}
-		if(name2.empty()){
-			name2 = Utils::String::toUpper(file2->metadata.get("name"));
-		}
-		return name1.compare(name2) < 0;
+		std::string name1 = file1->metadata.getSortName();
+		return name1.compare(file2->metadata.getSortName()) < 0;	
 	}
 
 	bool compareRating(const FileData* file1, const FileData* file2)

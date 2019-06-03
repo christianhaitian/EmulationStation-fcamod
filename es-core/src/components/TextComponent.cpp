@@ -95,15 +95,22 @@ void TextComponent::setUppercase(bool uppercase)
 
 void TextComponent::render(const Transform4x4f& parentTrans)
 {
+	if (mColorOpacity == 0)
+		return;
+
 	Transform4x4f trans = parentTrans * getTransform();
+
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
 
 	if (mRenderBackground)
 	{
 		Renderer::setMatrix(trans);
 		Renderer::drawRect(0.f, 0.f, mSize.x(), mSize.y(), mBgColor);
 	}
-
-	if(mTextCache)
+	
+	if (mTextCache)
 	{
 		const Vector2f& textSize = mTextCache->metrics.size;
 		float yOff = 0;
@@ -116,7 +123,7 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 				yOff = (getSize().y() - textSize.y());
 				break;
 			case ALIGN_CENTER:
-				yOff = (getSize().y() - textSize.y()) / 2.0f;
+				yOff = (int) (getSize().y() - textSize.y()) / 2.0f;
 				break;
 		}
 		Vector3f off(0, yOff, 0);
@@ -148,6 +155,7 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 				break;
 			}
 		}
+
 		mFont->renderTextCache(mTextCache.get());
 	}
 }

@@ -11,6 +11,13 @@ ButtonComponent::ButtonComponent(Window* window, const std::string& text, const 
 	mEnabled(true), 
 	mTextColorFocused(0xFFFFFFFF), mTextColorUnfocused(0x777777FF)
 {
+	auto menuTheme = ThemeData::getMenuTheme();
+
+	mFont = menuTheme->Text.font;
+	mTextColorUnfocused = menuTheme->Text.color;
+	mTextColorFocused = menuTheme->Text.selectedColor;	
+	mColor = menuTheme->Text.color;
+	
 	setPressedFunc(func);
 	setText(text, helpText);
 	updateImage();
@@ -71,6 +78,7 @@ void ButtonComponent::setEnabled(bool enabled)
 
 void ButtonComponent::updateImage()
 {
+	/*
 	if(!mEnabled || !mPressedFunc)
 	{
 		mBox.setImagePath(":/button_filled.png");
@@ -78,9 +86,9 @@ void ButtonComponent::updateImage()
 		mBox.setEdgeColor(0x770000FF);
 		return;
 	}
-
-	mBox.setCenterColor(0xFFFFFFFF);
-	mBox.setEdgeColor(0xFFFFFFFF);
+	*/
+	mBox.setCenterColor(mColor);
+	mBox.setEdgeColor(mColor);	
 	mBox.setImagePath(mFocused ? ":/button_filled.png" : ":/button.png");
 }
 

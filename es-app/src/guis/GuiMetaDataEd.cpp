@@ -30,14 +30,19 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 	mMetaData(md),
 	mSavedCallback(saveCallback), mDeleteFunc(deleteFunc)
 {
+	auto theme = ThemeData::getMenuTheme();
+	mBackground.setImagePath(theme->Background.path); // ":/frame.png"
+	mBackground.setCenterColor(theme->Background.color);
+	mBackground.setEdgeColor(theme->Background.color);
+
 	addChild(&mBackground);
 	addChild(&mGrid);
 
 	mHeaderGrid = std::make_shared<ComponentGrid>(mWindow, Vector2i(1, 5));
 
-	mTitle = std::make_shared<TextComponent>(mWindow, _T("EDIT METADATA"), Font::get(FONT_SIZE_LARGE), 0x555555FF, ALIGN_CENTER);
+	mTitle = std::make_shared<TextComponent>(mWindow, _T("EDIT METADATA"), theme->Title.font, theme->Title.color, ALIGN_CENTER);
 	mSubtitle = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(Utils::FileSystem::getFileName(scraperParams.game->getPath())),
-		Font::get(FONT_SIZE_SMALL), 0x777777FF, ALIGN_CENTER);
+		theme->TextSmall.font, theme->TextSmall.color, ALIGN_CENTER);
 
 	mHeaderGrid->setEntry(mTitle, Vector2i(0, 1), false, true);
 	mHeaderGrid->setEntry(mSubtitle, Vector2i(0, 3), false, true);
@@ -60,11 +65,13 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 		// don't add statistics
 		if(iter->isStatistic)
 			continue;
-
+		
+#if defined(_WIN32)
 		if (iter->displayName == "sortname" || iter->displayName == "image" || iter->displayName == "video" || iter->displayName == "marquee" || 
 			iter->displayName == "thumbnail" || iter->displayName == "kidgame" || iter->displayName == "description" || iter->displayName == "release date" || 
 			iter->displayName == "genre" || iter->displayName == "publisher" || iter->displayName == "developer" || iter->displayName == "players")
 			continue;
+#endif
 
 		// create ed and add it (and any related components) to mMenu
 		// ed's value will be set below
@@ -72,22 +79,18 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 
 		if (iter->displayName == "emulator")
 		{
-		//	if (file->getSystemEnvData()->mEmulators.size() <= 1)
-		//		continue;
-
 			std::string defaultEmul = system->getSystemEnvData()->getDefaultEmulator();
-
 			std::string currentEmul = file->getEmulator();
 
 			if (defaultEmul.length() == 0)
-				emul_choice->add(_T("DEFAULT"), "", false);
+				emul_choice->add(_T("DEFAULT"), "", true);
 			else
 				emul_choice->add(_T("DEFAULT") + " (" + defaultEmul + ")", "", currentEmul.length() == 0);
 
 			for (auto core : file->getSystemEnvData()->mEmulators)
 				emul_choice->add(core.mName, core.mName, core.mName == currentEmul);
 
-			row.addElement(std::make_shared<TextComponent>(mWindow, _T("EMULATOR"), Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+			row.addElement(std::make_shared<TextComponent>(mWindow, _T("EMULATOR"), theme->Text.font, theme->Text.color), true);
 			row.addElement(emul_choice, false);
 
 			mList->addRow(row);
@@ -134,7 +137,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 		//	core_choice->add(_T("DEFAULT"), "", true);
 			core_choice->setTag(iter->key);
 
-			row.addElement(std::make_shared<TextComponent>(mWindow, "CORE", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+			row.addElement(std::make_shared<TextComponent>(mWindow, "CORE", theme->Text.font, theme->Text.color), true);
 			row.addElement(core_choice, false);
 
 			mList->addRow(row);
@@ -147,7 +150,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 			continue;
 		}
 		
-		auto lbl = std::make_shared<TextComponent>(mWindow, _L(Utils::String::toUpper(iter->displayName)), Font::get(FONT_SIZE_MEDIUM), 0x777777FF);
+		auto lbl = std::make_shared<TextComponent>(mWindow, _L(Utils::String::toUpper(iter->displayName)), theme->Text.font, theme->Text.color);
 		row.addElement(lbl, true); // label
 
 		switch (iter->type)
@@ -198,7 +201,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 			default:
 			{
 				// MD_STRING
-				ed = std::make_shared<TextComponent>(window, "", Font::get(FONT_SIZE_SMALL, FONT_PATH_LIGHT), 0x777777FF, ALIGN_RIGHT);
+				ed = std::make_shared<TextComponent>(window, "", theme->Text.font, theme->Text.color, ALIGN_RIGHT);
 				row.addElement(ed, true);
 
 				auto spacer = std::make_shared<GuiComponent>(mWindow);

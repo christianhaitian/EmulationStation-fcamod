@@ -65,6 +65,8 @@ public:
     void setSize(float w, float h);
     virtual void onSizeChanged() {};
 
+	virtual void setColor(unsigned int color) {};
+
 	virtual Vector2f getRotationSize() const { return getSize(); };
 
 	float getRotation() const;

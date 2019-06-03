@@ -13,6 +13,8 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 	mSelectedZoomPercent = 1.0f;
 	mAnimPosition = Vector3f(0, 0);
 
+	mLabelMerged = false;
+
 	mDefaultProperties.mSize = getDefaultTileSize();
 	mDefaultProperties.mPadding = Vector2f(16.0f, 16.0f);
 	mDefaultProperties.mImageColor = 0xFFFFFFDD; // 0xAAAAAABB;
@@ -57,11 +59,20 @@ void GridTileComponent::resize()
 	setSize(currentProperties.mSize);
 
 	float height = currentProperties.mSize.y() * mLabelSize.y();
-	if (!mLabelVisible)
-		height = 0;
 
-	mLabel.setPosition(0, mSize.y() - height);
-	mLabel.setSize(currentProperties.mSize.x(), height);
+	if (mLabelMerged)
+	{
+		mLabel.setPosition(currentProperties.mPadding.x(), mSize.y() - height - currentProperties.mPadding.y());
+		mLabel.setSize(currentProperties.mSize.x() - 2 * currentProperties.mPadding.x(), height);
+	}
+	else
+	{
+		mLabel.setPosition(0, mSize.y() - height);
+		mLabel.setSize(currentProperties.mSize.x(), height);
+	}
+
+	if (!mLabelVisible || mLabelMerged)
+		height = 0;
 
 	if (mLabelSize.x() == 0)
 		height = 0;
@@ -90,7 +101,8 @@ void GridTileComponent::resize()
 	}
 	else
 		mBackground.setPosition(0, 0);
-	
+
+
 	if (mImage != NULL)
 	{
 		mImage->setOrigin(0.5f, 0.5f);
@@ -106,8 +118,11 @@ void GridTileComponent::resize()
 
 
 
+	if (!mLabelMerged && currentProperties.mImageSizeMode == "minSize")
+		mBackground.setSize(currentProperties.mSize.x(), currentProperties.mSize.y() - bottomPadding);
+	else
+		mBackground.setSize(currentProperties.mSize);
 
-	mBackground.setSize(currentProperties.mSize);
 	mBackground.setCornerSize(currentProperties.mBackgroundCornerSize);
 }
 
@@ -118,14 +133,26 @@ void GridTileComponent::render(const Transform4x4f& parentTrans)
 
 	Transform4x4f trans = getTransform() * parentTrans;
 
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
+
 	//Renderer::setMatrix(trans);
 	//Renderer::drawRect(0.f, 0.f, mSize.x(), mSize.y(), 0xFF0000FF);	
-
-	mBackground.render(trans);
+	
+	if (mBackground.getCornerSize().x() == 0)
+	{
+		
+		Renderer::setMatrix(trans);
+		Renderer::drawRect(mBackground.getPosition().x(), mBackground.getPosition().y(), mBackground.getSize().x(), mBackground.getSize().y(), mBackground.getCenterColor());
+		Renderer::setMatrix(parentTrans);
+	}
+	else
+		mBackground.render(trans);
 
 	if (mImage != NULL)
 		mImage->render(trans);
-
+	
 	if (mLabelVisible)
 		mLabel.render(trans);
 }
@@ -155,7 +182,7 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 	// Apply theme to the default gridtile
 	const ThemeData::ThemeElement* elem = theme->getElement(view, "default", "gridtile");
 	if (elem)
-	{
+	{		
 		if (elem->has("size"))
 			mDefaultProperties.mSize = elem->get<Vector2f>("size") * screen;
 
@@ -232,7 +259,10 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 	if (elem != NULL)
 	{
 		if (elem && elem->has("size"))
+		{
 			mLabelSize = elem->get<Vector2f>("size");
+			mLabelMerged = mLabelSize.x() == 0;
+		}
 
 		mLabelVisible = true;
 		mLabel.applyTheme(theme, view, element, properties);
@@ -264,7 +294,7 @@ void GridTileComponent::setImage(const std::string& path, std::string name)
 {
 	if (mCurrentPath != path)
 	{
-		mCurrentPath = path;
+		mCurrentPath = path;		
 		mImage->setImage(path);
 	}
 			

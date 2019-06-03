@@ -10,16 +10,20 @@
 MenuComponent::MenuComponent(Window* window, std::string title, const std::shared_ptr<Font>& titleFont) : GuiComponent(window),
 	mBackground(window), mGrid(window, Vector2i(1, 3))
 {
+	auto theme = ThemeData::getMenuTheme();
+
 	addChild(&mBackground);
 	addChild(&mGrid);
-
-	mBackground.setImagePath(":/frame.png");
+	
+	mBackground.setImagePath(theme->Background.path); // ":/frame.png"
+	mBackground.setCenterColor(theme->Background.color);
+	mBackground.setEdgeColor(theme->Background.color);
 
 	// set up title
 	mTitle = std::make_shared<TextComponent>(mWindow);
 	mTitle->setHorizontalAlignment(ALIGN_CENTER);
-	mTitle->setColor(0x555555FF);
-	setTitle(title.c_str(), titleFont);
+	mTitle->setColor(theme->Title.color); // 0x555555FF
+	setTitle(title.c_str(), theme->Title.font); //  titleFont
 	mGrid.setEntry(mTitle, Vector2i(0, 0), false);
 
 	// set up list which will never change (externally, anyway)
@@ -32,6 +36,16 @@ MenuComponent::MenuComponent(Window* window, std::string title, const std::share
 	mGrid.resetCursor();
 }
 
+void MenuComponent::addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp, bool setCursorHere, bool invert_when_selected)
+{
+	auto theme = ThemeData::getMenuTheme();
+	
+	ComponentListRow row;
+	row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), theme->Text.font, theme->Text.color), true);
+	row.addElement(comp, false, invert_when_selected);
+	addRow(row, setCursorHere);
+}
+
 void MenuComponent::setTitle(const char* title, const std::shared_ptr<Font>& font)
 {
 	mTitle->setText(Utils::String::toUpper(title));
@@ -40,7 +54,9 @@ void MenuComponent::setTitle(const char* title, const std::shared_ptr<Font>& fon
 
 float MenuComponent::getButtonGridHeight() const
 {
-	return (mButtonGrid ? mButtonGrid->getSize().y() : Font::get(FONT_SIZE_MEDIUM)->getHeight() + BUTTON_GRID_VERT_PADDING);
+	auto menuTheme = ThemeData::getMenuTheme();
+	return (mButtonGrid ? mButtonGrid->getSize().y() : menuTheme->Text.font->getHeight() + BUTTON_GRID_VERT_PADDING);
+	//return (mButtonGrid ? mButtonGrid->getSize().y() : Font::get(FONT_SIZE_MEDIUM)->getHeight() + BUTTON_GRID_VERT_PADDING);
 }
 
 void MenuComponent::updateSize()
@@ -126,8 +142,12 @@ std::shared_ptr<ComponentGrid> makeButtonGrid(Window* window, const std::vector<
 
 std::shared_ptr<ImageComponent> makeArrow(Window* window)
 {
+	auto menuTheme = ThemeData::getMenuTheme();
+
 	auto bracket = std::make_shared<ImageComponent>(window);
 	bracket->setImage(":/arrow.svg");
-	bracket->setResize(0, Math::round(Font::get(FONT_SIZE_MEDIUM)->getLetterHeight()));
+	bracket->setColorShift(menuTheme->Text.color);
+	bracket->setResize(0, round(menuTheme->Text.font->getLetterHeight()));
+	//bracket->setResize(0, Math::round(Font::get(FONT_SIZE_MEDIUM)->getLetterHeight()));
 	return bracket;
 }

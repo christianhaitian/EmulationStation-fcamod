@@ -20,11 +20,10 @@ FileData::FileData(FileType type, const std::string& path, SystemEnvironmentData
 	: mType(type), mPath(path), mSystem(system), mEnvData(envData), mSourceFileData(NULL), mParent(NULL), metadata(type == GAME ? GAME_METADATA : FOLDER_METADATA) // metadata is REALLY set in the constructor!
 {
 	// metadata needs at least a name field (since that's what getName() will return)
-	if(metadata.get("name").empty())
+	if (metadata.get("name").empty())
 		metadata.set("name", getDisplayName());
 
 	mSystemName = system->getName();	
-	// mDefaultCore = system->getSystemEnvData()->mDefaultCore;
 }
 
 FileData::~FileData()
@@ -84,7 +83,6 @@ const bool FileData::getFavorite()
 {
 	return metadata.get("favorite") == "true";
 }
-
 
 const bool FileData::getHidden()
 {
@@ -291,7 +289,7 @@ void FileData::removeChild(FileData* file)
 }
 
 void FileData::sort(ComparisonFunction& comparator, bool ascending)
-{
+{	
 	std::stable_sort(mChildren.begin(), mChildren.end(), comparator);
 
 	for(auto it = mChildren.cbegin(); it != mChildren.cend(); it++)

@@ -29,8 +29,10 @@ namespace GridFlags
 class ComponentGrid : public GuiComponent
 {
 public:
-	ComponentGrid(Window* window, const Vector2i& gridDimensions);
+	ComponentGrid(Window* window, const Vector2i& gridDimensions, unsigned int separatorColor = 0xC6C7C6FF);
 	virtual ~ComponentGrid();
+
+	void setSeparatorColor(unsigned int separatorColor) { mSeparatorColor = separatorColor; updateSeparators(); }
 
 	bool removeEntry(const std::shared_ptr<GuiComponent>& comp);
 
@@ -105,6 +107,7 @@ private:
 
 	std::vector<Vert> mLines;
 	std::vector<unsigned int> mLineColors;
+	unsigned int mSeparatorColor;
 
 	// Update position & size
 	void updateCellComponent(const GridEntry& cell);
