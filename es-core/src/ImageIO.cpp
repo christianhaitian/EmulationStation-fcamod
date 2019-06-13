@@ -35,6 +35,7 @@ std::vector<unsigned char> ImageIO::loadFromMemoryRGBA32(const unsigned char * d
 				{					
 					width = FreeImage_GetWidth(fiBitmap);
 					height = FreeImage_GetHeight(fiBitmap);
+
 					//loop through scanlines and add all pixel data to the return vector
 					//this is necessary, because width*height*bpp might not be == pitch
 
@@ -81,7 +82,40 @@ std::vector<unsigned char> ImageIO::loadFromMemoryRGBA32(const unsigned char * d
 	return rawData;
 }
 
-unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height)
+#include "math/Vector2i.h"
+
+//public static Rectangle GetPictureRect(Size imageSize, Rectangle rcPhoto, bool outerZooming = false, bool sourceRect = false)
+
+Vector2i ImageIO::adjustPictureSize(Vector2i imageSize, Vector2i maxSize)
+{
+	int cxDIB = imageSize.x();
+	int cyDIB = imageSize.y();
+	int iMaxX = maxSize.x();
+	int iMaxY = maxSize.y();
+
+	double xCoef = (double)iMaxX / (double)cxDIB;
+	double yCoef = (double)iMaxY / (double)cyDIB;
+	
+	cyDIB = (int)((double)cyDIB * std::fmax(xCoef, yCoef));
+	cxDIB = (int)((double)cxDIB * std::fmax(xCoef, yCoef));
+
+	if (cxDIB > iMaxX)
+	{
+		cyDIB = (int)((double)cyDIB * (double)iMaxX / (double)cxDIB);
+		cxDIB = iMaxX;
+	}
+
+	if (cyDIB > iMaxY)
+	{
+		cxDIB = (int)((double)cxDIB * (double)iMaxY / (double)cyDIB);
+		cyDIB = iMaxY;
+	}
+
+	return Vector2i(cxDIB, cyDIB);
+}
+
+
+unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height, int maxWidth, int maxHeight)
 {
 	width = 0;
 	height = 0;
@@ -112,7 +146,21 @@ unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const
 				{
 					width = FreeImage_GetWidth(fiBitmap);
 					height = FreeImage_GetHeight(fiBitmap);
+					
+					if (maxWidth > 0 && maxHeight > 0 && (width > maxWidth || height > maxHeight))
+					{
+						Vector2i sz = adjustPictureSize(Vector2i(width, height), Vector2i(maxWidth, maxHeight));
+						if (sz.x() != width || sz.y() != height)
+						{
+							FIBITMAP* imageRescaled = FreeImage_Rescale(fiBitmap, sz.x(), sz.y(), FILTER_BOX);
+							FreeImage_Unload(fiBitmap);
+							fiBitmap = imageRescaled;
 
+							width = FreeImage_GetWidth(fiBitmap);
+							height = FreeImage_GetHeight(fiBitmap);
+						}
+					}
+					
 					//loop through scanlines and add all pixel data to the return vector
 					//this is necessary, because width*height*bpp might not be == pitch
 

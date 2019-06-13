@@ -80,7 +80,7 @@ namespace Utils
 
 							FileInfo fi;
 							fi.path = fullName;
-							fi.readOnly = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN;
+							fi.hidden = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN;
 							fi.directory = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
 							contentList.push_back(fi);
 							
@@ -250,11 +250,19 @@ namespace Utils
 			static std::string path;
 
 			// only construct the homepath once
-			if(!path.length())
+			if (!path.length())
 			{
+				// verify if .emulationstation/es_systems.cfg is under exe's path to make app portable
+				std::string portableDir = getExePath() + "/.emulationstation/es_systems.cfg";
+				if (Utils::FileSystem::exists(portableDir))
+				{
+					path = getExePath();
+					return path;
+				}
+
 				// this should give us something like "/home/YOUR_USERNAME" on Linux and "C:/Users/YOUR_USERNAME/" on Windows
 				char* envHome = getenv("HOME");
-				envHome = "H:/[Emulz]/EmulationStation/";
+
 #ifdef _DEBUG
 				     envHome = "H:/[Emulz]/EmulationStation/";
 #endif
@@ -303,8 +311,8 @@ namespace Utils
 				if (result)
 				{
 					std::string ret = buffer;
-					path = getParent(ret);
-					return ret;
+					path = getGenericPath(getParent(ret));
+					return path;
 				}
 #endif
 				path = getCanonicalPath(Settings::getInstance()->getString("ExePath"));
@@ -678,11 +686,23 @@ namespace Utils
 		{
 			std::string path = getGenericPath(_path);
 			struct stat64 info;
-
+			
 			// check if stat64 succeeded
 			return (stat64(path.c_str(), &info) == 0);
 
 		} // exists
+
+		size_t getFileSize(const std::string& _path)
+		{
+			std::string path = getGenericPath(_path);
+			struct stat64 info;
+
+			// check if stat64 succeeded
+			if ((stat64(path.c_str(), &info) == 0))
+				return (size_t) info.st_size;
+
+			return 0;
+		}
 
 		bool isAbsolute(const std::string& _path)
 		{

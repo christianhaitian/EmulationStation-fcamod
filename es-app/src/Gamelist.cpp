@@ -106,6 +106,8 @@ void parseGamelist(SystemData* system)
 		LOG(LogError) << "Could not find <gameList> node in gamelist \"" << xmlpath << "\"!";
 		return;
 	}
+	
+	system->setSystemViewMode(root.attribute("defaultView").value());
 
 	std::string relativeTo = system->getStartPath();
 
@@ -181,12 +183,15 @@ void updateGamelist(SystemData* system)
 	if(Settings::getInstance()->getBool("IgnoreGamelist"))
 		return;
 
+	int numUpdated = 0;
+
 	pugi::xml_document doc;
 	pugi::xml_node root;
 	std::string xmlReadPath = system->getGamelistPath(false);
 
 	if(Utils::FileSystem::exists(xmlReadPath))
 	{
+
 		//parse an existing file first
 		pugi::xml_parse_result result = doc.load_file(xmlReadPath.c_str());
 
@@ -197,6 +202,20 @@ void updateGamelist(SystemData* system)
 		}
 
 		root = doc.child("gameList");
+
+		std::string viewMode = root.attribute("defaultView").value();
+		if (viewMode != system->getSystemViewMode())
+		{
+			numUpdated++;
+
+			if (system->getSystemViewMode().empty())
+				root.remove_attribute("defaultView");
+			else if (root.attribute("defaultView").empty())
+				root.append_attribute("defaultView") = system->getSystemViewMode().c_str();
+			else
+				root.attribute("defaultView") = system->getSystemViewMode().c_str();
+		}
+
 		if(!root)
 		{
 			LOG(LogError) << "Could not find <gameList> node in gamelist \"" << xmlReadPath << "\"!";
@@ -205,6 +224,12 @@ void updateGamelist(SystemData* system)
 	}else{
 		//set up an empty gamelist to append to
 		root = doc.append_child("gameList");
+
+		if (!system->getSystemViewMode().empty())
+		{
+			numUpdated++;
+			root.append_attribute("defaultView") = system->getSystemViewMode().c_str();
+		}
 	}
 
 
@@ -212,8 +237,6 @@ void updateGamelist(SystemData* system)
 	FileData* rootFolder = system->getRootFolder();
 	if (rootFolder != nullptr)
 	{
-		int numUpdated = 0;
-
 		//get only files, no folders
 		std::vector<FileData*> files = rootFolder->getFilesRecursive(GAME | FOLDER);
 		//iterate through all files, checking if they're already in the XML

@@ -22,8 +22,6 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 {
 	const float padding = 0.01f;
 
-	mGridEx = false;
-
 	mGrid.setPosition(mSize.x() * 0.1f, mSize.y() * 0.1f);
 	mGrid.setDefaultZIndex(20);
 	mGrid.setCursorChangedCallback([&](const CursorState& /*state*/) { updateInfoPanel(); });
@@ -88,9 +86,9 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 	updateInfoPanel();
 }
 
-void GridGameListView::setGridEx()
+void GridGameListView::setThemeName(std::string name)
 {
-	mGridEx = true;
+	ISimpleGameListView::setThemeName(name);
 	mGrid.setThemeName(getName());
 }
 
@@ -139,19 +137,19 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 			if ((*it)->getFavorite() && (showHiddenFiles || !(*it)->getHidden()))
 			{
 				if (systemName == "favorites")
-					mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it);
+					mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), (*it)->getVideoPath(), *it);
 				else
-					mGrid.add(_T("\uF006 ") + (*it)->getName(), (*it)->getThumbnailPath(), *it);
+					mGrid.add(_T("\uF006 ") + (*it)->getName(), (*it)->getThumbnailPath(), (*it)->getVideoPath(), *it);
 			}
 
 		for (auto it = files.cbegin(); it != files.cend(); it++)
 			if (!(*it)->getFavorite() && (showHiddenFiles || !(*it)->getHidden()))
-				mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it);
+				mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), (*it)->getVideoPath(), *it);
 	}
 	else
 	{
 		addPlaceholder();
-	}
+	}	
 }
 
 void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
@@ -286,9 +284,9 @@ void GridGameListView::updateInfoPanel()
 		if (mImageVisible)
 		{
 			if (file->getImagePath().empty())
-				mImage.setImage(file->getThumbnailPath());
+				mImage.setImage(file->getThumbnailPath(), false, mImage.getSize());
 			else
-				mImage.setImage(file->getImagePath());
+				mImage.setImage(file->getImagePath(), false, mImage.getSize());
 		}
 		else 
 			mImage.setImage("");
@@ -343,7 +341,7 @@ void GridGameListView::addPlaceholder()
 {
 	// empty grid - add a placeholder
 	FileData* placeholder = new FileData(PLACEHOLDER, "<No Entries Found>", this->mRoot->getSystem()->getSystemEnvData(), this->mRoot->getSystem());
-	mGrid.add(placeholder->getName(), "", placeholder);
+	mGrid.add(placeholder->getName(), "", "", placeholder);
 }
 
 void GridGameListView::launch(FileData* game)
@@ -380,6 +378,19 @@ void GridGameListView::remove(FileData *game, bool deleteFile)
 	onFileChanged(parent, FILE_REMOVED);           // update the view, with game removed
 }
 
+void GridGameListView::onFileChanged(FileData* file, FileChangeType change)
+{
+	if (change == FILE_METADATA_CHANGED)
+	{
+		// might switch to a detailed view
+		ViewController::get()->reloadGameListView(this);
+		return;
+	}
+
+	ISimpleGameListView::onFileChanged(file, change);
+}
+
+
 std::vector<TextComponent*> GridGameListView::getMDLabels()
 {
 	std::vector<TextComponent*> ret;
@@ -412,20 +423,26 @@ std::vector<HelpPrompt> GridGameListView::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts;
 
-	if(Settings::getInstance()->getBool("QuickSystemSelect"))
+	if (Settings::getInstance()->getBool("QuickSystemSelect"))
 		prompts.push_back(HelpPrompt("lr", _T("SYSTEM")));
 	prompts.push_back(HelpPrompt("up/down/left/right", _T("CHOOSE")));
 	prompts.push_back(HelpPrompt("a", _T("LAUNCH")));
-	prompts.push_back(HelpPrompt("b", _T("BACK")));
-	if(!UIModeController::getInstance()->isUIModeKid())
+
+	if (!Settings::getInstance()->getBool("HideSystemView"))
+		prompts.push_back(HelpPrompt("b", _T("BACK")));
+
+	if (!UIModeController::getInstance()->isUIModeKid())
 		prompts.push_back(HelpPrompt("select", _T("OPTIONS")));
-	if(mRoot->getSystem()->isGameSystem())
+
+	if (mRoot->getSystem()->isGameSystem())
 		prompts.push_back(HelpPrompt("x", _T("RANDOM")));
 
-	if(mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
+	if (mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
 	{
 		std::string prompt = CollectionSystemManager::get()->getEditingCollection();
 		prompts.push_back(HelpPrompt("y", prompt));
 	}
 	return prompts;
 }
+
+

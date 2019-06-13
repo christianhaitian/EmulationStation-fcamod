@@ -18,6 +18,12 @@ BasicGameListView::BasicGameListView(Window* window, FileData* root)
 	populateList(root->getChildrenListToDisplay());
 }
 
+void BasicGameListView::setThemeName(std::string name)
+{
+	ISimpleGameListView::setThemeName(name);
+	// mGrid.setThemeName(getName());
+}
+
 void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 {
 	ISimpleGameListView::onThemeChanged(theme);

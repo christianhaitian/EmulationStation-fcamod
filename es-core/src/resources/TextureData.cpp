@@ -14,8 +14,9 @@
 #define DPI 96
 
 TextureData::TextureData(bool tile) : mTile(tile), mTextureID(0), mDataRGBA(nullptr), mScalable(false),
-									  mWidth(0), mHeight(0), mSourceWidth(0.0f), mSourceHeight(0.0f)
+									  mWidth(0), mHeight(0), mSourceWidth(0.0f), mSourceHeight(0.0f), mMaxSize(Vector2f(0,0))
 {
+	
 }
 
 TextureData::~TextureData()
@@ -73,7 +74,14 @@ bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length
 		// auto scale height to keep aspect
 		mHeight = (size_t)Math::round(((float)mWidth / svgImage->width) * svgImage->height);
 	}
-
+	
+	if (mMaxSize.x() > 0 && mMaxSize.y() > 0 && (mWidth > mMaxSize.x() || mHeight > mMaxSize.y()))
+	{
+		Vector2i sz = ImageIO::adjustPictureSize(Vector2i(mWidth, mHeight), Vector2i(mMaxSize.x(), mMaxSize.y()));
+		mWidth = sz.x();
+		mHeight = sz.y();
+	}
+	
 	unsigned char* dataRGBA = new unsigned char[mWidth * mHeight * 4];
 
 	NSVGrasterizer* rast = nsvgCreateRasterizer();
@@ -97,8 +105,8 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 		if (mDataRGBA)
 			return true;
 	}
-
-	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height);
+	
+	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height, mMaxSize.x(), mMaxSize.y());
 
 //	std::vector<unsigned char> imageRGBA = ImageIO::loadFromMemoryRGBA32((const unsigned char*)(fileData), length, width, height);
 	if (imageRGBA == NULL)

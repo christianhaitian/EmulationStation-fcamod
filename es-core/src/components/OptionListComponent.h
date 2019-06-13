@@ -156,16 +156,16 @@ public:
 
 		if (mMultiSelect)
 		{
-			mRightArrow.setImage(":/arrow.svg");
+			mRightArrow.setImage(ThemeData::getMenuTheme()->Icons.arrow);// ":/arrow.svg");
 			mRightArrow.setColorShift(theme->Text.color);
 			addChild(&mRightArrow);
 		} else {
-			mLeftArrow.setImage(":/option_arrow.svg");
+			mLeftArrow.setImage(ThemeData::getMenuTheme()->Icons.option_arrow); //  ":/option_arrow.svg"
 			mLeftArrow.setColorShift(theme->Text.color);
 			mLeftArrow.setFlipX(true);
 			addChild(&mLeftArrow);
 
-			mRightArrow.setImage(":/option_arrow.svg");
+			mRightArrow.setImage(ThemeData::getMenuTheme()->Icons.option_arrow); // ":/option_arrow.svg");
 			mLeftArrow.setColorShift(theme->Text.color);
 			addChild(&mRightArrow);
 		}

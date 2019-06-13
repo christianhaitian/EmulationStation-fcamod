@@ -24,6 +24,7 @@ std::vector<SystemData*> SystemData::sSystemVector;
 SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem) :
 	mName(name), mFullName(fullName), mEnvData(envData), mThemeFolder(themeFolder), mIsCollectionSystem(CollectionSystem), mIsGameSystem(true)
 {
+	mViewModeChanged = false;
 	mFilterIndex = new FileFilterIndex();
 
 	// if it's an actual system, initialize it, if not, just create the data structure
@@ -54,6 +55,19 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 
 	setIsGameSystemStatus();
 	loadTheme();
+}
+
+bool SystemData::setSystemViewMode(std::string newViewMode)
+{
+	if (newViewMode == "automatic")
+		newViewMode = "";
+
+	if (mViewMode == newViewMode)
+		return false;
+
+	mViewMode = newViewMode;
+	mViewModeChanged = true;
+	return true;
 }
 
 SystemData::~SystemData()
@@ -108,7 +122,7 @@ void SystemData::populateFolder(FileData* folder)
 		//filePath = *it;
 
 		// skip hidden files and folders
-		if(!showHidden && fileInfo.readOnly)
+		if(!showHidden && fileInfo.hidden)
 			continue;
 
 		//this is a little complicated because we allow a list of extensions to be defined (delimited with a space)

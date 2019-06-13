@@ -6,6 +6,11 @@
 #include "Sound.h"
 #include "Window.h"
 
+void IGameListView::setThemeName(std::string name)
+{
+	mCustomThemeName = name;
+}
+
 bool IGameListView::input(InputConfig* config, Input input)
 {
 	// select to open GuiGamelistOptions

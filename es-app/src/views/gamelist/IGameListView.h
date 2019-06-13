@@ -41,7 +41,12 @@ public:
 	virtual HelpStyle getHelpStyle() override;
 
 	void render(const Transform4x4f& parentTrans) override;
+
+	virtual void setThemeName(std::string name);
+
 protected:
+	std::string mCustomThemeName;
+
 	FileData* mRoot;
 	std::shared_ptr<ThemeData> mTheme;
 };

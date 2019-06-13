@@ -95,7 +95,7 @@ void GuiSlideshowScreensaverOptions::addEditableTextComponent(ComponentListRow r
 	row.addElement(spacer, false);
 
 	auto bracket = std::make_shared<ImageComponent>(mWindow);
-	bracket->setImage(":/arrow.svg");
+	bracket->setImage(ThemeData::getMenuTheme()->Icons.arrow); // ":/arrow.svg");
 	bracket->setResize(Vector2f(0, lbl->getFont()->getLetterHeight()));
 	row.addElement(bracket, false);
 

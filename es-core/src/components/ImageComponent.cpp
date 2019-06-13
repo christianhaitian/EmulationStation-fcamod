@@ -21,11 +21,10 @@ Vector2f ImageComponent::getSize() const
 
 ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : GuiComponent(window),
 	mTargetIsMax(false), mTargetIsMin(false), mFlipX(false), mFlipY(false), mTargetSize(0, 0), mColorShift(0xFFFFFFFF),
-	mForceLoad(forceLoad), mDynamic(dynamic), mFadeOpacity(0), mFading(false), mRotateByTargetSize(false),
+	mForceLoad(forceLoad), mDynamic(dynamic), mFadeOpacity(0), mFading(false), mRotateByTargetSize(false), mVisible(true),
 	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f)
 {
-	updateColors();
-	mSizeChanged = false;
+	updateColors();	
 }
 
 ImageComponent::~ImageComponent()
@@ -122,11 +121,7 @@ void ImageComponent::resize()
 	mSize[0] = Math::round(mSize.x());
 	mSize[1] = Math::round(mSize.y());
 
-	if (ox != mSize.x() || oy != mSize.y())
-		mSizeChanged = true;
-
-	// mSize.y() should already be rounded
-	//mTexture->rasterizeAt((size_t)mSize.x(), (size_t)mSize.y());
+	mTexture->rasterizeAt((size_t)mSize.x(), (size_t)mSize.y());
 
 	onSizeChanged();
 }
@@ -141,17 +136,17 @@ void ImageComponent::setDefaultImage(std::string path)
 	mDefaultPath = path;
 }
 
-void ImageComponent::setImage(std::string path, bool tile)
+void ImageComponent::setImage(std::string path, bool tile, Vector2f maxSize)
 {
 	if (path.empty() || !ResourceManager::getInstance()->fileExists(path))
 	{
 		if (mDefaultPath.empty() || !ResourceManager::getInstance()->fileExists(mDefaultPath))
 			mTexture.reset();
 		else
-			mTexture = TextureResource::get(mDefaultPath, tile, mForceLoad, mDynamic);
+			mTexture = TextureResource::get(mDefaultPath, tile, mForceLoad, mDynamic, maxSize);
 	} 
 	else 
-		mTexture = TextureResource::get(path, tile, mForceLoad, mDynamic);
+		mTexture = TextureResource::get(path, tile, mForceLoad, mDynamic, maxSize);
 	
 	resize();
 }
@@ -173,6 +168,9 @@ void ImageComponent::setImage(const std::shared_ptr<TextureResource>& texture)
 
 void ImageComponent::setResize(float width, float height)
 {
+	if (!mTargetIsMax && !mTargetIsMin && mTargetSize.x() == width && mTargetSize.y() == height)
+		return;
+
 	mTargetSize = Vector2f(width, height);
 	mTargetIsMax = false;
 	mTargetIsMin = false;
@@ -181,6 +179,9 @@ void ImageComponent::setResize(float width, float height)
 
 void ImageComponent::setMaxSize(float width, float height)
 {
+	if (mTargetIsMax && !mTargetIsMin && mTargetSize.x() == width && mTargetSize.y() == height)
+		return;
+
 	mTargetSize = Vector2f(width, height);
 	mTargetIsMax = true;
 	mTargetIsMin = false;
@@ -189,6 +190,9 @@ void ImageComponent::setMaxSize(float width, float height)
 
 void ImageComponent::setMinSize(float width, float height)
 {
+	if (mTargetIsMin && !mTargetIsMax && mTargetSize.x() == width && mTargetSize.y() == height)
+		return;
+
 	mTargetSize = Vector2f(width, height);
 	mTargetIsMax = false;
 	mTargetIsMin = true;
@@ -330,6 +334,9 @@ void ImageComponent::updateColors()
 
 void ImageComponent::render(const Transform4x4f& parentTrans)
 {
+	if (!mVisible)
+		return;
+
 	Transform4x4f trans = parentTrans * getTransform();
 	Renderer::setMatrix(trans);
 
@@ -339,12 +346,6 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 
 	if (mTexture && mOpacity > 0)
 	{
-		if (mSizeChanged)
-		{
-			mSizeChanged = false;
-			mTexture->rasterizeAt((size_t)mSize.x(), (size_t)mSize.y());
-		}
-
 		if (Settings::getInstance()->getBool("DebugImage")) 
 		{
 			Vector2f targetSizePos = (mTargetSize - mSize) * mOrigin * -1;
@@ -476,7 +477,7 @@ void ImageComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 	if(properties & PATH && elem->has("path"))
 	{
 		bool tile = (elem->has("tile") && elem->get<bool>("tile"));
-		setImage(elem->get<std::string>("path"), tile);
+		setImage(elem->get<std::string>("path"), tile, mTargetSize);
 	}
 
 	if(properties & COLOR && elem->has("color"))

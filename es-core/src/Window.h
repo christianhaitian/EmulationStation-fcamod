@@ -57,8 +57,8 @@ public:
 	void update(int deltaTime);
 	void render();
 
-	bool init();
-	void deinit();
+	bool init(bool initRenderer);
+	void deinit(bool deinitRenderer);
 
 	void normalizeNextUpdate();
 

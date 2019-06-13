@@ -45,6 +45,9 @@ ViewController::~ViewController()
 
 void ViewController::goToStart(bool forceImmediate)
 {
+	bool hideSystemView = Settings::getInstance()->getBool("HideSystemView");
+	bool startOnGamelist = Settings::getInstance()->getBool("StartupOnGameList");
+
 	// If specific system is requested, go directly to the game list
 	auto requestedSystem = Settings::getInstance()->getString("StartupSystem");
 	if("" != requestedSystem && "retropie" != requestedSystem)
@@ -52,8 +55,11 @@ void ViewController::goToStart(bool forceImmediate)
 		for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++){
 			if ((*it)->getName() == requestedSystem)
 			{
-				goToSystemView(*it, forceImmediate);
-//				goToGameList(*it);
+				if (hideSystemView || startOnGamelist)
+					goToGameList(*it);
+				else
+					goToSystemView(*it, forceImmediate);
+
 				return;
 			}
 		}
@@ -62,7 +68,10 @@ void ViewController::goToStart(bool forceImmediate)
 		Settings::getInstance()->setString("StartupSystem", "");
 	}
 
-	goToSystemView(SystemData::sSystemVector.at(0), forceImmediate);
+	if (hideSystemView || startOnGamelist)
+		goToGameList(SystemData::sSystemVector.at(0));
+	else
+		goToSystemView(SystemData::sSystemVector.at(0), forceImmediate);
 }
 
 void ViewController::ReloadAndGoToStart()
@@ -284,75 +293,86 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	std::shared_ptr<IGameListView> view;
 
 	bool themeHasVideoView = system->getTheme()->hasView("video");
-
 	bool themeHasGridView = system->getTheme()->hasView("grid");
-	bool themeHasGridExView = system->getTheme()->hasView("gridex");
 
 	//decide type
 	GameListViewType selectedViewType = AUTOMATIC;
 
-	bool detailed = false;
+	bool allowDetailedDowngrade = false;
 
+	bool forceView = false;
 	std::string viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
+	std::string customThemeName;
+	
+	if (!system->getSystemViewMode().empty() && system->getTheme()->hasView(system->getSystemViewMode()))
+	{		
+		viewPreference = system->getSystemViewMode();
+		forceView = true;
+	}
+
+	if (viewPreference == "automatic")
+	{
+		auto defaultView = system->getTheme()->getDefaultView();
+		if (!defaultView.empty() && system->getTheme()->hasView(defaultView))
+			viewPreference = defaultView;
+	}
+
+	if (system->getTheme()->isCustomView(viewPreference))
+	{
+		auto baseClass = system->getTheme()->getCustomViewBaseType(viewPreference);
+		if (!baseClass.empty()) // this is a customView
+		{
+			customThemeName = viewPreference;
+			viewPreference = baseClass;
+		}
+	}
 
 	if (viewPreference.compare("basic") == 0)
 		selectedViewType = BASIC;
 	else if (viewPreference.compare("detailed") == 0)
 	{
-		detailed = true;
+		allowDetailedDowngrade = true;
 		selectedViewType = DETAILED;
 	}
-	else if (themeHasGridExView && viewPreference.compare("gridex") == 0)
-		selectedViewType = GRIDEX;
 	else if (themeHasGridView && viewPreference.compare("grid") == 0)
 		selectedViewType = GRID;
 	else if (viewPreference.compare("video") == 0)
 		selectedViewType = VIDEO;
 
-	if (selectedViewType == AUTOMATIC || detailed)
-	{
-		if (themeHasGridView && system->getTheme()->getDefaultView() == "grid" && !detailed)
-			selectedViewType = GRID;
-		else if (themeHasGridExView && system->getTheme()->getDefaultView() == "gridex" && !detailed)
-			selectedViewType = GRIDEX;
-		else 
-		{
-			selectedViewType = BASIC;
+	if (!forceView && (selectedViewType == AUTOMATIC || allowDetailedDowngrade))
+	{		
+		selectedViewType = BASIC;
 
-			if (system->getTheme()->getDefaultView() == "detailed")
-				selectedViewType = DETAILED;
-			else if (system->getTheme()->getDefaultView() != "basic")
+		if (system->getTheme()->getDefaultView() != "basic")
+		{
+			std::vector<FileData*> files = system->getRootFolder()->getFilesRecursive(GAME | FOLDER);
+			for (auto it = files.cbegin(); it != files.cend(); it++)
 			{
-				std::vector<FileData*> files = system->getRootFolder()->getFilesRecursive(GAME | FOLDER);
-				for (auto it = files.cbegin(); it != files.cend(); it++)
+				if (themeHasVideoView && !(*it)->getVideoPath().empty() && viewPreference.compare("detailed") != 0)
 				{
-					if (themeHasVideoView && !(*it)->getVideoPath().empty() && viewPreference.compare("detailed") != 0)
+					selectedViewType = VIDEO;
+					break;
+				}
+				else if (!(*it)->getThumbnailPath().empty())
+				{
+					/*
+					if (!allowDetailedDowngrade && (*it)->metadata.get("thumbnail").length() > 0)
 					{
-						selectedViewType = VIDEO;
-						break;
-					}
-					else if (!(*it)->getThumbnailPath().empty())
-					{
-						if (!detailed && (*it)->metadata.get("thumbnail").length() > 0)
-						{
-							if (themeHasGridExView && (*it)->metadata.get("image").length() > 0)
-								selectedViewType = GRIDEX;
-							else if (themeHasGridView)
-								selectedViewType = GRID;
-							else
-								selectedViewType = DETAILED;
-						}
+						if (themeHasGridView)
+							selectedViewType = GRID;
 						else
 							selectedViewType = DETAILED;
-
-						if (!themeHasVideoView)
-							break;
-
-						// Don't break out in case any subsequent files have video
 					}
+					else*/
+						selectedViewType = DETAILED;
+
+					if (!themeHasVideoView)
+						break;
+
+					// Don't break out in case any subsequent files have video
 				}
 			}
-		}
+		}		
 	}
 
 	// Create the view
@@ -364,21 +384,17 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 		case DETAILED:
 			view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, system->getRootFolder()));
 			break;
-		case GRID:
+		case GRID:		
 			view = std::shared_ptr<IGameListView>(new GridGameListView(mWindow, system->getRootFolder()));
-			break;
-		case GRIDEX:
-			{
-				GridGameListView* listView = new GridGameListView(mWindow, system->getRootFolder());
-				listView->setGridEx();
-				view = std::shared_ptr<IGameListView>(listView);
-			}
 			break;
 		case BASIC:
 		default:
 			view = std::shared_ptr<IGameListView>(new BasicGameListView(mWindow, system->getRootFolder()));
 			break;
 	}
+
+	if (!customThemeName.empty())
+		view->setThemeName(customThemeName);
 
 	view->setTheme(system->getTheme());
 
@@ -536,7 +552,6 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 	// Redisplay the current view
 	if (mCurrentView)
 		mCurrentView->onShow();
-
 }
 
 void ViewController::reloadAll()

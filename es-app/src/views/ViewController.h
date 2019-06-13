@@ -62,8 +62,8 @@ public:
 		BASIC,
 		DETAILED,
 		GRID,
-		VIDEO,
-		GRIDEX
+		VIDEO 
+		//,GRIDEX
 	};
 
 	struct State

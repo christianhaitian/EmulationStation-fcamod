@@ -67,6 +67,10 @@ void Settings::setDefaults()
 	mBoolMap["Windowed"] = false;
 	mBoolMap["SplashScreen"] = true;
 	mBoolMap["SplashScreenProgress"] = true;
+	mBoolMap["PreloadUI"] = true;
+	mBoolMap["StartupOnGameList"] = false;
+	mBoolMap["HideSystemView"] = false;
+	
 	mStringMap["StartupSystem"] = "";
 
 #if defined(_WIN32)
@@ -92,12 +96,17 @@ void Settings::setDefaults()
 	mIntMap["ScreenSaverTime"] = 5*60*1000; // 5 minutes
 	mIntMap["ScraperResizeWidth"] = 400;
 	mIntMap["ScraperResizeHeight"] = 0;
+
+#if defined(_WIN32)
+	mIntMap["MaxVRAM"] = 256;
+#else
 	#ifdef _RPI_
 		mIntMap["MaxVRAM"] = 80;
 	#else
 		mIntMap["MaxVRAM"] = 100;
 	#endif
-		
+#endif
+
 #if defined(_WIN32)
 	mBoolMap["HideWindow"] = false;
 #else
@@ -110,6 +119,13 @@ void Settings::setDefaults()
 	mStringMap["ScreenSaverBehavior"] = "dim";
 	mStringMap["Scraper"] = "TheGamesDB";
 	mStringMap["GamelistViewStyle"] = "automatic";
+
+	mStringMap["ThemeColorSet"] = "";
+	mStringMap["ThemeIconSet"] = "";
+	mStringMap["ThemeMenu"] = "";
+	mStringMap["ThemeSystemView"] = "";
+	mStringMap["ThemeGamelistView"] = "";
+	mStringMap["ThemeRegionName"] = "eu";
 
 	mBoolMap["ScreenSaverControls"] = true;
 	mStringMap["ScreenSaverGameInfo"] = "never";

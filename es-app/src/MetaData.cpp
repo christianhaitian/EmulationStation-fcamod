@@ -8,7 +8,7 @@
 MetaDataDecl gameDecls[] = {
 	// key,         type,                   default,            statistic,  name in GuiMetaDataEd,  prompt in GuiMetaDataEd
 	{"name",        MD_STRING,              "",                 false,      "name",                 "enter game name"},
-	{"sortname",    MD_STRING,              "",                 false,      "sortname",             "enter game sort name"},
+//	{"sortname",    MD_STRING,              "",                 false,      "sortname",             "enter game sort name"},
 	{"desc",        MD_MULTILINE_STRING,    "",                 false,      "description",          "enter description"},
 
 	{ "emulator",   MD_PLIST,				"",                 false,      "emulator",				"emulator" },
@@ -34,7 +34,7 @@ const std::vector<MetaDataDecl> gameMDD(gameDecls, gameDecls + sizeof(gameDecls)
 
 MetaDataDecl folderDecls[] = {
 	{"name",        MD_STRING,              "",                 false,      "name",                 "enter game name"},
-	{"sortname",    MD_STRING,              "",                 false,      "sortname",             "enter game sort name"},
+//	{"sortname",    MD_STRING,              "",                 false,      "sortname",             "enter game sort name"},
 	{"desc",        MD_MULTILINE_STRING,    "",                 false,      "description",          "enter description"},
 	{"image",       MD_PATH,                "",                 false,      "image",                "enter path to image"},
 	{"thumbnail",   MD_PATH,                "",                 false,      "thumbnail",            "enter path to thumbnail"},
@@ -134,8 +134,8 @@ void MetaDataList::appendToXML(pugi::xml_node& parent, bool ignoreDefaults, cons
 
 void MetaDataList::set(const std::string& key, const std::string& value)
 {
-	if ((key == "sortname" || key == "name") && !value.empty())
-		mSortName = Utils::String::toUpper(value);
+	if (key == "name")
+		mName = value;
 
 	mMap[key] = value;
 	mWasChanged = true;

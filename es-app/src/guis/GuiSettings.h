@@ -18,6 +18,18 @@ public:
 	inline void addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp) { mMenu.addWithLabel(label, comp); };
 	inline void addSaveFunc(const std::function<void()>& func) { mSaveFuncs.push_back(func); };
 
+	inline void addSubMenu(const std::string& label, const std::function<void()>& func) {
+		ComponentListRow row;
+		row.makeAcceptInputHandler(func);
+
+		auto theme = ThemeData::getMenuTheme();
+
+		auto entryMenu = std::make_shared<TextComponent>(mWindow, label, theme->Text.font, theme->Text.color);
+		row.addElement(entryMenu, true);
+		row.addElement(makeArrow(mWindow), false);
+		mMenu.addRow(row);
+	};
+
 	bool input(InputConfig* config, Input input) override;
 	std::vector<HelpPrompt> getHelpPrompts() override;
 	HelpStyle getHelpStyle() override;

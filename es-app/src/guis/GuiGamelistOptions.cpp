@@ -32,7 +32,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 		char startChar = '!';
 		char endChar = '_';
 
-		char curChar = (char)toupper(getGamelist()->getCursor()->getSortName()[0]);
+		char curChar = (char)toupper(getGamelist()->getCursor()->getName()[0]);
 		if(curChar < startChar || curChar > endChar)
 			curChar = startChar;
 
@@ -43,7 +43,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 			const std::vector<FileData*>& files = getGamelist()->getCursor()->getParent()->getChildrenListToDisplay();
 			for (auto file : files)
 			{
-				char candidate = (char)toupper(file->getSortName()[0]);
+				char candidate = (char)toupper(file->getName()[0]);
 				if (c == candidate)
 				{
 					mJumpToLetterList->add(std::string(1, c), c, c == curChar);
@@ -79,6 +79,33 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 
 		mMenu.addWithLabel(_T("SORT GAMES BY"), mListSort);
 	}
+
+	// GameList view style
+	mViewMode = std::make_shared< OptionListComponent<std::string> >(mWindow, _T("GAMELIST VIEW STYLE"), false);
+	std::vector<std::string> styles;
+	styles.push_back("automatic");
+
+	auto mViews = system->getTheme()->getViewsOfTheme();
+	for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
+		styles.push_back(*it);
+
+	std::string viewMode = system->getSystemViewMode();
+
+	bool found = false;
+	for (auto it = styles.cbegin(); it != styles.cend(); it++)
+	{
+		bool sel = (viewMode.empty() && *it == "automatic") || viewMode == *it;
+		if (sel)
+			found = true;
+
+		mViewMode->add(_L(*it), *it, sel);
+	}
+
+	if (!found)
+		mViewMode->selectFirstItem();
+
+	mMenu.addWithLabel(_T("GAMELIST VIEW STYLE"), mViewMode);	
+	
 	// show filtered menu
 	if(!Settings::getInstance()->getBool("ForceDisableFilters"))
 	{
@@ -119,33 +146,35 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 	}
 
 	// center the menu
-	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
-	//mMenu.setPosition((mSize.x() - mMenu.getSize().x()) / 2, (mSize.y() - mMenu.getSize().y()) / 2);
+	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());	
 
 	float x0 = (mSize.x() - mMenu.getSize().x()) / 2;
 
 	float y1 = Renderer::getScreenHeight();
 	float y2 = (mSize.y() - mMenu.getSize().y()) / 2;
-	//float y1 = mMenu.getSize().y();
-	//float y2 = (mSize.y() - mMenu.getSize().y()) / 2;
-
-	setPosition(x0, y1);
-
-	auto fadeFunc = [this, x0, y1, y2](float t) {
-
-		t -= 1; // cubic ease out
-		float pct = Math::lerp(0, 1, t*t*t + 1);
-
-		float y = y1 * (1 - pct) + y2 * pct;
-		setPosition(x0, y);
-	};
-
-	setAnimation(new LambdaAnimation(fadeFunc, 350), 0, [this, fadeFunc, x0, y2]
-	{
+	
+	if (Settings::getInstance()->getString("PowerSaverMode") == "instant" || Settings::getInstance()->getString("TransitionStyle") == "instant")
 		setPosition(x0, y2);
-	});
+	else
+	{
+		setPosition(x0, y1);
 
-	setPosition(x0, y2);
+		auto fadeFunc = [this, x0, y1, y2](float t) {
+
+			t -= 1; // cubic ease out
+			float pct = Math::lerp(0, 1, t*t*t + 1);
+
+			float y = y1 * (1 - pct) + y2 * pct;
+			setPosition(x0, y);
+		};
+
+		setAnimation(new LambdaAnimation(fadeFunc, 350), 0, [this, fadeFunc, x0, y2]
+		{
+			setPosition(x0, y2);
+		});
+
+		setPosition(x0, y2);
+	}
 }
 
 GuiGamelistOptions::~GuiGamelistOptions()
@@ -158,7 +187,8 @@ GuiGamelistOptions::~GuiGamelistOptions()
 		// notify that the root folder was sorted
 		getGamelist()->onFileChanged(root, FILE_SORTED);
 	}
-	if (mFiltersChanged)
+
+	if (mSystem->setSystemViewMode(mViewMode->getSelected()) || mFiltersChanged)
 	{
 		// only reload full view if we came from a placeholder
 		// as we need to re-display the remaining elements for whatever new
@@ -249,11 +279,11 @@ void GuiGamelistOptions::jumpToLetter()
 		if(files.at(mid)->getName().empty())
 			continue;
 
-		char checkLetter = (char)toupper(files.at(mid)->getSortName()[0]);
+		char checkLetter = (char)toupper(files.at(mid)->getName()[0]);
 
 		if(checkLetter < letter)
 			min = mid + 1;
-		else if(checkLetter > letter || (mid > 0 && (letter == toupper(files.at(mid - 1)->getSortName()[0]))))
+		else if(checkLetter > letter || (mid > 0 && (letter == toupper(files.at(mid - 1)->getName()[0]))))
 			max = mid - 1;
 		else
 			break; //exact match found

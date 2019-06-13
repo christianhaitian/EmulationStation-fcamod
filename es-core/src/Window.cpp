@@ -71,16 +71,18 @@ GuiComponent* Window::peekGui()
 	return mGuiStack.back();
 }
 
-bool Window::init()
+bool Window::init(bool initRenderer)
 {
-	if(!Renderer::init())
+	if (initRenderer && !Renderer::init())
 	{
 		LOG(LogError) << "Renderer failed to initialize!";
 		return false;
 	}
 
 	InputManager::getInstance()->init();
-	ResourceManager::getInstance()->reloadAll();
+
+	if (initRenderer)
+		ResourceManager::getInstance()->reloadAll();
 
 	//keep a reference to the default fonts, so they don't keep getting destroyed/recreated
 	if(mDefaultFonts.empty())
@@ -100,7 +102,7 @@ bool Window::init()
 	return true;
 }
 
-void Window::deinit()
+void Window::deinit(bool deinitRenderer)
 {
 	// Hide all GUI elements on uninitialisation - this disable
 	for(auto i = mGuiStack.cbegin(); i != mGuiStack.cend(); i++)
@@ -108,8 +110,12 @@ void Window::deinit()
 		(*i)->onHide();
 	}
 	InputManager::getInstance()->deinit();
-	ResourceManager::getInstance()->unloadAll();
-	Renderer::deinit();
+	
+	if (deinitRenderer)
+	{
+		ResourceManager::getInstance()->unloadAll();
+		Renderer::deinit();
+	}
 }
 
 void Window::textInput(const char* text)

@@ -7,6 +7,8 @@
 #include <mutex>
 #include <string>
 
+#include "math/Vector2f.h"
+
 class TextureResource;
 
 class TextureData
@@ -39,6 +41,8 @@ public:
 	// Release the texture from conventional RAM
 	void releaseRAM();
 
+	void setMaxSize(Vector2f maxSize) { mMaxSize = maxSize; };
+
 	// Get the amount of VRAM currenty used by this texture
 	size_t getVRAMUsage();
 
@@ -62,6 +66,8 @@ private:
 	float			mSourceHeight;
 	bool			mScalable;
 	bool			mReloadable;
+
+	Vector2f		mMaxSize;
 };
 
 #endif // ES_CORE_RESOURCES_TEXTURE_DATA_H

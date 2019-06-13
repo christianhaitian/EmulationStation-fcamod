@@ -78,7 +78,9 @@ void ISimpleGameListView::onFileChanged(FileData* /*file*/, FileChangeType /*cha
 
 bool ISimpleGameListView::input(InputConfig* config, Input input)
 {
-	if(input.value != 0)
+	bool hideSystemView = Settings::getInstance()->getBool("HideSystemView");
+
+	if (input.value != 0)
 	{
 		if (config->isMappedTo("a", input))
 		{
@@ -112,25 +114,26 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 		}
 		else if(config->isMappedTo("b", input))
 		{
-			if(mCursorStack.size())
+			if (mCursorStack.size())
 			{
 				populateList(mCursorStack.top()->getParent()->getChildren());
 				setCursor(mCursorStack.top());
 				mCursorStack.pop();
 				Sound::getFromTheme(getTheme(), getName(), "back")->play();
-			}else{
+			} 
+			else if (!hideSystemView)
+			{
 				onFocusLost();
 				SystemData* systemToView = getCursor()->getSystem();
 				if (systemToView->isCollection())
-				{
 					systemToView = CollectionSystemManager::get()->getSystemToView(systemToView);
-				}
+
 				ViewController::get()->goToSystemView(systemToView);
 			}
 
 			return true;
 		}
-		else if(config->isMappedLike(getQuickSystemSelectRightButton(), input))
+		else if (config->isMappedLike(getQuickSystemSelectRightButton(), input) || config->isMappedLike("rightshoulder", input))
 		{
 			if(Settings::getInstance()->getBool("QuickSystemSelect"))
 			{
@@ -139,7 +142,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				return true;
 			}
 		}
-		else if(config->isMappedLike(getQuickSystemSelectLeftButton(), input))
+		else if (config->isMappedLike(getQuickSystemSelectLeftButton(), input) || config->isMappedLike("leftshoulder", input))
 		{
 			if(Settings::getInstance()->getBool("QuickSystemSelect"))
 			{

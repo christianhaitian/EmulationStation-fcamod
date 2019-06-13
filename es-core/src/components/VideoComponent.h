@@ -30,13 +30,15 @@ public:
 	// Loads the video at the given filepath
 	bool setVideo(std::string path);
 	// Loads a static image that is displayed if the video cannot be played
-	void setImage(std::string path);
+	void setImage(std::string path, bool tile = false, Vector2f maxSize = Vector2f(0, 0));
 
 	// Configures the component to show the default video
 	void setDefaultVideo();
 
 	// sets whether it's going to render in screensaver mode
 	void setScreensaverMode(bool isScreensaver);
+
+	void setStartDelay(int delay) { mConfig.startDelay = delay; }
 
 	virtual void onShow() override;
 	virtual void onHide() override;
@@ -69,6 +71,15 @@ public:
 	// Never breaks the aspect ratio. setMaxSize() and setResize() are mutually exclusive.
 	virtual void setMaxSize(float width, float height) = 0;
 	inline void setMaxSize(const Vector2f& size) { setMaxSize(size.x(), size.y()); }
+
+	Vector2f getVideoSize() { return Vector2f(mVideoWidth, mVideoHeight); }
+	bool isPlaying() {
+		return mIsPlaying;
+	}
+
+	bool isFading() {		
+		return mFadeIn < 1.0f;
+	}
 
 private:
 	// Start the video Immediately

@@ -113,6 +113,7 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 	{
 		if (size < max_texture)
 			break;
+
 		//size -= (*it)->getVRAMUsage();
 		(*it)->releaseVRAM();
 		(*it)->releaseRAM();

@@ -136,8 +136,6 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 
 	Transform4x4f trans = parentTrans * getTransform();
 
-	GuiComponent::renderChildren(trans);
-
 	Renderer::setMatrix(trans);
 
 	if (mIsPlaying && mContext.valid)
@@ -177,16 +175,19 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 		vertices[3].tex[0] = 1.0f + tex_offs_x;		vertices[3].tex[1] = -tex_offs_y;
 		vertices[4].tex[0] = -tex_offs_x;			vertices[4].tex[1] = 1.0f + tex_offs_y;
 		vertices[5].tex[0] = 1.0f + tex_offs_x;		vertices[5].tex[1] = 1.0f + tex_offs_y;
-
+		
 		// Colours - use this to fade the video in and out
-		for (int i = 0; i < (4 * 6); ++i) {
-			if ((i%4) < 3)
+		for (int i = 0; i < (4 * 6); ++i) 
+		{
+			if ((i%4) == 3)
 				vertices[i / 4].colour[i % 4] = mFadeIn;
 			else
 				vertices[i / 4].colour[i % 4] = 1.0f;
 		}
-
+		
 		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Build a texture for the video frame
 		mTexture->initFromPixels((unsigned char*)mContext.surface->pixels, mContext.surface->w, mContext.surface->h);
@@ -208,6 +209,7 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 		glDisableClientState(GL_COLOR_ARRAY);
 
 		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
 	} else {
 		VideoComponent::renderSnapshot(parentTrans);
 	}
@@ -346,9 +348,11 @@ void VideoVlcComponent::startVideo()
 						libvlc_audio_set_mute(mMediaPlayer, 1);
 					}
 
-					libvlc_media_player_play(mMediaPlayer);
+					libvlc_media_player_play(mMediaPlayer);					
 					libvlc_video_set_callbacks(mMediaPlayer, lock, unlock, display, (void*)&mContext);
 					libvlc_video_set_format(mMediaPlayer, "RGBA", (int)mVideoWidth, (int)mVideoHeight, (int)mVideoWidth * 4);
+
+					// libvlc_media_player_set_position(mMediaPlayer, 0.15);
 
 					// Update the playing state
 					mIsPlaying = true;

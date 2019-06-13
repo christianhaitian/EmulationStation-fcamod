@@ -18,7 +18,7 @@ SliderComponent::SliderComponent(Window* window, float min, float max, float inc
 	mColor = menuTheme->Text.color;
 
 	mKnob.setOrigin(0.5f, 0.5f);
-	mKnob.setImage(":/slider_knob.svg");
+	mKnob.setImage(ThemeData::getMenuTheme()->Icons.knob); // ":/slider_knob.svg");
 	mKnob.setColorShift(mColor);
 
 	setSize(Renderer::getScreenWidth() * 0.15f, menuTheme->Text.font->getLetterHeight());

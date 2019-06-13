@@ -16,7 +16,7 @@ class TextureData;
 class TextureResource : public IReloadable
 {
 public:
-	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true);
+	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true, Vector2f maxSize = Vector2f(0, 0));
 	void initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height);
 	virtual void initFromMemory(const char* file, size_t length);
 
@@ -36,7 +36,7 @@ public:
 	static size_t getTotalTextureSize(); // returns the number of bytes that would be used if all textures were in memory
 
 protected:
-	TextureResource(const std::string& path, bool tile, bool dynamic);
+	TextureResource(const std::string& path, bool tile, bool dynamic, Vector2f maxSize);
 	virtual void unload(std::shared_ptr<ResourceManager>& rm);
 	virtual void reload(std::shared_ptr<ResourceManager>& rm);
 

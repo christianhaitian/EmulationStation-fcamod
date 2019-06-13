@@ -59,7 +59,7 @@ const std::string FileData::getThumbnailPath() const
 	if(thumbnail.empty())
 	{
 		thumbnail = metadata.get("image");
-		/*
+		
 		// no image, try to use local image
 		if(thumbnail.empty() && Settings::getInstance()->getBool("LocalArt"))
 		{
@@ -73,7 +73,7 @@ const std::string FileData::getThumbnailPath() const
 						thumbnail = path;
 				}
 			}
-		}*/
+		}
 	}
 
 	return thumbnail;
@@ -93,15 +93,15 @@ const std::string& FileData::getName()
 {
 	return metadata.get("name");
 }
-
+/*
 const std::string& FileData::getSortName()
 {
 	if (metadata.get("sortname").empty())
 		return metadata.get("name");
-	else
-		return metadata.get("sortname");
+	
+	return metadata.get("sortname");
 }
-
+*/
 FileData* FileData::findUniqueGameForFolder()
 {
 	std::vector<FileData*> children = getChildren();
@@ -155,15 +155,15 @@ const std::string FileData::getEmulator() const
 const std::string FileData::getVideoPath() const
 {
 	std::string video = metadata.get("video");
-	/*
+	
 	// no video, try to use local video
 	if(video.empty() && Settings::getInstance()->getBool("LocalArt"))
 	{
 		std::string path = mEnvData->mStartPath + "/images/" + getDisplayName() + "-video.mp4";
-		if(Utils::FileSystem::exists(path))
+		if (Utils::FileSystem::exists(path))
 			video = path;
 	}
-	*/
+	
 	return video;
 }
 
@@ -172,7 +172,7 @@ const std::string FileData::getMarqueePath() const
 	std::string marquee = metadata.get("marquee");
 
 	// no marquee, try to use local marquee
-	if(marquee.empty() && Settings::getInstance()->getBool("LocalArt"))
+	if (marquee.empty() && Settings::getInstance()->getBool("LocalArt"))
 	{
 		const char* extList[2] = { ".png", ".jpg" };
 		for(int i = 0; i < 2; i++)
@@ -315,8 +315,7 @@ void FileData::launchGame(Window* window)
 	VolumeControl::getInstance()->deinit();
 
 	bool hideWindow = Settings::getInstance()->getBool("HideWindow");
-	if (hideWindow)
-		window->deinit();
+	window->deinit(hideWindow);
 
 	std::string command = mEnvData->mLaunchCommand;
 
@@ -357,8 +356,7 @@ void FileData::launchGame(Window* window)
 
 	Scripting::fireEvent("game-end");
 
-	if (hideWindow)
-		window->init();
+	window->init(hideWindow);
 
 	VolumeControl::getInstance()->init();
 	window->normalizeNextUpdate();

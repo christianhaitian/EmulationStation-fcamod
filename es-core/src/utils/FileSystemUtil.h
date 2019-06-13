@@ -13,7 +13,7 @@ namespace Utils
 		{
 		public:
 			std::string path;
-			bool readOnly;
+			bool hidden;
 			bool directory;
 		};
 
@@ -42,6 +42,7 @@ namespace Utils
 		bool        removeFile         (const std::string& _path);
 		bool        createDirectory    (const std::string& _path);
 		bool        exists             (const std::string& _path);
+		size_t		getFileSize(const std::string& _path);
 		bool        isAbsolute         (const std::string& _path);
 		bool        isRegularFile      (const std::string& _path);
 		bool        isDirectory        (const std::string& _path);
