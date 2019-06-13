@@ -36,6 +36,7 @@ public:
 	void setCenterColor(unsigned int centerColor); // Apply a color shift to the "center" part of the ninepatch.
 
 	unsigned int getCenterColor() { return mCenterColor; };
+	unsigned int getEdgeColor() { return mEdgeColor; };
 
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties) override;
 

@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
 
 	if (!scrape_cmdline)
 	{
-		if(!window.init())
+		if(!window.init(true))
 		{
 			LOG(LogError) << "Window failed to initialize!";
 			return 1;
@@ -385,7 +385,9 @@ int main(int argc, char* argv[])
 
 	// preload what we can right away instead of waiting for the user to select it
 	// this makes for no delays when accessing content, but a longer startup time
-	// ViewController::get()->preload();
+
+	if (Settings::getInstance()->getBool("PreloadUI"))
+		ViewController::get()->preload();
 	
 	if (splashScreen && splashScreenProgress)	
 		window.renderLoadingScreen(_T("Starting UI"));
@@ -417,7 +419,7 @@ int main(int argc, char* argv[])
 		displayFrequency = lpDevMode.dmDisplayFrequency; // default value if cannot retrieve from user settings.
 	}
 	
-	int timeLimit = (1000 / displayFrequency) - 5;	 // Margin for vsync
+	int timeLimit = (1000 / displayFrequency) - 6;	 // Margin for vsync
 #endif
 
 	int lastTime = SDL_GetTicks();
@@ -502,7 +504,7 @@ int main(int argc, char* argv[])
 	while(window.peekGui() != ViewController::get())
 		delete window.peekGui();
 
-	window.deinit();
+	window.deinit(true);
 
 	MameNames::deinit();
 	CollectionSystemManager::deinit();

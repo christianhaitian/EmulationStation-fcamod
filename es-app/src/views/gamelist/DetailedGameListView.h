@@ -7,16 +7,29 @@
 #include "components/ScrollableContainer.h"
 #include "views/gamelist/BasicGameListView.h"
 
+class VideoComponent;
+
 class DetailedGameListView : public BasicGameListView
 {
 public:
 	DetailedGameListView(Window* window, FileData* root);
+	~DetailedGameListView();
 
 	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
+	virtual void onShow() override;
 
-	virtual const char* getName() const override { return "detailed"; }
+	virtual const char* getName() const override 
+	{ 
+		if (!mCustomThemeName.empty())
+			return mCustomThemeName.c_str();
+
+		return "detailed"; 
+	}
 
 	virtual void launch(FileData* game) override;
+
+protected:
+	virtual void update(int deltaTime) override;
 
 private:
 	void updateInfoPanel();
@@ -38,12 +51,15 @@ private:
 	DateTimeComponent mLastPlayed;
 	TextComponent mPlayCount;
 	TextComponent mName;
+	VideoComponent* mVideo;
 
 	std::vector<TextComponent*> getMDLabels();
 	std::vector<GuiComponent*> getMDValues();
 
 	ScrollableContainer mDescContainer;
 	TextComponent mDescription;
+
+	bool		mVideoVisible;	
 };
 
 #endif // ES_APP_VIEWS_GAME_LIST_DETAILED_GAME_LIST_VIEW_H

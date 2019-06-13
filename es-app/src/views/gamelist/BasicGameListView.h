@@ -18,10 +18,18 @@ public:
 	virtual FileData* getCursor() override;
 	virtual void setCursor(FileData* file) override;
 
-	virtual const char* getName() const override { return "basic"; }
+	virtual const char* getName() const override 
+	{ 
+		if (!mCustomThemeName.empty())
+			return mCustomThemeName.c_str();
+
+		return "basic"; 
+	}
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 	virtual void launch(FileData* game) override;
+
+	virtual void	setThemeName(std::string name);
 
 protected:
 	virtual std::string getQuickSystemSelectRightButton() override;

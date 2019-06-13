@@ -92,6 +92,9 @@ public:
 
 	inline const std::shared_ptr<ThemeData>& getTheme() const { return mTheme; }
 
+	std::string getSystemViewMode() const { if (mViewMode == "automatic") return ""; else return mViewMode; };
+	bool setSystemViewMode(std::string newViewMode);
+
 	std::string getGamelistPath(bool forWrite) const;
 	bool hasGamelist() const;
 	std::string getThemePath() const;
@@ -131,6 +134,9 @@ private:
 	SystemEnvironmentData* mEnvData;
 	std::string mThemeFolder;
 	std::shared_ptr<ThemeData> mTheme;
+
+	std::string mViewMode;
+	bool mViewModeChanged;
 
 	void populateFolder(FileData* folder);
 	void indexAllGameFilters(const FileData* folder);

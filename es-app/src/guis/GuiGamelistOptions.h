@@ -35,6 +35,9 @@ private:
 	typedef OptionListComponent<const FileData::SortType*> SortList;
 	std::shared_ptr<SortList> mListSort;
 
+	std::shared_ptr<OptionListComponent<std::string>> mViewMode;
+	
+
 	SystemData* mSystem;
 	IGameListView* getGamelist();
 	bool fromPlaceholder;

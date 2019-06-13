@@ -5,7 +5,7 @@
 #include "Renderer.h"
 
 ButtonComponent::ButtonComponent(Window* window, const std::string& text, const std::string& helpText, const std::function<void()>& func) : GuiComponent(window),
-	mBox(window, ":/button.png"),
+	mBox(window, ThemeData::getMenuTheme()->Icons.button),
 	mFont(Font::get(FONT_SIZE_MEDIUM)), 
 	mFocused(false), 
 	mEnabled(true), 
@@ -78,18 +78,18 @@ void ButtonComponent::setEnabled(bool enabled)
 
 void ButtonComponent::updateImage()
 {
-	/*
 	if(!mEnabled || !mPressedFunc)
 	{
-		mBox.setImagePath(":/button_filled.png");
+		mBox.setImagePath(ThemeData::getMenuTheme()->Icons.button_filled);
 		mBox.setCenterColor(0x770000FF);
 		mBox.setEdgeColor(0x770000FF);
 		return;
 	}
-	*/
+
 	mBox.setCenterColor(mColor);
 	mBox.setEdgeColor(mColor);	
-	mBox.setImagePath(mFocused ? ":/button_filled.png" : ":/button.png");
+	mBox.setImagePath(mFocused ? ThemeData::getMenuTheme()->Icons.button_filled : ThemeData::getMenuTheme()->Icons.button);	
+	//mBox.setImagePath(mFocused ? ":/button_filled.png" : ":/button.png");
 }
 
 void ButtonComponent::render(const Transform4x4f& parentTrans)

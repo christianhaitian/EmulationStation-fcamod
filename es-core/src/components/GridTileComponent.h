@@ -6,6 +6,8 @@
 #include "ImageComponent.h"
 #include "TextComponent.h"
 
+
+class VideoComponent;
 struct GridTileProperties
 {
 	Vector2f mSize;
@@ -17,12 +19,17 @@ struct GridTileProperties
 	unsigned int mBackgroundEdgeColor;
 
 	std::string mImageSizeMode;
+
+	Vector2f mLabelSize;
+	unsigned int mLabelColor;
+	unsigned int mLabelBackColor;
 };
 
 class GridTileComponent : public GuiComponent
 {
 public:
 	GridTileComponent(Window* window);
+	~GridTileComponent();
 
 	void render(const Transform4x4f& parentTrans) override;
 	void update(int deltaTime) override;
@@ -35,18 +42,30 @@ public:
 	Vector2f getSelectedTileSize() const;
 	bool isSelected() const;
 
-	void setImage(const std::string& path, std::string name);
+	void reset();
+
+	void setLabel(std::string name);
+	void setVideo(const std::string& path, float defaultDelay = -1.0);
+
+	void setImage(const std::string& path);
 	void setImage(const std::shared_ptr<TextureResource>& texture, std::string name);
-	void setSelected(bool selected, Vector3f* pPosition = NULL);
+	void setSelected(bool selected, bool allowAnimation = true, Vector3f* pPosition = NULL);
 	void setVisible(bool visible);
+
+	void forceSize(Vector2f size, float selectedZoom = 1.0);
+
+	void renderBackground(const Transform4x4f& parentTrans);
+	void renderContent(const Transform4x4f& parentTrans);
+
+	bool shouldSplitRendering() { return isAnimationPlaying(3); };
 
 private:
 	void resize();
-	const GridTileProperties& getCurrentProperties() const;
+	const GridTileProperties& getCurrentProperties();
 
 	std::shared_ptr<ImageComponent> mImage;
-	TextComponent mLabel;
-	Vector2f mLabelSize;
+
+	TextComponent mLabel;	
 
 	bool mLabelVisible;
 	bool mLabelMerged;
@@ -55,8 +74,10 @@ private:
 
 	GridTileProperties mDefaultProperties;
 	GridTileProperties mSelectedProperties;
+	GridTileProperties mMixedProperties;
 
 	std::string mCurrentPath;
+	std::string mVideoPath;
 
 	void setSelectedZoom(float percent);
 
@@ -65,6 +86,10 @@ private:
 	bool mVisible;
 
 	Vector3f mAnimPosition;
+
+	VideoComponent* mVideo;
+	bool mVideoPlaying;
+
 };
 
 #endif // ES_CORE_COMPONENTS_GRID_TILE_COMPONENT_H

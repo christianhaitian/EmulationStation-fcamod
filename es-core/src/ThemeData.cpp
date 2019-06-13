@@ -6,10 +6,14 @@
 #include "Log.h"
 #include "platform.h"
 #include "Settings.h"
-#include <pugixml/src/pugixml.hpp>
 #include <algorithm>
 
-std::vector<std::string> ThemeData::sSupportedViews { { "system" }, { "basic" }, { "detailed" },{ "grid" },{ "gridex" },{ "video" }, { "menu" } };
+#ifdef _RPI_
+#include "components/VideoPlayerComponent.h"
+#endif
+#include "components/VideoVlcComponent.h"
+
+std::vector<std::string> ThemeData::sSupportedViews { { "system" }, { "basic" }, { "detailed" },{ "grid" },{ "video" }, { "menu" } };
 std::vector<std::string> ThemeData::sSupportedFeatures { { "video" }, { "carousel" }, { "z-index" } };
 
 std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> ThemeData::sElementMap {
@@ -29,8 +33,15 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "pos", NORMALIZED_PAIR },
 		{ "size", NORMALIZED_PAIR },
 		{ "margin", NORMALIZED_PAIR },
+
+		{ "padding", NORMALIZED_PAIR },
+
+		{ "autoLayout", NORMALIZED_PAIR },
+		{ "autoLayoutSelectedZoom", FLOAT },
+
 		{ "gameImage", PATH },
 		{ "folderImage", PATH },
+		{ "showVideoAtDelay", FLOAT },		
 		{ "scrollDirection", STRING } } },
 	{ "gridtile", {
 		{ "size", NORMALIZED_PAIR },
@@ -40,7 +51,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "backgroundCornerSize", NORMALIZED_PAIR },		
 		{ "backgroundColor", COLOR },
 		{ "backgroundCenterColor", COLOR },
-		{ "backgroundEdgeColor", COLOR },
+		{ "backgroundEdgeColor", COLOR },		
 		{ "imageSizeMode", STRING } } },
 	{ "text", {
 		{ "pos", NORMALIZED_PAIR },
@@ -132,6 +143,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "rotation", FLOAT },
 		{ "rotationOrigin", NORMALIZED_PAIR },
 		{ "default", PATH },
+		{ "path", PATH },
 		{ "delay", FLOAT },
 		{ "zIndex", FLOAT },
 		{ "showSnapshotNoVideo", BOOLEAN },
@@ -167,7 +179,30 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 	{ "menuBackground", {
 		{ "path", PATH },
 		{ "fadePath", PATH },
-		{ "color", COLOR } } }
+		{ "color", COLOR } } },
+
+	{ "menuIcons",{		
+		{ "iconSystem", PATH },
+		{ "iconUpdates", PATH },
+		{ "iconControllers", PATH },
+		{ "iconGames", PATH },
+		{ "iconUI", PATH },
+		{ "iconSound", PATH },
+		{ "iconNetwork", PATH },
+		{ "iconScraper", PATH },
+		{ "iconAdvanced", PATH },
+		{ "iconQuit", PATH } } },
+
+	{ "menuSwitch",{
+		{ "pathOn", PATH },
+		{ "pathOff", PATH } } },
+
+	{ "menuSlider",{
+		{ "path", PATH } } },
+
+	{ "menuButton",{
+		{ "path", PATH },
+		{ "filledPath", PATH } } },
 };
 
 std::shared_ptr<ThemeData::ThemeMenu> ThemeData::MenuTheme;
@@ -229,6 +264,14 @@ std::string resolvePlaceholders(const char* in)
 
 ThemeData::ThemeData()
 {	
+	mHasSubsets = false;
+
+	mColorset = Settings::getInstance()->getString("ThemeColorSet");
+	mIconset = Settings::getInstance()->getString("ThemeIconSet");
+	mMenu = Settings::getInstance()->getString("ThemeMenu");
+	mSystemview = Settings::getInstance()->getString("ThemeSystemView");
+	mGamelistview = Settings::getInstance()->getString("ThemeGamelistView");	
+
 	mVersion = 0;
 }
 
@@ -242,6 +285,7 @@ void ThemeData::loadFile(std::string system, std::map<std::string, std::string> 
 	if(!Utils::FileSystem::exists(path))
 		throw error << "File does not exist!";
 
+	mHasSubsets = false;
 	mVersion = 0;
 	mViews.clear();
 
@@ -273,6 +317,7 @@ void ThemeData::loadFile(std::string system, std::map<std::string, std::string> 
 	parseVariables(root);
 	parseIncludes(root);
 	parseViews(root);	
+	parseCustomViews(root);
 	parseFeatures(root);
 
 	MenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(*this));
@@ -296,11 +341,39 @@ bool ThemeData::parseSubset(const pugi::xml_node& node)
 
 	if (node.attribute("subset"))
 	{
+		mHasSubsets = true;
+
 		parse = false;
 		const std::string subsetAttr = node.attribute("subset").as_string();
 		const std::string nameAttr = node.attribute("name").as_string();
 
-		if (subsetAttr == "iconset" || subsetAttr == "gamelistview")
+		if (subsetAttr == "colorset" && nameAttr == mColorset)
+		{
+			parse = true;
+			return parse;
+		}
+		if (subsetAttr == "iconset" && nameAttr == mIconset)
+		{
+			parse = true;
+			return parse;
+		}
+		if (subsetAttr == "menu" && nameAttr == mMenu)
+		{
+			parse = true;
+			return parse;
+		}
+		if (subsetAttr == "systemview" && nameAttr == mSystemview)
+		{
+			parse = true;
+			return parse;
+		}
+		if (subsetAttr == "gamelistview" && nameAttr == mGamelistview)
+		{
+			parse = true;
+			return parse;
+		}
+		/*
+		if (subsetAttr == "menu" || subsetAttr == "iconset" || subsetAttr == "gamelistview")
 		{
 			if (nameAttr.rfind("1-") != std::string::npos)
 			{
@@ -320,7 +393,7 @@ bool ThemeData::parseSubset(const pugi::xml_node& node)
 		{
 			parse = true;
 			return parse;
-		}
+		}*/
 		/*
 		if (subsetAttr == "colorset" && nameAttr == mColorset)
 		{
@@ -387,6 +460,7 @@ void ThemeData::parseIncludes(const pugi::xml_node& root)
 		parseVariables(theme);
 		parseIncludes(theme);
 		parseViews(theme);
+		parseCustomViews(theme);
 		parseFeatures(theme);
 
 		mPaths.pop_back();
@@ -408,6 +482,7 @@ void ThemeData::parseFeatures(const pugi::xml_node& root)
 		if (std::find(sSupportedFeatures.cbegin(), sSupportedFeatures.cend(), supportedAttr) != sSupportedFeatures.cend())
 		{
 			parseViews(node);
+			parseCustomViews(node);
 		}
 	}
 }
@@ -441,37 +516,138 @@ void ThemeData::parseViews(const pugi::xml_node& root)
 	// parse views
 	for (pugi::xml_node node = root.child("view"); node; node = node.next_sibling("view"))
 	{
-		if(!node.attribute("name"))
-			throw error << "View missing \"name\" attribute!";
+		if (!node.attribute("name"))
+			continue;
 
 		const char* delim = " \t\r\n,";
-		const std::string nameAttr = node.attribute("name").as_string();
+		const std::string nameAttr = node.attribute("name").as_string();	
 		size_t prevOff = nameAttr.find_first_not_of(delim, 0);
 		size_t off = nameAttr.find_first_of(delim, prevOff);
 		std::string viewKey;
-		while(off != std::string::npos || prevOff != std::string::npos)
+
+		while (off != std::string::npos || prevOff != std::string::npos)
 		{
 			viewKey = nameAttr.substr(prevOff, off - prevOff);
 			prevOff = nameAttr.find_first_not_of(delim, off);
 			off = nameAttr.find_first_of(delim, prevOff);
 			
 			if (std::find(sSupportedViews.cbegin(), sSupportedViews.cend(), viewKey) != sSupportedViews.cend())
-			{
+			{				
 				ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
 				parseView(node, view);
-				
-				if (viewKey == "grid" && (int) nameAttr.find("gridex") < 0)
-				{
-					ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>("gridex", ThemeView())).first->second;
-					parseView(node, view);
+
+
+				for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
+				{			
+					if (it->second.isCustomView && it->second.baseType == viewKey)
+					{
+						ThemeView& customView = (ThemeView&)it->second;
+						parseView(node, customView);
+					}
 				}
+				
+
+
+
 			}
 		}
 	}
 }
 
+void ThemeData::parseCustomViewBaseClass(const pugi::xml_node& root, ThemeView& view, std::string baseClass)
+{
+	bool found = false;
 
-void ThemeData::parseView(const pugi::xml_node& root, ThemeView& view)
+	// Import original view properties
+	for (pugi::xml_node nodec = root.child("view"); nodec; nodec = nodec.next_sibling("view"))
+	{
+		if (!nodec.attribute("name"))
+			continue;
+
+		const char* delim = " \t\r\n,";
+		const std::string nameAttr = nodec.attribute("name").as_string();
+
+		size_t prevOff = nameAttr.find_first_not_of(delim, 0);
+		size_t off = nameAttr.find_first_of(delim, prevOff);
+		std::string viewKey;
+		while (off != std::string::npos || prevOff != std::string::npos)
+		{
+			viewKey = nameAttr.substr(prevOff, off - prevOff);
+			prevOff = nameAttr.find_first_not_of(delim, off);
+			off = nameAttr.find_first_of(delim, prevOff);
+
+			if (viewKey == baseClass)
+			{
+				found = true;
+				parseView(nodec, view);
+			}
+		}
+	}
+
+	if (found)
+		return;
+	
+	// base class is a customview ?
+	for (pugi::xml_node nodec = root.child("customView"); nodec; nodec = nodec.next_sibling("customView"))
+	{
+		const std::string nameAttr = nodec.attribute("name").as_string();
+
+		if (!nameAttr.empty() && nameAttr == baseClass)
+		{
+			std::string inherits = nodec.attribute("inherits").as_string();
+			if (!inherits.empty() && inherits != baseClass)
+			{
+				view.baseType = inherits;
+				parseCustomViewBaseClass(root, view, inherits);
+			}
+
+			parseView(nodec, view);
+		}
+	}
+}
+
+void ThemeData::parseCustomViews(const pugi::xml_node& root)
+{
+	ThemeException error;
+	error.setFiles(mPaths);
+
+	// parse views
+	for (pugi::xml_node node = root.child("customView"); node; node = node.next_sibling("customView"))
+	{
+		if (!node.attribute("name"))
+			continue;
+
+		std::string viewKey = node.attribute("name").as_string();
+		
+		ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
+		view.isCustomView = true;
+		
+		std::string inherits = node.attribute("inherits").as_string();
+		if (!inherits.empty())
+		{
+			view.baseType = inherits;
+			parseCustomViewBaseClass(root, view, inherits);			
+		}
+		
+		parseView(node, view);
+	}
+}
+
+std::vector<std::string> ThemeData::getViewsOfTheme()
+{
+	std::vector<std::string> ret;
+	for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
+	{
+		if (it->first == "menu" || it->first == "system")
+			continue;
+
+		ret.push_back(it->first);
+	}
+
+	return ret;
+}
+
+void ThemeData::parseView(const pugi::xml_node& root, ThemeView& view, bool overwriteElements)
 {
 	ThemeException error;
 	error.setFiles(mPaths);
@@ -506,7 +682,7 @@ void ThemeData::parseView(const pugi::xml_node& root, ThemeView& view)
 				off = nameAttr.find_first_of(delim, prevOff);
 
 				parseElement(node, elemTypeIt->second,
-					view.elements.insert(std::pair<std::string, ThemeElement>(elemKey, ThemeElement())).first->second);
+					view.elements.insert(std::pair<std::string, ThemeElement>(elemKey, ThemeElement())).first->second, overwriteElements);
 
 				if (std::find(view.orderedKeys.cbegin(), view.orderedKeys.cend(), elemKey) == view.orderedKeys.cend())
 					view.orderedKeys.push_back(elemKey);
@@ -521,7 +697,7 @@ bool ThemeData::parseRegion(const pugi::xml_node& node)
 
 	if (node.attribute("region"))
 	{
-		std::string regionsetting = "us"; // Settings::getInstance()->getString("ThemeRegionName");
+		std::string regionsetting = Settings::getInstance()->getString("ThemeRegionName");
 
 		parse = false;
 		const char* delim = " \t\r\n,";
@@ -542,11 +718,9 @@ bool ThemeData::parseRegion(const pugi::xml_node& node)
 
 	}
 	return parse;
-
 }
 
-
-void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element)
+void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element, bool overwrite)
 {
 	ThemeException error;
 	error.setFiles(mPaths);
@@ -563,6 +737,9 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 			LOG(LogWarning) << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
 			continue;
 		}
+
+		if (!overwrite && element.properties.find(node.name()) != element.properties.cend())
+			continue;
 
 		std::string str = resolveSystemVariable(mSystemThemeFolder, resolvePlaceholders(node.text().as_string()));
 
@@ -652,6 +829,24 @@ bool ThemeData::hasView(const std::string& view)
 	return (viewIt != mViews.cend());
 }
 
+std::string ThemeData::getCustomViewBaseType(const std::string& view)
+{
+	auto viewIt = mViews.find(view);
+	if (viewIt != mViews.cend())
+		return viewIt->second.baseType;
+
+	return "";
+}
+
+bool ThemeData::isCustomView(const std::string& view)
+{
+	auto viewIt = mViews.find(view);
+	if (viewIt != mViews.cend())
+		return viewIt->second.isCustomView;
+
+	return false;
+}
+
 const ThemeData::ThemeElement* ThemeData::getElement(const std::string& view, const std::string& element, const std::string& expectedType) const
 {
 	auto viewIt = mViews.find(view);
@@ -715,6 +910,15 @@ std::vector<GuiComponent*> ThemeData::makeExtras(const std::shared_ptr<ThemeData
 				comp = new ImageComponent(window);
 			else if(t == "text")
 				comp = new TextComponent(window);
+			else if (t == "video")
+			{
+#ifdef _RPI_
+				if (Settings::getInstance()->getBool("VideoOmxPlayer"))
+					comp = new VideoPlayerComponent(window, "");
+				else
+#endif
+					comp = new VideoVlcComponent(window, "");
+			}
 
 			comp->setDefaultZIndex(10);
 			comp->applyTheme(theme, view, *it, ThemeFlags::ALL);
@@ -846,4 +1050,156 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 		if (elem->has("selectorColor"))
 			Text.selectorColor = elem->get<unsigned int>("selectorColor");
 	}
+
+	elem = theme.getElement("menu", "menubutton", "menuButton");
+
+	if (elem)
+	{
+		if (elem->has("path"))
+			Icons.button = elem->get<std::string>("path");
+		if (elem->has("filledPath"))
+			Icons.button_filled = elem->get<std::string>("filledPath");
+	}
+
+	elem = theme.getElement("menu", "menuswitch", "menuSwitch");
+
+	if (elem)
+	{
+		if (elem->has("pathOn") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("pathOn")))
+			Icons.on = elem->get<std::string>("pathOn");
+		if (elem->has("pathOff") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("pathOff")))
+			Icons.off = elem->get<std::string>("pathOff");
+	}
+
+	elem = theme.getElement("menu", "menuslider", "menuSlider");
+
+	if (elem && elem->has("path") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("path")))
+		Icons.knob = elem->get<std::string>("path");
+
+	elem = theme.getElement("menu", "menuicons", "menuIcons");
+
+	if (elem) 
+	{
+		if (elem->has("iconSystem") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconSystem")))
+			MenuIcons.system = elem->get<std::string>("iconSystem");
+
+		if (elem->has("iconUpdates") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconUpdates")))
+			MenuIcons.updates = elem->get<std::string>("iconUpdates");
+
+		if (elem->has("iconGames") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconGames")))
+			MenuIcons.games = elem->get<std::string>("iconGames");
+
+		if (elem->has("iconControllers") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconControllers")))
+			MenuIcons.controllers = elem->get<std::string>("iconControllers");
+
+		if (elem->has("iconUI") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconUI")))
+			MenuIcons.ui = elem->get<std::string>("iconUI");
+
+		if (elem->has("iconSound") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconSound")))
+			MenuIcons.sound = elem->get<std::string>("iconSound");
+
+		if (elem->has("iconScraper") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconScraper")))
+			MenuIcons.scraper = elem->get<std::string>("iconScraper");
+
+		if (elem->has("iconAdvanced") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconAdvanced")))
+			MenuIcons.advanced = elem->get<std::string>("iconAdvanced");
+
+		if (elem->has("iconQuit") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconQuit")))
+			MenuIcons.quit = elem->get<std::string>("iconQuit");
+	}
+}
+
+std::map<std::string, std::string> ThemeData::sortThemeSubSets(const std::map<std::string, std::string>& subsetmap, const std::string& subset)
+{
+	std::map<std::string, std::string> sortedsets;
+
+	for (const auto& it : subsetmap)
+	{
+		if (it.second == subset)
+			sortedsets[it.first] = it.first;
+	}
+	return sortedsets;
+}
+
+
+void ThemeData::crawlIncludes(const pugi::xml_node& root, std::map<std::string, std::string>& sets, std::deque<std::string>& dequepath)
+{
+	for (pugi::xml_node node = root.child("include"); node; node = node.next_sibling("include"))
+	{
+		sets[node.attribute("name").as_string()] = node.attribute("subset").as_string();
+
+		const char* relPath = node.text().get();
+		std::string path = Utils::FileSystem::resolveRelativePath(relPath, dequepath.back(), true);
+
+		dequepath.push_back(path);
+		pugi::xml_document includeDoc;
+		/*pugi::xml_parse_result result =*/ includeDoc.load_file(path.c_str());
+		pugi::xml_node root = includeDoc.child("theme");
+		crawlIncludes(root, sets, dequepath);
+		findRegion(includeDoc, sets);
+		dequepath.pop_back();
+	}
+}
+
+void ThemeData::findRegion(const pugi::xml_document& doc, std::map<std::string, std::string>& sets)
+{
+	pugi::xpath_node_set regionattr = doc.select_nodes("//@region");
+	for (auto xpath_node : regionattr)
+	{
+		if (xpath_node.attribute() != nullptr)
+			sets[xpath_node.attribute().value()] = "region";
+	}
+}
+
+std::map<std::string, std::string> ThemeData::getThemeSubSets(const std::string& theme)
+{
+	std::map<std::string, std::string> sets;
+
+	std::deque<std::string> dequepath;
+
+	static const size_t pathCount = 2;
+	std::string paths[pathCount] =
+	{
+		"/etc/emulationstation/themes",
+		Utils::FileSystem::getHomePath() + "/.emulationstation/themes"
+	};
+
+	for (size_t i = 0; i < pathCount; i++)
+	{
+		if (!Utils::FileSystem::isDirectory(paths[i]))
+			continue;
+
+		auto dirs = Utils::FileSystem::getDirInfo(paths[i] + "/" + theme, false);
+		for (auto it = dirs.cbegin(); it != dirs.cend(); ++it)
+		{
+			if (!it->directory || it->hidden)
+				continue;
+			
+			std::string path = it->path + "/theme.xml";
+			if (!Utils::FileSystem::exists(path))
+				continue;
+
+			dequepath.push_back(path);
+			pugi::xml_document doc;
+			doc.load_file(path.c_str());
+			pugi::xml_node root = doc.child("theme");
+			crawlIncludes(root, sets, dequepath);
+			findRegion(doc, sets);
+			dequepath.pop_back();
+		}
+
+		std::string path = paths[i] + "/" + theme + "/theme.xml";
+		if (!Utils::FileSystem::exists(path))
+			continue;
+
+		dequepath.push_back(path);
+		pugi::xml_document doc;
+		doc.load_file(path.c_str());
+		pugi::xml_node root = doc.child("theme");
+		crawlIncludes(root, sets, dequepath);
+		findRegion(doc, sets);
+		dequepath.pop_back();		
+	}
+		
+	return sets;
 }

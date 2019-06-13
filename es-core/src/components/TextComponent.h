@@ -22,6 +22,8 @@ public:
 	void setFont(const std::shared_ptr<Font>& font);
 	void setUppercase(bool uppercase);
 	void onSizeChanged() override;
+
+	std::string getText() { return mText; }
 	void setText(const std::string& text);
 	virtual void setColor(unsigned int color);
 	void setHorizontalAlignment(Alignment align);

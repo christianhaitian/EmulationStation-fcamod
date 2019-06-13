@@ -18,7 +18,7 @@ public:
 	void setDefaultImage(std::string path);
 
 	//Loads the image at the given filepath. Will tile if tile is true (retrieves texture as tiling, creates vertices accordingly).
-	void setImage(std::string path, bool tile = false);
+	void setImage(std::string path, bool tile = false, Vector2f maxSize = Vector2f(0  ,0));
 	//Loads an image from memory.
 	void setImage(const char* image, size_t length, bool tile = false);
 	//Use an already existing texture.
@@ -69,6 +69,13 @@ public:
 
 	Vector2f getSize() const override;
 
+	bool isVisible() {
+		return mVisible;
+	}
+	void setVisible(bool visible) {
+		mVisible = visible;
+	}
+
 	bool hasImage();
 
 	void render(const Transform4x4f& parentTrans) override;
@@ -107,11 +114,10 @@ private:
 	bool					mForceLoad;
 	bool					mDynamic;
 	bool					mRotateByTargetSize;
+	bool					mVisible;
 
 	Vector2f mTopLeftCrop;
-	Vector2f mBottomRightCrop;
-
-	bool	mSizeChanged;	
+	Vector2f mBottomRightCrop;	
 };
 
 #endif // ES_CORE_COMPONENTS_IMAGE_COMPONENT_H

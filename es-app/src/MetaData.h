@@ -63,10 +63,7 @@ public:
 
 	inline MetaDataListType getType() const { return mType; }
 	inline const std::vector<MetaDataDecl>& getMDD() const { return getMDDByType(getType()); }
-
-	const std::string getSortName() const {
-		return mSortName;
-	}
+	const std::string getName() const { return mName; }
 
 private:
 	MetaDataListType mType;
@@ -78,7 +75,7 @@ private:
 
 	static std::map<std::string, std::string> BuildDefaultMap(MetaDataListType type);
 
-	std::string mSortName;
+	std::string mName;
 };
 
 #endif // ES_APP_META_DATA_H

@@ -41,6 +41,9 @@ void TextComponent::setFont(const std::shared_ptr<Font>& font)
 //  Set the color of the font/text
 void TextComponent::setColor(unsigned int color)
 {
+	if (mColor == color)
+		return;
+
 	mColor = color;
 	mColorOpacity = mColor & 0x000000FF;
 	onColorChanged();
@@ -49,6 +52,9 @@ void TextComponent::setColor(unsigned int color)
 //  Set the color of the background box
 void TextComponent::setBackgroundColor(unsigned int color)
 {
+	if (mBgColor == color)
+		return;
+
 	mBgColor = color;
 	mBgColorOpacity = mBgColor & 0x000000FF;
 }

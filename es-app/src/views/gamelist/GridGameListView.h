@@ -23,16 +23,17 @@ public:
 
 	virtual const char* getName() const override 
 	{ 
-		if (mGridEx)
-			return "gridex";
+		if (!mCustomThemeName.empty())
+			return mCustomThemeName.c_str();
 
 		return "grid"; 
 	}
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 	virtual void launch(FileData* game) override;
+	virtual void onFileChanged(FileData* file, FileChangeType change);
 
-	void setGridEx();
+	virtual void setThemeName(std::string name);
 
 protected:
 	virtual std::string getQuickSystemSelectRightButton() override;
@@ -63,7 +64,6 @@ private:
 	ImageComponent mImage;
 
 	bool mImageVisible;
-	bool mGridEx;
 
 	std::vector<TextComponent*> getMDLabels();
 	std::vector<GuiComponent*> getMDValues();
