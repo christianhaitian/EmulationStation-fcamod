@@ -113,6 +113,7 @@ Changes in my branch
 **General :** 	
 - Localisation (French actually supported)
 - OSK : On-screen Keyboard.
+- Video elements can be added as extras.
 - Fixed : Don't show Games what are marked Hidden in gamelist.
 - Added a star icon before the name of the game when it is a favorite.
 - Corrected favorites ( and custom lists ) management.
