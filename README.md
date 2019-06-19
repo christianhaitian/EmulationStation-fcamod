@@ -1,47 +1,123 @@
-EmulationStation
-================
+EmulationStation FCAMOD
+=======================
 
-This is a fork of EmulationStation from jrassa.
-EmulationStation is a cross-platform graphical front-end for emulators with controller navigation.
+This is a fork of EmulationStation containing many additions. 
+This has been primary developped for Windows platform, but can be compiled for Linux & Raspberry Pi.
 
 Changes in my branch
 ====================
 
+**System list :** 
 - Support for Multiple Emulators/Cores in es_systems.cfg, and setting Emulator/Core per game.
 
-```xml
-  <command>%HOME%\RetroArch\retroarch.exe -L %HOME%\RetroArch\cores\%CORE%_libretro.dll %ROM%</command>
-  <emulators>
-      <emulator name="mame">
-        <cores>
-          <core>mame2003_plus</core>
-          <core>mame2003</core>
-        </cores>
-      </emulator>
-      <emulator name="fbalpha">
-        <cores>
-          <core>fbalpha2012</core>
-        </cores>
-      </emulator>
-    </emulators>
-```
-- Better Grid view (animations, layout, selection...)
-- Created a 'GridEx' mode, which inherits from grid, in order to create a 'preview bar' including a game screenshot.
-- Changed 'Automatic' view mode. Switchs to grid if "thumbnails" exist in gamelist. Switchs to gridex if "thumbnails" and "image" exist in gamelist. 
-- Don't show Directories that contains only one Game : just Show the game.
-- Don't show Games what are marked Hidden in gamelist.
-- Cleaned menus + changed menu item order (by interest). Simplified "Quit" menu item ( no more popup )
-- Case insensitive file extensions.
-- Skip parsing 'downloaded_images' and 'media' folders ( loading time boost )
-- Localisation (French actually supported)
-- Corrected favorites ( and custom lists ) management.
-- Don't load all fields in Medadata Editor ( too tricky to use on windows, better use an external tool ).
-- Windows is now "Windowed No border" by default. On Windows, Exclusive fullscreen can be annoying...
-- Theming : Ability to force default view ( attribute defaultView )
-- Windows : Stop using _wsystem for launching games. Run games with ShellExecuteEx instead ( avoids command window )
-- Add an option to leave ES open with a black screen" Chargement en cours..." when launching games ( avoids showing windows desktop )
+	```xml
+	  <command>%HOME%\RetroArch\retroarch.exe -L %HOME%\RetroArch\cores\%CORE%_libretro.dll %ROM%</command>
+	  <emulators>
+	      <emulator name="mame">
+		<cores>
+		  <core>mame2003_plus</core>
+		  <core>mame2003</core>
+		</cores>
+	      </emulator>
+	      <emulator name="fbalpha">
+		<cores>
+		  <core>fbalpha2012</core>
+		</cores>
+	      </emulator>
+	    </emulators>
+	```
+**Grid view :** 
+- Animations when size changes and during scrolling.
+- Supports having a label. 
+	```xml
+	<text name="gridtile">
+	    <color>969A9E</color>
+	    <size>1 0.18</size>
+	</text>
+	<text name="gridtile_selected">
+	    <color>F6FAFF</color>
+	</text>
+	```	
+- Layout can be defined by number of columns and rows ( you had to calculate manually the size of tiles in previous versions ). Zooming the selected item can also be defined simply.
+	```xml
+	<imagegrid name="gamegrid">
+	      <autoLayout>4 3</autoLayout>	
+	      <autoLayoutSelectedZoom>1.04</autoLayoutSelectedZoom>
+	```	 
+- Supports extended padding (top, left, bottom, right) :
+	```xml
+	<imagegrid name="gamegrid">
+	      <padding>0.03 0.13 0.03 0.08</padding>
+	```	 
+	
+- Supports video in the selected item (delay can be defined in the theme)
+	```xml
+	<imagegrid name="gamegrid">
+	      <showVideoAtDelay>700</showVideoAtDelay>      
+	```	 	
+	
+- Theme can define which image to use (image, thumbnail or marquee).
+	```xml
+	<imagegrid name="gamegrid">
+	      <imageSource>marquee</imageSource>
+	```	 
 
-Je crois que c'est à peu près tout....
+- Theme can define the image sizing mode (minSize, maxSize or size). Gridtile items can define a padding.
+	```xml
+	<gridtile name="default">
+	    <padding>24 24</padding>
+	    <imageSizeMode>minSize</imageSizeMode>
+	```	 
+	
+- Supports md_image, md_video, md_name items... just like detailed view.
+- Ability to override grid size by system.
+
+**Detailed view :** 
+- Supports md_video, md_marquee items like video view did : Video view is no longer useful.
+
+**Custom views & Theming:** 	
+- Allow creation of custom views, which inherits from one of the basic theme items ( basic, detailed, grid ).
+	```xml
+	<customView name="Video grid" inherits="grid">
+	    <imagegrid name="gamegrid">
+	```	    
+- Ability to select the view (or customview) to use globally or by system.
+- The theme can force the default view to use ( attribute defaultView )
+- Fully supports Retropie & Recalbox Themes.
+		    
+**Optimizations :** 	
+- Really faster loading time, using multithreading.
+- The loading sequence displays a progress bar.
+- Reviewed SVG loading and size calculation mecanism. Previous versions unloaded/reloaded SVGs each time a new container needed to display it because of a size calculation problem.
+- Ability to disable "Preload UI" mecanism. This mecanism is used to preload the UI of gamelists of every system. Disable it adds a small lags when opening
+- Don't keep in memory the cache of image filenames when launching games -> It takes a lot of memory for nothing.
+- Skip parsing 'downloaded_images' and 'media' folders ( better loading time )
+- Added option "Optimize images Vram Use" : Don't load an image in it source resolution if it needs to be displayed smaller -> Resize images in memory to save VRAM. Introduce longer image loading time, but less VRAM use.
+
+**Menus :** 	
+- Cleaned menus + changed menu item order (by interest). 
+- Full support for menu Theming.
+- Separated "Transition style" and "Game launch transition"
+- Added option "Boot on gamelist"
+- Added option "Hide system view"
+- Added option "Display favorites first in gamelist"
+
+**General :** 	
+- Localisation (French actually supported)
+- OSK : On-screen Keyboard.
+- Fixed : Don't show Games what are marked Hidden in gamelist.
+- Corrected favorites ( and custom lists ) management.
+- Don't show Directories that contains only one Game : just Show the game.
+- Case insensitive file extensions.
+
+**Windows specific :** 	
+- Simplified "Quit" menu item ( no more popup asking to restart or turn off Windows )
+- Windows is now "Windowed No border" by default. On Windows, Exclusive fullscreen can be annoying...
+- Stop using _wsystem for launching games. Run games with ShellExecuteEx instead ( avoids command window )
+- Add an option to leave ES open with a black screen "Loading..." when launching games ( avoids showing windows desktop )
+- Don't load all fields in Medadata Editor ( too tricky to use on windows, better use an external tool ).
+
+Je crois que c'est à peu près tout...
 
 Building
 ========
