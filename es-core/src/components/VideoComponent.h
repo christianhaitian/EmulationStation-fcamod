@@ -77,9 +77,15 @@ public:
 		return mIsPlaying;
 	}
 
+	bool isWaitingForVideoToStart() {
+		return mIsWaitingForVideoToStart;
+	}
+
 	bool isFading() {		
 		return mFadeIn < 1.0f;
 	}
+
+	void onVideoStarted();
 
 private:
 	// Start the video Immediately
@@ -99,6 +105,7 @@ private:
 	void manageState();
 
 protected:
+
 	unsigned						mVideoWidth;
 	unsigned						mVideoHeight;
 	Vector2f						mTargetSize;
@@ -117,6 +124,8 @@ protected:
 	bool							mScreensaverActive;
 	bool							mScreensaverMode;
 	bool							mTargetIsMax;
+
+	bool							mIsWaitingForVideoToStart;
 
 	Configuration					mConfig;
 };

@@ -65,6 +65,9 @@ VideoComponent::VideoComponent(Window* window) :
 	mTargetIsMax(false),
 	mTargetSize(0, 0)
 {
+	mFadeIn = 0.0f;
+	mIsWaitingForVideoToStart = false;
+
 	// Setup the default configuration
 	mConfig.showSnapshotDelay 		= false;
 	mConfig.showSnapshotNoVideo		= false;
@@ -94,7 +97,7 @@ void VideoComponent::onOriginChanged()
 
 void VideoComponent::onSizeChanged()
 {
-	// Update the embeded static image
+	// Update the embeded static image	
 	mStaticImage.onSizeChanged();
 }
 
@@ -149,6 +152,8 @@ void VideoComponent::render(const Transform4x4f& parentTrans)
 	Transform4x4f trans = parentTrans * getTransform();
 	GuiComponent::renderChildren(trans);
 	
+	VideoComponent::renderSnapshot(parentTrans);
+
 	Renderer::setMatrix(trans);
 
 	// Handle the case where the video is delayed
@@ -162,10 +167,13 @@ void VideoComponent::renderSnapshot(const Transform4x4f& parentTrans)
 {
 	// This is the case where the video is not currently being displayed. Work out
 	// if we need to display a static image
-	if ((mConfig.showSnapshotNoVideo && mVideoPath.empty()) || (mStartDelayed && mConfig.showSnapshotDelay))
-	{
-		// Display the static image instead
-		mStaticImage.setOpacity((unsigned char)(mFadeIn * 255.0f));
+	if ((mConfig.showSnapshotNoVideo && mVideoPath.empty()) || ((mStartDelayed || mFadeIn < 1.0) && mConfig.showSnapshotDelay))
+	{		
+		float t = 1.0 - mFadeIn;
+		t -= 1; // cubic ease out
+		t = Math::lerp(0, 1, t*t*t + 1);
+
+		mStaticImage.setOpacity((unsigned char)(t * 255.0f));
 		mStaticImage.render(parentTrans);
 	}
 }
@@ -244,7 +252,7 @@ void VideoComponent::handleLooping()
 void VideoComponent::handleStartDelay()
 {
 	// Only play if any delay has timed out
-	if (!mStartDelayed)
+	if (!mStartDelayed || mIsWaitingForVideoToStart)
 		return;
 
 	// Timeout not yet completed
@@ -255,16 +263,38 @@ void VideoComponent::handleStartDelay()
 	mStartDelayed = false;
 	// Clear the playing flag so startVideo works
 	mIsPlaying = false;
+
+	mIsWaitingForVideoToStart = true;
+
 	startVideo();
 
-	mFadeIn = 0.0f;
-	mIsPlaying = true;	
+	if (mIsPlaying)
+		mIsWaitingForVideoToStart = false;
+
+//	mFadeIn = 0.0f;
+//	mIsPlaying = true;	
+}
+
+void VideoComponent::onVideoStarted()
+{
+	mIsWaitingForVideoToStart = false;
+
+	if (mConfig.startDelay == 0 || PowerSaver::getMode() == PowerSaver::INSTANT)
+	{
+		mFadeIn = 1.0f;
+		mIsPlaying = true;
+	}
+	else
+	{
+		mFadeIn = 0.0f;
+		mIsPlaying = true;
+	}
 }
 
 void VideoComponent::startVideoWithDelay()
 {
 	// If not playing then either start the video or initiate the delay
-	if (mIsPlaying || mStartDelayed)
+	if (mIsPlaying || mStartDelayed || mIsWaitingForVideoToStart)
 		return;
 	
 	// Set the video that we are going to be playing so we don't attempt to restart it
@@ -275,10 +305,13 @@ void VideoComponent::startVideoWithDelay()
 		// No delay. Just start the video
 		mStartDelayed = false;
 		mIsPlaying = false;
+		
+		mIsWaitingForVideoToStart = true;
+
 		startVideo();
 
-		mFadeIn = 0.0f;
-		mIsPlaying = true;
+		if (mIsPlaying)
+			mIsWaitingForVideoToStart = false;
 	}
 	else
 	{
@@ -326,16 +359,20 @@ void VideoComponent::update(int deltaTime)
 
 void VideoComponent::manageState()
 {
+	if (mIsWaitingForVideoToStart && mIsPlaying)
+		mIsWaitingForVideoToStart = false;
+
 	// We will only show if the component is on display and the screensaver
 	// is not active
 	bool show = mShowing && !mScreensaverActive && !mDisable;
 
 	// See if we're already playing
-	if (mIsPlaying)
+	if (mIsPlaying || mIsWaitingForVideoToStart)
 	{
 		// If we are not on display then stop the video from playing
 		if (!show)
 		{
+			mIsWaitingForVideoToStart = false;
 			stopVideo();
 		}
 		else
@@ -344,6 +381,7 @@ void VideoComponent::manageState()
 			{
 				// Path changed. Stop the video. We will start it again below because
 				// mIsPlaying will be modified by stopVideo to be false
+				mIsWaitingForVideoToStart = false;
 				stopVideo();
 			}
 		}

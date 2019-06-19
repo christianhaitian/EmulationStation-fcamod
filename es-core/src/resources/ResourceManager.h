@@ -20,8 +20,8 @@ class ResourceManager;
 class IReloadable
 {
 public:
-	virtual void unload(std::shared_ptr<ResourceManager>& rm) = 0;
-	virtual void reload(std::shared_ptr<ResourceManager>& rm) = 0;
+	virtual void unload() = 0;
+	virtual void reload() = 0;
 };
 
 class ResourceManager

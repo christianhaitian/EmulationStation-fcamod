@@ -115,8 +115,11 @@ Vector2i ImageIO::adjustPictureSize(Vector2i imageSize, Vector2i maxSize)
 }
 
 
-unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height, int maxWidth, int maxHeight)
+unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height, int maxWidth, int maxHeight, Vector2i& baseSize, Vector2i& packedSize)
 {
+	baseSize = Vector2i(0, 0);
+	packedSize = Vector2i(0, 0);
+
 	width = 0;
 	height = 0;
 
@@ -142,22 +145,27 @@ unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const
 						fiBitmap = fiConverted;
 					}
 				}
+
 				if (fiBitmap != nullptr)
 				{
 					width = FreeImage_GetWidth(fiBitmap);
 					height = FreeImage_GetHeight(fiBitmap);
+
+					baseSize = Vector2i(width, height);
 					
 					if (maxWidth > 0 && maxHeight > 0 && (width > maxWidth || height > maxHeight))
 					{
 						Vector2i sz = adjustPictureSize(Vector2i(width, height), Vector2i(maxWidth, maxHeight));
 						if (sz.x() != width || sz.y() != height)
-						{
+						{							
 							FIBITMAP* imageRescaled = FreeImage_Rescale(fiBitmap, sz.x(), sz.y(), FILTER_BOX);
 							FreeImage_Unload(fiBitmap);
 							fiBitmap = imageRescaled;
 
 							width = FreeImage_GetWidth(fiBitmap);
 							height = FreeImage_GetHeight(fiBitmap);
+							
+							packedSize = Vector2i(width, height);
 						}
 					}
 					

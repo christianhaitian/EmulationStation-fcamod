@@ -13,6 +13,7 @@ struct libvlc_media_player_t;
 struct VideoContext {
 	SDL_Surface*		surface;
 	SDL_mutex*			mutex;
+	VideoComponent*		component;
 	bool				valid;
 };
 

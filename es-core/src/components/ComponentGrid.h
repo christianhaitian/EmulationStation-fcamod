@@ -71,6 +71,8 @@ public:
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 
+	inline void setUnhandledInputCallback(const std::function<bool(InputConfig* config, Input input)>& func) { mUnhandledInputCallback = func; }
+
 private:
 	class GridEntry
 	{
@@ -122,6 +124,8 @@ private:
 
 	void onCursorMoved(Vector2i from, Vector2i to);
 	Vector2i mCursor;
+
+	std::function<bool(InputConfig* config, Input input)> mUnhandledInputCallback;
 };
 
 #endif // ES_CORE_COMPONENTS_COMPONENT_GRID_H

@@ -27,6 +27,8 @@ public:
 	GuiComponent(Window* window);
 	virtual ~GuiComponent();
 
+	static bool ALLOWANIMATIONS;
+
 	virtual void textInput(const char* text);
 
 	//Called when input is received.
@@ -94,6 +96,7 @@ public:
 	void sortChildren();
 	unsigned int getChildCount() const;
 	GuiComponent* getChild(unsigned int i) const;
+	bool isChild(GuiComponent* cmp);
 
 	// animation will be automatically deleted when it completes or is stopped.
 	bool isAnimationPlaying(unsigned char slot) const;
@@ -206,6 +209,7 @@ public:
 	static const std::string localize(const std::string text);
 
 	static void setLanguage(std::string lang);
+	static const std::string getLanguage() { return mCurrentLanguage; }
 
 private:
 	static std::vector<LocalizationItem*> mItems;
@@ -214,9 +218,19 @@ private:
 };
 
 #if defined(_WIN32)
+
+#define UNICODE_CHARTYPE wchar_t*
+#define UNICODE_CHARS(x) L ## x
+#define UNICODE_STRING(x) GuiTextTool::convertFromWideString(L ## x)
+
 #define _T(x) GuiTextTool::localize(GuiTextTool::convertFromWideString(L ## x))
 #define _L(x) GuiTextTool::localize(x)
 #else
+
+#define UNICODE_CHARTYPE char*
+#define UNICODE_CHARS(x) x
+#define UNICODE_STRING(x) x
+
 #define _T(x) GuiTextTool::localize(x)
 #define _L(x) GuiTextTool::localize(x)
 #endif // _WIN32

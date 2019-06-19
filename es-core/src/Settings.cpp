@@ -73,12 +73,7 @@ void Settings::setDefaults()
 	
 	mStringMap["StartupSystem"] = "";
 
-#if defined(_WIN32)
 	mBoolMap["VSync"] = true;
-#else
-	mBoolMap["VSync"] = false;
-#endif
-
 	mBoolMap["EnableSounds"] = true;
 	mBoolMap["ShowHelpPrompts"] = true;
 	mBoolMap["ScrapeRatings"] = true;
@@ -87,6 +82,7 @@ void Settings::setDefaults()
 	mBoolMap["QuickSystemSelect"] = true;
 	mBoolMap["MoveCarousel"] = true;
 	mBoolMap["SaveGamelistsOnExit"] = true;
+	mBoolMap["OptimizeVRAM"] = false;	
 
 	mBoolMap["Debug"] = false;
 	mBoolMap["DebugGrid"] = false;
@@ -160,6 +156,8 @@ void Settings::setDefaults()
 	mStringMap["CollectionSystemsCustom"] = "";
 	mBoolMap["SortAllSystems"] = false;
 	mBoolMap["UseCustomCollectionsSystem"] = true;
+	mBoolMap["FavoritesFirst"] = true;
+	
 
 	mBoolMap["LocalArt"] = false;
 

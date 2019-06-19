@@ -80,6 +80,8 @@ public:
 
 	void render(const Transform4x4f& parentTrans) override;
 
+	void setAllowFading(bool fade) { mAllowFading = fade; };
+
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties) override;
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
@@ -115,6 +117,8 @@ private:
 	bool					mDynamic;
 	bool					mRotateByTargetSize;
 	bool					mVisible;
+
+	bool					mAllowFading;
 
 	Vector2f mTopLeftCrop;
 	Vector2f mBottomRightCrop;	

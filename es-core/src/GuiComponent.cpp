@@ -105,6 +105,8 @@ const std::string GuiTextTool::localize(const std::string text)
 	return text;	
 }
 
+bool GuiComponent::ALLOWANIMATIONS = true;
+
 GuiComponent::GuiComponent(Window* window) : mWindow(window), mParent(NULL), mOpacity(255),
 	mPosition(Vector3f::Zero()), mOrigin(Vector2f::Zero()), mRotationOrigin(0.5, 0.5),
 	mSize(Vector2f::Zero()), mTransform(Transform4x4f::Identity()), mIsProcessing(false)
@@ -211,7 +213,7 @@ Vector2f GuiComponent::getSize() const
 void GuiComponent::setSize(float w, float h)
 {
 	mSize = Vector2f(w, h);
-    onSizeChanged();
+	onSizeChanged();
 }
 
 float GuiComponent::getRotation() const
@@ -245,7 +247,7 @@ void GuiComponent::setZIndex(float z)
 }
 
 float GuiComponent::getDefaultZIndex() const
-{
+{	
 	return mDefaultZIndex;
 }
 
@@ -258,6 +260,15 @@ Vector2f GuiComponent::getCenter() const
 {
 	return Vector2f(mPosition.x() - (getSize().x() * mOrigin.x()) + getSize().x() / 2,
 	                mPosition.y() - (getSize().y() * mOrigin.y()) + getSize().y() / 2);
+}
+
+bool GuiComponent::isChild(GuiComponent* cmp)
+{
+	for (auto i = mChildren.cbegin(); i != mChildren.cend(); i++)
+		if (*i == cmp)
+			return true;
+	
+	return false;
 }
 
 //Children stuff.

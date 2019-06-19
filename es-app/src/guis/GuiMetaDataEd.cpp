@@ -18,6 +18,7 @@
 #include "FileFilterIndex.h"
 #include "SystemData.h"
 #include "Window.h"
+#include "guis/GuiTextEditPopupKeyboard.h"
 
 GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector<MetaDataDecl>& mdd, ScraperSearchParams scraperParams,
 	const std::string& /*header*/, std::function<void()> saveCallback, std::function<void()> deleteFunc, FileData* file) : GuiComponent(window),
@@ -216,8 +217,10 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 				bool multiLine = iter->type == MD_MULTILINE_STRING;
 				const std::string title = iter->displayPrompt;
 				auto updateVal = [ed](const std::string& newVal) { ed->setValue(newVal); }; // ok callback (apply new value to ed)
-				row.makeAcceptInputHandler([this, title, ed, updateVal, multiLine] {
-					mWindow->pushGui(new GuiTextEditPopup(mWindow, title, ed->getValue(), updateVal, multiLine));
+				row.makeAcceptInputHandler([this, title, ed, updateVal, multiLine] 
+				{
+					mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, title, ed->getValue(), updateVal, multiLine));
+			//		mWindow->pushGui(new GuiTextEditPopup(mWindow, title, ed->getValue(), updateVal, multiLine));
 				});
 				break;
 			}

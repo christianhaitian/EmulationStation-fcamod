@@ -81,7 +81,7 @@ bool Window::init(bool initRenderer)
 
 	InputManager::getInstance()->init();
 
-	if (initRenderer)
+	//if (initRenderer)
 		ResourceManager::getInstance()->reloadAll();
 
 	//keep a reference to the default fonts, so they don't keep getting destroyed/recreated
@@ -109,11 +109,14 @@ void Window::deinit(bool deinitRenderer)
 	{
 		(*i)->onHide();
 	}
+
 	InputManager::getInstance()->deinit();
-	
+	TextureResource::resetCache();
+	ResourceManager::getInstance()->unloadAll();
+
 	if (deinitRenderer)
 	{
-		ResourceManager::getInstance()->unloadAll();
+	//	ResourceManager::getInstance()->unloadAll();
 		Renderer::deinit();
 	}
 }
@@ -309,6 +312,9 @@ void Window::setAllowSleep(bool sleep)
 
 void Window::endRenderLoadingScreen()
 {
+	if (mSplash != NULL)
+		mSplash->unload();
+
 	mSplash = NULL;
 }
 
@@ -344,7 +350,7 @@ void Window::renderLoadingScreen(std::string text, float percent)
 
 #if defined(_WIN32)
 	if (mSplash == NULL)
-		mSplash = TextureResource::get(":/splash.svg", false, true, true);
+		mSplash = TextureResource::get(":/splash.svg", false, false, true);
 #endif
 
 	if (mSplash != NULL)
@@ -381,11 +387,14 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 
 #if defined(_WIN32)
 	if (mSplash == NULL)
-		mSplash = TextureResource::get(":/splash.svg", false, true, true);
+		mSplash = TextureResource::get(":/splash.svg", false, false, true);
 #endif
 
 	if (mSplash != NULL)
+	{
+		mSplash->reload();  // Ensure splash is loaded
 		splash.setImage(mSplash);
+	}
 	else
 		splash.setImage(":/splash.svg");
 
@@ -394,6 +403,8 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 	splash.render(trans);
 	
 	auto& font = mDefaultFonts.at(1);
+	font->reload(); // Ensure font is loaded
+
 	TextCache* cache = font->buildTextCache(_T("Loading..."), 0, 0, 0x65656500 | (unsigned char)(opacity * 255));
 
 	float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);

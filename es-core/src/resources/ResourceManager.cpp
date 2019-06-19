@@ -98,9 +98,9 @@ void ResourceManager::unloadAll()
 	auto iter = mReloadables.cbegin();
 	while(iter != mReloadables.cend())
 	{
-		if(!iter->expired())
+		if (!iter->expired())
 		{
-			iter->lock()->unload(sInstance);
+			iter->lock()->unload();
 			iter++;
 		}else{
 			iter = mReloadables.erase(iter);
@@ -115,7 +115,7 @@ void ResourceManager::reloadAll()
 	{
 		if(!iter->expired())
 		{
-			iter->lock()->reload(sInstance);
+			iter->lock()->reload();
 			iter++;
 		}else{
 			iter = mReloadables.erase(iter);

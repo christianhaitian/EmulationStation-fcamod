@@ -136,6 +136,15 @@ public:
 		onCursorChanged(CURSOR_STOPPED);
 	}
 
+	void setCursorIndex(int index) 
+	{
+		if (index >= 0 && index < (int)mEntries.size()) 
+		{
+			mCursor = index;
+			onCursorChanged(CURSOR_STOPPED);
+		}
+	}
+
 	// returns true if successful (select is in our list), false if not
 	bool setCursor(const UserData& obj)
 	{

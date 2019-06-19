@@ -8,6 +8,9 @@
 #include <string>
 #include <vector>
 
+#include <pugixml/src/pugixml.hpp>
+#include "math/Vector2f.h"
+
 class FileData;
 class FileFilterIndex;
 class ThemeData;
@@ -93,7 +96,9 @@ public:
 	inline const std::shared_ptr<ThemeData>& getTheme() const { return mTheme; }
 
 	std::string getSystemViewMode() const { if (mViewMode == "automatic") return ""; else return mViewMode; };
-	bool setSystemViewMode(std::string newViewMode);
+	bool setSystemViewMode(std::string newViewMode, Vector2f gridSizeOverride = Vector2f(0,0), bool setChanged = true);
+
+	Vector2f getGridSizeOverride();
 
 	std::string getGamelistPath(bool forWrite) const;
 	bool hasGamelist() const;
@@ -127,6 +132,8 @@ public:
 	FileFilterIndex* getIndex() { return mFilterIndex; };
 
 private:
+	static SystemData* loadSystem(pugi::xml_node system);
+
 	bool mIsCollectionSystem;
 	bool mIsGameSystem;
 	std::string mName;
@@ -136,6 +143,7 @@ private:
 	std::shared_ptr<ThemeData> mTheme;
 
 	std::string mViewMode;
+	Vector2f    mGridSizeOverride;
 	bool mViewModeChanged;
 
 	void populateFolder(FileData* folder);

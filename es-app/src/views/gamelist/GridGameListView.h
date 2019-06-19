@@ -9,10 +9,13 @@
 #include "views/gamelist/ISimpleGameListView.h"
 #include "views/gamelist/BasicGameListView.h"
 
+class VideoComponent;
+
 class GridGameListView : public ISimpleGameListView
 {
 public:
-	GridGameListView(Window* window, FileData* root);
+	GridGameListView(Window* window, FileData* root, const std::shared_ptr<ThemeData>& theme, std::string customThemeName, Vector2f gridSize);
+	~GridGameListView();
 
 	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
 
@@ -33,7 +36,7 @@ public:
 	virtual void launch(FileData* game) override;
 	virtual void onFileChanged(FileData* file, FileChangeType change);
 
-	virtual void setThemeName(std::string name);
+	virtual void setThemeName(std::string name);	
 
 protected:
 	virtual std::string getQuickSystemSelectRightButton() override;
@@ -46,6 +49,7 @@ protected:
 
 private:
 	void updateInfoPanel();
+	const std::string getImagePath(FileData* file);
 
 	void initMDLabels();
 	void initMDValues();
@@ -61,9 +65,12 @@ private:
 	DateTimeComponent mLastPlayed;
 	TextComponent mPlayCount;
 	TextComponent mName;
-	ImageComponent mImage;
 
+	ImageComponent mImage;
 	bool mImageVisible;
+
+	VideoComponent* mVideo;
+	bool			mVideoVisible;
 
 	std::vector<TextComponent*> getMDLabels();
 	std::vector<GuiComponent*> getMDValues();

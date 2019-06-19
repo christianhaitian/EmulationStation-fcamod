@@ -31,8 +31,14 @@ static void unlock(void *data, void* /*id*/, void *const* /*p_pixels*/) {
 }
 
 // VLC wants to display a video frame.
-static void display(void* /*data*/, void* /*id*/) {
-	//Data to be displayed
+static void display(void* data, void* id) 
+{
+	if (data == NULL)
+		return;
+
+	struct VideoContext *c = (struct VideoContext *)data;
+	if (c->valid && c->component != NULL && !c->component->isPlaying() && c->component->isWaitingForVideoToStart())
+		c->component->onVideoStarted();
 }
 
 VideoVlcComponent::VideoVlcComponent(Window* window, std::string subtitles) :
@@ -132,6 +138,7 @@ void VideoVlcComponent::resize()
 void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 {
 	VideoComponent::render(parentTrans);
+
 	float x, y;
 
 	Transform4x4f trans = parentTrans * getTransform();
@@ -176,11 +183,20 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 		vertices[4].tex[0] = -tex_offs_x;			vertices[4].tex[1] = 1.0f + tex_offs_y;
 		vertices[5].tex[0] = 1.0f + tex_offs_x;		vertices[5].tex[1] = 1.0f + tex_offs_y;
 		
+		float t = mFadeIn;
+		if (mFadeIn < 1.0)
+		{
+			t = 1.0 - mFadeIn;
+			t -= 1; // cubic ease in
+			t = Math::lerp(0, 1, t*t*t + 1);
+			t = 1.0 - t;
+		}
+
 		// Colours - use this to fade the video in and out
 		for (int i = 0; i < (4 * 6); ++i) 
 		{
 			if ((i%4) == 3)
-				vertices[i / 4].colour[i % 4] = mFadeIn;
+				vertices[i / 4].colour[i % 4] = t;
 			else
 				vertices[i / 4].colour[i % 4] = 1.0f;
 		}
@@ -210,9 +226,7 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
-	} else {
-		VideoComponent::renderSnapshot(parentTrans);
-	}
+	}	
 }
 
 void VideoVlcComponent::setupContext()
@@ -222,6 +236,7 @@ void VideoVlcComponent::setupContext()
 		// Create an RGBA surface to render the video into
 		mContext.surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (int)mVideoWidth, (int)mVideoHeight, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
 		mContext.mutex = SDL_CreateMutex();
+		mContext.component = this;
 		mContext.valid = true;
 		resize();
 	}
@@ -233,6 +248,8 @@ void VideoVlcComponent::freeContext()
 	{
 		SDL_FreeSurface(mContext.surface);
 		SDL_DestroyMutex(mContext.mutex);
+		
+		mContext.component = NULL;
 		mContext.valid = false;
 	}
 }
@@ -351,12 +368,10 @@ void VideoVlcComponent::startVideo()
 					libvlc_media_player_play(mMediaPlayer);					
 					libvlc_video_set_callbacks(mMediaPlayer, lock, unlock, display, (void*)&mContext);
 					libvlc_video_set_format(mMediaPlayer, "RGBA", (int)mVideoWidth, (int)mVideoHeight, (int)mVideoWidth * 4);
-
-					// libvlc_media_player_set_position(mMediaPlayer, 0.15);
-
+					
 					// Update the playing state
-					mIsPlaying = true;
-					mFadeIn = 0.0f;
+					//mIsPlaying = true;
+					//mFadeIn = 0.0f;
 				}
 			}
 		}

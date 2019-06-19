@@ -77,6 +77,10 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	sortAllSystemsSwitch->setState(Settings::getInstance()->getBool("SortAllSystems"));
 	mMenu.addWithLabel(_T("SORT CUSTOM COLLECTIONS AND SYSTEMS"), sortAllSystemsSwitch);
 
+	favoritesFirstSwitch = std::make_shared<SwitchComponent>(mWindow);
+	favoritesFirstSwitch->setState(Settings::getInstance()->getBool("FavoritesFirst"));
+	mMenu.addWithLabel(_T("DISPLAY FAVORITES FIRST IN GAMELIST"), favoritesFirstSwitch);
+
 	if(CollectionSystemManager::get()->isEditing())
 	{
 		row.elements.clear();
@@ -170,11 +174,16 @@ void GuiCollectionSystemsOptions::applySettings()
 	std::string prevAuto = Settings::getInstance()->getString("CollectionSystemsAuto");
 	std::string outCustom = Utils::String::vectorToCommaString(customOptionList->getSelectedObjects());
 	std::string prevCustom = Settings::getInstance()->getString("CollectionSystemsCustom");
+
 	bool outSort = sortAllSystemsSwitch->getState();
 	bool prevSort = Settings::getInstance()->getBool("SortAllSystems");
 	bool outBundle = bundleCustomCollections->getState();
 	bool prevBundle = Settings::getInstance()->getBool("UseCustomCollectionsSystem");
-	bool needUpdateSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle;
+
+	bool outFavoritesFirst = favoritesFirstSwitch->getState();
+	bool prevFavoritesFirst = Settings::getInstance()->getBool("FavoritesFirst");
+	
+	bool needUpdateSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle || outFavoritesFirst != prevFavoritesFirst;
 	if (needUpdateSettings)
 	{
 		updateSettings(outAuto, outCustom);
@@ -188,6 +197,8 @@ void GuiCollectionSystemsOptions::updateSettings(std::string newAutoSettings, st
 	Settings::getInstance()->setString("CollectionSystemsCustom", newCustomSettings);
 	Settings::getInstance()->setBool("SortAllSystems", sortAllSystemsSwitch->getState());
 	Settings::getInstance()->setBool("UseCustomCollectionsSystem", bundleCustomCollections->getState());
+	Settings::getInstance()->setBool("FavoritesFirst", favoritesFirstSwitch->getState());
+
 	Settings::getInstance()->saveFile();
 	CollectionSystemManager::get()->loadEnabledListFromSettings();
 	CollectionSystemManager::get()->updateSystemsList();

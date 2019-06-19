@@ -6,13 +6,20 @@
 #include "CollectionSystemManager.h"
 #include "Settings.h"
 #include "SystemData.h"
+#include "Window.h"
+#include "guis/GuiGamelistOptions.h"
 
-GridGameListView::GridGameListView(Window* window, FileData* root) :
+#ifdef _RPI_
+#include "components/VideoPlayerComponent.h"
+#endif
+#include "components/VideoVlcComponent.h"
+
+GridGameListView::GridGameListView(Window* window, FileData* root, const std::shared_ptr<ThemeData>& theme, std::string themeName, Vector2f gridSize) :
 	ISimpleGameListView(window, root),
 	mGrid(window),
 	mDescContainer(window), mDescription(window),
 	mImage(window),
-
+	mVideo(nullptr),
 	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window),
 	mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),
 
@@ -22,12 +29,13 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 {
 	const float padding = 0.01f;
 
+	mVideoVisible = false;
+
+	mGrid.setGridSizeOverride(gridSize);
 	mGrid.setPosition(mSize.x() * 0.1f, mSize.y() * 0.1f);
 	mGrid.setDefaultZIndex(20);
 	mGrid.setCursorChangedCallback([&](const CursorState& /*state*/) { updateInfoPanel(); });
 	addChild(&mGrid);
-
-	populateList(root->getChildrenListToDisplay());
 
 	// image
 	mImage.setOrigin(0.5f, 0.5f);
@@ -35,6 +43,22 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 	//mImage.setMaxSize(mSize.x() * (0.50f - 2 * padding), mSize.y() * 0.4f);
 	mImage.setDefaultZIndex(30);
 	addChild(&mImage);
+
+	// video
+	// Create the correct type of video window
+#ifdef _RPI_
+	if (Settings::getInstance()->getBool("VideoOmxPlayer"))
+		mVideo = new VideoPlayerComponent(window, "");
+	else
+#endif
+		mVideo = new VideoVlcComponent(window, getTitlePath());
+
+	mVideo->setOrigin(0.5f, 0.5f);
+	mVideo->setPosition(mSize.x() * 0.25f, mSize.y() * 0.4f);
+	mVideo->setSize(mSize.x() * (0.5f - 2 * padding), mSize.y() * 0.4f);
+	mVideo->setStartDelay(2000);
+	mVideo->setDefaultZIndex(31);
+	//	addChild(mVideo);
 
 	// metadata labels + values
 	mLblRating.setText("Rating: ");
@@ -83,9 +107,20 @@ GridGameListView::GridGameListView(Window* window, FileData* root) :
 
 	initMDLabels();
 	initMDValues();
+
+	if (!themeName.empty())
+		setThemeName(themeName);
+
+	setTheme(theme);
+
+	populateList(root->getChildrenListToDisplay());
 	updateInfoPanel();
 }
 
+GridGameListView::~GridGameListView()
+{
+	delete mVideo;
+}
 void GridGameListView::setThemeName(std::string name)
 {
 	ISimpleGameListView::setThemeName(name);
@@ -118,10 +153,31 @@ std::string GridGameListView::getQuickSystemSelectLeftButton()
 
 bool GridGameListView::input(InputConfig* config, Input input)
 {
+	if (!UIModeController::getInstance()->isUIModeKid() && config->isMappedTo("select", input) && input.value)
+	{
+		Sound::getFromTheme(mTheme, getName(), "menuOpen")->play();
+		mWindow->pushGui(new GuiGamelistOptions(mWindow, this->mRoot->getSystem(), true));
+		return true;
+
+		// Ctrl-R to reload a view when debugging
+	}
+
 	if(config->isMappedLike("left", input) || config->isMappedLike("right", input))
 		return GuiComponent::input(config, input);
 
 	return ISimpleGameListView::input(config, input);
+}
+
+const std::string GridGameListView::getImagePath(FileData* file)
+{
+	ImageSource src = mGrid.getImageSource();
+
+	if (src == ImageSource::IMAGE)
+		return file->getImagePath();
+	else if (src == ImageSource::MARQUEE)
+		return file->getMarqueePath();
+	
+	return file->getThumbnailPath();
 }
 
 void GridGameListView::populateList(const std::vector<FileData*>& files)
@@ -131,25 +187,51 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 	if (files.size() > 0)
 	{
 		std::string systemName = mRoot->getSystem()->getFullName();
+
 		bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles");
+		bool favoritesFirst = Settings::getInstance()->getBool("FavoritesFirst");
+		bool showFavoriteIcon = (systemName != "favorites");
+		if (!showFavoriteIcon)
+			favoritesFirst = false;
+
+		if (favoritesFirst)
+		{
+			for (auto it = files.cbegin(); it != files.cend(); it++)
+			{
+				if ((*it)->getFavorite() && (showHiddenFiles || !(*it)->getHidden()))
+				{
+					if (showFavoriteIcon)
+						mGrid.add(_T("\uF006 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);
+					else
+						mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);
+				}
+			}
+		}
 
 		for (auto it = files.cbegin(); it != files.cend(); it++)
-			if ((*it)->getFavorite() && (showHiddenFiles || !(*it)->getHidden()))
+		{
+			if (!showHiddenFiles && (*it)->getHidden())
+				continue;
+
+			if ((*it)->getFavorite())
 			{
-				if (systemName == "favorites")
-					mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), (*it)->getVideoPath(), *it);
-				else
-					mGrid.add(_T("\uF006 ") + (*it)->getName(), (*it)->getThumbnailPath(), (*it)->getVideoPath(), *it);
+				if (favoritesFirst)
+					continue;
+
+				if (showFavoriteIcon)
+				{
+					mGrid.add(_T("\uF006 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);
+					continue;
+				}
 			}
 
-		for (auto it = files.cbegin(); it != files.cend(); it++)
-			if (!(*it)->getFavorite() && (showHiddenFiles || !(*it)->getHidden()))
-				mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), (*it)->getVideoPath(), *it);
+			mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);
+		}
 	}
 	else
 	{
 		addPlaceholder();
-	}	
+	}		
 }
 
 void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
@@ -168,6 +250,18 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	}
 	else
 		mImageVisible = false;
+
+	if (theme->getElement(getName(), "md_video", "video"))
+	{
+		mVideoVisible = true;
+		mVideo->applyTheme(theme, getName(), "md_video", POSITION | ThemeFlags::SIZE | ThemeFlags::DELAY | Z_INDEX | ROTATION);
+		addChild(mVideo);
+	}
+	else
+	{
+		mVideoVisible = false;
+		removeChild(mVideo);
+	}
 
 	initMDLabels();
 	std::vector<TextComponent*> labels = getMDLabels();
@@ -196,9 +290,19 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 		values[i]->applyTheme(theme, getName(), valElements[i], ALL ^ ThemeFlags::TEXT);
 	}
 
-	mDescContainer.applyTheme(theme, getName(), "md_description", POSITION | ThemeFlags::SIZE | Z_INDEX);
-	mDescription.setSize(mDescContainer.getSize().x(), 0);
-	mDescription.applyTheme(theme, getName(), "md_description", ALL ^ (POSITION | ThemeFlags::SIZE | ThemeFlags::ORIGIN | TEXT | ROTATION));
+
+	if (theme->getElement(getName(), "md_description", "text"))
+	{
+		mDescContainer.applyTheme(theme, getName(), "md_description", POSITION | ThemeFlags::SIZE | Z_INDEX);
+		mDescription.setSize(mDescContainer.getSize().x(), 0);
+		mDescription.applyTheme(theme, getName(), "md_description", ALL ^ (POSITION | ThemeFlags::SIZE | ThemeFlags::ORIGIN | TEXT | ROTATION));
+
+		if (!isChild(&mDescContainer))
+			addChild(&mDescContainer);
+	}
+	else 
+		removeChild(&mDescContainer);
+
 
 	sortChildren();
 	updateInfoPanel();
@@ -276,17 +380,36 @@ void GridGameListView::updateInfoPanel()
 	bool fadingOut;
 	if (file == NULL)
 	{
+		mVideo->setVideo("");
+		mVideo->setImage("");
+
 		//mDescription.setText("");
 		fadingOut = true;
 	}
 	else
 	{
+		if (mVideoVisible)
+		{
+			if (!mVideo->setVideo(file->getVideoPath()))
+				mVideo->setDefaultVideo();
+		}
+
 		if (mImageVisible)
 		{
 			if (file->getImagePath().empty())
+			{
+				if (mVideoVisible)
+					mVideo->setImage(file->getThumbnailPath(), false, mVideo->getSize());
+
 				mImage.setImage(file->getThumbnailPath(), false, mImage.getSize());
+			}
 			else
+			{
+				if (mVideoVisible)
+					mVideo->setImage(file->getImagePath(), false, mVideo->getSize());
+
 				mImage.setImage(file->getImagePath(), false, mImage.getSize());
+			}
 		}
 		else 
 			mImage.setImage("");
@@ -313,6 +436,7 @@ void GridGameListView::updateInfoPanel()
 
 	std::vector<GuiComponent*> comps = getMDValues();
 	comps.push_back(&mImage);
+	comps.push_back(mVideo);
 	comps.push_back(&mDescription);
 	comps.push_back(&mName);
 	std::vector<TextComponent*> labels = getMDLabels();
@@ -353,6 +477,7 @@ void GridGameListView::remove(FileData *game, bool deleteFile)
 {
 	if (deleteFile)
 		Utils::FileSystem::removeFile(game->getPath());  // actually delete the file on the filesystem
+
 	FileData* parent = game->getParent();
 	if (getCursor() == game)                     // Select next element in list, or prev if none
 	{
@@ -444,5 +569,3 @@ std::vector<HelpPrompt> GridGameListView::getHelpPrompts()
 	}
 	return prompts;
 }
-
-

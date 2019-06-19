@@ -234,24 +234,30 @@ bool ComponentGrid::input(InputConfig* config, Input input)
 	if(!input.value)
 		return false;
 
+	bool result = false;
+
 	if(config->isMappedLike("down", input))
 	{
-		return moveCursor(Vector2i(0, 1));
+		result = moveCursor(Vector2i(0, 1));
 	}
 	if(config->isMappedLike("up", input))
 	{
-		return moveCursor(Vector2i(0, -1));
+		result = moveCursor(Vector2i(0, -1));
 	}
 	if(config->isMappedLike("left", input))
 	{
-		return moveCursor(Vector2i(-1, 0));
+		result = moveCursor(Vector2i(-1, 0));
 	}
 	if(config->isMappedLike("right", input))
 	{
-		return moveCursor(Vector2i(1, 0));
+		result = moveCursor(Vector2i(1, 0));
 	}
 
-	return false;
+	if (!result && mUnhandledInputCallback) {
+		return mUnhandledInputCallback(config, input);
+	}
+
+	return result;
 }
 
 void ComponentGrid::resetCursor()

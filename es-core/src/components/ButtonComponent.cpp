@@ -4,7 +4,7 @@
 #include "utils/StringUtil.h"
 #include "Renderer.h"
 
-ButtonComponent::ButtonComponent(Window* window, const std::string& text, const std::string& helpText, const std::function<void()>& func) : GuiComponent(window),
+ButtonComponent::ButtonComponent(Window* window, const std::string& text, const std::string& helpText, const std::function<void()>& func, bool upperCase) : GuiComponent(window),
 	mBox(window, ThemeData::getMenuTheme()->Icons.button),
 	mFont(Font::get(FONT_SIZE_MEDIUM)), 
 	mFocused(false), 
@@ -19,7 +19,7 @@ ButtonComponent::ButtonComponent(Window* window, const std::string& text, const 
 	mColor = menuTheme->Text.color;
 	
 	setPressedFunc(func);
-	setText(text, helpText);
+	setText(text, helpText, upperCase);
 	updateImage();
 }
 
@@ -45,9 +45,9 @@ bool ButtonComponent::input(InputConfig* config, Input input)
 	return GuiComponent::input(config, input);
 }
 
-void ButtonComponent::setText(const std::string& text, const std::string& helpText)
+void ButtonComponent::setText(const std::string& text, const std::string& helpText, bool upperCase)
 {
-	mText = Utils::String::toUpper(text);
+	mText = upperCase ? Utils::String::toUpper(text) : text;
 	mHelpText = helpText;
 	
 	mTextCache = std::unique_ptr<TextCache>(mFont->buildTextCache(mText, 0, 0, getCurTextColor()));
@@ -83,6 +83,14 @@ void ButtonComponent::updateImage()
 		mBox.setImagePath(ThemeData::getMenuTheme()->Icons.button_filled);
 		mBox.setCenterColor(0x770000FF);
 		mBox.setEdgeColor(0x770000FF);
+		return;
+	}
+
+	// If a new color has been set.  
+	if (mNewColor) {
+		mBox.setImagePath(ThemeData::getMenuTheme()->Icons.button_filled);
+		mBox.setCenterColor(mModdedColor);
+		mBox.setEdgeColor(mModdedColor);
 		return;
 	}
 
