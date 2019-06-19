@@ -84,8 +84,11 @@ Changes in my branch
 - Ability to select the view (or customview) to use globally or by system.
 - The theme can force the default view to use ( attribute defaultView )
 - Fully supports Retropie & Recalbox Themes.
+- Carousel supports element "logoPos" : this allows the logo not to be inevitably centered.
+- Image loading : the image bytes where duplicated 3 times in memory.
+- In previous versions, if a xml element was unknown in the theme, nothing was loaded.
 		    
-**Optimizations :** 	
+**Optimizations & Fixes:** 	
 - Really faster loading time, using multithreading.
 - The loading sequence displays a progress bar.
 - Reviewed SVG loading and size calculation mecanism. Previous versions unloaded/reloaded SVGs each time a new container needed to display it because of a size calculation problem.
@@ -93,6 +96,11 @@ Changes in my branch
 - Don't keep in memory the cache of image filenames when launching games -> It takes a lot of memory for nothing.
 - Skip parsing 'downloaded_images' and 'media' folders ( better loading time )
 - Added option "Optimize images Vram Use" : Don't load an image in it source resolution if it needs to be displayed smaller -> Resize images in memory to save VRAM. Introduce longer image loading time, but less VRAM use.
+- Fixed video starting : Videos started fading even if the video was not available yet ( but not really fading : there was no blending ).
+- Software clipping : Avoid rendering clipped items -> They were previously clipped by OpenGl scissors.
+- Carousel animation was corrupted if the carousel has to display only one item with <maxLogoCount>1</maxLogoCount>
+- Font : Optimization when calculating text extend.
+- If XML writer fails, the gamelist.xml file become empty and set to 0Kb -> Added a mecanism to secure that. Also, previous gamelist.xml version is saved as gamelist.xml.old.
 
 **Menus :** 	
 - Cleaned menus + changed menu item order (by interest). 
@@ -106,16 +114,20 @@ Changes in my branch
 - Localisation (French actually supported)
 - OSK : On-screen Keyboard.
 - Fixed : Don't show Games what are marked Hidden in gamelist.
+- Added a star icon before the name of the game when it is a favorite.
 - Corrected favorites ( and custom lists ) management.
 - Don't show Directories that contains only one Game : just Show the game.
 - Case insensitive file extensions.
+- Stop using "sortname" in gamelists. It is useful.
 
 **Windows specific :** 	
+- Natively portable. If file ".emulationstation/es_systems.cfg" relative to the exe folder.
 - Simplified "Quit" menu item ( no more popup asking to restart or turn off Windows )
 - Windows is now "Windowed No border" by default. On Windows, Exclusive fullscreen can be annoying...
 - Stop using _wsystem for launching games. Run games with ShellExecuteEx instead ( avoids command window )
 - Add an option to leave ES open with a black screen "Loading..." when launching games ( avoids showing windows desktop )
 - Don't load all fields in Medadata Editor ( too tricky to use on windows, better use an external tool ).
+- With some Nvidia GPUs when VSYNC is active, SDL_GL_SwapWindow takes a lot of CPU : Introduce a smart calculation based on display frequency to reduce the time SDL_GL_SwapWindow has to wait. This saves a lot of CPU load.
 
 Je crois que c'est à peu près tout...
 
@@ -221,7 +233,7 @@ You can use `--help` or `-h` to view a list of command-line options. Briefly out
 --no-splash                     don't show the splash screen
 --debug                         more logging, show console on Windows
 --scrape                        scrape using command line interface
---windowed                      not fullscreen, should be used with --resolution
+--windowed                      not fullscreen, may be used with --resolution
 --vsync [1/on or 0/off]         turn vsync on or off (default is on)
 --max-vram [size]               Max VRAM to use in Mb before swapping. 0 for unlimited
 --force-kid             Force the UI mode to be Kid
