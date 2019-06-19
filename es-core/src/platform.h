@@ -18,6 +18,8 @@
 		#define sleep Sleep
 	#endif
 
+	#define GL_GLEXT_PROTOTYPES
+
 	#define GLHEADER <SDL_opengl.h>
 #endif
 

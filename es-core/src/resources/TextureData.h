@@ -8,6 +8,7 @@
 #include <string>
 
 #include "math/Vector2f.h"
+#include "math/Vector2i.h"
 
 class TextureResource;
 
@@ -16,6 +17,8 @@ class TextureData
 public:
 	TextureData(bool tile);
 	~TextureData();
+
+	static bool OPTIMIZEVRAM;
 
 	// These functions populate mDataRGBA but do not upload the texture to VRAM
 
@@ -41,7 +44,11 @@ public:
 	// Release the texture from conventional RAM
 	void releaseRAM();
 
-	void setMaxSize(Vector2f maxSize) { mMaxSize = maxSize; };
+	void setMaxSize(Vector2f maxSize) 
+	{ 
+		if (mMaxSize.x() < maxSize.x() || mMaxSize.y() < maxSize.y())
+			mMaxSize = maxSize; 
+	};
 
 	// Get the amount of VRAM currenty used by this texture
 	size_t getVRAMUsage();
@@ -54,20 +61,27 @@ public:
 
 	bool tiled() { return mTile; }
 
+	bool isRequiredTextureSizeOk();
+
+	std::string		mPath;
+	GLuint 			mTextureID;
+
 private:
 	std::mutex		mMutex;
 	bool			mTile;
-	std::string		mPath;
-	GLuint 			mTextureID;
 	unsigned char*	mDataRGBA;
 	size_t			mWidth;
 	size_t			mHeight;
 	float			mSourceWidth;
-	float			mSourceHeight;
+	float			mSourceHeight;	
 	bool			mScalable;
 	bool			mReloadable;
 
+	Vector2i		mPackedSize;
+	Vector2i		mBaseSize;
 	Vector2f		mMaxSize;
 };
+
+void traceOutput(std::string string);
 
 #endif // ES_CORE_RESOURCES_TEXTURE_DATA_H

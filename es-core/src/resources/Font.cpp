@@ -22,7 +22,6 @@ Font::FontFace::FontFace(ResourceData&& d, int size) : data(d)
 
 Font::FontFace::~FontFace()
 {
-
 	if(face)
 		FT_Done_Face(face);
 }
@@ -73,6 +72,7 @@ Font::Font(int size, const std::string& path) : mSize(size), mPath(path)
 {
 	assert(mSize > 0);
 	
+	mLoaded = true;
 	mMaxGlyphHeight = 0;
 
 	if (!sLibrary)
@@ -95,17 +95,24 @@ Font::~Font()
 	for (auto it = mGlyphMap.cbegin(); it != mGlyphMap.cend(); it++)
 		delete it->second;
 
-	unload(ResourceManager::getInstance());
+	unload();
 }
 
-void Font::reload(std::shared_ptr<ResourceManager>& /*rm*/)
+void Font::reload()
 {
+	if (mLoaded)
+		return;
+
 	rebuildTextures();
+	mLoaded = true;
 }
 
-void Font::unload(std::shared_ptr<ResourceManager>& /*rm*/)
+void Font::unload()
 {
-	unloadTextures();
+	if (mLoaded)
+		unloadTextures();
+
+	mLoaded = false;
 }
 
 std::shared_ptr<Font> Font::get(int size, const std::string& path)

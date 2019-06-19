@@ -8,6 +8,7 @@
 #include "components/TextComponent.h"
 #include "guis/GuiMsgBox.h"
 #include "guis/GuiTextEditPopup.h"
+#include "guis/GuiTextEditPopupKeyboard.h"
 #include "resources/Font.h"
 #include "utils/StringUtil.h"
 #include "FileData.h"
@@ -235,12 +236,12 @@ void ScraperSearchComponent::onSearchDone(const std::vector<ScraperSearchResult>
 		if (!isValidConfiguredScraper())
 		{
 			mWindow->pushGui(new GuiMsgBox(mWindow, Utils::String::toUpper("Configured scraper is no longer available.\nPlease change the scraping source in the settings."),
-				"FINISH", mSkipCallback));
+				_T("FINISH"), mSkipCallback));
 		}
 		else
 		{
 			ComponentListRow row;
-			row.addElement(std::make_shared<TextComponent>(mWindow, "NO GAMES FOUND - SKIP", font, color), true);
+			row.addElement(std::make_shared<TextComponent>(mWindow, _T("NO GAMES FOUND - SKIP"), font, color), true);
 
 			if(mSkipCallback)
 				row.makeAcceptInputHandler(mSkipCallback);
@@ -455,17 +456,23 @@ void ScraperSearchComponent::openInputScreen(ScraperSearchParams& params)
 	};
 
 	stop();
-	mWindow->pushGui(new GuiTextEditPopup(mWindow, "SEARCH FOR", 
+
+	mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, "SEARCH FOR",
+		// initial value is last search if there was one, otherwise the clean path name
+		params.nameOverride.empty() ? params.game->getCleanName() : params.nameOverride,
+		searchForFunc, false, "SEARCH"));
+	/*
+	mWindow->pushGui(new GuiTextEditPopup(mWindow, _T("SEARCH FOR"), 
 		// initial value is last search if there was one, otherwise the clean path name
 		params.nameOverride.empty() ? params.game->getCleanName() : params.nameOverride, 
-		searchForFunc, false, "SEARCH"));
+		searchForFunc, false, _T("SEARCH")));*/
 }
 
 std::vector<HelpPrompt> ScraperSearchComponent::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mGrid.getHelpPrompts();
 	if(getSelectedIndex() != -1)
-		prompts.push_back(HelpPrompt("a", "accept result"));
+		prompts.push_back(HelpPrompt("a", _T("accept result")));
 	
 	return prompts;
 }

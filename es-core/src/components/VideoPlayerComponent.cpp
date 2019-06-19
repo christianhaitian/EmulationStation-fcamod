@@ -32,8 +32,8 @@ void VideoPlayerComponent::render(const Transform4x4f& parentTrans)
 {
 	VideoComponent::render(parentTrans);
 
-	if (!mIsPlaying || mPlayerPid == -1)
-		VideoComponent::renderSnapshot(parentTrans);
+//	if (!mIsPlaying || mPlayerPid == -1)
+	//	VideoComponent::renderSnapshot(parentTrans);
 }
 
 void VideoPlayerComponent::setResize(float width, float height)

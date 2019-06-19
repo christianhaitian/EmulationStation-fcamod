@@ -20,7 +20,7 @@
 
 #define VIDEODELAY	100
 
-GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBackground(window), mLabel(window), mVideo(nullptr), mVideoPlaying(false)
+GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBackground(window), mLabel(window), mVideo(nullptr), mVideoPlaying(false), mShown(false)
 {	
 	mSelectedZoomPercent = 1.0f;
 	mAnimPosition = Vector3f(0, 0);
@@ -53,6 +53,7 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 
 	mImage = std::make_shared<ImageComponent>(mWindow);
 	mImage->setOrigin(0.5f, 0.5f);
+	mImage->setAllowFading(false);
 
 	addChild(&mBackground);
 	addChild(&(*mImage));
@@ -124,24 +125,6 @@ void GridTileComponent::resize()
 	float bottomPadding = std::max(topPadding, height);
 	float paddingX = currentProperties.mPadding.x();
 	
-	if (mSelectedZoomPercent != 1.0f)
-	{
-		if (mAnimPosition.x() != 0 && mAnimPosition.y() != 0 && mSelected)
-		{
-			int x = mAnimPosition.x() - mPosition.x();
-			int y = mAnimPosition.y() - mPosition.y();
-
-			x = x * (1.0 - mSelectedZoomPercent);
-			y = y * (1.0 - mSelectedZoomPercent);
-
-			mBackground.setPosition(x, y);
-		}
-		else 
-			mBackground.setPosition(0, 0);
-	}
-	else
-		mBackground.setPosition(0, 0);
-
 	float imageWidth = size.x() - paddingX * 2.0;
 	float imageHeight = size.y() - topPadding - bottomPadding;
 
@@ -149,7 +132,8 @@ void GridTileComponent::resize()
 	{
 		mImage->setOrigin(0.5f, 0.5f);
 		mImage->setPosition(size.x() / 2.0f, (size.y() - height) / 2.0f);
-		
+		mImage->setColorShift(currentProperties.mImageColor);
+
 		if (currentProperties.mImageSizeMode == "minSize")
 			mImage->setMinSize(imageWidth, imageHeight);
 		else if (currentProperties.mImageSizeMode == "size")
@@ -207,12 +191,45 @@ void GridTileComponent::resize()
 			mVideo->setMaxSize(imageWidth, size.y() - topPadding - bottomPadding);
 	}
 
-	if (!mLabelMerged && currentProperties.mImageSizeMode == "minSize")
-		mBackground.setSize(size.x(), size.y() - bottomPadding + topPadding);
-	else
-		mBackground.setSize(size);
+	Vector3f bkposition = Vector3f(0, 0);
+	Vector2f bkSize = size;
 
+
+
+//	if (!mLabelMerged && currentProperties.mImageSizeMode == "minSize")
+//		bkSize = Vector2f(size.x(), size.y() - bottomPadding + topPadding);
+
+	if (mImage != NULL && currentProperties.mSelectionMode == "image" && mImage->getSize() != Vector2f(0,0))
+	{
+		if (currentProperties.mImageSizeMode == "minSize")
+			bkSize = Vector2f(size.x(), size.y() - bottomPadding + topPadding);
+		else
+		{
+			bkposition = Vector3f(
+				mImage->getPosition().x() - mImage->getSize().x() / 2 - currentProperties.mPadding.x(),
+				mImage->getPosition().y() - mImage->getSize().y() / 2 - currentProperties.mPadding.y(), 0);
+
+			bkSize = Vector2f(mImage->getSize().x() + 2 * currentProperties.mPadding.x(), mImage->getSize().y() + 2 * currentProperties.mPadding.y());
+		}
+	}
+
+	if (mSelectedZoomPercent != 1.0f && mAnimPosition.x() != 0 && mAnimPosition.y() != 0 && mSelected)
+	{
+		float x = mPosition.x() + bkposition.x();
+		float y = mPosition.y() + bkposition.y();
+
+		x = mAnimPosition.x() * (1.0 - mSelectedZoomPercent) + x * mSelectedZoomPercent;
+		y = mAnimPosition.y() * (1.0 - mSelectedZoomPercent) + y * mSelectedZoomPercent;
+
+		bkposition = Vector3f(x - mPosition.x(), y - mPosition.y(), 0);
+	}
+
+	mBackground.setPosition(bkposition);
+	mBackground.setSize(bkSize);
 	mBackground.setCornerSize(currentProperties.mBackgroundCornerSize);
+	mBackground.setCenterColor(currentProperties.mBackgroundCenterColor);
+	mBackground.setEdgeColor(currentProperties.mBackgroundEdgeColor);
+	mBackground.setImagePath(currentProperties.mBackgroundImage);
 }
 
 void GridTileComponent::renderBackground(const Transform4x4f& parentTrans)
@@ -221,19 +238,7 @@ void GridTileComponent::renderBackground(const Transform4x4f& parentTrans)
 		return;
 
 	Transform4x4f trans = getTransform() * parentTrans;
-
-	Vector2f clipPos(trans.translation().x(), trans.translation().y());
-	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
-		return;
-
-	if (mBackground.getCornerSize().x() == 0)
-	{
-		Renderer::setMatrix(trans);
-		Renderer::drawRect(mBackground.getPosition().x(), mBackground.getPosition().y(), mBackground.getSize().x() - 1, mBackground.getSize().y() - 1, mBackground.getCenterColor());
-		Renderer::setMatrix(parentTrans);
-	}
-	else
-		mBackground.render(trans);
+	mBackground.render(trans);
 }
 
 void GridTileComponent::renderContent(const Transform4x4f& parentTrans)
@@ -285,24 +290,6 @@ void GridTileComponent::render(const Transform4x4f& parentTrans)
 	renderContent(parentTrans);
 }
 
-// Update all the tile properties to the new status (selected or default)
-void GridTileComponent::update(int deltaTime)
-{
-	GuiComponent::update(deltaTime);
-
-	const GridTileProperties& currentProperties = getCurrentProperties();
-
-	mBackground.setImagePath(currentProperties.mBackgroundImage);
-
-	if (mImage != NULL)
-		mImage->setColorShift(currentProperties.mImageColor);
-
-	mBackground.setCenterColor(currentProperties.mBackgroundCenterColor);
-	mBackground.setEdgeColor(currentProperties.mBackgroundEdgeColor);
-
-	resize();
-}
-
 void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties)
 {
 	Vector2f screen = Vector2f((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
@@ -339,7 +326,16 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 			mDefaultProperties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundEdgeColor");
 
 		if (elem && elem->has("imageSizeMode"))
+		{
 			mDefaultProperties.mImageSizeMode = elem->get<std::string>("imageSizeMode");
+			mSelectedProperties.mImageSizeMode = mDefaultProperties.mImageSizeMode;
+		}
+
+		if (elem && elem->has("selectionMode"))
+		{
+			mDefaultProperties.mSelectionMode = elem->get<std::string>("selectionMode");
+			mSelectedProperties.mSelectionMode = mDefaultProperties.mSelectionMode;
+		}
 	}
 
 	// Apply theme to the selected gridtile
@@ -378,10 +374,6 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 
 	if (elem && elem->has("backgroundEdgeColor"))
 		mSelectedProperties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundEdgeColor");
-
-	mSelectedProperties.mImageSizeMode = elem && elem->has("imageSizeMode") ?
-		elem->get<std::string>("imageSizeMode") :
-		mDefaultProperties.mImageSizeMode;
 
 	elem = theme->getElement(view, "gridtile", "text");
 	if (elem != NULL)
@@ -450,7 +442,12 @@ void GridTileComponent::setImage(const std::string& path)
 		return;
 	
 	mCurrentPath = path;		
-	mImage->setImage(path, false, mSize);
+
+	if (mSelectedProperties.mSize.x() > mSize.x())
+		mImage->setImage(path, false, mSelectedProperties.mSize);
+	else
+		mImage->setImage(path, false, mSize);
+
 	resize();	
 }
 
@@ -485,19 +482,27 @@ void GridTileComponent::setVideo(const std::string& path, float defaultDelay)
 		if (mVideoPath.empty())
 			mVideo->setVideo("");
 	}
+
+	resize();
 }
 
-void GridTileComponent::setImage(const std::shared_ptr<TextureResource>& texture, std::string name)
+void GridTileComponent::onShow()
 {
-	mImage->setImage(texture);
-	mLabel.setText(name);
-	
-	// Resize now to prevent flickering images when scrolling
-	resize();
+	GuiComponent::onShow();
+	mShown = true;
+}
+
+void GridTileComponent::onHide()
+{
+	GuiComponent::onHide();
+	mShown = false;
 }
 
 void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f* pPosition)
 {
+	if (!mShown || !GuiComponent::ALLOWANIMATIONS)
+		allowAnimation = false;
+
 	if (mSelected == selected)
 	{
 		if (mSelected && mVideo != nullptr)
@@ -560,6 +565,9 @@ void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f
 		}
 		else
 		{
+			if (mVideo != NULL)
+				mVideo->setVideo("");
+
 			auto func = [this](float t)
 			{
 				t -= 1; // cubic ease out
@@ -570,10 +578,6 @@ void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f
 			cancelAnimation(3);
 			setAnimation(new LambdaAnimation(func, 250), 0, [this] {
 				this->setSelectedZoom(0);
-
-				if (mVideo != NULL)
-					mVideo->setVideo("");
-
 			}, false, 3);
 		}
 	}
@@ -612,39 +616,42 @@ unsigned int mixColors(unsigned int first, unsigned int second, float percent)
 
 const GridTileProperties& GridTileComponent::getCurrentProperties() 
 {
-	if (mSelectedZoomPercent != 1.0f)
+	if (mSelectedZoomPercent == 0.0f || mSelectedZoomPercent == 1.0f)
+		return mSelected ? mSelectedProperties : mDefaultProperties;
+
+	auto def = mSelected ? mSelectedProperties : mDefaultProperties;
+
+	mMixedProperties = mSelected ? mSelectedProperties : mDefaultProperties;
+
+	if (mDefaultProperties.mSize != mSelectedProperties.mSize)
 	{
-		auto def = mSelected ? mSelectedProperties : mDefaultProperties;
-
-		mMixedProperties = mSelected ? mSelectedProperties : mDefaultProperties;
-
-		if (mDefaultProperties.mSize != mSelectedProperties.mSize)
-		{
-			float x = mDefaultProperties.mSize.x() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mSize.x() * mSelectedZoomPercent;
-			float y = mDefaultProperties.mSize.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mSize.y() * mSelectedZoomPercent;
-			mMixedProperties.mSize = Vector2f(x, y);
-		}
-
-		if (mDefaultProperties.mPadding != mSelectedProperties.mPadding)
-		{
-			float x = mDefaultProperties.mPadding.x() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mPadding.x() * mSelectedZoomPercent;
-			float y = mDefaultProperties.mPadding.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mPadding.y() * mSelectedZoomPercent;
-			mMixedProperties.mPadding = Vector2f(x, y);
-		}
-
-		if (mDefaultProperties.mImageColor != mSelectedProperties.mImageColor)
-		{
-			mMixedProperties.mImageColor = mixColors(mDefaultProperties.mImageColor, mSelectedProperties.mImageColor, mSelectedZoomPercent);
-		}
-
-		if (mDefaultProperties.mLabelSize != mSelectedProperties.mLabelSize)
-		{
-			float y = mDefaultProperties.mLabelSize.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mLabelSize.y() * mSelectedZoomPercent;
-			mMixedProperties.mLabelSize = Vector2f(mDefaultProperties.mLabelSize.x(), y);
-		}
-
-		return mMixedProperties;
+		float x = mDefaultProperties.mSize.x() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mSize.x() * mSelectedZoomPercent;
+		float y = mDefaultProperties.mSize.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mSize.y() * mSelectedZoomPercent;
+		mMixedProperties.mSize = Vector2f(x, y);
 	}
 
-	return mSelected ? mSelectedProperties : mDefaultProperties;
+	if (mDefaultProperties.mPadding != mSelectedProperties.mPadding)
+	{
+		float x = mDefaultProperties.mPadding.x() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mPadding.x() * mSelectedZoomPercent;
+		float y = mDefaultProperties.mPadding.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mPadding.y() * mSelectedZoomPercent;
+		mMixedProperties.mPadding = Vector2f(x, y);
+	}
+
+	if (mDefaultProperties.mImageColor != mSelectedProperties.mImageColor)
+	{
+		mMixedProperties.mImageColor = mixColors(mDefaultProperties.mImageColor, mSelectedProperties.mImageColor, mSelectedZoomPercent);
+	}
+
+	if (mDefaultProperties.mLabelSize != mSelectedProperties.mLabelSize)
+	{
+		float y = mDefaultProperties.mLabelSize.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mLabelSize.y() * mSelectedZoomPercent;
+		mMixedProperties.mLabelSize = Vector2f(mDefaultProperties.mLabelSize.x(), y);
+	}
+
+	return mMixedProperties;
+}
+
+Vector3f GridTileComponent::getBackgroundPosition() 
+{ 
+	return Vector3f(mBackground.getPosition().x() + mPosition.x(), mBackground.getPosition().y() + mPosition.y(), 0);
 }

@@ -4,6 +4,8 @@
 #include "resources/TextureResource.h"
 #include "Settings.h"
 
+#include <SDL_timer.h>
+
 TextureDataManager::TextureDataManager()
 {
 	unsigned char data[5 * 5 * 4];
@@ -63,7 +65,8 @@ std::shared_ptr<TextureData> TextureDataManager::get(const TextureResource* key)
 		mTextureLookup[key] = mTextures.cbegin();
 
 		// Make sure it's loaded or queued for loading
-		load(tex);
+		if (!tex->isLoaded()) // FCATMP
+			load(tex);
 	}
 	return tex;
 }
@@ -104,28 +107,76 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 {
 	// See if it's already loaded
 	if (tex->isLoaded())
-		return;
+	{
+		if (tex->isRequiredTextureSizeOk())
+			return;
+		
+		tex->releaseVRAM();
+		tex->releaseRAM();
+
+		mLoader->remove(tex);
+		block = true; // Reload instantly or other instances will fade again
+	}
+
 	// Not loaded. Make sure there is room
 	size_t size = TextureResource::getTotalMemUsage();
 	size_t max_texture = (size_t)Settings::getInstance()->getInt("MaxVRAM") * 1024 * 1024;
+
+	int cleanedMemory = 0;
+	int lastTime = SDL_GetTicks();
 
 	for (auto it = mTextures.crbegin(); it != mTextures.crend(); ++it)
 	{
 		if (size < max_texture)
 			break;
 
-		//size -= (*it)->getVRAMUsage();
+		if (!(*it)->isLoaded()) // FCA added to avoid calling TextureResource::getTotalMemUsage() if texture is not loaded
+			continue;
+
 		(*it)->releaseVRAM();
 		(*it)->releaseRAM();
+
 		// It may be already in the loader queue. In this case it wouldn't have been using
 		// any VRAM yet but it will be. Remove it from the loader queue
 		mLoader->remove(*it);
 		size = TextureResource::getTotalMemUsage();
+
+		cleanedMemory++;
+	}	
+
+#ifdef WIN32	
+	if (cleanedMemory > 0)
+	{
+		lastTime = SDL_GetTicks() - lastTime;
+
+		char buffer[1000];
+		sprintf_s(buffer, "cleanedMemory : %d items in %d ms\n", cleanedMemory, lastTime);
+		traceOutput(buffer);
 	}
+#endif
+
 	if (!block)
+	{
+		/*
+#ifdef WIN32	
+		char buffer[1000];
+		sprintf_s(buffer, "ASYNC LOAD : %s\n", tex->mPath.c_str());
+		traceOutput(buffer);
+#endif*/
+
 		mLoader->load(tex);
+	}
 	else
+	{
+		/*
+#ifdef WIN32	
+		char buffer[1000];
+		sprintf_s(buffer, "SYNC LOAD : %s\n", tex->mPath.c_str());
+		traceOutput(buffer);
+#endif*/
+		mLoader->remove(tex);
 		tex->load();
+	}
 }
 
 TextureLoader::TextureLoader() : mExit(false)

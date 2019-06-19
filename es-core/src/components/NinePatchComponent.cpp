@@ -11,6 +11,7 @@ NinePatchComponent::NinePatchComponent(Window* window, const std::string& path, 
 	mPath(path),
 	mVertices(NULL), mColors(NULL)
 {
+	mPreviousSize = Vector2f(0, 0);
 	if(!mPath.empty())
 		buildVertices();
 }
@@ -26,6 +27,9 @@ NinePatchComponent::~NinePatchComponent()
 
 void NinePatchComponent::updateColors()
 {
+	if (mColors == NULL)
+		return;
+
 	Renderer::buildGLColorArray(mColors, mEdgeColor, 6 * 9);
 	Renderer::buildGLColorArray(&mColors[4 * 6 * 4], mCenterColor, 6);
 }
@@ -143,6 +147,10 @@ void NinePatchComponent::render(const Transform4x4f& parentTrans)
 
 void NinePatchComponent::onSizeChanged()
 {
+	if (mPreviousSize == mSize)
+		return;
+
+	mPreviousSize = mSize;
 	buildVertices();
 }
 
@@ -153,6 +161,9 @@ const Vector2f& NinePatchComponent::getCornerSize() const
 
 void NinePatchComponent::setCornerSize(int sizeX, int sizeY)
 {
+	if (mCornerSize.x() == sizeX && mCornerSize.y() == sizeY)
+		return;
+
 	mCornerSize = Vector2f(sizeX, sizeY);
 	buildVertices();
 }

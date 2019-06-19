@@ -147,7 +147,7 @@ void ViewController::goToGameList(SystemData* system)
 
 	mCurrentView = getGameListView(system);
 	if (mCurrentView)
-		mCurrentView->onShow();		
+		mCurrentView->onShow();
 
 	playViewTransition(false);
 }
@@ -302,11 +302,16 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 
 	bool forceView = false;
 	std::string viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
+	if (!system->getTheme()->hasView(viewPreference))
+		viewPreference == "automatic";	
+
 	std::string customThemeName;
+	Vector2f gridSizeOverride = Vector2f(0,0);
 	
 	if (!system->getSystemViewMode().empty() && system->getTheme()->hasView(system->getSystemViewMode()))
 	{		
 		viewPreference = system->getSystemViewMode();
+		gridSizeOverride = system->getGridSizeOverride();
 		forceView = true;
 	}
 
@@ -385,7 +390,10 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 			view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, system->getRootFolder()));
 			break;
 		case GRID:		
-			view = std::shared_ptr<IGameListView>(new GridGameListView(mWindow, system->getRootFolder()));
+			{
+				view = std::shared_ptr<IGameListView>(new GridGameListView(mWindow, system->getRootFolder(), system->getTheme(), customThemeName, gridSizeOverride));
+			}
+						
 			break;
 		case BASIC:
 		default:
@@ -393,10 +401,15 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 			break;
 	}
 
-	if (!customThemeName.empty())
-		view->setThemeName(customThemeName);
+	if (selectedViewType != GRID)
+	{
+		// GridGameListView theme needs to be loaded before populating.
 
-	view->setTheme(system->getTheme());
+		if (!customThemeName.empty())
+			view->setThemeName(customThemeName);
+
+		view->setTheme(system->getTheme());
+	}
 
 	std::vector<SystemData*>& sysVec = SystemData::sSystemVector;
 	int id = (int)(std::find(sysVec.cbegin(), sysVec.cend(), system) - sysVec.cbegin());
@@ -507,13 +520,22 @@ void ViewController::render(const Transform4x4f& parentTrans)
 
 void ViewController::preload()
 {
-	uint32_t i = 0;
+	int i = 1;
+	int max = SystemData::sSystemVector.size() + 1;
+
+	bool splash = Settings::getInstance()->getBool("SplashScreen") && Settings::getInstance()->getBool("SplashScreenProgress");
+	if (splash)
+		mWindow->renderLoadingScreen(_T("Preloading UI"), (float)i / (float)max);
+
+	// First load the system list
+	getSystemListView();
+	
 	for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
 	{
-		if (Settings::getInstance()->getBool("SplashScreen") && Settings::getInstance()->getBool("SplashScreenProgress"))
+		if (splash)
 		{
 			i++;
-			mWindow->renderLoadingScreen(_T("Preloading UI"), (float) i / (float) SystemData::sSystemVector.size());
+			mWindow->renderLoadingScreen(_T("Preloading UI"), (float) i / (float)max);
 		}
 
 		(*it)->getIndex()->resetFilters();

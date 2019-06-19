@@ -11,7 +11,7 @@ class ImageIO
 {
 public:
 	static std::vector<unsigned char> loadFromMemoryRGBA32(const unsigned char * data, const size_t size, size_t & width, size_t & height);
-	static unsigned char* loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height, int maxWidth=0, int maxHeight=0);
+	static unsigned char* loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height, int maxWidth, int maxHeight, Vector2i& baseSize, Vector2i& packedSize);
 	
 	static void flipPixelsVert(unsigned char* imagePx, const size_t& width, const size_t& height);
 	static Vector2i adjustPictureSize(Vector2i imageSize, Vector2i maxSize);

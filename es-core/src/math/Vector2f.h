@@ -2,6 +2,7 @@
 #ifndef ES_CORE_MATH_VECTOR2F_H
 #define ES_CORE_MATH_VECTOR2F_H
 
+#include <string>
 #include "math/Misc.h"
 #include <assert.h>
 
@@ -11,6 +12,8 @@ class Vector4f;
 class Vector2f
 {
 public:
+	static const Vector2f parseString(const std::string& _input);
+	const std::string toString();
 
 	         Vector2f()                                                                                { }
 	         Vector2f(const float _f)                 : mX(_f),                 mY(_f)                 { }

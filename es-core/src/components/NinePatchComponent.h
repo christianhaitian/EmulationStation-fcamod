@@ -59,6 +59,7 @@ private:
 
 	std::string mPath;
 	Vector2f mCornerSize;
+	Vector2f mPreviousSize;
 	unsigned int mEdgeColor;
 	unsigned int mCenterColor;
 	std::shared_ptr<TextureResource> mTexture;

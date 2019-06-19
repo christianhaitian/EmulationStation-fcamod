@@ -19,6 +19,7 @@
 #include <SDL_events.h>
 #include <algorithm>
 
+#include "resources/TextureData.h"
 #include "animations/LambdaAnimation.h"
 
 GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _T("MAIN MENU")), mVersion(window)
@@ -485,13 +486,17 @@ void GuiMenu::openUISettings()
 		styles.push_back("grid");		
 	}
 
+	auto viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
+	if (!system->getTheme()->hasView(viewPreference))
+		viewPreference == "automatic";
+
 	for (auto it = styles.cbegin(); it != styles.cend(); it++)
-		gamelist_style->add(_L(*it), *it, Settings::getInstance()->getString("GamelistViewStyle") == *it);
+		gamelist_style->add(_L(*it), *it, viewPreference == *it);
 
 	s->addWithLabel(_T("GAMELIST VIEW STYLE"), gamelist_style);
-	s->addSaveFunc([gamelist_style] {
+	s->addSaveFunc([gamelist_style, viewPreference] {
 		bool needReload = false;
-		if (Settings::getInstance()->getString("GamelistViewStyle") != gamelist_style->getSelected())
+		if (viewPreference != gamelist_style->getSelected())
 			needReload = true;
 		Settings::getInstance()->setString("GamelistViewStyle", gamelist_style->getSelected());
 		if (needReload)
@@ -588,6 +593,7 @@ void GuiMenu::openUISettings()
 			PowerSaver::init();
 		}
 		Settings::getInstance()->setString("TransitionStyle", transition_style->getSelected());
+		GuiComponent::ALLOWANIMATIONS = Settings::getInstance()->getString("TransitionStyle") != "instant";
 	});
 
 
@@ -727,6 +733,9 @@ void GuiMenu::openOtherSettings()
 			Settings::getInstance()->setBool("MoveCarousel", false);
 			Settings::getInstance()->setBool("EnableSounds", false);
 		}
+
+		GuiComponent::ALLOWANIMATIONS = Settings::getInstance()->getString("TransitionStyle") != "instant";
+
 		Settings::getInstance()->setString("PowerSaverMode", power_saver->getSelected());
 		PowerSaver::init();
 	});
@@ -780,6 +789,16 @@ void GuiMenu::openOtherSettings()
 	preloadUI->setState(Settings::getInstance()->getBool("PreloadUI"));
 	s->addWithLabel(_T("PRELOAD UI"), preloadUI);
 	s->addSaveFunc([preloadUI] { Settings::getInstance()->setBool("PreloadUI", preloadUI->getState()); });
+	
+	// optimizeVram
+	auto optimizeVram = std::make_shared<SwitchComponent>(mWindow);
+	optimizeVram->setState(Settings::getInstance()->getBool("OptimizeVRAM"));
+	s->addWithLabel(_T("OPTIMIZE IMAGES VRAM USE"), optimizeVram);
+	s->addSaveFunc([optimizeVram]
+	{
+		TextureData::OPTIMIZEVRAM = optimizeVram->getState();
+		Settings::getInstance()->setBool("OptimizeVRAM", optimizeVram->getState());
+	});
 
 #ifdef WIN32
 	// vsync

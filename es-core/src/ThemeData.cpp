@@ -8,6 +8,8 @@
 #include "Settings.h"
 #include <algorithm>
 
+#include "utils/StringUtil.h"
+
 #ifdef _RPI_
 #include "components/VideoPlayerComponent.h"
 #endif
@@ -34,11 +36,13 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "size", NORMALIZED_PAIR },
 		{ "margin", NORMALIZED_PAIR },
 
-		{ "padding", NORMALIZED_PAIR },
+		{ "padding", NORMALIZED_RECT },
 
 		{ "autoLayout", NORMALIZED_PAIR },
 		{ "autoLayoutSelectedZoom", FLOAT },
 
+		{ "imageSource", STRING }, // image, thumbnail, marquee
+		{ "zIndex", FLOAT },
 		{ "gameImage", PATH },
 		{ "folderImage", PATH },
 		{ "showVideoAtDelay", FLOAT },		
@@ -52,6 +56,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "backgroundColor", COLOR },
 		{ "backgroundCenterColor", COLOR },
 		{ "backgroundEdgeColor", COLOR },		
+		{ "selectionMode", STRING },		
 		{ "imageSizeMode", STRING } } },
 	{ "text", {
 		{ "pos", NORMALIZED_PAIR },
@@ -205,7 +210,8 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "filledPath", PATH } } },
 };
 
-std::shared_ptr<ThemeData::ThemeMenu> ThemeData::MenuTheme;
+std::shared_ptr<ThemeData::ThemeMenu> ThemeData::mMenuTheme;
+ThemeData* ThemeData::mCurrentTheme = nullptr;
 
 #define MINIMUM_THEME_FORMAT_VERSION 3
 #define CURRENT_THEME_FORMAT_VERSION 6
@@ -240,9 +246,7 @@ unsigned int getHexColor(const char* str)
 	return val;
 }
 
-std::map<std::string, std::string> mVariables;
-
-std::string resolvePlaceholders(const char* in)
+std::string ThemeData::resolvePlaceholders(const char* in)
 {
 	std::string inStr(in);
 
@@ -320,7 +324,18 @@ void ThemeData::loadFile(std::string system, std::map<std::string, std::string> 
 	parseCustomViews(root);
 	parseFeatures(root);
 
-	MenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(*this));
+	mMenuTheme = nullptr;
+	mCurrentTheme = this;
+}
+
+const std::shared_ptr<ThemeData::ThemeMenu>& ThemeData::getMenuTheme()
+{ 	
+	if (mMenuTheme == nullptr && mCurrentTheme != nullptr)
+		mMenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(*mCurrentTheme));
+	else if (mMenuTheme == nullptr)
+		return std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(ThemeData()));
+
+	return mMenuTheme;
 }
 
 std::string ThemeData::resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path)
@@ -536,7 +551,6 @@ void ThemeData::parseViews(const pugi::xml_node& root)
 				ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
 				parseView(node, view);
 
-
 				for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
 				{			
 					if (it->second.isCustomView && it->second.baseType == viewKey)
@@ -545,10 +559,6 @@ void ThemeData::parseViews(const pugi::xml_node& root)
 						parseView(node, customView);
 					}
 				}
-				
-
-
-
 			}
 		}
 	}
@@ -745,6 +755,25 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 
 		switch(typeIt->second)
 		{
+		case NORMALIZED_RECT:
+		{
+			Vector4f val;
+
+			auto splits = Utils::String::split(str, ' ');
+			if (splits.size() == 2)
+			{				
+				val = Vector4f((float)atof(splits.at(0).c_str()), (float)atof(splits.at(1).c_str()),
+					(float)atof(splits.at(0).c_str()), (float)atof(splits.at(1).c_str()));
+			}
+			else if (splits.size() == 4)
+			{
+				val = Vector4f((float)atof(splits.at(0).c_str()), (float)atof(splits.at(1).c_str()),
+					(float)atof(splits.at(2).c_str()), (float)atof(splits.at(3).c_str()));
+			}
+			
+			element.properties[node.name()] = val;
+			break;
+		}
 		case NORMALIZED_PAIR:
 		{
 			size_t divider = str.find(' ');
@@ -759,7 +788,7 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 			std::string second = str.substr(divider, std::string::npos);
 
 			Vector2f val((float)atof(first.c_str()), (float)atof(second.c_str()));
-
+			
 			element.properties[node.name()] = val;
 			break;
 		}
@@ -905,6 +934,7 @@ std::vector<GuiComponent*> ThemeData::makeExtras(const std::shared_ptr<ThemeData
 		if(elem.extra)
 		{
 			GuiComponent* comp = NULL;
+
 			const std::string& t = elem.type;
 			if(t == "image")
 				comp = new ImageComponent(window);
@@ -919,6 +949,9 @@ std::vector<GuiComponent*> ThemeData::makeExtras(const std::shared_ptr<ThemeData
 #endif
 					comp = new VideoVlcComponent(window, "");
 			}
+
+			if (comp == NULL)
+				continue;
 
 			comp->setDefaultZIndex(10);
 			comp->applyTheme(theme, view, *it, ThemeFlags::ALL);

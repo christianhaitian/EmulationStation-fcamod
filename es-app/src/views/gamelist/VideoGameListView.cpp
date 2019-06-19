@@ -62,7 +62,7 @@ VideoGameListView::VideoGameListView(Window* window, FileData* root) :
 	mVideo->setOrigin(0.5f, 0.5f);
 	mVideo->setPosition(mSize.x() * 0.25f, mSize.y() * 0.4f);
 	mVideo->setSize(mSize.x() * (0.5f - 2*padding), mSize.y() * 0.4f);
-	mVideo->setDefaultZIndex(30);
+	mVideo->setDefaultZIndex(31);
 	addChild(mVideo);
 
 	// metadata labels + values

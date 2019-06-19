@@ -28,9 +28,6 @@ public:
 
 	virtual void launch(FileData* game) override;
 
-protected:
-	virtual void update(int deltaTime) override;
-
 private:
 	void updateInfoPanel();
 
@@ -39,6 +36,8 @@ private:
 	std::string getMetadata(FileData* file, std::string name);
 
 	ImageComponent mImage;
+	ImageComponent mMarquee;
+	VideoComponent* mVideo;
 
 	TextComponent mLblRating, mLblReleaseDate, mLblDeveloper, mLblPublisher, mLblGenre, mLblPlayers, mLblLastPlayed, mLblPlayCount;
 
@@ -51,15 +50,14 @@ private:
 	DateTimeComponent mLastPlayed;
 	TextComponent mPlayCount;
 	TextComponent mName;
-	VideoComponent* mVideo;
-
+	
 	std::vector<TextComponent*> getMDLabels();
 	std::vector<GuiComponent*> getMDValues();
 
 	ScrollableContainer mDescContainer;
 	TextComponent mDescription;
 
-	bool		mVideoVisible;	
+
 };
 
 #endif // ES_APP_VIEWS_GAME_LIST_DETAILED_GAME_LIST_VIEW_H

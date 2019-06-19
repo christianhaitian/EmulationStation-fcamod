@@ -1,6 +1,7 @@
 #include "Gamelist.h"
 
 #include "utils/FileSystemUtil.h"
+#include "utils/StringUtil.h"
 #include "FileData.h"
 #include "FileFilterIndex.h"
 #include "Log.h"
@@ -107,7 +108,8 @@ void parseGamelist(SystemData* system)
 		return;
 	}
 	
-	system->setSystemViewMode(root.attribute("defaultView").value());
+	Vector2f gridSizeOverride = Vector2f::parseString(root.attribute("gridSize").value());
+	system->setSystemViewMode(root.attribute("defaultView").value(), gridSizeOverride, false);
 
 	std::string relativeTo = system->getStartPath();
 
@@ -215,6 +217,19 @@ void updateGamelist(SystemData* system)
 			else
 				root.attribute("defaultView") = system->getSystemViewMode().c_str();
 		}
+		
+		Vector2f gridSize = Vector2f::parseString(root.attribute("gridSize").value());		
+		if (gridSize != system->getGridSizeOverride())
+		{
+			numUpdated++;
+
+			if (system->getGridSizeOverride() == Vector2f(0,0))
+				root.remove_attribute("gridSize");
+			else if (root.attribute("gridSize").empty())
+				root.append_attribute("gridSize") = system->getGridSizeOverride().toString().c_str();
+			else
+				root.attribute("gridSize") = system->getGridSizeOverride().toString().c_str();
+		}
 
 		if(!root)
 		{
@@ -288,8 +303,31 @@ void updateGamelist(SystemData* system)
 
 			LOG(LogInfo) << "Added/Updated " << numUpdated << " entities in '" << xmlReadPath << "'";
 
-			if (!doc.save_file(xmlWritePath.c_str())) {
+			// Secure XML writing -> Write to a temporary file first
+			std::string tmpFile = xmlWritePath + ".tmp";
+			if (Utils::FileSystem::exists(tmpFile))
+				Utils::FileSystem::removeFile(tmpFile);
+
+			if (!doc.save_file(tmpFile.c_str())) {
 				LOG(LogError) << "Error saving gamelist.xml to \"" << xmlWritePath << "\" (for system " << system->getName() << ")!";
+			}
+			else if (Utils::FileSystem::exists(tmpFile))
+			{				
+				// Secure XML writing
+				if ((int) Utils::FileSystem::getFileSize(tmpFile) > 0)
+				{
+					std::string savFile = xmlWritePath + ".old";
+
+					if (Utils::FileSystem::exists(savFile))
+						Utils::FileSystem::removeFile(savFile);
+
+					if (Utils::FileSystem::exists(xmlWritePath))
+						std::rename(xmlWritePath.c_str(), savFile.c_str());
+
+					std::rename(tmpFile.c_str(), xmlWritePath.c_str());
+				}
+				else 
+					Utils::FileSystem::removeFile(tmpFile);
 			}
 		}
 	}else{

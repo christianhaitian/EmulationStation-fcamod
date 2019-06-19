@@ -53,35 +53,48 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 	mHeaderText.setText(systemName);
 
 	bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles");
+	bool favoritesFirst = Settings::getInstance()->getBool("FavoritesFirst");
+	bool showFavoriteIcon = (systemName != "favorites");
+	if (!showFavoriteIcon)
+		favoritesFirst = false;
 
 	if (files.size() > 0)
 	{
-		for (auto it = files.cbegin(); it != files.cend(); it++)
+		if (favoritesFirst)
 		{
-			if ((*it)->getFavorite())
-				if (showHiddenFiles || !(*it)->getHidden())
-				{
-					if (systemName == "favorites")
-						mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
-					else
+			for (auto it = files.cbegin(); it != files.cend(); it++)
+			{
+				if (!showHiddenFiles && (*it)->getHidden())
+					continue;
 
-						mList.add(_T("\uF006 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
-				}
+				if (!(*it)->getFavorite())
+					continue;
+				
+				if (showFavoriteIcon)
+					mList.add(_T("\uF006 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
+				else
+					mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));				
+			}
 		}
-		/*
-		for (auto it = files.cbegin(); it != files.cend(); it++)
-		{
-			if (!(*it)->getFavorite() && ((*it)->getType() == FOLDER))
-				if (showHiddenFiles || !(*it)->getHidden())
-					mList.add("[Folder] "+(*it)->getName(), *it, ((*it)->getType() == FOLDER));
-
-		}*/
 
 		for (auto it = files.cbegin(); it != files.cend(); it++)
 		{
-			if (!(*it)->getFavorite())
-				if (showHiddenFiles || !(*it)->getHidden())				
-					mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+			if (!showHiddenFiles && (*it)->getHidden())
+				continue;
+
+			if ((*it)->getFavorite())
+			{
+				if (favoritesFirst)
+					continue;
+
+				if (showFavoriteIcon)
+				{
+					mList.add(_T("\uF006 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
+					continue;
+				}
+			}
+				
+			mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
 		}
 	}
 	else

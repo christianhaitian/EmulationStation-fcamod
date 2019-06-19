@@ -124,7 +124,7 @@ void CollectionSystemManager::saveCustomCollection(SystemData* sys)
 
 /* Methods to load all Collections into memory, and handle enabling the active ones */
 // loads all Collection Systems
-void CollectionSystemManager::loadCollectionSystems()
+void CollectionSystemManager::loadCollectionSystems(bool async)
 {
 	initAutoCollectionSystems();
 	CollectionSystemDecl decl = mCollectionSystemDeclsIndex[myCollectionsName];
@@ -135,8 +135,11 @@ void CollectionSystemManager::loadCollectionSystems()
 	{
 		// Now see which ones are enabled
 		loadEnabledListFromSettings();
+
+		
 		// add to the main System Vector, and create Views as needed
-		updateSystemsList();
+		if (!async)
+			updateSystemsList();
 	}
 }
 
@@ -170,7 +173,7 @@ void CollectionSystemManager::updateSystemsList()
 	// add custom enabled ones
 	addEnabledCollectionsToDisplayedSystems(&mCustomCollectionSystemsData);
 
-	if(Settings::getInstance()->getBool("SortAllSystems"))
+	if (Settings::getInstance()->getBool("SortAllSystems"))
 	{
 		// sort custom individual systems with other systems
 		std::sort(SystemData::sSystemVector.begin(), SystemData::sSystemVector.end(), systemSort);
@@ -200,7 +203,7 @@ void CollectionSystemManager::updateSystemsList()
 
 	// add auto enabled ones
 	addEnabledCollectionsToDisplayedSystems(&mAutoCollectionSystemsData);
-
+	/*
 	// create views for collections, before reload
 	for(auto sysIt = SystemData::sSystemVector.cbegin(); sysIt != SystemData::sSystemVector.cend(); sysIt++)
 	{
@@ -208,7 +211,7 @@ void CollectionSystemManager::updateSystemsList()
 		{
 			ViewController::get()->getGameListView((*sysIt));
 		}
-	}
+	}*/
 
 	// if we were editing a custom collection, and it's no longer enabled, exit edit mode
 	if(mIsEditingCustom && !mEditingCollectionSystemData->isEnabled)

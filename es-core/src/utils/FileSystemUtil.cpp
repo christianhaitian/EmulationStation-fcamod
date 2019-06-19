@@ -263,7 +263,10 @@ namespace Utils
 				// this should give us something like "/home/YOUR_USERNAME" on Linux and "C:/Users/YOUR_USERNAME/" on Windows
 				char* envHome = getenv("HOME");
 
+				// envHome = "H:/[Emulz]/EmulationStation/";
+
 #ifdef _DEBUG
+				if (Utils::FileSystem::exists("H:/[Emulz]/EmulationStation/emulationstation.exe"))
 				     envHome = "H:/[Emulz]/EmulationStation/";
 #endif
 

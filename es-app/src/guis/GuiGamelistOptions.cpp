@@ -13,9 +13,61 @@
 
 #include "animations/LambdaAnimation.h"
 
-GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window),
+std::vector<std::string> gridSizes {
+	"automatic",
+	
+	"2x2",	
+	"2x3",	
+	"2x4",
+	"2x5",
+	"2x6",
+	"2x7",
+
+	"3x1",
+	"3x2",
+	"3x3",
+	"3x4",
+	"3x5",
+	"3x6",
+	"3x7",
+	
+	"4x1",
+	"4x2",
+	"4x3",
+	"4x4",
+	"4x5",
+	"4x6",
+	"4x7",
+
+	"5x1",
+	"5x2",
+	"5x3",
+	"5x4",
+	"5x5",
+	"5x6",
+	"5x7",
+
+	"6x1",
+	"6x2",
+	"6x3",
+	"6x4",
+	"6x5",
+	"6x6",
+	"6x7",
+
+	"7x1",
+	"7x2",
+	"7x3",
+	"7x4",
+	"7x5",
+	"7x6",
+	"7x7"
+};
+
+GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool showGridFeatures) : GuiComponent(window),
 	mSystem(system), mMenu(window, "OPTIONS"), fromPlaceholder(false), mFiltersChanged(false)
-{
+{	
+	mGridSize = NULL;
 	addChild(&mMenu);
 
 	// check it's not a placeholder folder - if it is, only show "Filter Options"
@@ -106,6 +158,32 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 
 	mMenu.addWithLabel(_T("GAMELIST VIEW STYLE"), mViewMode);	
 	
+	
+
+	// Grid size override
+	if (showGridFeatures)
+	{
+		auto gridOverride = system->getGridSizeOverride();
+		auto ovv = std::to_string((int)gridOverride.x()) + "x" + std::to_string((int)gridOverride.y());
+
+		mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _T("GRID SIZE"), false);
+
+		found = false;
+		for (auto it = gridSizes.cbegin(); it != gridSizes.cend(); it++)
+		{
+			bool sel = (gridOverride == Vector2f(0, 0) && *it == "automatic") || ovv == *it;
+			if (sel)
+				found = true;
+
+			mGridSize->add(_L(*it), *it, sel);
+		}
+
+		if (!found)
+			mGridSize->selectFirstItem();
+
+		mMenu.addWithLabel(_T("GRID SIZE"), mGridSize);
+	}
+
 	// show filtered menu
 	if(!Settings::getInstance()->getBool("ForceDisableFilters"))
 	{
@@ -115,6 +193,31 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 		row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::openGamelistFilter, this));
 		mMenu.addRow(row);		
 	}
+
+
+
+	/*
+	// maximum vram
+	auto max_vram = std::make_shared<SliderComponent>(mWindow, 0.f, 2000.f, 10.f, "Mb");
+	max_vram->setValue((float)(Settings::getInstance()->getInt("MaxVRAM")));
+	s->addWithLabel(_T("VRAM LIMIT"), max_vram);
+	s->addSaveFunc([max_vram] { Settings::getInstance()->setInt("MaxVRAM", (int)Math::round(max_vram->getValue())); });
+	*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	std::map<std::string, CollectionSystemData> customCollections = CollectionSystemManager::get()->getCustomCollectionSystems();
 
@@ -188,7 +291,23 @@ GuiGamelistOptions::~GuiGamelistOptions()
 		getGamelist()->onFileChanged(root, FILE_SORTED);
 	}
 
-	if (mSystem->setSystemViewMode(mViewMode->getSelected()) || mFiltersChanged)
+	Vector2f gridSizeOverride(0, 0);
+
+	if (mGridSize != NULL)
+	{
+		auto str = mGridSize->getSelected();
+
+		size_t divider = str.find('x');
+		if (divider != std::string::npos)
+		{
+			std::string first = str.substr(0, divider);
+			std::string second = str.substr(divider+1, std::string::npos);
+
+			gridSizeOverride = Vector2f((float)atof(first.c_str()), (float)atof(second.c_str()));
+		}
+	}
+	
+	if (mSystem->setSystemViewMode(mViewMode->getSelected(), gridSizeOverride) || mFiltersChanged)
 	{
 		// only reload full view if we came from a placeholder
 		// as we need to re-display the remaining elements for whatever new

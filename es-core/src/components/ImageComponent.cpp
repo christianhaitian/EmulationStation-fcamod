@@ -168,7 +168,7 @@ void ImageComponent::setImage(const std::shared_ptr<TextureResource>& texture)
 
 void ImageComponent::setResize(float width, float height)
 {
-	if (!mTargetIsMax && !mTargetIsMin && mTargetSize.x() == width && mTargetSize.y() == height)
+	if (mSize.x() != 0 && mSize.y() != 0 && !mTargetIsMax && !mTargetIsMin && mTargetSize.x() == width && mTargetSize.y() == height)
 		return;
 
 	mTargetSize = Vector2f(width, height);
@@ -179,7 +179,7 @@ void ImageComponent::setResize(float width, float height)
 
 void ImageComponent::setMaxSize(float width, float height)
 {
-	if (mTargetIsMax && !mTargetIsMin && mTargetSize.x() == width && mTargetSize.y() == height)
+	if (mSize.x() != 0 && mSize.y() != 0 && mTargetIsMax && !mTargetIsMin && mTargetSize.x() == width && mTargetSize.y() == height)
 		return;
 
 	mTargetSize = Vector2f(width, height);
@@ -190,7 +190,7 @@ void ImageComponent::setMaxSize(float width, float height)
 
 void ImageComponent::setMinSize(float width, float height)
 {
-	if (mTargetIsMin && !mTargetIsMax && mTargetSize.x() == width && mTargetSize.y() == height)
+	if (mSize.x() != 0 && mSize.y() != 0 && mTargetIsMin && !mTargetIsMax && mTargetSize.x() == width && mTargetSize.y() == height)
 		return;
 
 	mTargetSize = Vector2f(width, height);
@@ -260,6 +260,9 @@ void ImageComponent::setFlipY(bool flip)
 
 void ImageComponent::setColorShift(unsigned int color)
 {
+	if (mColorShift == color)
+		return;
+
 	mColorShift = color;
 	// Grab the opacity from the color shift because we may need to apply it if
 	// fading textures in
@@ -338,11 +341,12 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 		return;
 
 	Transform4x4f trans = parentTrans * getTransform();
-	Renderer::setMatrix(trans);
 
 	Vector2f clipPos(trans.translation().x(), trans.translation().y());
 	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
 		return;
+
+	Renderer::setMatrix(trans);
 
 	if (mTexture && mOpacity > 0)
 	{
@@ -394,6 +398,9 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 
 void ImageComponent::fadeIn(bool textureLoaded)
 {
+	if (!mAllowFading)
+		return;
+
 	if (!mForceLoad)
 	{
 		if (!textureLoaded)
@@ -476,8 +483,12 @@ void ImageComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 
 	if(properties & PATH && elem->has("path"))
 	{
-		bool tile = (elem->has("tile") && elem->get<bool>("tile"));
-		setImage(elem->get<std::string>("path"), tile, mTargetSize);
+		auto path = elem->get<std::string>("path");
+		if (Utils::FileSystem::exists(path))
+		{
+			bool tile = (elem->has("tile") && elem->get<bool>("tile"));
+			setImage(path, tile, Vector2f(mTargetSize.x(), mTargetSize.y()));
+		}
 	}
 
 	if(properties & COLOR && elem->has("color"))

@@ -13,8 +13,20 @@
 
 #define DPI 96
 
+#ifdef WIN32	
+void traceOutput(std::string string)
+{
+#if _DEBUG
+	OutputDebugStringA(string.c_str());
+#endif
+}
+#endif
+
+
+bool TextureData::OPTIMIZEVRAM = false;
+
 TextureData::TextureData(bool tile) : mTile(tile), mTextureID(0), mDataRGBA(nullptr), mScalable(false),
-									  mWidth(0), mHeight(0), mSourceWidth(0.0f), mSourceHeight(0.0f), mMaxSize(Vector2f(0,0))
+									  mWidth(0), mHeight(0), mSourceWidth(0.0f), mSourceHeight(0.0f), mMaxSize(Vector2f(0,0)), mPackedSize(Vector2i(0,0)), mBaseSize(Vector2i(0, 0))
 {
 	
 }
@@ -61,8 +73,14 @@ bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length
 		mSourceWidth = svgImage->width;
 		mSourceHeight = svgImage->height;
 	}
-	mWidth = (size_t)Math::round(mSourceWidth);
-	mHeight = (size_t)Math::round(mSourceHeight);
+	else 
+		mSourceWidth = (mSourceHeight * svgImage->width) / svgImage->height; // FCATMP : Always keep source aspect ratio
+
+//	mWidth = (size_t)Math::round(mSourceWidth);
+//	mHeight = (size_t)Math::round(mSourceHeight);
+
+	mWidth = (int) mSourceWidth;
+	mHeight = (int) mSourceHeight;
 
 	if (mWidth == 0)
 	{
@@ -74,13 +92,28 @@ bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length
 		// auto scale height to keep aspect
 		mHeight = (size_t)Math::round(((float)mWidth / svgImage->width) * svgImage->height);
 	}
+
+	mBaseSize = Vector2i(mWidth, mHeight);
 	
-	if (mMaxSize.x() > 0 && mMaxSize.y() > 0 && (mWidth > mMaxSize.x() || mHeight > mMaxSize.y()))
+	if (mMaxSize.x() > 0 && mMaxSize.y() > 0 && mHeight < mMaxSize.y() && mWidth < mMaxSize.y()) // FCATMP
+	{
+		Vector2i sz = ImageIO::adjustPictureSize(Vector2i(mWidth, mHeight), Vector2i(mMaxSize.x(), mMaxSize.y()));
+		mWidth = sz.x();		
+		mHeight = sz.y();
+		mWidth = (int)((mHeight * svgImage->width) / svgImage->height);
+	}
+	
+	if (OPTIMIZEVRAM && mMaxSize.x() > 0 && mMaxSize.y() > 0 && (mWidth > mMaxSize.x() || mHeight > mMaxSize.y()))
 	{
 		Vector2i sz = ImageIO::adjustPictureSize(Vector2i(mWidth, mHeight), Vector2i(mMaxSize.x(), mMaxSize.y()));
 		mWidth = sz.x();
-		mHeight = sz.y();
+		mHeight = sz.y();	
+		mWidth = (mHeight * svgImage->width) / svgImage->height;
+
+		mPackedSize = Vector2i(mWidth, mHeight);
 	}
+	else
+		mPackedSize = Vector2i(0, 0);
 	
 	unsigned char* dataRGBA = new unsigned char[mWidth * mHeight * 4];
 
@@ -95,6 +128,29 @@ bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length
 	return true;
 }
 
+bool TextureData::isRequiredTextureSizeOk()
+{
+	if (!OPTIMIZEVRAM)
+		return true;
+
+	if (mPackedSize == Vector2i(0, 0))
+		return true;
+
+	if (mBaseSize == Vector2i(0, 0))
+		return true;
+
+	if (mMaxSize == Vector2f(0, 0))
+		return true;
+
+	if ((int) mMaxSize.x() <= mPackedSize.x() || (int) mMaxSize.y() <= mPackedSize.y())
+		return true;
+
+	if (mBaseSize.x() <= mPackedSize.x() || mBaseSize.y() <= mPackedSize.y())
+		return true;
+
+	return false;
+}
+
 bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t length)
 {
 	size_t width, height;
@@ -106,9 +162,7 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 			return true;
 	}
 	
-	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height, mMaxSize.x(), mMaxSize.y());
-
-//	std::vector<unsigned char> imageRGBA = ImageIO::loadFromMemoryRGBA32((const unsigned char*)(fileData), length, width, height);
+	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height, OPTIMIZEVRAM ? mMaxSize.x() : 0, mMaxSize.y(), mBaseSize, mPackedSize);
 	if (imageRGBA == NULL)
 	{
 		LOG(LogError) << "Could not initialize texture from memory, invalid data!  (file path: " << mPath << ", data ptr: " << (size_t)fileData << ", reported size: " << length << ")";
@@ -148,6 +202,7 @@ bool TextureData::initFromRGBAEx(unsigned char* dataRGBA, size_t width, size_t h
 	mDataRGBA = dataRGBA;
 	mWidth = width;
 	mHeight = height;
+
 	return true;
 }
 
@@ -158,18 +213,27 @@ bool TextureData::load()
 	// Need to load. See if there is a file
 	if (!mPath.empty())
 	{
+#ifdef WIN32	
+		char buffer[1000];
+		sprintf_s(buffer, "TextureData::load(%s, %d)\n", mPath.c_str(), mTextureID);
+		traceOutput(buffer);
+#endif
+
 		std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
 
 		const ResourceData& data = rm->getFileData(mPath);
 		// is it an SVG?
 		if (mPath.substr(mPath.size() - 4, std::string::npos) == ".svg")
 		{
-			mScalable = true;
+			mScalable = true; // ??? interest ?
 			retval = initSVGFromMemory((const unsigned char*)data.ptr.get(), data.length);
 		}
 		else
 			retval = initImageFromMemory((const unsigned char*)data.ptr.get(), data.length);
 	}
+
+	
+
 	return retval;
 }
 
@@ -178,6 +242,7 @@ bool TextureData::isLoaded()
 	std::unique_lock<std::mutex> lock(mMutex);
 	if (mDataRGBA || (mTextureID != 0))
 		return true;
+
 	return false;
 }
 
@@ -199,6 +264,7 @@ bool TextureData::uploadAndBind()
 		// Make sure we're ready to upload
 		if ((mWidth == 0) || (mHeight == 0) || (mDataRGBA == nullptr))
 			return false;
+
 		glGetError();
 		//now for the openGL texture stuff
 		glGenTextures(1, &mTextureID);
@@ -266,8 +332,16 @@ void TextureData::setSourceSize(float width, float height)
 {
 	if (mScalable)
 	{
-		if ((mSourceWidth != width) || (mSourceHeight != height))
+		//if ((mSourceWidth != width) || (mSourceHeight != height))
+		if (mSourceHeight < height) // FCATMP
 		{
+			/*
+#ifdef WIN32	
+			char buffer[1000];
+			sprintf_s(buffer, "TextureData::setSourceSize(%s, %d)\n", mPath.c_str(), mTextureID);
+			traceOutput(buffer);
+#endif*/
+
 			mSourceWidth = width;
 			mSourceHeight = height;
 			releaseVRAM();

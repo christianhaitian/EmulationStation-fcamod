@@ -19,6 +19,7 @@ struct GridTileProperties
 	unsigned int mBackgroundEdgeColor;
 
 	std::string mImageSizeMode;
+	std::string mSelectionMode;
 
 	Vector2f mLabelSize;
 	unsigned int mLabelColor;
@@ -32,7 +33,6 @@ public:
 	~GridTileComponent();
 
 	void render(const Transform4x4f& parentTrans) override;
-	void update(int deltaTime) override;
 
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties);
 
@@ -48,7 +48,7 @@ public:
 	void setVideo(const std::string& path, float defaultDelay = -1.0);
 
 	void setImage(const std::string& path);
-	void setImage(const std::shared_ptr<TextureResource>& texture, std::string name);
+	// void setImage(const std::shared_ptr<TextureResource>& texture, std::string name);
 	void setSelected(bool selected, bool allowAnimation = true, Vector3f* pPosition = NULL);
 	void setVisible(bool visible);
 
@@ -58,6 +58,11 @@ public:
 	void renderContent(const Transform4x4f& parentTrans);
 
 	bool shouldSplitRendering() { return isAnimationPlaying(3); };
+
+	Vector3f getBackgroundPosition();
+
+	virtual void onShow();
+	virtual void onHide();
 
 private:
 	void resize();
@@ -89,7 +94,7 @@ private:
 
 	VideoComponent* mVideo;
 	bool mVideoPlaying;
-
+	bool mShown;
 };
 
 #endif // ES_CORE_COMPONENTS_GRID_TILE_COMPONENT_H

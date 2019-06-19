@@ -10,7 +10,7 @@ class TextCache;
 class ButtonComponent : public GuiComponent
 {
 public:
-	ButtonComponent(Window* window, const std::string& text = "", const std::string& helpText = "", const std::function<void()>& func = nullptr);
+	ButtonComponent(Window* window, const std::string& text = "", const std::string& helpText = "", const std::function<void()>& func = nullptr, bool upperCase = true);
 
 	void setPressedFunc(std::function<void()> f);
 
@@ -19,7 +19,7 @@ public:
 	bool input(InputConfig* config, Input input) override;
 	void render(const Transform4x4f& parentTrans) override;
 
-	void setText(const std::string& text, const std::string& helpText);
+	void setText(const std::string& text, const std::string& helpText, bool upperCase = true);
 
 	inline const std::string& getText() const { return mText; };
 	inline const std::function<void()>& getPressedFunc() const { return mPressedFunc; };
@@ -27,6 +27,9 @@ public:
 	void onSizeChanged() override;
 	void onFocusGained() override;
 	void onFocusLost() override;
+
+	void setColorShift(unsigned int color) { mModdedColor = color; mNewColor = true; updateImage(); }
+	void removeColorShift() { mNewColor = false; updateImage(); }
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 
@@ -36,8 +39,10 @@ private:
 
 	bool mFocused;
 	bool mEnabled;
+	bool mNewColor = false;
 	unsigned int mTextColorFocused;
 	unsigned int mTextColorUnfocused;
+	unsigned int mModdedColor;
 
 	unsigned int getCurTextColor() const;
 	void updateImage();

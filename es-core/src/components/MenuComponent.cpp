@@ -30,6 +30,25 @@ MenuComponent::MenuComponent(Window* window, std::string title, const std::share
 	mList = std::make_shared<ComponentList>(mWindow);
 	mGrid.setEntry(mList, Vector2i(0, 1), true);
 
+	mGrid.setUnhandledInputCallback([this](InputConfig* config, Input input) -> bool {
+		if (config->isMappedLike("down", input)) {
+			mGrid.setCursorTo(mList);
+			mList->setCursorIndex(0);
+			return true;
+		}
+		if (config->isMappedLike("up", input)) {
+			mList->setCursorIndex(mList->size() - 1);
+			if (mButtons.size()) {
+				mGrid.moveCursor(Vector2i(0, 1));
+			}
+			else {
+				mGrid.setCursorTo(mList);
+			}
+			return true;
+		}
+		return false;
+	});
+
 	updateGrid();
 	updateSize();
 
@@ -117,6 +136,43 @@ void MenuComponent::updateGrid()
 std::vector<HelpPrompt> MenuComponent::getHelpPrompts()
 {
 	return mGrid.getHelpPrompts();
+}
+
+std::shared_ptr<ComponentGrid> makeMultiDimButtonGrid(Window* window, const std::vector< std::vector< std::shared_ptr<ButtonComponent> > >& buttons, float outerWidth)
+{
+
+	const int sizeX = (int)buttons.at(0).size();
+	const int sizeY = (int)buttons.size();
+	const float buttonHeight = buttons.at(0).at(0)->getSize().y();
+	const float gridHeight = (buttonHeight + BUTTON_GRID_VERT_PADDING + 2) * sizeY;
+
+	float horizPadding = (float)BUTTON_GRID_HORIZ_PADDING;
+	float gridWidth, buttonWidth;
+
+//	do {
+		gridWidth = outerWidth - horizPadding; // to get centered because size * (button size + BUTTON_GRID_VERT_PADDING) let a half BUTTON_GRID_VERT_PADDING left / right marge
+		buttonWidth = (gridWidth / sizeX) - horizPadding;
+	//	horizPadding -= 2;
+//	} while ((buttonWidth < 100) && (horizPadding > 2));
+
+	std::shared_ptr<ComponentGrid> grid = std::make_shared<ComponentGrid>(window, Vector2i(sizeX, sizeY));
+
+	grid->setSize(gridWidth, gridHeight);
+
+	for (int x = 0; x < sizeX; x++)
+		grid->setColWidthPerc(x, (float)1 / sizeX);
+
+	for (int y = 0; y < sizeY; y++)
+	{
+		for (int x = 0; x < sizeX; x++)
+		{
+			const std::shared_ptr<ButtonComponent>& button = buttons.at(y).at(x);
+			button->setSize(buttonWidth, buttonHeight);
+			grid->setEntry(button, Vector2i(x, y), true, false);
+		}
+	}
+
+	return grid;
 }
 
 std::shared_ptr<ComponentGrid> makeButtonGrid(Window* window, const std::vector< std::shared_ptr<ButtonComponent> >& buttons)

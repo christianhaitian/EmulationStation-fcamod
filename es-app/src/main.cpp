@@ -25,6 +25,7 @@
 #include <Windows.h>
 #endif
 
+#include "resources/TextureData.h"
 #include <FreeImage.h>
 
 bool scrape_cmdline = false;
@@ -332,6 +333,9 @@ int main(int argc, char* argv[])
 	CollectionSystemManager::init(&window);
 	MameNames::init();
 	window.pushGui(ViewController::get());
+
+	TextureData::OPTIMIZEVRAM = Settings::getInstance()->getBool("OptimizeVRAM");
+	GuiComponent::ALLOWANIMATIONS = Settings::getInstance()->getString("TransitionStyle") != "instant";
 
 	bool splashScreen = Settings::getInstance()->getBool("SplashScreen");
 	bool splashScreenProgress = Settings::getInstance()->getBool("SplashScreenProgress");

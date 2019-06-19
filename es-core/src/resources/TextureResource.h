@@ -34,11 +34,14 @@ public:
 
 	static size_t getTotalMemUsage(); // returns an approximation of total VRAM used by textures (in bytes)
 	static size_t getTotalTextureSize(); // returns the number of bytes that would be used if all textures were in memory
+	static void resetCache();
+
+public:
+	virtual void unload();
+	virtual void reload();
 
 protected:
 	TextureResource(const std::string& path, bool tile, bool dynamic, Vector2f maxSize);
-	virtual void unload(std::shared_ptr<ResourceManager>& rm);
-	virtual void reload(std::shared_ptr<ResourceManager>& rm);
 
 private:
 	// mTextureData is used for textures that are not loaded from a file - these ones
@@ -54,6 +57,7 @@ private:
 
 	typedef std::pair<std::string, bool> TextureKeyType;
 	static std::map< TextureKeyType, std::weak_ptr<TextureResource> > sTextureMap; // map of textures, used to prevent duplicate textures
+	static std::map< TextureKeyType, std::shared_ptr<TextureResource> > sPermanentTextureMap; // map of textures, used to prevent duplicate textures // FCAWEAK
 	static std::set<TextureResource*> 	sAllTextures;	// Set of all textures, used for memory management
 };
 
