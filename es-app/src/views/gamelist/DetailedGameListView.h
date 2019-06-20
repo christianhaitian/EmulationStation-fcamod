@@ -12,7 +12,7 @@ class VideoComponent;
 class DetailedGameListView : public BasicGameListView
 {
 public:
-	DetailedGameListView(Window* window, FileData* root);
+	DetailedGameListView(Window* window, FolderData* root);
 	~DetailedGameListView();
 
 	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
@@ -30,13 +30,17 @@ public:
 
 private:
 	void updateInfoPanel();
+	
+	void createVideo();
+	void createMarquee();
+	void createImage();	
 
 	void initMDLabels();
 	void initMDValues();
 	std::string getMetadata(FileData* file, std::string name);
 
-	ImageComponent mImage;
-	ImageComponent mMarquee;
+	ImageComponent* mImage;
+	ImageComponent* mMarquee;
 	VideoComponent* mVideo;
 
 	TextComponent mLblRating, mLblReleaseDate, mLblDeveloper, mLblPublisher, mLblGenre, mLblPlayers, mLblLastPlayed, mLblPlayCount;

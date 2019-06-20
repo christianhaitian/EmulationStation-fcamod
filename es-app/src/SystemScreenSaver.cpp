@@ -264,7 +264,7 @@ unsigned long SystemScreenSaver::countGameListNodes(const char *nodeName)
 		if (!(*it)->isGameSystem() || (*it)->isCollection())
 			continue;
 
-		FileData* rootFileData = (*it)->getRootFolder();
+		FolderData* rootFileData = (*it)->getRootFolder();
 
 		FileType type = GAME;
 		std::vector<FileData*> allFiles = rootFileData->getFilesRecursive(type, true);
@@ -308,7 +308,7 @@ void SystemScreenSaver::pickGameListNode(unsigned long index, const char *nodeNa
 		if (!(*it)->isGameSystem() || (*it)->isCollection())
 			continue;
 
-		FileData* rootFileData = (*it)->getRootFolder();
+		FolderData* rootFileData = (*it)->getRootFolder();
 
 		FileType type = GAME;
 		std::vector<FileData*> allFiles = rootFileData->getFilesRecursive(type, true);

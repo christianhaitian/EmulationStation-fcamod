@@ -33,7 +33,7 @@ private:
 	typedef OptionListComponent<char> LetterList;
 	std::shared_ptr<LetterList> mJumpToLetterList;
 
-	typedef OptionListComponent<const FileData::SortType*> SortList;
+	typedef OptionListComponent<const FolderData::SortType*> SortList;
 	std::shared_ptr<SortList> mListSort;
 
 	std::shared_ptr<OptionListComponent<std::string>> mViewMode;

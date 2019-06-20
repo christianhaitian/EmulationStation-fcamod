@@ -288,7 +288,8 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	if(exists != mGameListViews.cend())
 		return exists->second;
 
-	system->getIndex()->setUIModeFilters();
+	system->setUIModeFilters();
+
 	//if we didn't, make it, remember it, and return it
 	std::shared_ptr<IGameListView> view;
 
@@ -400,7 +401,7 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 			view = std::shared_ptr<IGameListView>(new BasicGameListView(mWindow, system->getRootFolder()));
 			break;
 	}
-
+	
 	if (selectedViewType != GRID)
 	{
 		// GridGameListView theme needs to be loaded before populating.
@@ -410,7 +411,7 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 
 		view->setTheme(system->getTheme());
 	}
-
+	
 	std::vector<SystemData*>& sysVec = SystemData::sSystemVector;
 	int id = (int)(std::find(sysVec.cbegin(), sysVec.cend(), system) - sysVec.cbegin());
 	view->setPosition(id * (float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight() * 2);
@@ -538,7 +539,7 @@ void ViewController::preload()
 			mWindow->renderLoadingScreen(_T("Preloading UI"), (float) i / (float)max);
 		}
 
-		(*it)->getIndex()->resetFilters();
+		(*it)->resetFilters();
 		getGameListView(*it);
 	}
 }
@@ -549,16 +550,21 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 	{
 		if(it->second.get() == view)
 		{
+
+		//	addPlaceholder()
+
 			bool isCurrent = (mCurrentView == it->second);
 
 			SystemData* system = it->first;
+		
 			FileData* cursor = view->getCursor();
+
 			mGameListViews.erase(it);
 
 			if (reloadTheme)
 				system->loadTheme();
 
-			system->getIndex()->setUIModeFilters();
+			system->setUIModeFilters();
 			std::shared_ptr<IGameListView> newView = getGameListView(system);
 
 			// to counter having come from a placeholder
@@ -596,7 +602,7 @@ void ViewController::reloadAll()
 	for(auto it = cursorMap.cbegin(); it != cursorMap.cend(); it++)
 	{
 		it->first->loadTheme();
-		it->first->getIndex()->resetFilters();
+		it->first->resetFilters();
 
 		if (it->second != NULL)
 			getGameListView(it->first)->setCursor(it->second);

@@ -32,32 +32,34 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 {
 	mGridSizeOverride = Vector2f(0, 0);
 	mViewModeChanged = false;
-	mFilterIndex = new FileFilterIndex();
+	mFilterIndex = nullptr;// new FileFilterIndex();
 
 	// if it's an actual system, initialize it, if not, just create the data structure
 	if (!CollectionSystem)
 	{
-		mRootFolder = new FileData(FOLDER, mEnvData->mStartPath, mEnvData, this);
+		mRootFolder = new FolderData(mEnvData->mStartPath, this);
 		mRootFolder->metadata.set("name", mFullName);
 
+		std::unordered_map<std::string, FileData*> fileMap;
+
 		if (!Settings::getInstance()->getBool("ParseGamelistOnly"))
-		{
-			populateFolder(mRootFolder);
+		{			
+			populateFolder(mRootFolder, fileMap);
 			if (mRootFolder->getChildren().size() == 0)
 				return;
 		}
 
 		if (!Settings::getInstance()->getBool("IgnoreGamelist"))
-			parseGamelist(this);
+			parseGamelist(this, fileMap);
 
 		mRootFolder->sort(FileSorts::SortTypes.at(0));
 
-		indexAllGameFilters(mRootFolder);
+		//indexAllGameFilters(mRootFolder);
 	}
 	else
 	{
 		// virtual systems are updated afterwards, we're just creating the data structure
-		mRootFolder = new FileData(FOLDER, "" + name, mEnvData, this);
+		mRootFolder = new FolderData("" + name, this);
 	}
 
 	setIsGameSystemStatus();
@@ -87,7 +89,9 @@ Vector2f SystemData::getGridSizeOverride()
 SystemData::~SystemData()
 {
 	delete mRootFolder;
-	delete mFilterIndex;
+
+	if (mFilterIndex != nullptr)
+		delete mFilterIndex;
 }
 
 void SystemData::setIsGameSystemStatus()
@@ -104,7 +108,7 @@ char _easytolower(char in) {
 	return in;
 }
 
-void SystemData::populateFolder(FileData* folder)
+void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::string, FileData*>& fileMap)
 {
 	const std::string& folderPath = folder->getPath();
 	if(!Utils::FileSystem::isDirectory(folderPath))
@@ -150,13 +154,17 @@ void SystemData::populateFolder(FileData* folder)
 		isGame = false;
 		if(std::find(mEnvData->mSearchExtensions.cbegin(), mEnvData->mSearchExtensions.cend(), extension) != mEnvData->mSearchExtensions.cend())
 		{
-			FileData* newGame = new FileData(GAME, fileInfo.path, mEnvData, this);
-
-			// preventing new arcade assets to be added
-			if (extension != ".zip" || !newGame->isArcadeAsset())
+			if (fileMap.find(fileInfo.path) == fileMap.end())
 			{
-				folder->addChild(newGame);
-				isGame = true;
+				FileData* newGame = new FileData(GAME, fileInfo.path, this);
+
+				// preventing new arcade assets to be added
+				if (extension != ".zip" || !newGame->isArcadeAsset())
+				{
+					folder->addChild(newGame);
+					fileMap[fileInfo.path] = newGame;
+					isGame = true;
+				}
 			}
 		}
 		
@@ -166,20 +174,39 @@ void SystemData::populateFolder(FileData* folder)
 			if (fileInfo.path.rfind("downloaded_images") != std::string::npos || fileInfo.path.rfind("media") != std::string::npos)
 				continue;
 
-			FileData* newFolder = new FileData(FOLDER, fileInfo.path, mEnvData, this);
-			populateFolder(newFolder);
+			FolderData* newFolder = new FolderData(fileInfo.path, this);
+			populateFolder(newFolder, fileMap);
 
-			if (newFolder->getChildrenByFilename().size() == 0)
+			if (newFolder->getChildren().size() == 0)
 				delete newFolder;
 			else if (newFolder->findUniqueGameForFolder() != NULL)
 				delete newFolder;
 			else
-				folder->addChild(newFolder);
+			{
+				const std::string& key = newFolder->getPath();
+				if (fileMap.find(key) == fileMap.end())
+				{
+					folder->addChild(newFolder);
+					fileMap[key] = newFolder;
+				}
+			}
 		}
 	}
 }
 
-void SystemData::indexAllGameFilters(const FileData* folder)
+FileFilterIndex* SystemData::getIndex(bool createIndex) 
+{ 
+	if (mFilterIndex == nullptr && createIndex)
+	{
+		mFilterIndex = new FileFilterIndex();
+		indexAllGameFilters(mRootFolder);
+		mFilterIndex->setUIModeFilters();
+	}
+
+	return mFilterIndex; 
+}
+
+void SystemData::indexAllGameFilters(const FolderData* folder)
 {
 	const std::vector<FileData*>& children = folder->getChildren();
 
@@ -188,7 +215,7 @@ void SystemData::indexAllGameFilters(const FileData* folder)
 		switch((*it)->getType())
 		{
 			case GAME:   { mFilterIndex->addToIndex(*it); } break;
-			case FOLDER: { indexAllGameFilters(*it);      } break;
+			case FOLDER: { indexAllGameFilters((FolderData*)*it); } break;
 		}
 	}
 }
@@ -322,7 +349,7 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 	envData->mEmulators = emulatorList;
 
 	SystemData* newSys = new SystemData(name, fullname, envData, themeFolder);
-	if (newSys->getRootFolder()->getChildrenByFilename().size() == 0)
+	if (newSys->getRootFolder()->getChildren().size() == 0)
 	{
 		LOG(LogWarning) << "System \"" << name << "\" has no games! Ignoring it.";
 		delete newSys;

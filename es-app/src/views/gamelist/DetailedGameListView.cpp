@@ -12,10 +12,10 @@
 #include "Settings.h"
 #endif
 
-DetailedGameListView::DetailedGameListView(Window* window, FileData* root) : 
+DetailedGameListView::DetailedGameListView(Window* window, FolderData* root) :
 	BasicGameListView(window, root), 
 	mDescContainer(window), mDescription(window), 
-	mImage(window), mMarquee(window), mVideo(nullptr),	
+	mImage(nullptr), mMarquee(nullptr), mVideo(nullptr),
 
 	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window), 
 	mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),
@@ -31,37 +31,7 @@ DetailedGameListView::DetailedGameListView(Window* window, FileData* root) :
 	mList.setAlignment(TextListComponent<FileData*>::ALIGN_LEFT);
 	mList.setCursorChangedCallback([&](const CursorState& /*state*/) { updateInfoPanel(); });
 
-	// Marquee
-	mMarquee.setOrigin(0.5f, 0.5f);
-	mMarquee.setPosition(mSize.x() * 0.25f, mSize.y() * 0.10f);
-	mMarquee.setMaxSize(mSize.x() * (0.5f - 2 * padding), mSize.y() * 0.18f);
-	mMarquee.setDefaultZIndex(35);
-	// addChild(&mMarquee);
-
-	// Image
-	mImage.setOrigin(0.5f, 0.5f);
-	mImage.setPosition(mSize.x() * 0.25f, mList.getPosition().y() + mSize.y() * 0.2125f);
-	mImage.setMaxSize(mSize.x() * (0.50f - 2*padding), mSize.y() * 0.4f);
-	mImage.setDefaultZIndex(30);
- 	addChild(&mImage);
-
-	// video
-	// Create the correct type of video window
-#ifdef _RPI_
-	if (Settings::getInstance()->getBool("VideoOmxPlayer"))
-		mVideo = new VideoPlayerComponent(window, "");
-	else
-#endif
-		mVideo = new VideoVlcComponent(window, getTitlePath());
-
-	mVideo->setOrigin(0.5f, 0.5f);
-	mVideo->setPosition(mSize.x() * 0.25f, mSize.y() * 0.4f);
-	mVideo->setSize(mSize.x() * (0.5f - 2 * padding), mSize.y() * 0.4f);
-	mVideo->setStartDelay(2000);
-	mVideo->setDefaultZIndex(31);
-//	addChild(mVideo);
-
-	//addChild(mVideo); -> Add only if present in theme later
+	createImage();
 
 	// metadata labels + values
 	mLblRating.setText(_T("Rating") + ": ");
@@ -107,15 +77,74 @@ DetailedGameListView::DetailedGameListView(Window* window, FileData* root) :
 	mDescription.setSize(mDescContainer.getSize().x(), 0);
 	mDescContainer.addChild(&mDescription);
 
-
 	initMDLabels();
 	initMDValues();
-	updateInfoPanel();
 }
 
 DetailedGameListView::~DetailedGameListView()
 {
-	delete mVideo;
+	if (mImage != nullptr)
+		delete mImage;
+
+	if (mMarquee != nullptr)
+		delete mMarquee;
+
+	if (mVideo != nullptr)
+		delete mVideo;
+}
+
+void DetailedGameListView::createImage()
+{
+	if (mImage != nullptr)
+		return;
+
+	const float padding = 0.01f;
+
+	// Image
+	mImage = new ImageComponent(mWindow);
+	mImage->setOrigin(0.5f, 0.5f);
+	mImage->setPosition(mSize.x() * 0.25f, mList.getPosition().y() + mSize.y() * 0.2125f);
+	mImage->setMaxSize(mSize.x() * (0.50f - 2 * padding), mSize.y() * 0.4f);
+	mImage->setDefaultZIndex(30);
+	addChild(mImage);
+}
+
+void DetailedGameListView::createVideo()
+{
+	if (mVideo != nullptr)
+		return;
+
+	const float padding = 0.01f;
+
+	// video
+// Create the correct type of video window
+#ifdef _RPI_
+	if (Settings::getInstance()->getBool("VideoOmxPlayer"))
+		mVideo = new VideoPlayerComponent(window, "");
+	else
+#endif
+		mVideo = new VideoVlcComponent(mWindow, getTitlePath());
+
+	mVideo->setOrigin(0.5f, 0.5f);
+	mVideo->setPosition(mSize.x() * 0.25f, mSize.y() * 0.4f);
+	mVideo->setSize(mSize.x() * (0.5f - 2 * padding), mSize.y() * 0.4f);
+	mVideo->setStartDelay(2000);
+	mVideo->setDefaultZIndex(31);
+	addChild(mVideo);
+}
+
+void DetailedGameListView::createMarquee()
+{
+	const float padding = 0.01f;
+
+	// Marquee
+	mMarquee = new ImageComponent(mWindow);
+	mMarquee->setOrigin(0.5f, 0.5f);
+	mMarquee->setPosition(mSize.x() * 0.25f, mSize.y() * 0.10f);
+	mMarquee->setMaxSize(mSize.x() * (0.5f - 2 * padding), mSize.y() * 0.18f);
+	mMarquee->setDefaultZIndex(35);
+	addChild(mMarquee);
+
 }
 
 void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
@@ -123,41 +152,58 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& them
 	BasicGameListView::onThemeChanged(theme);
 
 	using namespace ThemeFlags;
-
-	mImage.applyTheme(theme, getName(), "md_image", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);	
+	
 	mName.applyTheme(theme, getName(), "md_name", ALL);
 
 	if (theme->getElement(getName(), "md_video", "video"))
 	{
+		createVideo();
 		mVideo->applyTheme(theme, getName(), "md_video", POSITION | ThemeFlags::SIZE | ThemeFlags::DELAY | Z_INDEX | ROTATION);
-		if (!isChild(mVideo))
-			addChild(mVideo);
 	}
-	else if (isChild(mVideo))
+	else if (mVideo != nullptr)
+	{
 		removeChild(mVideo);
+		delete mVideo;
+		mVideo = nullptr;
+	}
+
+	if (mVideo == nullptr || theme->getElement(getName(), "md_image", "image"))
+	{
+		createImage();
+		mImage->applyTheme(theme, getName(), "md_image", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);
+	}
+	else if (mImage != nullptr)
+	{
+		removeChild(mImage);
+		delete mImage;
+		mImage = nullptr;
+	}
 
 	if (theme->getElement(getName(), "md_marquee", "image"))
 	{
-		mMarquee.applyTheme(theme, getName(), "md_marquee", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);
-		if (!isChild(&mMarquee))
-			addChild(&mMarquee);
+		createMarquee();
+		mMarquee->applyTheme(theme, getName(), "md_marquee", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);		
 	}
-	else if (isChild(&mMarquee))
-		removeChild(&mMarquee);
+	else if (mMarquee != nullptr)
+	{
+		removeChild(mMarquee);
+		delete mMarquee;
+		mMarquee = nullptr;
+	}
 
 	initMDLabels();
 	std::vector<TextComponent*> labels = getMDLabels();
 	assert(labels.size() == 8);
+
 	const char* lblElements[8] = {
 		"md_lbl_rating", "md_lbl_releasedate", "md_lbl_developer", "md_lbl_publisher", 
 		"md_lbl_genre", "md_lbl_players", "md_lbl_lastplayed", "md_lbl_playcount"
 	};
-
-	for(unsigned int i = 0; i < labels.size(); i++)
+	
+	for (unsigned int i = 0; i < labels.size(); i++)
 	{
 		labels[i]->applyTheme(theme, getName(), lblElements[i], ALL);
 	}
-
 
 	initMDValues();
 	std::vector<GuiComponent*> values = getMDValues();
@@ -261,8 +307,9 @@ void DetailedGameListView::updateInfoPanel()
 	bool fadingOut;
 	if (file == NULL)
 	{		
-		mVideo->setVideo("");
-		//mVideo->setImage("");		
+		if (mVideo != nullptr)
+			mVideo->setVideo("");
+		
 		//mImage.setImage("");
 		//mDescription.setText("");
 		fadingOut = true;
@@ -271,7 +318,7 @@ void DetailedGameListView::updateInfoPanel()
 	{
 		std::string imagePath = file->getImagePath().empty() ? file->getThumbnailPath() : file->getImagePath();
 
-		if (isChild(mVideo))
+		if (mVideo != nullptr)
 		{
 			if (!mVideo->setVideo(file->getVideoPath()))
 				mVideo->setDefaultVideo();
@@ -279,11 +326,11 @@ void DetailedGameListView::updateInfoPanel()
 			mVideo->setImage(imagePath, false, mVideo->getSize());
 		}
 
-		if (isChild(&mImage))
-			mImage.setImage(imagePath, false, mImage.getSize());
+		if (mImage != nullptr)
+			mImage->setImage(imagePath, false, mImage->getSize());
 
-		if (isChild(&mMarquee))
-			mMarquee.setImage(file->getMarqueePath());
+		if (mMarquee != nullptr)
+			mMarquee->setImage(file->getMarqueePath());
 
 		mDescription.setText(getMetadata(file, "desc"));
 		mDescContainer.reset();
@@ -307,13 +354,15 @@ void DetailedGameListView::updateInfoPanel()
 
 	std::vector<GuiComponent*> comps = getMDValues();
 
-	if (isChild(&mMarquee))
-		comps.push_back(&mMarquee);
+	if (mVideo != nullptr)
+		comps.push_back(mVideo);
 
-	if (isChild(&mImage))
-		comps.push_back(&mImage);
+	if (mImage != nullptr)
+		comps.push_back(mImage);
 
-	comps.push_back(mVideo);
+	if (mMarquee != nullptr)
+		comps.push_back(mMarquee);
+
 	comps.push_back(&mDescription);
 	comps.push_back(&mName);
 	std::vector<TextComponent*> labels = getMDLabels();
@@ -342,10 +391,10 @@ void DetailedGameListView::launch(FileData* game)
 {
 	Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
 	
-	if (isChild(mVideo) && !isChild(&mImage))
+	if (mImage != nullptr && mImage->hasImage())
+		target = Vector3f(mImage->getCenter().x(), mImage->getCenter().y(), 0); 
+	else if (mVideo != nullptr)
 		target = Vector3f(mVideo->getCenter().x(), mVideo->getCenter().y(), 0);
-	else if(mImage.hasImage())
-		target = Vector3f(mImage.getCenter().x(), mImage.getCenter().y(), 0);
 
 	ViewController::get()->launch(game, target);
 }
@@ -380,6 +429,6 @@ std::vector<GuiComponent*> DetailedGameListView::getMDValues()
 
 void DetailedGameListView::onShow()
 {
-	GuiComponent::onShow();
+	BasicGameListView::onShow();
 	updateInfoPanel();
 }

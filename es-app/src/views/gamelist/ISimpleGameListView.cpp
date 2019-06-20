@@ -7,7 +7,7 @@
 #include "Sound.h"
 #include "SystemData.h"
 
-ISimpleGameListView::ISimpleGameListView(Window* window, FileData* root) : IGameListView(window, root),
+ISimpleGameListView::ISimpleGameListView(Window* window, FolderData* root) : IGameListView(window, root),
 	mHeaderText(window), mHeaderImage(window), mBackground(window)
 {
 	mHeaderText.setText("Logo Text");
@@ -85,10 +85,13 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 		if (config->isMappedTo("a", input))
 		{
 			FileData* cursor = getCursor();
+			FolderData* folder = NULL;
 
 			if (cursor->getType() == FOLDER)
 			{
-				FileData* gameOfFolder = cursor->findUniqueGameForFolder();
+				folder = (FolderData*)cursor;
+
+				FileData* gameOfFolder = folder->findUniqueGameForFolder();
 				if (gameOfFolder != NULL)
 					cursor = gameOfFolder;
 			}
@@ -101,10 +104,10 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			else
 			{
 				// it's a folder
-				if(cursor->getChildren().size() > 0)
+				if(folder->getChildren().size() > 0)
 				{
 					mCursorStack.push(cursor);
-					populateList(cursor->getChildrenListToDisplay());
+					populateList(folder->getChildrenListToDisplay());
 					FileData* cursor = getCursor();
 					setCursor(cursor);
 				}
@@ -164,7 +167,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				return true;
 			}
 		}
-		else if (config->isMappedTo("y", input) && UIModeController::getInstance()->isUIModeKid())
+		else if (config->isMappedTo("y", input) && !UIModeController::getInstance()->isUIModeKid())
 		{
 			if(mRoot->getSystem()->isGameSystem())
 			{

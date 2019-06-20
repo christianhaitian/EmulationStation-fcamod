@@ -13,16 +13,6 @@
 
 #define DPI 96
 
-#ifdef WIN32	
-void traceOutput(std::string string)
-{
-#if _DEBUG
-	OutputDebugStringA(string.c_str());
-#endif
-}
-#endif
-
-
 bool TextureData::OPTIMIZEVRAM = false;
 
 TextureData::TextureData(bool tile) : mTile(tile), mTextureID(0), mDataRGBA(nullptr), mScalable(false),
@@ -214,9 +204,7 @@ bool TextureData::load()
 	if (!mPath.empty())
 	{
 #ifdef WIN32	
-		char buffer[1000];
-		sprintf_s(buffer, "TextureData::load(%s, %d)\n", mPath.c_str(), mTextureID);
-		traceOutput(buffer);
+		TRACE("TextureData::load(" << mPath << ", " << mTextureID << ")")
 #endif
 
 		std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
@@ -335,13 +323,6 @@ void TextureData::setSourceSize(float width, float height)
 		//if ((mSourceWidth != width) || (mSourceHeight != height))
 		if (mSourceHeight < height) // FCATMP
 		{
-			/*
-#ifdef WIN32	
-			char buffer[1000];
-			sprintf_s(buffer, "TextureData::setSourceSize(%s, %d)\n", mPath.c_str(), mTextureID);
-			traceOutput(buffer);
-#endif*/
-
 			mSourceWidth = width;
 			mSourceHeight = height;
 			releaseVRAM();

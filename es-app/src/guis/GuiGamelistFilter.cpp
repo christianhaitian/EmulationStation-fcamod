@@ -15,10 +15,9 @@ void GuiGamelistFilter::initializeMenu()
 
 	// get filters from system
 
-	mFilterIndex = mSystem->getIndex();
+	mFilterIndex = mSystem->getIndex(true);
 
 	ComponentListRow row;
-
 	
 	// show filtered menu
 	row.elements.clear();

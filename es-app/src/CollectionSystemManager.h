@@ -7,6 +7,7 @@
 #include <vector>
 
 class FileData;
+class FolderData;
 class SystemData;
 class Window;
 struct SystemEnvironmentData;
@@ -103,7 +104,7 @@ private:
 	std::vector<std::string> getCollectionThemeFolders(bool custom);
 	std::vector<std::string> getUserCollectionThemeFolders();
 
-	void trimCollectionCount(FileData* rootFolder, int limit);
+	void trimCollectionCount(FolderData* rootFolder, int limit);
 
 	bool themeFolderExists(std::string folder);
 

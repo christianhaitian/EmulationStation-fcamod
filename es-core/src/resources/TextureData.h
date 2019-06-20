@@ -82,6 +82,4 @@ private:
 	Vector2f		mMaxSize;
 };
 
-void traceOutput(std::string string);
-
 #endif // ES_CORE_RESOURCES_TEXTURE_DATA_H

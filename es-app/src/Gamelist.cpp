@@ -9,10 +9,10 @@
 #include "SystemData.h"
 #include <pugixml/src/pugixml.hpp>
 
-FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType type)
+FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType type, std::unordered_map<std::string, FileData*>& fileMap)
 {
 	// first, verify that path is within the system's root folder
-	FileData* root = system->getRootFolder();
+	FolderData* root = system->getRootFolder();
 	bool contains = false;
 	std::string relative = Utils::FileSystem::removeCommonPath(path, root->getPath(), contains);
 
@@ -24,40 +24,41 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 
 	Utils::FileSystem::stringList pathList = Utils::FileSystem::getPathList(relative);
 	auto path_it = pathList.begin();
-	FileData* treeNode = root;
-	bool found = false;
+	FolderData* treeNode = root;
+
+	//	bool found = false;
 	while(path_it != pathList.end())
 	{
-		const std::unordered_map<std::string, FileData*>& children = treeNode->getChildrenByFilename();
-
-		std::string key = *path_it;
-		found = children.find(key) != children.cend();
-		if (found) {
-			treeNode = children.at(key);
-		}
+		std::string key = Utils::FileSystem::combine(treeNode->getPath(), *path_it);	
+		FileData* item = (fileMap.find(key) != fileMap.end()) ? fileMap[key] : nullptr;
 
 		// this is the end
 		if(path_it == --pathList.end())
 		{
-			if(found)
-				return treeNode;
-
-			if(type == FOLDER)
+			if (type == FOLDER)
 			{
-				LOG(LogWarning) << "gameList: folder doesn't already exist, won't create";
 				return NULL;
+				LOG(LogWarning) << "gameList: folder doesn't already exist, won't create";
 			}
 
-			FileData* file = new FileData(type, path, system->getSystemEnvData(), system);
-
-			// skipping arcade assets from gamelist
-			if(!file->isArcadeAsset())
+			if (type == GAME) // Final file
 			{
-				treeNode->addChild(file);
+				if (item == nullptr)
+				{
+					// Add final game
+					item = new FileData(GAME, path, system);
+					if (!item->isArcadeAsset())
+					{
+						fileMap[key] = item;
+						treeNode->addChild(item);
+					}
+				}
+
+				return item;
 			}
-			return file;
 		}
 
+		/*
 		if(!found)
 		{
 			// don't create folders unless it's leading up to a game
@@ -69,20 +70,19 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 			}
 			
 			// create missing folder
-
-			/* FCA TODO -> 1 seul jeu dans le folder ?
-			FileData* folder = new FileData(FOLDER, Utils::FileSystem::getStem(treeNode->getPath()) + "/" + *path_it, system->getSystemEnvData(), system);
-			treeNode->addChild(folder);
-			treeNode = folder;*/
+			//FCA TODO -> 1 seul jeu dans le folder ?
+			//FileData* folder = new FileData(FOLDER, Utils::FileSystem::getStem(treeNode->getPath()) + "/" + *path_it, system->getSystemEnvData(), system);
+			//treeNode->addChild(folder);
+			//treeNode = folder;
 		}
-
+		*/
 		path_it++;
 	}
 
 	return NULL;
 }
 
-void parseGamelist(SystemData* system)
+void parseGamelist(SystemData* system, std::unordered_map<std::string, FileData*>& fileMap)
 {
 	std::string xmlpath = system->getGamelistPath(false);
 	if (!Utils::FileSystem::exists(xmlpath))
@@ -132,7 +132,7 @@ void parseGamelist(SystemData* system)
 			continue;
 		}
 		
-		FileData* file = findOrCreateFile(system, path, type);
+		FileData* file = findOrCreateFile(system, path, type, fileMap);
 		if(!file)
 		{
 			LOG(LogError) << "Error finding/creating FileData for \"" << path << "\", skipping.";
@@ -141,7 +141,7 @@ void parseGamelist(SystemData* system)
 		else if(!file->isArcadeAsset())
 		{
 			std::string defaultName = file->metadata.get("name");
-			file->metadata = MetaDataList::createFromXML(GAME_METADATA, fileNode, relativeTo);
+			file->metadata = MetaDataList::createFromXML(GAME_METADATA, fileNode, system);
 
 			//make sure name gets set if one didn't exist
 			if (file->metadata.get("name").empty())
@@ -249,7 +249,7 @@ void updateGamelist(SystemData* system)
 
 
 	//now we have all the information from the XML. now iterate through all our games and add information from there
-	FileData* rootFolder = system->getRootFolder();
+	FolderData* rootFolder = system->getRootFolder();
 	if (rootFolder != nullptr)
 	{
 		//get only files, no folders

@@ -89,7 +89,8 @@ Changes in my branch
 - In previous versions, if a xml element was unknown in the theme, nothing was loaded.
 		    
 **Optimizations & Fixes:** 	
-- Really faster loading time, using multithreading.
+- Faster loading time, using multithreading.
+- Optimized memory usage for files and gamelists.
 - The loading sequence displays a progress bar.
 - Reviewed SVG loading and size calculation mecanism. Previous versions unloaded/reloaded SVGs each time a new container needed to display it because of a size calculation problem.
 - Ability to disable "Preload UI" mecanism. This mecanism is used to preload the UI of gamelists of every system. Disable it adds a small lags when opening

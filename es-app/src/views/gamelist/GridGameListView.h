@@ -14,7 +14,7 @@ class VideoComponent;
 class GridGameListView : public ISimpleGameListView
 {
 public:
-	GridGameListView(Window* window, FileData* root, const std::shared_ptr<ThemeData>& theme, std::string customThemeName, Vector2f gridSize);
+	GridGameListView(Window* window, FolderData* root, const std::shared_ptr<ThemeData>& theme, std::string customThemeName, Vector2f gridSize);
 	~GridGameListView();
 
 	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
@@ -37,6 +37,7 @@ public:
 	virtual void onFileChanged(FileData* file, FileChangeType change);
 
 	virtual void setThemeName(std::string name);	
+	virtual void onShow();
 
 protected:
 	virtual std::string getQuickSystemSelectRightButton() override;
@@ -50,6 +51,8 @@ protected:
 private:
 	void updateInfoPanel();
 	const std::string getImagePath(FileData* file);
+	
+	void createVideo();
 
 	void initMDLabels();
 	void initMDValues();
@@ -77,6 +80,8 @@ private:
 
 	ScrollableContainer mDescContainer;
 	TextComponent mDescription;
+
+	bool	mLoaded;
 };
 
 #endif // ES_APP_VIEWS_GAME_LIST_GRID_GAME_LIST_VIEW_H

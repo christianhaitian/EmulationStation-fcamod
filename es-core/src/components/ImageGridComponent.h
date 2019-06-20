@@ -549,12 +549,13 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 			mStartPosition = (col - centralCol) * dimOpposite;
 	}
 
+	auto lastCursor = mLastCursor;
 	mLastCursor = mCursor;
 
 	mCameraDirection = direction ? -1.0 : 1.0;
 	mCamera = 0;
 
-	if (oldStart == mStartPosition || !GuiComponent::ALLOWANIMATIONS)
+	if (lastCursor < 0 || oldStart == mStartPosition || !GuiComponent::ALLOWANIMATIONS)
 	{
 		updateTiles(direction, true);
 

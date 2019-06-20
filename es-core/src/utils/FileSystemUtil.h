@@ -39,6 +39,7 @@ namespace Utils
 		std::string createRelativePath (const std::string& _path, const std::string& _relativeTo, const bool _allowHome);
 		std::string removeCommonPath   (const std::string& _path, const std::string& _common, bool& _contains);
 		std::string resolveSymlink     (const std::string& _path);
+		std::string combine(const std::string& _path, const std::string& filename);
 		bool        removeFile         (const std::string& _path);
 		bool        createDirectory    (const std::string& _path);
 		bool        exists             (const std::string& _path);

@@ -99,8 +99,9 @@ void CollectionSystemManager::deinit()
 
 void CollectionSystemManager::saveCustomCollection(SystemData* sys)
 {
-	std::string name = sys->getName();
-	std::unordered_map<std::string, FileData*> games = sys->getRootFolder()->getChildrenByFilename();
+	std::string name = sys->getName();	
+	auto games = sys->getRootFolder()->getChildren();
+
 	bool found = mCustomCollectionSystemsData.find(name) != mCustomCollectionSystemsData.cend();
 	if (found) {
 		CollectionSystemData sysData = mCustomCollectionSystemsData.at(name);
@@ -108,9 +109,9 @@ void CollectionSystemManager::saveCustomCollection(SystemData* sys)
 		{
 			std::ofstream configFile;
 			configFile.open(getCustomCollectionConfigPath(name));
-			for(std::unordered_map<std::string, FileData*>::const_iterator iter = games.cbegin(); iter != games.cend(); ++iter)
+			for(auto iter = games.cbegin(); iter != games.cend(); ++iter)
 			{
-				std::string path =  iter->first;
+				std::string path = (*iter)->getKey();
 				configFile << path << std::endl;
 			}
 			configFile.close();
@@ -244,18 +245,18 @@ void CollectionSystemManager::updateCollectionSystem(FileData* file, CollectionS
 		// collection files use the full path as key, to avoid clashes
 		std::string key = file->getFullPath();
 
-		SystemData* curSys = sysData.system;
-		const std::unordered_map<std::string, FileData*>& children = curSys->getRootFolder()->getChildrenByFilename();
-		bool found = children.find(key) != children.cend();
-		FileData* rootFolder = curSys->getRootFolder();
-		FileFilterIndex* fileIndex = curSys->getIndex();
+		SystemData* curSys = sysData.system;	
+		FileData* collectionEntry = curSys->getRootFolder()->FindByPath(key);
+
+		FolderData* rootFolder = curSys->getRootFolder();
+		
 		std::string name = curSys->getName();
 
-		if (found) {
+		if (collectionEntry != nullptr) 
+		{
 			// if we found it, we need to update it
-			FileData* collectionEntry = children.at(key);
 			// remove from index, so we can re-index metadata after refreshing
-			fileIndex->removeFromIndex(collectionEntry);
+			curSys->removeFromIndex(collectionEntry);
 			collectionEntry->refreshMetadata();
 			// found and we are removing
 			if (name == "favorites" && file->metadata.get("favorite") == "false") {
@@ -268,7 +269,7 @@ void CollectionSystemManager::updateCollectionSystem(FileData* file, CollectionS
 			else
 			{
 				// re-index with new metadata
-				fileIndex->addToIndex(collectionEntry);
+				curSys->addToIndex(collectionEntry);
 				ViewController::get()->onFileChanged(collectionEntry, FILE_METADATA_CHANGED);
 			}
 		}
@@ -279,7 +280,7 @@ void CollectionSystemManager::updateCollectionSystem(FileData* file, CollectionS
 				name == "favorites" && file->metadata.get("favorite") == "true") {
 				CollectionFileData* newGame = new CollectionFileData(file, curSys);
 				rootFolder->addChild(newGame);
-				fileIndex->addToIndex(newGame);
+				curSys->addToIndex(newGame);
 				
 				ViewController::get()->onFileChanged(file, FILE_METADATA_CHANGED);
 				ViewController::get()->getGameListView(curSys)->onFileChanged(newGame, FILE_METADATA_CHANGED);
@@ -296,7 +297,7 @@ void CollectionSystemManager::updateCollectionSystem(FileData* file, CollectionS
 	}
 }
 
-void CollectionSystemManager::trimCollectionCount(FileData* rootFolder, int limit)
+void CollectionSystemManager::trimCollectionCount(FolderData* rootFolder, int limit)
 {
 	SystemData* curSys = rootFolder->getSystem();
 	while ((int)rootFolder->getChildrenListToDisplay().size() > limit)
@@ -320,12 +321,10 @@ void CollectionSystemManager::deleteCollectionFiles(FileData* file)
 	{
 		if (sysDataIt->second.isPopulated)
 		{
-			const std::unordered_map<std::string, FileData*>& children = (sysDataIt->second.system)->getRootFolder()->getChildrenByFilename();
-
-			bool found = children.find(key) != children.cend();
-			if (found) {
-				sysDataIt->second.needsSave = true;
-				FileData* collectionEntry = children.at(key);
+			FileData* collectionEntry = (sysDataIt->second.system)->getRootFolder()->FindByPath(key);
+			if (collectionEntry != nullptr)
+			{
+				sysDataIt->second.needsSave = true;				
 				SystemData* systemViewToUpdate = getSystemToView(sysDataIt->second.system);
 				ViewController::get()->getGameListView(systemViewToUpdate).get()->remove(collectionEntry, false);
 			}
@@ -482,25 +481,23 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 				populateCustomCollection(mEditingCollectionSystemData);
 			}
 			std::string key = file->getFullPath();
-			FileData* rootFolder = sysData->getRootFolder();
-			const std::unordered_map<std::string, FileData*>& children = rootFolder->getChildrenByFilename();
-			bool found = children.find(key) != children.cend();
-			FileFilterIndex* fileIndex = sysData->getIndex();
+			FolderData* rootFolder = sysData->getRootFolder();
+
+			FileData* collectionEntry = rootFolder->FindByPath(key);
+			
 			std::string name = sysData->getName();
 
 			SystemData* systemViewToUpdate = getSystemToView(sysData);
 
-			if (found) {
+			if (collectionEntry != nullptr) {
 				adding = false;
-				// if we found it, we need to remove it
-				FileData* collectionEntry = children.at(key);
+				// if we found it, we need to remove it				
 				// remove from index
-				fileIndex->removeFromIndex(collectionEntry);
+				sysData->removeFromIndex(collectionEntry);
 				// remove from bundle index as well, if needed
-				if(systemViewToUpdate != sysData)
-				{
-					systemViewToUpdate->getIndex()->removeFromIndex(collectionEntry);
-				}
+				if (systemViewToUpdate != sysData)
+					systemViewToUpdate->removeFromIndex(collectionEntry);
+
 				ViewController::get()->getGameListView(systemViewToUpdate).get()->remove(collectionEntry, false);
 			}
 			else
@@ -508,14 +505,14 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 				// we didn't find it here, we should add it
 				CollectionFileData* newGame = new CollectionFileData(file, sysData);
 				rootFolder->addChild(newGame);
-				fileIndex->addToIndex(newGame);
+				sysData->addToIndex(newGame);
 				ViewController::get()->getGameListView(systemViewToUpdate)->onFileChanged(newGame, FILE_METADATA_CHANGED);
 				rootFolder->sort(getSortTypeFromString(mEditingCollectionSystemData->decl.defaultSort));
 				ViewController::get()->onFileChanged(systemViewToUpdate->getRootFolder(), FILE_SORTED);
 				// add to bundle index as well, if needed
 				if(systemViewToUpdate != sysData)
 				{
-					systemViewToUpdate->getIndex()->addToIndex(newGame);
+					systemViewToUpdate->addToIndex(newGame);
 				}
 			}
 			updateCollectionFolderMetadata(sysData);
@@ -523,7 +520,7 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 		else
 		{
 			SystemData* sysData = file->getSourceFileData()->getSystem();
-			sysData->getIndex()->removeFromIndex(file);
+			sysData->removeFromIndex(file);
 
 			MetaDataList* md = &file->getSourceFileData()->metadata;
 
@@ -535,7 +532,7 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 				adding = false;
 				md->set("favorite", "false");
 			}
-			sysData->getIndex()->addToIndex(file);
+			sysData->addToIndex(file);
 
 			refreshCollectionSystems(file->getSourceFileData());
 
@@ -565,12 +562,10 @@ SystemData* CollectionSystemManager::getSystemToView(SystemData* sys)
 	SystemData* systemToView = sys;
 	FileData* rootFolder = sys->getRootFolder();
 
-	FileData* bundleRootFolder = mCustomCollectionsBundle->getRootFolder();
-	const std::unordered_map<std::string, FileData*>& bundleChildren = bundleRootFolder->getChildrenByFilename();
+	FolderData* bundleRootFolder = mCustomCollectionsBundle->getRootFolder();
 
 	// is the rootFolder bundled in the "My Collections" system?
-	bool sysFoundInBundle = bundleChildren.find(rootFolder->getKey()) != bundleChildren.cend();
-
+	bool sysFoundInBundle = bundleRootFolder->FindByPath(rootFolder->getKey()) != nullptr;
 	if (sysFoundInBundle && sys->isCollection())
 	{
 		systemToView = mCustomCollectionsBundle;
@@ -596,7 +591,7 @@ void CollectionSystemManager::initAutoCollectionSystems()
 // automatically generate metadata for a folder
 void CollectionSystemManager::updateCollectionFolderMetadata(SystemData* sys)
 {
-	FileData* rootFolder = sys->getRootFolder();
+	FolderData* rootFolder = sys->getRootFolder();
 
 	std::string desc = "This collection is empty.";
 	std::string rating = "0";
@@ -608,16 +603,16 @@ void CollectionSystemManager::updateCollectionFolderMetadata(SystemData* sys)
 	std::string thumbnail = "";
 	std::string image = "";
 
-	std::unordered_map<std::string, FileData*> games = rootFolder->getChildrenByFilename();
+	auto games = rootFolder->getChildren();
 
 	if(games.size() > 0)
 	{
 		std::string games_list = "";
 		int games_counter = 0;
-		for(std::unordered_map<std::string, FileData*>::const_iterator iter = games.cbegin(); iter != games.cend(); ++iter)
+		for(auto iter = games.cbegin(); iter != games.cend(); ++iter)
 		{
 			games_counter++;
-			FileData* file = iter->second;
+			FileData* file = *iter;
 
 			std::string new_rating = file->metadata.get("rating");
 			std::string new_releasedate = file->metadata.get("releasedate");
@@ -647,10 +642,12 @@ void CollectionSystemManager::updateCollectionFolderMetadata(SystemData* sys)
 		desc = "This collection contains " + std::to_string(games_counter) + " games, including " + games_list;
 
 		FileData* randomGame = sys->getRandomGame();
-
-		video = randomGame->getVideoPath();
-		thumbnail = randomGame->getThumbnailPath();
-		image = randomGame->getImagePath();
+		if (randomGame != nullptr)
+		{
+			video = randomGame->getVideoPath();
+			thumbnail = randomGame->getThumbnailPath();
+			image = randomGame->getImagePath();
+		}
 	}
 
 
@@ -725,8 +722,8 @@ void CollectionSystemManager::populateAutoCollection(CollectionSystemData* sysDa
 {
 	SystemData* newSys = sysData->system;
 	CollectionSystemDecl sysDecl = sysData->decl;
-	FileData* rootFolder = newSys->getRootFolder();
-	FileFilterIndex* index = newSys->getIndex();
+	FolderData* rootFolder = newSys->getRootFolder();
+	
 	for(auto sysIt = SystemData::sSystemVector.cbegin(); sysIt != SystemData::sSystemVector.cend(); sysIt++)
 	{
 		// we won't iterate all collections
@@ -749,7 +746,7 @@ void CollectionSystemManager::populateAutoCollection(CollectionSystemData* sysDa
 				if (include) {
 					CollectionFileData* newGame = new CollectionFileData(*gameIt, newSys);
 					rootFolder->addChild(newGame);
-					index->addToIndex(newGame);
+					newSys->addToIndex(newGame);
 				}
 			}
 		}
@@ -775,24 +772,22 @@ void CollectionSystemManager::populateCustomCollection(CollectionSystemData* sys
 	}
 	LOG(LogInfo) << "Loading custom collection config file at " << path;
 
-	FileData* rootFolder = newSys->getRootFolder();
-	FileFilterIndex* index = newSys->getIndex();
-
+	FolderData* rootFolder = newSys->getRootFolder();
+	
 	// get Configuration for this Custom System
 	std::ifstream input(path);
 
-	// get all files map
-	std::unordered_map<std::string,FileData*> allFilesMap = getAllGamesCollection()->getRootFolder()->getChildrenByFilename();
+	FolderData* folder = getAllGamesCollection()->getRootFolder();
 
 	// iterate list of files in config file
-
 	for(std::string gameKey; getline(input, gameKey); )
 	{
-		std::unordered_map<std::string,FileData*>::const_iterator it = allFilesMap.find(gameKey);
-		if (it != allFilesMap.cend()) {
-			CollectionFileData* newGame = new CollectionFileData(it->second, newSys);
+		FileData* file = folder->FindByPath(gameKey);
+		if (file != nullptr) 
+		{
+			CollectionFileData* newGame = new CollectionFileData(file, newSys);
 			rootFolder->addChild(newGame);
-			index->addToIndex(newGame);
+			newSys->addToIndex(newGame);
 		}
 		else
 		{
@@ -821,14 +816,14 @@ void CollectionSystemManager::removeCollectionsFromDisplayedSystems()
 
 	// remove all custom collections in bundle
 	// this should not delete the objects from memory!
-	FileData* customRoot = mCustomCollectionsBundle->getRootFolder();
+	FolderData* customRoot = mCustomCollectionsBundle->getRootFolder();
 	std::vector<FileData*> mChildren = customRoot->getChildren();
 	for(auto it = mChildren.cbegin(); it != mChildren.cend(); it++)
 	{
 		customRoot->removeChild(*it);
 	}
 	// clear index
-	mCustomCollectionsBundle->getIndex()->resetIndex();
+	mCustomCollectionsBundle->resetIndex();
 	// remove view so it's re-created as needed
 	ViewController::get()->removeGameListView(mCustomCollectionsBundle);
 }
@@ -863,7 +858,7 @@ void CollectionSystemManager::addEnabledCollectionsToDisplayedSystems(std::map<s
 			{
 				FileData* newSysRootFolder = it->second.system->getRootFolder();
 				mCustomCollectionsBundle->getRootFolder()->addChild(newSysRootFolder);
-				mCustomCollectionsBundle->getIndex()->importIndex(it->second.system->getIndex());
+				mCustomCollectionsBundle->getIndex(true)->importIndex(it->second.system->getIndex(true));
 			}
 		}
 	}

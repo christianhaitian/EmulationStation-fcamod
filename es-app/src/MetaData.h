@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+class SystemData;
+
 namespace pugi { class xml_node; }
 
 enum MetaDataType
@@ -26,6 +28,8 @@ enum MetaDataType
 
 struct MetaDataDecl
 {
+	unsigned char id;
+
 	std::string key;
 	MetaDataType type;
 	std::string defaultValue;
@@ -45,14 +49,14 @@ const std::vector<MetaDataDecl>& getMDDByType(MetaDataListType type);
 class MetaDataList
 {
 public:
-	static MetaDataList createFromXML(MetaDataListType type, pugi::xml_node& node, const std::string& relativeTo);
+	static MetaDataList createFromXML(MetaDataListType type, pugi::xml_node& node, SystemData* system);
 	void appendToXML(pugi::xml_node& parent, bool ignoreDefaults, const std::string& relativeTo) const;
 
 	MetaDataList(MetaDataListType type);
-	
+
 	void set(const std::string& key, const std::string& value);
 
-	const std::string& get(const std::string& key) const;
+	const std::string get(const std::string& key) const;
 	int getInt(const std::string& key) const;
 	float getFloat(const std::string& key) const;
 
@@ -61,21 +65,37 @@ public:
 	bool wasChanged() const;
 	void resetChangedFlag();
 
-	inline MetaDataListType getType() const { return mType; }
+	inline MetaDataListType getType() const { return (MetaDataListType) mType; }
 	inline const std::vector<MetaDataDecl>& getMDD() const { return getMDDByType(getType()); }
-	const std::string getName() const { return mName; }
+	const std::string& getName() const;
 
 private:
-	MetaDataListType mType;
-	std::map<std::string, std::string> mMap;
-	bool mWasChanged;
+	std::string		mName;
+	unsigned char	mType;
+	bool			mWasChanged;
+	SystemData*		mRelativeTo;
 
-	static std::map<std::string, std::string> mDefaultGameMap;
-	static std::map<std::string, std::string> mDefaultFolderMap;
+	std::map<unsigned char, std::string> mMap;
 
-	static std::map<std::string, std::string> BuildDefaultMap(MetaDataListType type);
+	unsigned char getId(const std::string& key) const;	
+	MetaDataType getType(unsigned char id) const;
 
-	std::string mName;
+
+private: // Static maps
+
+	static std::map<unsigned char, std::string> mDefaultGameMap;
+	static std::map<unsigned char, std::string> mDefaultFolderMap;
+
+	static std::map<std::string, unsigned char> mGameIdMap;
+	static std::map<std::string, unsigned char> mFolderIdMap;
+
+	static std::map<unsigned char, MetaDataType> mGameTypeMap;
+	static std::map<unsigned char, MetaDataType> mFolderTypeMap;
+
+	static std::map<unsigned char, std::string> BuildDefaultMap(MetaDataListType type);
+	static std::map<std::string, unsigned char> BuildIdMap(MetaDataListType type);
+	static std::map<unsigned char, MetaDataType> BuildTypeMap(MetaDataListType type);
+
 };
 
 #endif // ES_APP_META_DATA_H

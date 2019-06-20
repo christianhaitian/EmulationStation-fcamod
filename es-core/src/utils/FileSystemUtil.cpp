@@ -1,6 +1,7 @@
 #define _FILE_OFFSET_BITS 64
 
 #include "utils/FileSystemUtil.h"
+#include "utils/StringUtil.h"
 
 #include "Settings.h"
 #include <sys/stat.h>
@@ -263,7 +264,7 @@ namespace Utils
 				// this should give us something like "/home/YOUR_USERNAME" on Linux and "C:/Users/YOUR_USERNAME/" on Windows
 				char* envHome = getenv("HOME");
 
-				// envHome = "H:/[Emulz]/EmulationStation/";
+				 envHome = "H:/[Emulz]/EmulationStation/";
 
 #ifdef _DEBUG
 				if (Utils::FileSystem::exists("H:/[Emulz]/EmulationStation/emulationstation.exe"))
@@ -570,6 +571,12 @@ namespace Utils
 
 		std::string createRelativePath(const std::string& _path, const std::string& _relativeTo, const bool _allowHome)
 		{
+			if (_relativeTo.empty())
+				return _path;
+
+			if (_path == _relativeTo)
+				return "";
+
 			bool        contains = false;
 			std::string path     = removeCommonPath(_path, _relativeTo, contains);
 
@@ -791,6 +798,59 @@ namespace Utils
 			return false;
 
 		} // isHidden
+
+		std::string combine(const std::string& _path, const std::string& filename)
+		{
+			std::string gp = getGenericPath(_path);
+			
+			if (Utils::String::startsWith(filename, "/.."))
+			{
+				auto f = getPathList(filename);
+
+				int count = 0;
+				for (auto it = f.cbegin(); it != f.cend(); ++it)
+				{
+					if (*it != "..")
+						break;
+
+					count++;
+				}
+
+				if (count > 0)
+				{
+					auto list = getPathList(gp);
+					std::vector<std::string> p(list.begin(), list.end());
+
+					std::string result;
+
+					for (int i = 0; i < p.size() - count; i++)
+					{
+						if (result.empty())
+							result = p.at(i);
+						else
+							result = result + "/" + p.at(i);
+					}
+
+					std::vector<std::string> fn(f.begin(), f.end());
+					for (int i = count; i < fn.size(); i++)
+					{
+						if (result.empty())
+							result = fn.at(i);
+						else
+							result = result + "/" + fn.at(i);
+					}
+
+					return result;
+				}
+			}
+
+
+			if (!Utils::String::endsWith(gp, "/") && !Utils::String::endsWith(gp, "\\"))
+				if (!Utils::String::startsWith(filename, "/") && !Utils::String::startsWith(filename, "\\"))
+					gp += "/";
+
+			return gp + filename;
+		}
 
 	} // FileSystem::
 

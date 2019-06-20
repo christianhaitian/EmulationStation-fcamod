@@ -10,9 +10,12 @@
 
 #include <pugixml/src/pugixml.hpp>
 #include "math/Vector2f.h"
+#include <unordered_map>
+
+#include "FileFilterIndex.h"
 
 class FileData;
-class FileFilterIndex;
+class FolderData;
 class ThemeData;
 class Window;
 
@@ -83,7 +86,7 @@ public:
 	SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem = false);
 	~SystemData();
 
-	inline FileData* getRootFolder() const { return mRootFolder; };
+	inline FolderData* getRootFolder() const { return mRootFolder; };
 	inline const std::string& getName() const { return mName; }
 	inline const std::string& getFullName() const { return mFullName; }
 	inline const std::string& getStartPath() const { return mEnvData->mStartPath; }
@@ -129,7 +132,28 @@ public:
 	// Load or re-load theme.
 	void loadTheme();
 
-	FileFilterIndex* getIndex() { return mFilterIndex; };
+	FileFilterIndex* getIndex(bool createIndex = false);
+
+	void removeFromIndex(FileData* game) {
+		if (mFilterIndex != nullptr) mFilterIndex->removeFromIndex(game);
+	};
+
+	void addToIndex(FileData* game) {
+		if (mFilterIndex != nullptr) mFilterIndex->addToIndex(game);
+	};
+
+	void resetFilters() {
+		if (mFilterIndex != nullptr) mFilterIndex->resetFilters();
+	};
+
+	void resetIndex() {
+		if (mFilterIndex != nullptr) mFilterIndex->resetIndex();
+	};
+	
+
+	void setUIModeFilters() {
+		if (mFilterIndex != nullptr) mFilterIndex->setUIModeFilters();
+	}
 
 private:
 	static SystemData* loadSystem(pugi::xml_node system);
@@ -146,13 +170,13 @@ private:
 	Vector2f    mGridSizeOverride;
 	bool mViewModeChanged;
 
-	void populateFolder(FileData* folder);
-	void indexAllGameFilters(const FileData* folder);
+	void populateFolder(FolderData* folder, std::unordered_map<std::string, FileData*>& fileMap);
+	void indexAllGameFilters(const FolderData* folder);
 	void setIsGameSystemStatus();
 
 	FileFilterIndex* mFilterIndex;
 
-	FileData* mRootFolder;
+	FolderData* mRootFolder;
 };
 
 #endif // ES_APP_SYSTEM_DATA_H

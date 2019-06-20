@@ -148,32 +148,16 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 	if (cleanedMemory > 0)
 	{
 		lastTime = SDL_GetTicks() - lastTime;
-
-		char buffer[1000];
-		sprintf_s(buffer, "cleanedMemory : %d items in %d ms\n", cleanedMemory, lastTime);
-		traceOutput(buffer);
+		TRACE("cleanedMemory : " << cleanedMemory << " items in " << lastTime  << " ms")
 	}
 #endif
 
 	if (!block)
 	{
-		/*
-#ifdef WIN32	
-		char buffer[1000];
-		sprintf_s(buffer, "ASYNC LOAD : %s\n", tex->mPath.c_str());
-		traceOutput(buffer);
-#endif*/
-
 		mLoader->load(tex);
 	}
 	else
-	{
-		/*
-#ifdef WIN32	
-		char buffer[1000];
-		sprintf_s(buffer, "SYNC LOAD : %s\n", tex->mPath.c_str());
-		traceOutput(buffer);
-#endif*/
+	{		
 		mLoader->remove(tex);
 		tex->load();
 	}

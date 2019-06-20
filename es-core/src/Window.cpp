@@ -19,7 +19,6 @@ Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCoun
 	mHelp = new HelpComponent(this);
 	mBackgroundOverlay = new ImageComponent(this);
 	mSplash = NULL;
-
 }
 
 Window::~Window()
@@ -320,12 +319,6 @@ void Window::endRenderLoadingScreen()
 
 void Window::renderLoadingScreen(std::string text, float percent)
 {	
-#if defined(_WIN32)
-	// Avoid Window Freezing on Windows
-	SDL_Event event;
-	while (SDL_PollEvent(&event)) ;
-#endif
-
 	Transform4x4f trans = Transform4x4f::Identity();
 	Renderer::setMatrix(trans);
 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x000000FF);
@@ -343,15 +336,12 @@ void Window::renderLoadingScreen(std::string text, float percent)
 		Renderer::drawRect(x, y, w, h, 0x252525FF);
 		Renderer::drawRect(x + 1, y + 1, (w*percent) - 2, h - 2, 0x656565FF); // 0xFFFFFFFF
 	}
-
-
+	
 	ImageComponent splash(this, true);
 	splash.setResize(Renderer::getScreenWidth() * 0.4f, 0.0f);	
 
-#if defined(_WIN32)
 	if (mSplash == NULL)
 		mSplash = TextureResource::get(":/splash.svg", false, false, true);
-#endif
 
 	if (mSplash != NULL)
 		splash.setImage(mSplash);
@@ -360,8 +350,7 @@ void Window::renderLoadingScreen(std::string text, float percent)
 
 	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.7f);
 	splash.render(trans);
-
-
+	
 	auto& font = mDefaultFonts.at(1);
 	TextCache* cache = font->buildTextCache(text, 0, 0, 0x656565FF);
 
@@ -369,11 +358,16 @@ void Window::renderLoadingScreen(std::string text, float percent)
 	float y = Math::round(Renderer::getScreenHeight() * 0.78f); // 35
 	trans = trans.translate(Vector3f(x, y, 0.0f));
 	Renderer::setMatrix(trans);
-	font->renderTextCache(cache);
+ 	font->renderTextCache(cache);
 	delete cache;
 
-
 	Renderer::swapBuffers();
+	
+#if defined(_WIN32)
+	// Avoid Window Freezing on Windows
+	SDL_Event event;
+	while (SDL_PollEvent(&event));
+#endif
 }
 
 void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)

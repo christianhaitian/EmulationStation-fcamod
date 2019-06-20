@@ -31,4 +31,21 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 int quitES(const std::string& filename);
 void touch(const std::string& filename);
 
+
+#if !defined(TRACE)
+#if defined(WIN32) && defined(_DEBUG)
+	#include <Windows.h>
+	#include <sstream>
+
+	#define TRACE( s )            \
+	{                             \
+	   std::ostringstream os_;    \
+	   os_ << s << std::endl;                   \
+	   OutputDebugStringA( os_.str().c_str() );  \
+	}
+#else
+	#define TRACE(s) 
+#endif
+#endif
+
 #endif // ES_CORE_PLATFORM_H
