@@ -183,8 +183,11 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 			sTextureMap[key] = std::shared_ptr<TextureResource>(tex); // FCAWEAK
 	}
 
-	// Add it to the reloadable list
-	rm->addReloadable(tex);
+	// Add it to the reloadable list, exclusion for splash.svg manually managed
+#ifdef WIN32
+	if (path != ":/splash.svg")
+#endif
+		rm->addReloadable(tex);
 
 	if (data != nullptr)
 		data->setMaxSize(maxSize);
