@@ -552,11 +552,11 @@ void GuiMenu::openUISettings()
 
 	//#ifndef WIN32
 		//UI mode
-	auto UImodeSelection = std::make_shared< OptionListComponent<std::string> >(mWindow, "UI MODE", false);
+	auto UImodeSelection = std::make_shared< OptionListComponent<std::string> >(mWindow, _T("UI MODE"), false);
 	std::vector<std::string> UImodes = UIModeController::getInstance()->getUIModes();
 	for (auto it = UImodes.cbegin(); it != UImodes.cend(); it++)
-		UImodeSelection->add(*it, *it, Settings::getInstance()->getString("UIMode") == *it);
-	s->addWithLabel("UI MODE", UImodeSelection);
+		UImodeSelection->add(_L(*it), *it, Settings::getInstance()->getString("UIMode") == *it);
+	s->addWithLabel(_T("UI MODE"), UImodeSelection);
 	Window* window = mWindow;
 	s->addSaveFunc([UImodeSelection, window]
 	{
