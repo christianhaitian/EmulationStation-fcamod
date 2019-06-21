@@ -22,7 +22,7 @@ FileData::FileData(FileType type, const std::string& path, SystemData* system)
 {
 	mPath = Utils::FileSystem::createRelativePath(path, getSystemEnvData()->mStartPath, false);
 	
-	TRACE("FileData : " << mPath);
+//	TRACE("FileData : " << mPath);
 
 	// metadata needs at least a name field (since that's what getName() will return)
 	if (metadata.get("name").empty())

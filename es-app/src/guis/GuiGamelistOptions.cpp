@@ -13,7 +13,7 @@
 
 #include "animations/LambdaAnimation.h"
 
-std::vector<std::string> gridSizes {
+std::vector<std::string> GuiGamelistOptions::gridSizes {
 	"automatic",
 	
 	"2x2",	
@@ -307,8 +307,12 @@ GuiGamelistOptions::~GuiGamelistOptions()
 		}
 	}
 	
-	if (mSystem->setSystemViewMode(mViewMode->getSelected(), gridSizeOverride) || mFiltersChanged)
+	bool viewModeChanged = mSystem->setSystemViewMode(mViewMode->getSelected(), gridSizeOverride);
+	if (viewModeChanged || mFiltersChanged)
 	{
+		if (viewModeChanged)
+			Settings::getInstance()->saveFile();
+
 		// only reload full view if we came from a placeholder
 		// as we need to re-display the remaining elements for whatever new
 		// game is selected

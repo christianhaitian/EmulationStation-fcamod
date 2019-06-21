@@ -73,6 +73,10 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "forceUppercase", BOOLEAN },
 		{ "lineSpacing", FLOAT },
 		{ "value", STRING },
+
+		{ "glowColor", COLOR },
+		{ "glowSize", FLOAT },
+
 		{ "zIndex", FLOAT } } },
 	{ "textlist", {
 		{ "pos", NORMALIZED_PAIR },

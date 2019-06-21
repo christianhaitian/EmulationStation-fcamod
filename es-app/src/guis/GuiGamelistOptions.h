@@ -21,6 +21,8 @@ public:
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 	virtual HelpStyle getHelpStyle() override;
 
+	static std::vector<std::string> gridSizes;
+
 private:
 	void openGamelistFilter();
 	void openMetaDataEd();

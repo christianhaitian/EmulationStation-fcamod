@@ -16,16 +16,19 @@ BasicGameListView::BasicGameListView(Window* window, FolderData* root)
 	mList.setPosition(0, mSize.y() * 0.2f);
 	mList.setDefaultZIndex(20);
 	addChild(&mList);		
+
+	populateList(mRoot->getChildrenListToDisplay());
 }
 
 void BasicGameListView::onShow()
 {
+	/*
 	if (!mLoaded)
 	{
 		populateList(mRoot->getChildrenListToDisplay());
 		mLoaded = true;
 	}
-
+	*/
 	ISimpleGameListView::onShow();
 }
 

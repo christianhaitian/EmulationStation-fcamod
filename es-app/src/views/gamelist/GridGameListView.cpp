@@ -95,6 +95,9 @@ GridGameListView::GridGameListView(Window* window, FolderData* root, const std::
 		setThemeName(themeName);
 
 	setTheme(theme);
+
+	populateList(mRoot->getChildrenListToDisplay());
+	updateInfoPanel();
 }
 
 void GridGameListView::createVideo()
@@ -118,19 +121,13 @@ void GridGameListView::createVideo()
 	mVideo->setSize(mSize.x() * (0.5f - 2 * padding), mSize.y() * 0.4f);
 	mVideo->setStartDelay(2000);
 	mVideo->setDefaultZIndex(31);
-	addChild(mVideo);
+	addChild(mVideo);	
 }
 
 void GridGameListView::onShow()
 {
-	if (!mLoaded)
-	{
-		populateList(mRoot->getChildrenListToDisplay());
-		updateInfoPanel();
-		mLoaded = true;
-	}
-
 	ISimpleGameListView::onShow();
+	updateInfoPanel();
 }
 
 
@@ -396,12 +393,18 @@ void GridGameListView::updateInfoPanel()
 {
 	FileData* file = (mGrid.size() == 0 || mGrid.isScrolling()) ? NULL : mGrid.getSelected();
 
+	TRACE("GridGameListView::updateInfoPanel " << (file ? "null" : "ok"));
+
 	bool fadingOut;
 	if (file == NULL)
 	{
 		if (mVideo != nullptr)
+		{
 			mVideo->setVideo("");
+			mVideo->setImage("");
+		}
 		
+		mImage.setImage("");
 		// mVideo->setImage("");
 		// mDescription.setText("");
 		fadingOut = true;

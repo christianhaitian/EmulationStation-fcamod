@@ -103,6 +103,9 @@ void VideoComponent::onSizeChanged()
 
 bool VideoComponent::setVideo(std::string path)
 {
+	if (path == mVideoPath)
+		return !path.empty();
+
 	// Convert the path into a generic format
 	std::string fullPath = Utils::FileSystem::getCanonicalPath(path);
 
@@ -172,9 +175,13 @@ void VideoComponent::renderSnapshot(const Transform4x4f& parentTrans)
 		float t = 1.0 - mFadeIn;
 		t -= 1; // cubic ease out
 		t = Math::lerp(0, 1, t*t*t + 1);
+		t = (t * (float)mOpacity);
 
-		mStaticImage.setOpacity((unsigned char)(t * 255.0f));
-		mStaticImage.render(parentTrans);
+		if (t == 0.0)
+			return;
+		
+		mStaticImage.setOpacity((unsigned char)t);
+		mStaticImage.render(parentTrans);		
 	}
 }
 

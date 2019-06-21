@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "math/Vector2i.h"
+#include "math/Vector2f.h"
 
 class ImageIO
 {
@@ -15,6 +16,7 @@ public:
 	
 	static void flipPixelsVert(unsigned char* imagePx, const size_t& width, const size_t& height);
 	static Vector2i adjustPictureSize(Vector2i imageSize, Vector2i maxSize);
+	static Vector2f adjustExternPictureSizef(Vector2f imageSize, Vector2f maxSize);
 };
 
 #endif // ES_CORE_IMAGE_IO

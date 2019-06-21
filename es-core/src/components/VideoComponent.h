@@ -81,10 +81,6 @@ public:
 		return mIsWaitingForVideoToStart;
 	}
 
-	bool isFading() {		
-		return mFadeIn < 1.0f;
-	}
-
 	void onVideoStarted();
 
 private:

@@ -108,9 +108,6 @@ void parseGamelist(SystemData* system, std::unordered_map<std::string, FileData*
 		return;
 	}
 	
-	Vector2f gridSizeOverride = Vector2f::parseString(root.attribute("gridSize").value());
-	system->setSystemViewMode(root.attribute("defaultView").value(), gridSizeOverride, false);
-
 	std::string relativeTo = system->getStartPath();
 
 	for (pugi::xml_node fileNode : root.children())
@@ -191,9 +188,8 @@ void updateGamelist(SystemData* system)
 	pugi::xml_node root;
 	std::string xmlReadPath = system->getGamelistPath(false);
 
-	if(Utils::FileSystem::exists(xmlReadPath))
+	if (Utils::FileSystem::exists(xmlReadPath))
 	{
-
 		//parse an existing file first
 		pugi::xml_parse_result result = doc.load_file(xmlReadPath.c_str());
 
@@ -203,34 +199,7 @@ void updateGamelist(SystemData* system)
 			return;
 		}
 
-		root = doc.child("gameList");
-
-		std::string viewMode = root.attribute("defaultView").value();
-		if (viewMode != system->getSystemViewMode())
-		{
-			numUpdated++;
-
-			if (system->getSystemViewMode().empty())
-				root.remove_attribute("defaultView");
-			else if (root.attribute("defaultView").empty())
-				root.append_attribute("defaultView") = system->getSystemViewMode().c_str();
-			else
-				root.attribute("defaultView") = system->getSystemViewMode().c_str();
-		}
-		
-		Vector2f gridSize = Vector2f::parseString(root.attribute("gridSize").value());		
-		if (gridSize != system->getGridSizeOverride())
-		{
-			numUpdated++;
-
-			if (system->getGridSizeOverride() == Vector2f(0,0))
-				root.remove_attribute("gridSize");
-			else if (root.attribute("gridSize").empty())
-				root.append_attribute("gridSize") = system->getGridSizeOverride().toString().c_str();
-			else
-				root.attribute("gridSize") = system->getGridSizeOverride().toString().c_str();
-		}
-
+		root = doc.child("gameList");		
 		if(!root)
 		{
 			LOG(LogError) << "Could not find <gameList> node in gamelist \"" << xmlReadPath << "\"!";
@@ -239,12 +208,6 @@ void updateGamelist(SystemData* system)
 	}else{
 		//set up an empty gamelist to append to
 		root = doc.append_child("gameList");
-
-		if (!system->getSystemViewMode().empty())
-		{
-			numUpdated++;
-			root.append_attribute("defaultView") = system->getSystemViewMode().c_str();
-		}
 	}
 
 

@@ -6,6 +6,8 @@
 #include "Settings.h"
 #include "ThemeData.h"
 
+#include "resources/TextureData.h"
+
 Vector2i ImageComponent::getTextureSize() const
 {
 	if(mTexture)
@@ -365,6 +367,12 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			// when it finally loads
 			fadeIn(mTexture->bind());
 
+			GLfloat color[16] = { 
+				0.5,0,0,0,
+				0,1,0,0,
+				0,0,1,0,
+				0,0,0,1 };
+
 			glEnable(GL_TEXTURE_2D);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -376,9 +384,9 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			glVertexPointer(2, GL_FLOAT, sizeof(Vertex), &mVertices[0].pos);
 			glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), &mVertices[0].tex);
 			glColorPointer(4, GL_UNSIGNED_BYTE, 0, mColors);
-
+		
 			glDrawArrays(GL_TRIANGLES, 0, 6);
-
+			
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 			glDisableClientState(GL_COLOR_ARRAY);

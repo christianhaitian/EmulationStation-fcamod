@@ -9,6 +9,7 @@
 #include <vector>
 
 Settings* Settings::sInstance = NULL;
+static std::string mEmptyString = "";
 
 // these values are NOT saved to es_settings.xml
 // since they're set through command-line arguments, and not the in-program settings menu
@@ -115,6 +116,7 @@ void Settings::setDefaults()
 	mStringMap["ScreenSaverBehavior"] = "dim";
 	mStringMap["Scraper"] = "TheGamesDB";
 	mStringMap["GamelistViewStyle"] = "automatic";
+	mStringMap["DefaultGridSize"] = "";
 
 	mStringMap["ThemeColorSet"] = "";
 	mStringMap["ThemeIconSet"] = "";
@@ -184,15 +186,25 @@ void Settings::setDefaults()
 	mIntMap["ScreenRotate"]  = 0;
 
 	mStringMap["ExePath"] = "";
+
+
+	mDefaultBoolMap = mBoolMap;
+	mDefaultIntMap = mIntMap;
+	mDefaultFloatMap = mFloatMap;
+	mDefaultStringMap = mStringMap;
 }
 
 template <typename K, typename V>
-void saveMap(pugi::xml_document& doc, std::map<K, V>& map, const char* type)
+void saveMap(pugi::xml_document& doc, std::map<K, V>& map, const char* type, std::map<K, V>& defaultMap)
 {
 	for(auto iter = map.cbegin(); iter != map.cend(); iter++)
 	{
 		// key is on the "don't save" list, so don't save it
 		if(std::find(settings_dont_save.cbegin(), settings_dont_save.cend(), iter->first) != settings_dont_save.cend())
+			continue;
+
+		auto def = defaultMap.find(iter->first);
+		if (def != defaultMap.cend() && def->second == iter->second)
 			continue;
 
 		pugi::xml_node node = doc.append_child(type);
@@ -208,13 +220,24 @@ void Settings::saveFile()
 
 	pugi::xml_document doc;
 
-	saveMap<std::string, bool>(doc, mBoolMap, "bool");
-	saveMap<std::string, int>(doc, mIntMap, "int");
-	saveMap<std::string, float>(doc, mFloatMap, "float");
+	saveMap<std::string, bool>(doc, mBoolMap, "bool", mDefaultBoolMap);
+	saveMap<std::string, int>(doc, mIntMap, "int", mDefaultIntMap);
+	saveMap<std::string, float>(doc, mFloatMap, "float", mDefaultFloatMap);
 
 	//saveMap<std::string, std::string>(doc, mStringMap, "string");
 	for(auto iter = mStringMap.cbegin(); iter != mStringMap.cend(); iter++)
 	{
+		// key is on the "don't save" list, so don't save it
+		if (std::find(settings_dont_save.cbegin(), settings_dont_save.cend(), iter->first) != settings_dont_save.cend())
+			continue;
+
+		auto def = mDefaultStringMap.find(iter->first);
+		if (def == mDefaultStringMap.cend() && iter->second.empty())
+			continue;
+
+		if (def != mDefaultStringMap.cend() && def->second == iter->second)
+			continue;
+		
 		pugi::xml_node node = doc.append_child("string");
 		node.append_attribute("name").set_value(iter->first.c_str());
 		node.append_attribute("value").set_value(iter->second.c_str());
@@ -252,11 +275,12 @@ void Settings::loadFile()
 }
 
 //Print a warning message if the setting we're trying to get doesn't already exist in the map, then return the value in the map.
-#define SETTINGS_GETSET(type, mapName, getMethodName, setMethodName) type Settings::getMethodName(const std::string& name) \
+#define SETTINGS_GETSET(type, mapName, getMethodName, setMethodName, defaultValue) type Settings::getMethodName(const std::string& name) \
 { \
 	if(mapName.find(name) == mapName.cend()) \
 	{ \
-		LOG(LogError) << "Tried to use unset setting " << name << "!"; \
+		/*LOG(LogError) << "Tried to use unset setting " << name << "!";*/ \
+		return defaultValue; \
 	} \
 	return mapName[name]; \
 } \
@@ -265,7 +289,7 @@ void Settings::setMethodName(const std::string& name, type value) \
 	mapName[name] = value; \
 }
 
-SETTINGS_GETSET(bool, mBoolMap, getBool, setBool);
-SETTINGS_GETSET(int, mIntMap, getInt, setInt);
-SETTINGS_GETSET(float, mFloatMap, getFloat, setFloat);
-SETTINGS_GETSET(const std::string&, mStringMap, getString, setString);
+SETTINGS_GETSET(bool, mBoolMap, getBool, setBool, false);
+SETTINGS_GETSET(int, mIntMap, getInt, setInt, 0);
+SETTINGS_GETSET(float, mFloatMap, getFloat, setFloat, 0.0f);
+SETTINGS_GETSET(const std::string&, mStringMap, getString, setString, mEmptyString);

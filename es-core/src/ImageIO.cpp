@@ -114,6 +114,21 @@ Vector2i ImageIO::adjustPictureSize(Vector2i imageSize, Vector2i maxSize)
 	return Vector2i(cxDIB, cyDIB);
 }
 
+Vector2f ImageIO::adjustExternPictureSizef(Vector2f imageSize, Vector2f maxSize)
+{
+	float cxDIB = maxSize.x();
+	float cyDIB = maxSize.y();
+
+	float xCoef = maxSize.x() / imageSize.x();
+	float yCoef = maxSize.y() / imageSize.y();
+
+	if (imageSize.x() * yCoef < maxSize.x())
+		cyDIB = imageSize.y() * xCoef;
+	else
+		cxDIB = imageSize.x() * yCoef;
+
+	return Vector2f(cxDIB, cyDIB);
+}
 
 unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height, int maxWidth, int maxHeight, Vector2i& baseSize, Vector2i& packedSize)
 {

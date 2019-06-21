@@ -62,6 +62,10 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 		mRootFolder = new FolderData("" + name, this);
 	}
 
+	auto defaultView = Settings::getInstance()->getString(getName() + ".defaultView");
+	auto gridSizeOverride = Vector2f::parseString(Settings::getInstance()->getString(getName() + ".gridSize"));
+	setSystemViewMode(defaultView, gridSizeOverride, false);
+
 	setIsGameSystemStatus();
 	loadTheme();
 }
@@ -77,6 +81,12 @@ bool SystemData::setSystemViewMode(std::string newViewMode, Vector2f gridSizeOve
 	mGridSizeOverride = gridSizeOverride;
 	mViewMode = newViewMode;
 	mViewModeChanged = setChanged;
+
+	if (setChanged)
+	{
+		Settings::getInstance()->setString(getName() + ".defaultView", mViewMode);
+		Settings::getInstance()->setString(getName() + ".gridSize", Utils::String::replace(Utils::String::replace(mGridSizeOverride.toString(), ".000000", ""), "0 0", ""));
+	}
 
 	return true;
 }

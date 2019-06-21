@@ -24,6 +24,16 @@ struct GridTileProperties
 	Vector2f mLabelSize;
 	unsigned int mLabelColor;
 	unsigned int mLabelBackColor;
+
+	unsigned int mLabelGlowColor;
+	unsigned int mLabelGlowSize;
+
+	std::string		mFontPath;
+	unsigned int	mFontSize;
+
+	/*
+	<fontPath>. / main / fonts / Dosis - Bold.ttf< / fontPath>
+		<fontSize>0.025< / fontSize>*/
 };
 
 class GridTileComponent : public GuiComponent
@@ -49,7 +59,7 @@ public:
 
 	void setImage(const std::string& path);
 	// void setImage(const std::shared_ptr<TextureResource>& texture, std::string name);
-	void setSelected(bool selected, bool allowAnimation = true, Vector3f* pPosition = NULL);
+	void setSelected(bool selected, bool allowAnimation = true, Vector3f* pPosition = NULL, bool force=false);
 	void setVisible(bool visible);
 
 	void forceSize(Vector2f size, float selectedZoom = 1.0);
@@ -63,6 +73,7 @@ public:
 
 	virtual void onShow();
 	virtual void onHide();
+	virtual void update(int deltaTime);
 
 private:
 	void resize();

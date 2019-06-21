@@ -44,6 +44,11 @@ public:
 
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties) override;
 
+	void setGlowColor(unsigned int color) { mGlowColor = color; };
+	void setGlowSize(unsigned int size) { mGlowSize = size; };
+	
+	void setFont(std::string path, int size);
+
 protected:
 	virtual void onTextChanged();
 
@@ -67,6 +72,9 @@ private:
 	Alignment mHorizontalAlignment;
 	Alignment mVerticalAlignment;
 	float mLineSpacing;
+
+	unsigned int mGlowColor;
+	unsigned int mGlowSize;
 };
 
 #endif // ES_CORE_COMPONENTS_TEXT_COMPONENT_H

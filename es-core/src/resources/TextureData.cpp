@@ -204,7 +204,7 @@ bool TextureData::load()
 	if (!mPath.empty())
 	{
 #ifdef WIN32	
-		TRACE("TextureData::load(" << mPath << ", " << mTextureID << ")")
+		//TRACE("TextureData::load(" << mPath << ", " << mTextureID << ")")
 #endif
 
 		std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();

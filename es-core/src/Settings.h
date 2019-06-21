@@ -36,6 +36,12 @@ private:
 	std::map<std::string, int> mIntMap;
 	std::map<std::string, float> mFloatMap;
 	std::map<std::string, std::string> mStringMap;
+
+
+	std::map<std::string, bool> mDefaultBoolMap;
+	std::map<std::string, int> mDefaultIntMap;
+	std::map<std::string, float> mDefaultFloatMap;
+	std::map<std::string, std::string> mDefaultStringMap;
 };
 
 #endif // ES_CORE_SETTINGS_H

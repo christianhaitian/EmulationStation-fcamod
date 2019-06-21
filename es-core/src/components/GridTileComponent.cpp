@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include "animations/LambdaAnimation.h"
-
+#include "ImageIO.h"
 
 #ifdef _RPI_
 #include "components/VideoPlayerComponent.h"
@@ -42,14 +42,26 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 	mSelectedProperties.mBackgroundCornerSize = mDefaultProperties.mBackgroundCornerSize;
 	mSelectedProperties.mBackgroundCenterColor = 0xFFFFFFFF;
 	mSelectedProperties.mBackgroundEdgeColor = 0xFFFFFFFF;
+	
+
 
 	mDefaultProperties.mLabelSize = Vector2f(1.0, 0.30);
 	mDefaultProperties.mLabelColor = 0xFFFFFFFF;
 	mDefaultProperties.mLabelBackColor = 0;
-	
+	mDefaultProperties.mLabelGlowColor = 0;
+	mDefaultProperties.mLabelGlowSize = 2;
+
+	mDefaultProperties.mFontPath = "";
+	mDefaultProperties.mFontSize = 0;
+
 	mSelectedProperties.mLabelSize = Vector2f(1.0, 0.30);
 	mSelectedProperties.mLabelColor = 0xFFFFFFFF;
 	mSelectedProperties.mLabelBackColor = 0;
+	mSelectedProperties.mLabelGlowColor = 0;
+	mSelectedProperties.mLabelGlowSize = 2;
+
+	mSelectedProperties.mFontPath = "";
+	mSelectedProperties.mFontSize = 0;
 
 	mImage = std::make_shared<ImageComponent>(mWindow);
 	mImage->setOrigin(0.5f, 0.5f);
@@ -103,6 +115,11 @@ void GridTileComponent::resize()
 
 	mLabel.setColor(currentProperties.mLabelColor);
 	mLabel.setBackgroundColor(currentProperties.mLabelBackColor);
+	mLabel.setGlowColor(currentProperties.mLabelGlowColor);
+	mLabel.setGlowSize(currentProperties.mLabelGlowSize);
+
+	if (mDefaultProperties.mFontPath != mSelectedProperties.mFontPath || mDefaultProperties.mFontSize != mSelectedProperties.mFontSize)
+		mLabel.setFont(currentProperties.mFontPath, currentProperties.mFontSize);
 
 	if (mLabelMerged)
 	{
@@ -153,7 +170,7 @@ void GridTileComponent::resize()
 		}
 	}
 
-	if (mVideo != nullptr)
+	if (mVideo != nullptr && mVideo->isPlaying())
 	{
 		mVideo->setOrigin(0.5f, 0.5f);
 		mVideo->setPosition(size.x() / 2.0f, (size.y() - height) / 2.0f);
@@ -161,28 +178,10 @@ void GridTileComponent::resize()
 		if (currentProperties.mImageSizeMode == "minSize")
 		{
 			auto vs = mVideo->getVideoSize();
+			if (vs == Vector2f(0, 0))
+				vs = Vector2f(640, 480);
 
-			double prop = vs == Vector2f(0,0) ? 640.0 / 480.0 : vs.x() / vs.y();
-			double imgprop = imageWidth / imageHeight;
-
-			if (prop < imgprop)
-			{
-				double h = imageWidth / prop; // suppose video is 4:3
-
-				if (h < imageHeight)
-					h = imageHeight;
-
-				mVideo->setSize(imageWidth, h);
-			}
-			else
-			{
-				double w = imageHeight / prop; // suppose video is 4:3
-
-				if (w < imageWidth)
-					w = imageWidth;
-
-				mVideo->setSize(w, imageHeight);
-			}
+			mVideo->setSize(ImageIO::adjustExternPictureSizef(vs, Vector2f(imageWidth, imageHeight)));
 		}
 		else 
 		if (currentProperties.mImageSizeMode == "size")
@@ -230,6 +229,14 @@ void GridTileComponent::resize()
 	mBackground.setCenterColor(currentProperties.mBackgroundCenterColor);
 	mBackground.setEdgeColor(currentProperties.mBackgroundEdgeColor);
 	mBackground.setImagePath(currentProperties.mBackgroundImage);
+}
+
+void GridTileComponent::update(int deltaTime)
+{
+	GuiComponent::update(deltaTime);
+	
+	if ((mVideo != nullptr && mVideo->isPlaying()))
+		resize();
 }
 
 void GridTileComponent::renderBackground(const Transform4x4f& parentTrans)
@@ -378,6 +385,8 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 	elem = theme->getElement(view, "gridtile", "text");
 	if (elem != NULL)
 	{
+		float sh = (float)Renderer::getScreenHeight();
+
 		if (elem && elem->has("size"))
 		{
 			mDefaultProperties.mLabelSize = elem->get<Vector2f>("size");
@@ -397,6 +406,30 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 			mSelectedProperties.mLabelBackColor = mDefaultProperties.mLabelBackColor;			
 		}
 
+		if (elem && elem->has("glowSize"))
+		{
+			mDefaultProperties.mLabelGlowSize = (unsigned int) elem->get<float>("glowSize");
+			mSelectedProperties.mLabelGlowSize = mDefaultProperties.mLabelGlowSize;
+		}
+
+		if (elem && elem->has("glowColor"))
+		{
+			mDefaultProperties.mLabelGlowColor = elem->get<unsigned int>("glowColor");
+			mSelectedProperties.mLabelGlowColor = mDefaultProperties.mLabelGlowColor;
+		}
+
+		if (elem && elem->has("fontSize"))
+		{
+			mDefaultProperties.mFontSize = elem->get<float>("fontSize") * sh;
+			mSelectedProperties.mFontSize = mDefaultProperties.mFontSize;
+		}
+
+		if (elem && elem->has("fontPath"))
+		{
+			mDefaultProperties.mFontPath = elem->get<std::string>("fontPath");
+			mSelectedProperties.mFontPath = mDefaultProperties.mFontPath;
+		}
+
 		mLabelVisible = true;
 		mLabel.applyTheme(theme, view, element, properties);
 
@@ -411,6 +444,18 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 
 			if (elem && elem->has("backgroundColor"))
 				mSelectedProperties.mLabelBackColor = elem->get<unsigned int>("backgroundColor");
+
+			if (elem && elem->has("glowSize"))
+				mSelectedProperties.mLabelGlowSize = (unsigned int)elem->get<float>("glowSize");
+
+			if (elem && elem->has("glowColor"))
+				mSelectedProperties.mLabelGlowColor = elem->get<unsigned int>("glowColor");
+
+			if (elem && elem->has("fontSize"))
+				mSelectedProperties.mFontSize = elem->get<float>("fontSize") * sh;
+
+			if (elem && elem->has("fontPath"))
+				mSelectedProperties.mFontPath = elem->get<std::string>("fontPath");
 		}
 	}
 	else
@@ -498,12 +543,12 @@ void GridTileComponent::onHide()
 	mShown = false;
 }
 
-void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f* pPosition)
+void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f* pPosition, bool force)
 {
 	if (!mShown || !GuiComponent::ALLOWANIMATIONS)
 		allowAnimation = false;
 
-	if (mSelected == selected)
+	if (mSelected == selected && !force)
 	{
 		if (mSelected && mVideo != nullptr)
 			mVideo->setVideo(mVideoPath);
@@ -511,22 +556,24 @@ void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f
 		return;
 	}
 
-	mSelected = selected;
-	
+	mSelected = selected;	
+
 	if (!mSelected && mVideo != nullptr)
 		mVideo->setVideo("");	
 
 	if (selected)
 	{
 		if (pPosition == NULL || !allowAnimation)
-		{
+		{			
 			cancelAnimation(3);
-
+			
 			this->setSelectedZoom(1);
 			mAnimPosition = Vector3f(0, 0, 0);
 
 			if (mVideo != NULL)
-				mVideo->setVideo(mVideoPath);
+				mVideo->setVideo(mVideoPath);	
+
+			resize();
 		}
 		else
 		{
@@ -558,13 +605,18 @@ void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f
 	{
 		if (!allowAnimation)
 		{
+			cancelAnimation(3);
 			this->setSelectedZoom(0);
 
 			if (mVideo != NULL)
 				mVideo->setVideo("");
+
+			resize();
 		}
 		else
 		{
+			this->setSelectedZoom(1);
+
 			if (mVideo != NULL)
 				mVideo->setVideo("");
 
@@ -574,7 +626,7 @@ void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f
 				float pct = Math::lerp(0, 1, t*t*t + 1);
 				this->setSelectedZoom(1.0 - pct);
 			};
-
+			
 			cancelAnimation(3);
 			setAnimation(new LambdaAnimation(func, 250), 0, [this] {
 				this->setSelectedZoom(0);
@@ -585,6 +637,9 @@ void GridTileComponent::setSelected(bool selected, bool allowAnimation, Vector3f
 
 void GridTileComponent::setSelectedZoom(float percent)
 {
+	if (mSelectedZoomPercent == percent)
+		return;
+
 	mSelectedZoomPercent = percent;
 	resize();
 }
@@ -643,10 +698,24 @@ const GridTileProperties& GridTileComponent::getCurrentProperties()
 	}
 
 	if (mDefaultProperties.mLabelSize != mSelectedProperties.mLabelSize)
-	{
-		float y = mDefaultProperties.mLabelSize.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mLabelSize.y() * mSelectedZoomPercent;
-		mMixedProperties.mLabelSize = Vector2f(mDefaultProperties.mLabelSize.x(), y);
-	}
+		mMixedProperties.mLabelSize = Vector2f(mDefaultProperties.mLabelSize.x(), 
+			mDefaultProperties.mLabelSize.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mLabelSize.y() * mSelectedZoomPercent);
+
+	if (mDefaultProperties.mLabelColor != mSelectedProperties.mLabelColor)
+		mMixedProperties.mLabelColor = mixColors(mDefaultProperties.mLabelColor, mSelectedProperties.mLabelColor, mSelectedZoomPercent);
+
+	if (mDefaultProperties.mLabelBackColor != mSelectedProperties.mLabelBackColor)
+		mMixedProperties.mLabelBackColor = mixColors(mDefaultProperties.mLabelBackColor, mSelectedProperties.mLabelBackColor, mSelectedZoomPercent);
+
+	if (mDefaultProperties.mLabelGlowColor != mSelectedProperties.mLabelGlowColor)
+		mMixedProperties.mLabelGlowColor = mixColors(mDefaultProperties.mLabelGlowColor, mSelectedProperties.mLabelGlowColor, mSelectedZoomPercent);
+
+	if (mDefaultProperties.mLabelGlowSize != mSelectedProperties.mLabelGlowSize)
+		mMixedProperties.mLabelGlowSize = mDefaultProperties.mLabelGlowSize * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mLabelGlowSize * mSelectedZoomPercent;
+
+//  Avoid to multiply font sizes in mem + it create strange sizings
+//	if (mDefaultProperties.mFontSize != mSelectedProperties.mFontSize)
+	//	mMixedProperties.mFontSize = mDefaultProperties.mFontSize * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mFontSize * mSelectedZoomPercent;
 
 	return mMixedProperties;
 }

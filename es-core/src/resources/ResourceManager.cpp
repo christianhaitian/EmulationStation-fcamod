@@ -99,7 +99,7 @@ void ResourceManager::unloadAll()
 	while(iter != mReloadables.cend())
 	{
 		if (!iter->expired())
-		{
+		{			
 			iter->lock()->unload();
 			iter++;
 		}else{

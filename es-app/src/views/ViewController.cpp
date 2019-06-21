@@ -304,15 +304,18 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	bool forceView = false;
 	std::string viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
 	if (!system->getTheme()->hasView(viewPreference))
-		viewPreference == "automatic";	
+		viewPreference = "automatic";	
 
 	std::string customThemeName;
-	Vector2f gridSizeOverride = Vector2f(0,0);
+	Vector2f gridSizeOverride = Vector2f::parseString(Settings::getInstance()->getString("DefaultGridSize"));
+		
+	Vector2f bySystemGridOverride = system->getGridSizeOverride(); //Vector2f(0,0);
+	if (bySystemGridOverride != Vector2f(0, 0))
+		gridSizeOverride = bySystemGridOverride;
 	
 	if (!system->getSystemViewMode().empty() && system->getTheme()->hasView(system->getSystemViewMode()))
 	{		
 		viewPreference = system->getSystemViewMode();
-		gridSizeOverride = system->getGridSizeOverride();
 		forceView = true;
 	}
 
