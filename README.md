@@ -87,6 +87,7 @@ Changes in my branch
 - Carousel supports element "logoPos" : this allows the logo not to be inevitably centered.
 - Image loading : the image bytes where duplicated 3 times in memory.
 - In previous versions, if a xml element was unknown in the theme, nothing was loaded.
+- Support for glows around text 
 		    
 **Optimizations & Fixes:** 	
 - Faster loading time, using multithreading.
