@@ -722,6 +722,10 @@ Can be created as an extra.
 * `lineSpacing` - type: FLOAT.  Controls the space between lines (as a multiple of font height).  Default is 1.5.
 * `zIndex` - type: FLOAT.
 	- z-index value for component.  Components will be rendered in order of z-index value from low to high.
+* `glowColor` - type: COLOR;
+	- NEW : Defines the color of the glow around the text.
+* `glowSize` - type: FLOAT.
+	- NEW : Defines the size of the glow around the text.
 
 #### textlist
 
