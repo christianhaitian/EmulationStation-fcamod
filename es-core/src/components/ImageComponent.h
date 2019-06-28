@@ -81,6 +81,7 @@ public:
 	void render(const Transform4x4f& parentTrans) override;
 
 	void setAllowFading(bool fade) { mAllowFading = fade; };
+	void setMirroring(Vector2f mirror) { mMirror = mirror; };
 
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties) override;
 
@@ -98,12 +99,12 @@ private:
 	{
 		Vector2f pos;
 		Vector2f tex;
-	} mVertices[6];
+	} mVertices[4];
 
-	GLubyte mColors[6*4];
+//	GLubyte mColors[6*4];
 
 	void updateVertices();
-	void updateColors();
+//	void updateColors();
 	void fadeIn(bool textureLoaded);
 
 	unsigned int mColorShift;
@@ -122,6 +123,8 @@ private:
 
 	Vector2f mTopLeftCrop;
 	Vector2f mBottomRightCrop;	
+
+	Vector2f mMirror;
 };
 
 #endif // ES_CORE_COMPONENTS_IMAGE_COMPONENT_H

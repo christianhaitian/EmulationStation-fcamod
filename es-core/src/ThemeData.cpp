@@ -30,6 +30,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "default", PATH },
 		{ "tile", BOOLEAN },
 		{ "color", COLOR },
+		{ "reflexion", NORMALIZED_PAIR },
 		{ "zIndex", FLOAT } } },
 	{ "imagegrid", {
 		{ "pos", NORMALIZED_PAIR },
@@ -57,6 +58,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "backgroundCenterColor", COLOR },
 		{ "backgroundEdgeColor", COLOR },		
 		{ "selectionMode", STRING },		
+		{ "reflexion", NORMALIZED_PAIR },
 		{ "imageSizeMode", STRING } } },
 	{ "text", {
 		{ "pos", NORMALIZED_PAIR },
@@ -85,6 +87,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "selectorHeight", FLOAT },
 		{ "selectorOffsetY", FLOAT },
 		{ "selectorColor", COLOR },
+		{ "selectorGradientColor", COLOR },		
 		{ "selectorImagePath", PATH },
 		{ "selectorImageTile", BOOLEAN },
 		{ "selectedColor", COLOR },
@@ -163,6 +166,8 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "pos", NORMALIZED_PAIR },
 		{ "origin", NORMALIZED_PAIR },
 		{ "color", COLOR },
+		{ "colorGradient", COLOR },
+		{ "gradientType", STRING },
 		{ "logoScale", FLOAT },
 		{ "logoRotation", FLOAT },
 		{ "logoRotationOrigin", NORMALIZED_PAIR },
@@ -177,6 +182,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "fontSize", FLOAT },
 		{ "separatorColor", COLOR },
 		{ "selectorColor", COLOR },
+		{ "selectorGradientColor", COLOR },
 		{ "selectedColor", COLOR },
 		{ "color", COLOR } } },
 
@@ -303,7 +309,8 @@ void ThemeData::loadFile(std::string system, std::map<std::string, std::string> 
 	mVariables.insert(sysDataMap.cbegin(), sysDataMap.cend());
 
 	pugi::xml_document doc;
-	pugi::xml_parse_result res = doc.load_file(path.c_str());
+	pugi::xml_parse_result res = doc.load_file(path.c_str());	
+
 	if(!res)
 		throw error << "XML parsing error: \n    " << res.description();
 
@@ -469,6 +476,7 @@ void ThemeData::parseIncludes(const pugi::xml_node& root)
 
 		pugi::xml_document includeDoc;
 		pugi::xml_parse_result result = includeDoc.load_file(path.c_str());
+
 		if(!result)
 			throw error << "Error parsing file: \n    " << result.description();
 
@@ -1086,6 +1094,8 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 			Text.selectedColor = elem->get<unsigned int>("selectedColor");
 		if (elem->has("selectorColor"))
 			Text.selectorColor = elem->get<unsigned int>("selectorColor");
+		if (elem->has("selectorGradientColor"))
+			Text.selectorGradientColor = elem->get<unsigned int>("selectorGradientColor");
 	}
 
 	elem = theme.getElement("menu", "menubutton", "menuButton");
@@ -1171,6 +1181,7 @@ void ThemeData::crawlIncludes(const pugi::xml_node& root, std::map<std::string, 
 		dequepath.push_back(path);
 		pugi::xml_document includeDoc;
 		/*pugi::xml_parse_result result =*/ includeDoc.load_file(path.c_str());
+
 		pugi::xml_node root = includeDoc.child("theme");
 		crawlIncludes(root, sets, dequepath);
 		findRegion(includeDoc, sets);
@@ -1206,7 +1217,7 @@ std::map<std::string, std::string> ThemeData::getThemeSubSets(const std::string&
 		if (!Utils::FileSystem::isDirectory(paths[i]))
 			continue;
 
-		auto dirs = Utils::FileSystem::getDirInfo(paths[i] + "/" + theme, false);
+		auto dirs = Utils::FileSystem::getDirInfo(paths[i] + "/" + theme);
 		for (auto it = dirs.cbegin(); it != dirs.cend(); ++it)
 		{
 			if (!it->directory || it->hidden)
@@ -1218,7 +1229,8 @@ std::map<std::string, std::string> ThemeData::getThemeSubSets(const std::string&
 
 			dequepath.push_back(path);
 			pugi::xml_document doc;
-			doc.load_file(path.c_str());
+			doc.load_file(path.c_str());			
+
 			pugi::xml_node root = doc.child("theme");
 			crawlIncludes(root, sets, dequepath);
 			findRegion(doc, sets);
@@ -1231,7 +1243,8 @@ std::map<std::string, std::string> ThemeData::getThemeSubSets(const std::string&
 
 		dequepath.push_back(path);
 		pugi::xml_document doc;
-		doc.load_file(path.c_str());
+		doc.load_file(path.c_str());		
+
 		pugi::xml_node root = doc.child("theme");
 		crawlIncludes(root, sets, dequepath);
 		findRegion(doc, sets);

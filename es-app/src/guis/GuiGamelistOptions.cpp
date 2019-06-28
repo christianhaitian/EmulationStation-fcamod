@@ -16,7 +16,10 @@
 std::vector<std::string> GuiGamelistOptions::gridSizes {
 	"automatic",
 	
-	"2x2",	
+	"1x1",
+
+	"2x1",
+	"2x2",
 	"2x3",	
 	"2x4",
 	"2x5",

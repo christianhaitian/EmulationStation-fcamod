@@ -449,7 +449,11 @@ void SystemView::renderCarousel(const Transform4x4f& trans)
 	Renderer::pushClipRect(Vector2i((int)clipPos.x(), (int)clipPos.y()), Vector2i((int)mCarousel.size.x(), (int)mCarousel.size.y()));
 
 	Renderer::setMatrix(carouselTrans);
-	Renderer::drawRect(0.0, 0.0, mCarousel.size.x(), mCarousel.size.y(), mCarousel.color);
+
+	if (mCarousel.colorGradient != 0)
+		Renderer::drawGradientRect(0.0, 0.0, mCarousel.size.x(), mCarousel.size.y(), mCarousel.color, mCarousel.colorGradient, mCarousel.colorGradientHorz);
+	else
+		Renderer::drawRect(0.0, 0.0, mCarousel.size.x(), mCarousel.size.y(), mCarousel.color);
 
 	// draw logos
 	Vector2f logoSpacing(0.0, 0.0); // NB: logoSpacing will include the size of the logo itself as well!
@@ -623,6 +627,8 @@ void  SystemView::getDefaultElements(void)
 	mCarousel.origin.x() = 0.0f;
 	mCarousel.origin.y() = 0.0f;
 	mCarousel.color = 0xFFFFFFD8;
+	mCarousel.colorGradient = 0;
+	mCarousel.colorGradientHorz = false;
 	mCarousel.logoScale = 1.2f;
 	mCarousel.logoRotation = 7.5;
 	mCarousel.logoRotationOrigin.x() = -5;
@@ -665,6 +671,12 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 		mCarousel.origin = elem->get<Vector2f>("origin");
 	if (elem->has("color"))
 		mCarousel.color = elem->get<unsigned int>("color");
+
+	if (elem->has("colorGradient"))
+		mCarousel.colorGradient = elem->get<unsigned int>("colorGradient");
+
+	mCarousel.colorGradientHorz = (elem->has("gradientType") && !(elem->get<std::string>("type").compare("horizontal")));
+
 	if (elem->has("logoScale"))
 		mCarousel.logoScale = elem->get<float>("logoScale");
 	if (elem->has("logoSize"))

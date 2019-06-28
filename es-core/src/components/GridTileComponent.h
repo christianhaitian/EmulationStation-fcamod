@@ -31,6 +31,8 @@ struct GridTileProperties
 	std::string		mFontPath;
 	unsigned int	mFontSize;
 
+	Vector2f		mMirror;
+
 	/*
 	<fontPath>. / main / fonts / Dosis - Bold.ttf< / fontPath>
 		<fontSize>0.025< / fontSize>*/

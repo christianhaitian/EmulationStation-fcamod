@@ -872,12 +872,17 @@ void GuiMenu::openOtherSettings()
 	});
 #endif
 
-	// framerate
-	
+	// framerate	
 	auto framerate = std::make_shared<SwitchComponent>(mWindow);
 	framerate->setState(Settings::getInstance()->getBool("DrawFramerate"));
 	s->addWithLabel(_T("SHOW FRAMERATE"), framerate);
 	s->addSaveFunc([framerate] { Settings::getInstance()->setBool("DrawFramerate", framerate->getState()); });
+
+	// threaded loading
+	auto threadedLoading = std::make_shared<SwitchComponent>(mWindow);
+	threadedLoading->setState(Settings::getInstance()->getBool("ThreadedLoading"));
+	s->addWithLabel(_T("THREADED LOADING"), threadedLoading);
+	s->addSaveFunc([threadedLoading] { Settings::getInstance()->setBool("ThreadedLoading", threadedLoading->getState()); });
 
 	s->updatePosition();
 	mWindow->pushGui(s);

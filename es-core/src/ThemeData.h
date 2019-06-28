@@ -88,8 +88,9 @@ struct ThemeSet
 struct MenuElement {
 	unsigned int color;
 	unsigned int selectedColor;
-	unsigned int selectorColor;
+	unsigned int selectorColor;	
 	unsigned int separatorColor;
+	unsigned int selectorGradientColor;
 	std::string path;
 	std::string fadePath;
 	std::shared_ptr<Font> font;
@@ -126,11 +127,11 @@ public:
 	public:
 		ThemeMenu(ThemeData& theme);
 
-		MenuElement Background{ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, ":/frame.png", ":/scroll_gradient.png", nullptr };
-		MenuElement Title{ 0x555555FF, 0x555555FF, 0x555555FF, 0xFFFFFFFF, "", "", nullptr };
-		MenuElement Text{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, "", "", nullptr };
-		MenuElement TextSmall{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, "", "", nullptr };
-		MenuElement Footer{ 0xC6C6C6FF, 0xC6C6C6FF, 0xC6C6C6FF, 0xFFFFFFFF, "", "", nullptr };
+		MenuElement Background{ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0, ":/frame.png", ":/scroll_gradient.png", nullptr };
+		MenuElement Title{ 0x555555FF, 0x555555FF, 0x555555FF, 0xFFFFFFFF, 0, "", "", nullptr };
+		MenuElement Text{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, 0, "", "", nullptr };
+		MenuElement TextSmall{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, 0, "", "", nullptr };
+		MenuElement Footer{ 0xC6C6C6FF, 0xC6C6C6FF, 0xC6C6C6FF, 0xFFFFFFFF, 0, "", "", nullptr };
 		MenuIconElement MenuIcons { "","","","","","","","","" };
 		IconElement Icons { ":/button.png", ":/button_filled.png", ":/on.svg", ":/off.svg", ":/option_arrow.svg", ":/arrow.svg", ":/slider_knob.svg" };
 	};

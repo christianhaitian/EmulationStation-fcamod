@@ -102,7 +102,16 @@ HttpReq::HttpReq(const std::string& url)
 		onError(curl_easy_strerror(err));
 		return;
 	}
+	/*
+#ifdef WIN32
+#ifdef _DEBUG
 
+				CURLcode ret;
+				curl_easy_setopt(mHandle, CURLOPT_PROXY, "127.0.0.1:8081");
+				curl_easy_setopt(mHandle, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);			
+#endif
+#endif
+			*/	
 	//add the handle to our multi
 	CURLMcode merr = curl_multi_add_handle(s_multi_handle, mHandle);
 	if(merr != CURLM_OK)

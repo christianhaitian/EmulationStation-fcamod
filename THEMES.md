@@ -613,6 +613,9 @@ Can be created as an extra.
 	- Multiply each pixel's color by this color. For example, an all-white image with `<color>FF0000</color>` would become completely red.  You can also control the transparency of an image with `<color>FFFFFFAA</color>` - keeping all the pixels their normal color and only affecting the alpha channel.
 * `zIndex` - type: FLOAT.
 	- z-index value for component.  Components will be rendered in order of z-index value from low to high.
+* `reflexion` - type: NORMALIZED_PAIR.
+	- NEW : table reflexion effect. First item is top position alpha, second is bottom alpha.
+
 
 #### imagegrid
 
@@ -661,6 +664,8 @@ Can be created as an extra.
     - NEW : Selects if the background is over the full tile or only the image. `full` by default, can also be set to `image`. 
 * `imageSizeMode` - type: STRING.
     - NEW : Selects the image sizing mode. `maxSize` by default, can also be set to `minSize` (outer zoom) or `size` (stretch). 
+* `reflexion` - type: NORMALIZED_PAIR.
+	- NEW : table reflexion effect. First item is top position alpha, second is bottom alpha.
     
 #### video
 
@@ -726,6 +731,8 @@ Can be created as an extra.
 	- Where on the component `pos` refers to.  For example, an origin of `0.5 0.5` and a `pos` of `0.5 0.5` would place the component exactly in the middle of the screen.  If the "POSITION" and "SIZE" attributes are themable, "ORIGIN" is implied.
 * `selectorColor` - type: COLOR.
 	- Color of the "selector bar."
+* `selectorGradientColor` - type: NORMALIZED_PAIR. 
+    - NEW : Bottom color for the gradient of the "selector bar."
 * `selectorImagePath` - type: PATH.
 	- Path to image to render in place of "selector bar."
 * `selectorImageTile` - type: BOOLEAN.
@@ -845,6 +852,10 @@ EmulationStation borrows the concept of "nine patches" from Android (or "9-Slice
 * `color` - type: COLOR.
 	- Controls the color of the carousel background.
 	- Default is FFFFFFD8
+* `colorGradient` - type: COLOR.
+	- NEW : Color for the end of gradient
+* `gradientType` - type: STRING.
+	- NEW : Sets the gradient direction. Accepted values are "horizontal" and "vertical".
 * `logoSize` - type: NORMALIZED_PAIR.  Default is "0.25 0.155"
 * `logoScale` - type: FLOAT.
 	- Selected logo is increased in size by this scale

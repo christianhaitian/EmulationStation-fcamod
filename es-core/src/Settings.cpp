@@ -37,7 +37,8 @@ std::vector<const char*> settings_dont_save {
 	{ "ScreenOffsetX" },
 	{ "ScreenOffsetY" },
 	{ "ScreenRotate" },
-	{ "ExePath" }
+	{ "ExePath" },
+	{ "HomePath" }
 };
 
 Settings::Settings()
@@ -84,7 +85,8 @@ void Settings::setDefaults()
 	mBoolMap["MoveCarousel"] = true;
 	mBoolMap["SaveGamelistsOnExit"] = true;
 	mBoolMap["OptimizeVRAM"] = false;	
-
+	mBoolMap["ThreadedLoading"] = true;
+	
 	mBoolMap["Debug"] = false;
 	mBoolMap["DebugGrid"] = false;
 	mBoolMap["DebugText"] = false;

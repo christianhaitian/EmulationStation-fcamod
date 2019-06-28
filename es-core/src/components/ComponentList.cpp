@@ -164,6 +164,7 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 
 	auto menuTheme = ThemeData::getMenuTheme();
 	unsigned int selectorColor = menuTheme->Text.selectorColor;
+	unsigned int selectorGradientColor = menuTheme->Text.selectorGradientColor;
 	unsigned int selectedColor = menuTheme->Text.selectedColor;
 	unsigned int bgColor = menuTheme->Background.color;
 	unsigned int separatorColor = menuTheme->Text.separatorColor;
@@ -214,9 +215,17 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 		const float selectedRowHeight = getRowHeight(mEntries.at(mCursor).data);
 		
 		if ((selectorColor != bgColor) && ((selectorColor & 0xFF) != 0x00)) {
-			//Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, GL_ONE_MINUS_DST_COLOR, GL_ZERO);
-			Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
-			Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, selectorColor, GL_ONE, GL_ONE);
+
+			if (selectorGradientColor != 0)
+			{
+				Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+				Renderer::drawGradientRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, selectorColor, selectorGradientColor, false, GL_ONE, GL_ONE);
+			}
+			else
+			{
+				Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+				Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, selectorColor, GL_ONE, GL_ONE);
+			}
 		}
 		
 	//	Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, 0xFFFFFFFF, GL_ONE_MINUS_DST_COLOR, GL_ZERO);

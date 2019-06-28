@@ -124,7 +124,7 @@ const std::vector<MetaDataDecl>& getMDDByType(MetaDataListType type)
 	return gameMDD;
 }
 
-MetaDataList::MetaDataList(MetaDataListType type) : mType(type), mWasChanged(false) 
+MetaDataList::MetaDataList(MetaDataListType type) : mType(type), mWasChanged(false), mRelativeTo(nullptr)
 { 
 
 }

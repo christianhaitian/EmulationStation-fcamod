@@ -32,6 +32,22 @@ bool scrape_cmdline = false;
 
 bool parseArgs(int argc, char* argv[])
 {
+	for (int i = 1; i < argc; i++)
+	{
+		if (strcmp(argv[i], "--home") == 0)
+		{
+			if (i == argc - 1)
+				continue;
+
+			std::string arg = argv[i + 1];
+			if (arg.find("-") == 0)
+				continue;
+
+			Utils::FileSystem::setHomePath(argv[i + 1]);
+			i++; // skip vsync value			
+		}
+	}
+
 	Settings::getInstance()->setString("ExePath", argv[0]);
 
 	for(int i = 1; i < argc; i++)

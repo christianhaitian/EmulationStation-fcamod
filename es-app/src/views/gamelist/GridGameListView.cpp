@@ -456,7 +456,7 @@ void GridGameListView::updateInfoPanel()
 
 		fadingOut = false;
 	}
-
+	
 	std::vector<GuiComponent*> comps = getMDValues();
 
 	if (mVideo != nullptr)
@@ -465,6 +465,7 @@ void GridGameListView::updateInfoPanel()
 	comps.push_back(&mImage);
 	comps.push_back(&mDescription);
 	comps.push_back(&mName);
+
 	std::vector<TextComponent*> labels = getMDLabels();
 	comps.insert(comps.cend(), labels.cbegin(), labels.cend());
 	
@@ -475,8 +476,7 @@ void GridGameListView::updateInfoPanel()
 		//   then animate if reverse != fadingOut
 		// an animation is not playing
 		//   then animate if opacity != our target opacity
-		if((comp->isAnimationPlaying(0) && comp->isAnimationReversed(0) != fadingOut) ||
-		   (!comp->isAnimationPlaying(0) && comp->getOpacity() != (fadingOut ? 0 : 255)))
+		if((comp->isAnimationPlaying(0) && comp->isAnimationReversed(0) != fadingOut) || (!comp->isAnimationPlaying(0) && comp->getOpacity() != (fadingOut ? 0 : 255)))
 		{
 			auto func = [comp](float t)
 			{

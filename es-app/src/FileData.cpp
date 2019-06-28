@@ -281,6 +281,7 @@ CollectionFileData::CollectionFileData(FileData* file, SystemData* system)
 	mSourceFileData = file->getSourceFileData();
 	mParent = NULL;
 	metadata = mSourceFileData->metadata;	
+	mDirty = true;
 }
 
 SystemEnvironmentData* CollectionFileData::getSystemEnvData() const

@@ -11,21 +11,14 @@
 #include "ThemeData.h"
 #include "views/UIModeController.h"
 #include <fstream>
-
 #include "utils/StringUtil.h"
-
-#ifdef WIN32
-#include <Windows.h>
-#endif
-
+#include "utils/ThreadPool.h"
 #include "GuiComponent.h"
 #include "Window.h"
 
-#include <SDL_timer.h>
+using namespace Utils;
 
 std::vector<SystemData*> SystemData::sSystemVector;
-
-#define USE_THREADING
 
 SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem) :
 	mName(name), mFullName(fullName), mEnvData(envData), mThemeFolder(themeFolder), mIsCollectionSystem(CollectionSystem), mIsGameSystem(true)
@@ -41,7 +34,7 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 		mRootFolder->metadata.set("name", mFullName);
 
 		std::unordered_map<std::string, FileData*> fileMap;
-
+		
 		if (!Settings::getInstance()->getBool("ParseGamelistOnly"))
 		{			
 			populateFolder(mRootFolder, fileMap);
@@ -51,7 +44,8 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 
 		if (!Settings::getInstance()->getBool("IgnoreGamelist"))
 			parseGamelist(this, fileMap);
-
+			
+		//StopWatch ws("sort " + mName);
 		mRootFolder->sort(FileSorts::SortTypes.at(0));
 
 		//indexAllGameFilters(mRootFolder);
@@ -61,7 +55,7 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 		// virtual systems are updated afterwards, we're just creating the data structure
 		mRootFolder = new FolderData("" + name, this);
 	}
-
+	
 	auto defaultView = Settings::getInstance()->getString(getName() + ".defaultView");
 	auto gridSizeOverride = Vector2f::parseString(Settings::getInstance()->getString(getName() + ".gridSize"));
 	setSystemViewMode(defaultView, gridSizeOverride, false);
@@ -143,7 +137,8 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 	bool isGame;
 	bool showHidden = Settings::getInstance()->getBool("ShowHiddenFiles");
 	
-	Utils::FileSystem::fileList dirContent = Utils::FileSystem::getDirInfo(folderPath, false);
+	Utils::FileSystem::fileList dirContent = Utils::FileSystem::getDirInfo(folderPath);
+
 	for(Utils::FileSystem::fileList::const_iterator it = dirContent.cbegin(); it != dirContent.cend(); ++it)
 	{
 		auto fileInfo = *it;
@@ -370,111 +365,6 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 	return newSys;
 }
 
-#ifdef USE_THREADING
-typedef std::function<void(void)> work_function;
-
-#include <thread>
-#include <mutex>
-#include <queue>
-#include <atomic>
-
-class ThreadPool
-{
-public:
-	ThreadPool() : mRunning(true), mWaiting(false), mNumWork(0)
-	{
-#ifdef WIN32
-		SYSTEM_INFO sysinfo;
-		GetSystemInfo(&sysinfo);
-		size_t num_threads = sysinfo.dwNumberOfProcessors;
-#else
-		size_t num_threads = sysconf(_SC_NPROCESSORS_ONLN);
-#endif
-
-		auto doWork = [&](size_t id)
-		{
-			while (mRunning)
-			{
-				_mutex.lock();
-				if (!mWorkQueue.empty())
-				{
-					auto work = mWorkQueue.front();
-					mWorkQueue.pop();
-					_mutex.unlock();
-
-					try
-					{
-						work();
-					}
-					catch (...) { }
-
-					mNumWork--;
-				}
-				else
-				{
-					_mutex.unlock();
-
-					// Extra code : Exit finished threads
-					if (mWaiting)
-						return;
-
-					std::this_thread::yield();
-					std::this_thread::sleep_for(std::chrono::milliseconds(1));
-				}
-			}
-		};
-
-		mThreads.reserve(num_threads);
-
-		for (size_t i = 0; i < num_threads; i++)
-			mThreads.push_back(std::thread(doWork, i));
-	}
-
-	~ThreadPool() 
-	{
-		mRunning = false;
-		for (std::thread& t : mThreads)
-			t.join();	
-	}
-
-	void queueWorkItem(work_function work) 
-	{
-		_mutex.lock();
-		mWorkQueue.push(work);
-		mNumWork++;
-		_mutex.unlock();
-	}
-
-	void wait()
-	{
-		mWaiting = true;
-		while (mNumWork.load() > 0)
-			std::this_thread::yield();		
-	}
-
-	void wait(work_function work, int delay = 50)
-	{
-		mWaiting = true;
-		while (mNumWork.load() > 0)
-		{
-			work();			
-
-			std::this_thread::yield();
-			std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-		}
-	}
-
-private:
-	bool mRunning;
-	bool mWaiting;
-	std::queue<work_function> mWorkQueue;
-	std::atomic<size_t> mNumWork;
-	std::mutex _mutex;
-	std::vector<std::thread> mThreads;
-
-};
-#endif
-
 //creates systems from information located in a config file
 bool SystemData::loadConfig(Window* window)
 {
@@ -525,80 +415,99 @@ bool SystemData::loadConfig(Window* window)
 	unsigned int Ticks = GetTickCount();
 #endif
 
-#ifdef USE_THREADING
-	ThreadPool threadPool;
-
 	typedef SystemData* SystemDataPtr;
+
+	ThreadPool* pThreadPool = NULL;
+	SystemDataPtr* systems = NULL;
 	
-	SystemDataPtr* systems = new SystemDataPtr[systemCount];
-	for (int i = 0; i < systemCount; i++)
-		systems[i] = nullptr;	
+	if (ThreadPool::getProcessorCount() > 2 && Settings::getInstance()->getBool("ThreadedLoading"))
+	{
+		pThreadPool = new ThreadPool();
 
-	threadPool.queueWorkItem([] { CollectionSystemManager::get()->loadCollectionSystems(true); });	
+		systems = new SystemDataPtr[systemCount];
+		for (int i = 0; i < systemCount; i++)
+			systems[i] = nullptr;
 
-#endif
+		pThreadPool->queueWorkItem([] { CollectionSystemManager::get()->loadCollectionSystems(true); });
+	}
 
 	int processedSystem = 0;
 	
 	for (pugi::xml_node system = systemList.child("system"); system; system = system.next_sibling("system"))
 	{		
-#ifdef USE_THREADING
-		threadPool.queueWorkItem([system, currentSystem, systems, &processedSystem]
+		if (pThreadPool != NULL)
 		{
-			systems[currentSystem] = loadSystem(system);
-			processedSystem++;
-		});
-#else
-		std::string fullname = system.child("fullname").text().get();
+			pThreadPool->queueWorkItem([system, currentSystem, systems, &processedSystem]
+			{				
+				systems[currentSystem] = loadSystem(system);
+				processedSystem++;
+			});
+		}
+		else
+		{
+			std::string fullname = system.child("fullname").text().get();
 
-		if (window != NULL)
-			window->renderLoadingScreen(fullname, systemCount == 0 ? 0 : (float) currentSystem / (float) (systemCount + 1));
-	
-		SystemData* pSystem = loadSystem(system);
-		if (pSystem != nullptr)
-			sSystemVector.push_back(pSystem);
-		
-#endif
+			if (window != NULL)
+				window->renderLoadingScreen(fullname, systemCount == 0 ? 0 : (float)currentSystem / (float)(systemCount + 1));
+
+			std::string nm = system.child("name").text().get();
+			StopWatch watch("SystemData " + nm);
+
+			SystemData* pSystem = loadSystem(system);
+			if (pSystem != nullptr)
+				sSystemVector.push_back(pSystem);
+		}
+
 		currentSystem++;
 	}
 
-#ifdef USE_THREADING
-	if (window != NULL)
-	{		
-		threadPool.wait([window, &processedSystem, systemCount, systemsNames]
+	if (pThreadPool != NULL)
+	{
+		if (window != NULL)
 		{
-			int px = processedSystem;
-			auto name = px < 0 || px > systemsNames.size() ? "" : systemsNames.at(px);
-			window->renderLoadingScreen(name, (float)px / (float)(systemCount + 1));
-		}, 50);
+			int cnt = 0;
+
+			pThreadPool->wait([window, &processedSystem, systemCount, systemsNames, &cnt]
+			{
+				int px = processedSystem;
+				if (px == cnt)
+					return;
+
+				cnt = px;
+
+				auto name = px < 0 || px > systemsNames.size() ? "" : systemsNames.at(px);
+				window->renderLoadingScreen(name, (float)px / (float)(systemCount + 1));
+			}, 10);
+		}
+		else
+			pThreadPool->wait();
+
+		for (int i = 0; i < systemCount; i++)
+		{
+			SystemData* pSystem = systems[i];
+			if (pSystem != nullptr)
+				sSystemVector.push_back(pSystem);
+		}
+
+		delete[] systems;
+		delete pThreadPool;
+
+		if (window != NULL)
+			window->renderLoadingScreen(_T("Favorites"), systemCount == 0 ? 0 : currentSystem / systemCount);
+
+		CollectionSystemManager::get()->updateSystemsList();
 	}
 	else
-		threadPool.wait();
-
-	for (int i = 0; i < systemCount; i++)
 	{
-		SystemData* pSystem = systems[i];
-		if (pSystem != nullptr)
-			sSystemVector.push_back(pSystem);
+		if (window != NULL)
+			window->renderLoadingScreen(_T("Favorites"), systemCount == 0 ? 0 : currentSystem / systemCount);
+
+		CollectionSystemManager::get()->loadCollectionSystems();
 	}
-
-	delete[] systems;
-
-	if (window != NULL)
-		window->renderLoadingScreen(_T("Favorites"), systemCount == 0 ? 0 : currentSystem / systemCount);
-
-	CollectionSystemManager::get()->updateSystemsList();
-#else
-
-	if (window != NULL)
-		window->renderLoadingScreen(_T("Favorites"), systemCount == 0 ? 0 : currentSystem / systemCount);
-
-	CollectionSystemManager::get()->loadCollectionSystems();
-#endif
 
 #ifdef WIN32
 	Ticks = GetTickCount() - Ticks;
-	// ::MessageBox(0, std::to_string(Ticks).c_str(), NULL, NULL);
+//	::MessageBox(0, std::to_string(Ticks).c_str(), NULL, NULL);
 #endif
 
 	return true;
@@ -812,6 +721,8 @@ unsigned int SystemData::getDisplayedGameCount() const
 
 void SystemData::loadTheme()
 {
+	//StopWatch watch("SystemData::loadTheme " + getName());
+
 	mTheme = std::make_shared<ThemeData>();
 
 	std::string path = getThemePath();

@@ -141,6 +141,10 @@ msgid "GAME LAUNCH TRANSITION"
 msgstr "TRANSITION AU LANCEMENT D'UN JEU"
 
 #: 
+msgid "THREADED LOADING"
+msgstr "Chargement multitâche"
+
+#: 
 msgid "RANDOM"
 msgstr "ALÉATOIRE"
 

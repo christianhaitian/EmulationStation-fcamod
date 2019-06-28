@@ -43,8 +43,6 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 	mSelectedProperties.mBackgroundCenterColor = 0xFFFFFFFF;
 	mSelectedProperties.mBackgroundEdgeColor = 0xFFFFFFFF;
 	
-
-
 	mDefaultProperties.mLabelSize = Vector2f(1.0, 0.30);
 	mDefaultProperties.mLabelColor = 0xFFFFFFFF;
 	mDefaultProperties.mLabelBackColor = 0;
@@ -62,6 +60,9 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 
 	mSelectedProperties.mFontPath = "";
 	mSelectedProperties.mFontSize = 0;
+
+	mDefaultProperties.mMirror = Vector2f(0, 0);
+	mSelectedProperties.mMirror = Vector2f(0, 0);
 
 	mImage = std::make_shared<ImageComponent>(mWindow);
 	mImage->setOrigin(0.5f, 0.5f);
@@ -150,6 +151,7 @@ void GridTileComponent::resize()
 		mImage->setOrigin(0.5f, 0.5f);
 		mImage->setPosition(size.x() / 2.0f, (size.y() - height) / 2.0f);
 		mImage->setColorShift(currentProperties.mImageColor);
+		mImage->setMirroring(currentProperties.mMirror);
 
 		if (currentProperties.mImageSizeMode == "minSize")
 			mImage->setMinSize(imageWidth, imageHeight);
@@ -343,7 +345,16 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 			mDefaultProperties.mSelectionMode = elem->get<std::string>("selectionMode");
 			mSelectedProperties.mSelectionMode = mDefaultProperties.mSelectionMode;
 		}
+
+		if (elem && elem->has("reflexion"))
+		{
+			mDefaultProperties.mMirror = elem->get<Vector2f>("reflexion");
+			mSelectedProperties.mMirror = mDefaultProperties.mMirror;
+		}
 	}
+
+//	mDefaultProperties.mMirror = Vector2f(0, 0);
+//	mSelectedProperties.mMirror = Vector2f(0, 0);
 
 	// Apply theme to the selected gridtile
 	// NOTE that some of the default gridtile properties influence on the selected gridtile properties
@@ -381,6 +392,9 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 
 	if (elem && elem->has("backgroundEdgeColor"))
 		mSelectedProperties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundEdgeColor");
+
+	if (elem && elem->has("reflexion"))
+		mSelectedProperties.mMirror = elem->get<Vector2f>("reflexion");
 
 	elem = theme->getElement(view, "gridtile", "text");
 	if (elem != NULL)
@@ -712,6 +726,13 @@ const GridTileProperties& GridTileComponent::getCurrentProperties()
 
 	if (mDefaultProperties.mLabelGlowSize != mSelectedProperties.mLabelGlowSize)
 		mMixedProperties.mLabelGlowSize = mDefaultProperties.mLabelGlowSize * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mLabelGlowSize * mSelectedZoomPercent;
+	
+	if (mDefaultProperties.mMirror != mSelectedProperties.mMirror)
+	{
+		float x = mDefaultProperties.mMirror.x() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mMirror.x() * mSelectedZoomPercent;
+		float y = mDefaultProperties.mMirror.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mMirror.y() * mSelectedZoomPercent;
+		mMixedProperties.mMirror = Vector2f(x, y);
+	}
 
 //  Avoid to multiply font sizes in mem + it create strange sizings
 //	if (mDefaultProperties.mFontSize != mSelectedProperties.mFontSize)

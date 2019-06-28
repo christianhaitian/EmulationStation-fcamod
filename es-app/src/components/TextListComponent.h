@@ -73,6 +73,7 @@ public:
 	inline void setSelectorHeight(float selectorScale) { mSelectorHeight = selectorScale; }
 	inline void setSelectorOffsetY(float selectorOffsetY) { mSelectorOffsetY = selectorOffsetY; }
 	inline void setSelectorColor(unsigned int color) { mSelectorColor = color; }
+	inline void setSelectorGradientColor(unsigned int color) { mSelectorGradientColor = color; }
 	inline void setSelectedColor(unsigned int color) { mSelectedColor = color; }
 	inline void setColor(unsigned int id, unsigned int color) { mColors[id] = color; }
 	inline void setLineSpacing(float lineSpacing) { mLineSpacing = lineSpacing; }
@@ -97,6 +98,7 @@ private:
 	float mSelectorHeight;
 	float mSelectorOffsetY;
 	unsigned int mSelectorColor;
+	unsigned int mSelectorGradientColor;
 	unsigned int mSelectedColor;
 	std::string mScrollSound;
 	static const unsigned int COLOR_ID_COUNT = 2;
@@ -122,6 +124,7 @@ TextListComponent<T>::TextListComponent(Window* window) :
 	mSelectorHeight = mFont->getSize() * 1.5f;
 	mSelectorOffsetY = 0;
 	mSelectorColor = 0x000000FF;
+	mSelectorGradientColor = 0;
 	mSelectedColor = 0;
 	mColors[0] = 0x0000FFFF;
 	mColors[1] = 0x00FF00FF;
@@ -167,7 +170,11 @@ void TextListComponent<T>::render(const Transform4x4f& parentTrans)
 			mSelectorImage.render(trans);
 		} else {
 			Renderer::setMatrix(trans);
-			Renderer::drawRect(0.f, (mCursor - startEntry)*entrySize + mSelectorOffsetY, mSize.x(), mSelectorHeight, mSelectorColor);
+
+			if (mSelectorGradientColor != 0)
+				Renderer::drawGradientRect(0.f, (mCursor - startEntry)*entrySize + mSelectorOffsetY, mSize.x(), mSelectorHeight, mSelectorColor, mSelectorGradientColor);
+			else
+				Renderer::drawRect(0.f, (mCursor - startEntry)*entrySize + mSelectorOffsetY, mSize.x(), mSelectorHeight, mSelectorColor);
 		}
 	}
 
@@ -370,6 +377,8 @@ void TextListComponent<T>::applyTheme(const std::shared_ptr<ThemeData>& theme, c
 			setColor(0, elem->get<unsigned int>("primaryColor"));
 		if(elem->has("secondaryColor"))
 			setColor(1, elem->get<unsigned int>("secondaryColor"));
+		if (elem->has("selectorGradientColor"))
+			setSelectorGradientColor(elem->get<unsigned int>("selectorGradientColor"));
 	}
 
 	setFont(Font::getFromTheme(elem, properties, mFont));

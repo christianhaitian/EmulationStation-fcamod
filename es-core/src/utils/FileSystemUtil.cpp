@@ -6,11 +6,13 @@
 #include "Settings.h"
 #include <sys/stat.h>
 #include <string.h>
+#include "platform.h"
 
 #if defined(_WIN32)
 // because windows...
 #include <direct.h>
 #include <Windows.h>
+#include <mutex>
 #define getcwd _getcwd
 #define mkdir(x,y) _mkdir(x)
 #define snprintf _snprintf
@@ -27,6 +29,17 @@ namespace Utils
 {
 	namespace FileSystem
 	{
+#if defined(_WIN32)
+		std::mutex mFileMutex;
+#endif
+
+		pugi::xml_parse_result	load_xml(pugi::xml_document& doc, const char* path)
+		{			
+#if defined(_WIN32)
+			std::unique_lock<std::mutex> lock(mFileMutex);
+#endif
+			return doc.load_file(path);
+		}
 
 #if defined(_WIN32)
 		static std::string convertFromWideString(const std::wstring wstring)
@@ -54,7 +67,9 @@ namespace Utils
 			return (first.path.length() < second.path.length());			
 		}
 
-		fileList getDirInfo(const std::string& _path, const bool _recursive)
+
+
+		fileList getDirInfo(const std::string& _path/*, const bool _recursive*/)
 		{
 			std::string path = getGenericPath(_path);
 			fileList  contentList;
@@ -63,6 +78,8 @@ namespace Utils
 			if (isDirectory(path))
 			{
 #if defined(_WIN32)
+				std::unique_lock<std::mutex> lock(mFileMutex);
+
 				WIN32_FIND_DATAW findData;
 				std::string      wildcard = path + "/*";
 				HANDLE           hFind = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
@@ -73,26 +90,17 @@ namespace Utils
 					do
 					{
 						std::string name = convertFromWideString(findData.cFileName);
+						
+						if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && name == "." || name == "..")
+							continue;
 
-						// ignore "." and ".."
-						if ((name != ".") && (name != ".."))
-						{
-							std::string fullName(getGenericPath(path + "/" + name));
-
-							FileInfo fi;
-							fi.path = fullName;
-							fi.hidden = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN;
-							fi.directory = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
-							contentList.push_back(fi);
-							
-							if (_recursive && fi.directory)
-							{
-								fileList fl = getDirInfo(fullName, true);
-								for (auto it = fl.cbegin(); it != fl.cend(); ++it)
-									contentList.push_back(*it);
-							}							
-						}
-					} while (FindNextFileW(hFind, &findData));
+						FileInfo fi;
+						fi.path = path + "/" + name;
+						fi.hidden = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN;
+						fi.directory = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
+						contentList.push_back(fi);			
+					} 
+					while (FindNextFileW(hFind, &findData));
 
 					FindClose(hFind);
 				}
@@ -118,13 +126,6 @@ namespace Utils
 							fi.readOnly = Utils::FileSystem::isHidden(fullName);
 							fi.directory = isDirectory(fullName);
 							contentList.push_back(fi);
-
-							if (_recursive && fi.directory)
-							{
-								fileList fl = getDirInfo(fullName, true);
-								for (auto it = fl.cbegin(); it != fl.cend(); ++it)
-									contentList.push_back(*it);
-							}
 						}
 					}
 
@@ -151,6 +152,11 @@ namespace Utils
 			if(isDirectory(path))
 			{				
 #if defined(_WIN32)
+				std::unique_lock<std::mutex>* pLock = nullptr;
+
+				if (!_recursive)
+					pLock = new std::unique_lock<std::mutex>(mFileMutex);
+
 				WIN32_FIND_DATAW findData;
 				std::string      wildcard = path + "/*";
 				HANDLE           hFind    = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
@@ -163,23 +169,26 @@ namespace Utils
 						std::string name = convertFromWideString(findData.cFileName);
 
 						// ignore "." and ".."
-						if((name != ".") && (name != ".."))
-						{
-							std::string fullName(getGenericPath(path + "/" + name));
+						if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && name == "." || name == "..")
+							continue;
 
-							if (!includeHidden && (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN)
-								continue;
+						std::string fullName(getGenericPath(path + "/" + name));
+
+						if (!includeHidden && (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN)
+							continue;
 							
-							contentList.push_back(fullName);
+						contentList.push_back(fullName);
 
-							if(_recursive && (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
-								contentList.merge(getDirContent(fullName, true, includeHidden));
-						}
+						if(_recursive && (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+							contentList.merge(getDirContent(fullName, true, includeHidden));
 					}
 					while(FindNextFileW(hFind, &findData));
 
 					FindClose(hFind);
 				}
+
+				if (pLock != nullptr)
+					delete pLock;
 #else // _WIN32
 				DIR* dir = opendir(path.c_str());
 
@@ -246,8 +255,19 @@ namespace Utils
 
 		} // getPathList
 
+		std::string mCustomHomePath = "";
+
+		void setHomePath(std::string path)
+		{
+			mCustomHomePath = path;
+		}
+
 		std::string getHomePath()
 		{
+			if (!mCustomHomePath.empty())
+				return mCustomHomePath;
+
+
 			static std::string path;
 
 			// only construct the homepath once
@@ -260,17 +280,9 @@ namespace Utils
 					path = getExePath();
 					return path;
 				}
-
+				
 				// this should give us something like "/home/YOUR_USERNAME" on Linux and "C:/Users/YOUR_USERNAME/" on Windows
 				char* envHome = getenv("HOME");
-
-				 envHome = "H:/[Emulz]/EmulationStation/";
-
-#ifdef _DEBUG
-				if (Utils::FileSystem::exists("H:/[Emulz]/EmulationStation/emulationstation.exe"))
-				     envHome = "H:/[Emulz]/EmulationStation/";
-#endif
-
 				if (envHome)
 					path = getGenericPath(envHome);
 
@@ -693,13 +705,18 @@ namespace Utils
 		} // createDirectory
 
 		bool exists(const std::string& _path)
-		{
+		{				
+#ifdef WIN32
+			DWORD dwAttr = GetFileAttributes(_path.c_str());
+			if (0xFFFFFFFF == dwAttr)
+				return false;
+#else
 			std::string path = getGenericPath(_path);
 			struct stat64 info;
 			
 			// check if stat64 succeeded
 			return (stat64(path.c_str(), &info) == 0);
-
+#endif
 		} // exists
 
 		size_t getFileSize(const std::string& _path)
@@ -742,6 +759,14 @@ namespace Utils
 
 		bool isDirectory(const std::string& _path)
 		{
+#ifdef WIN32
+			DWORD dwAttr = GetFileAttributes(_path.c_str());
+			if (0xFFFFFFFF == dwAttr)
+				return false;
+
+			return (dwAttr & FILE_ATTRIBUTE_DIRECTORY);				
+#else
+
 			std::string path = getGenericPath(_path);
 			struct stat info;
 
@@ -751,7 +776,7 @@ namespace Utils
 
 			// check for S_IFDIR attribute
 			return (S_ISDIR(info.st_mode));
-
+#endif
 		} // isDirectory
 
 		bool isSymlink(const std::string& _path)

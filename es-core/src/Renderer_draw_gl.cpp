@@ -110,6 +110,8 @@ namespace Renderer {
 		}
 	}
 
+	bool isClippingEnabled() { return !clipStack.empty(); }
+
 	bool valueInRange(int value, int min, int max)
 	{
 		return (value >= min) && (value <= max);
@@ -156,8 +158,62 @@ namespace Renderer {
 		drawRect((int)Math::round(x), (int)Math::round(y), (int)Math::round(w), (int)Math::round(h), color, blend_sfactor, blend_dfactor);
 	}
 
+	#define MAKEQUAD(x) (((x) & 0xff000000) >> 24) / 255.0,  (((x) & 0x00ff0000) >> 16) / 255.0, (((x) & 0x0000ff00) >> 8) / 255.0, (((x) & 0x000000ff)) / 255.0
+
+	void drawGradientRect(int x, int y, int w, int h, unsigned int color, unsigned int colorBottom, bool horz, GLenum blend_sfactor, GLenum blend_dfactor)
+	{
+		glEnable(GL_BLEND);
+		glBlendFunc(blend_sfactor, blend_dfactor);
+		
+		glBegin(GL_QUADS);
+
+		glColor4f(MAKEQUAD(horz ? colorBottom : color));
+		glVertex2f(x, y);
+
+		glColor4f(MAKEQUAD(color));
+		glVertex2f(x + w, y);
+
+		glColor4f(MAKEQUAD(horz ? color : colorBottom));
+		glVertex2f(x + w, y + h);
+
+		glColor4f(MAKEQUAD(colorBottom));
+		glVertex2f(x, y + h);
+
+		glEnd();
+
+		glDisable(GL_BLEND);
+
+		return;
+	}
+
 	void drawRect(int x, int y, int w, int h, unsigned int color, GLenum blend_sfactor, GLenum blend_dfactor)
 	{
+		glEnable(GL_BLEND);
+		glBlendFunc(blend_sfactor, blend_dfactor);
+		glBegin(GL_QUADS);
+
+		GLfloat red = ((color & 0xff000000) >> 24) / 255.0;
+		GLfloat green = ((color & 0x00ff0000) >> 16) / 255.0;
+		GLfloat blue = ((color & 0x0000ff00) >> 8) / 255.0;
+		GLfloat alpha = ((color & 0x000000ff)) / 255.0;
+
+		glColor4f(red, green, blue, alpha);
+		glVertex2f(x, y);
+
+		glColor4f(red, green, blue, alpha);
+		glVertex2f(x+w, y);
+
+		glColor4f(red, green, blue, alpha);
+		glVertex2f(x+w, y+h);
+
+		glColor4f(red, green, blue, alpha);
+		glVertex2f(x, y+h);
+
+		glEnd();
+		glDisable(GL_BLEND);
+
+		return;
+
 #ifdef USE_OPENGL_ES
 		GLshort points[12];
 #else

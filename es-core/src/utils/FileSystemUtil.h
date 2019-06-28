@@ -4,6 +4,7 @@
 
 #include <list>
 #include <string>
+#include <pugixml/src/pugixml.hpp>
 
 namespace Utils
 {
@@ -20,7 +21,7 @@ namespace Utils
 		typedef std::list<std::string> stringList;
 		typedef std::list<FileInfo> fileList;
 
-		fileList  getDirInfo(const std::string& _path, const bool _recursive = false);
+		fileList  getDirInfo(const std::string& _path/*, const bool _recursive = false*/);
 		stringList  getDirContent      (const std::string& _path, const bool _recursive = false, const bool includeHidden = true);
 		stringList  getPathList        (const std::string& _path);
 		std::string getHomePath        ();
@@ -49,6 +50,13 @@ namespace Utils
 		bool        isDirectory        (const std::string& _path);
 		bool        isSymlink          (const std::string& _path);
 		bool        isHidden           (const std::string& _path);
+
+		void		setHomePath		   (std::string path);
+
+
+		pugi::xml_parse_result	load_xml(pugi::xml_document& doc, const char* path);
+
+	
 
 	} // FileSystem::
 

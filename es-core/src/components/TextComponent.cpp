@@ -14,7 +14,7 @@ TextComponent::TextComponent(Window* window) : GuiComponent(window),
 
 TextComponent::TextComponent(Window* window, const std::string& text, const std::shared_ptr<Font>& font, unsigned int color, Alignment align,
 	Vector3f pos, Vector2f size, unsigned int bgcolor) : GuiComponent(window), 
-	mFont(NULL), mUppercase(false), mColor(0x000000FF), mAutoCalcExtent(true, true),
+	mFont(NULL), mUppercase(false), mColor(1), mAutoCalcExtent(true, true),
 	mHorizontalAlignment(align), mVerticalAlignment(ALIGN_CENTER), mLineSpacing(1.5f), mBgColor(0),
 	mRenderBackground(false), mGlowColor(0), mGlowSize(2)
 {
@@ -357,9 +357,6 @@ void TextComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const st
 
 	if(properties & LINE_SPACING && elem->has("lineSpacing"))
 		setLineSpacing(elem->get<float>("lineSpacing"));
-
-	if (properties & COLOR && elem->has("color"))
-		setColor(elem->get<unsigned int>("color"));
 
 	if (properties & COLOR && elem->has("glowColor"))
 		mGlowColor = elem->get<unsigned int>("glowColor");

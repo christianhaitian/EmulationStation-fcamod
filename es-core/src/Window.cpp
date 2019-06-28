@@ -319,6 +319,9 @@ void Window::endRenderLoadingScreen()
 
 void Window::renderLoadingScreen(std::string text, float percent)
 {	
+	if (mSplash == NULL)
+		mSplash = TextureResource::get(":/splash.svg", false, true, true);
+
 	Transform4x4f trans = Transform4x4f::Identity();
 	Renderer::setMatrix(trans);
 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x000000FF);
@@ -334,14 +337,12 @@ void Window::renderLoadingScreen(std::string text, float percent)
 		float y = Renderer::getScreenHeight() - (Renderer::getScreenHeight() * 3 * baseHeight);
 
 		Renderer::drawRect(x, y, w, h, 0x252525FF);
-		Renderer::drawRect(x + 1, y + 1, (w*percent) - 2, h - 2, 0x656565FF); // 0xFFFFFFFF
+		// Renderer::drawGradientRect(x + 1, y + 1, (w*percent) - 2, h - 2, 0x858585FF, 0x555555FF); // 0xFFFFFFFF
+		Renderer::drawGradientRect(x + 1, y + 1, (w*percent) - 2, h - 2, 0x006C9EFF, 0x003E5CFF); // 0xFFFFFFFF
 	}
 	
 	ImageComponent splash(this, true);
 	splash.setResize(Renderer::getScreenWidth() * 0.4f, 0.0f);	
-
-	if (mSplash == NULL)
-		mSplash = TextureResource::get(":/splash.svg", false, false, true);
 
 	if (mSplash != NULL)
 		splash.setImage(mSplash);
@@ -381,7 +382,7 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 
 #if defined(_WIN32)
 	if (mSplash == NULL)
-		mSplash = TextureResource::get(":/splash.svg", false, false, true);
+		mSplash = TextureResource::get(":/splash.svg", false, true, true);
 #endif
 
 	if (mSplash != NULL)
