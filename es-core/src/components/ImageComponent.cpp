@@ -355,7 +355,7 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 
 	Renderer::setMatrix(trans);
 
-	if (mTexture && (mColorShift & 0xff))
+	if (mTexture)
 	{
 		if (Settings::getInstance()->getBool("DebugImage")) 
 		{
@@ -372,80 +372,83 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			// when it finally loads
 			fadeIn(mTexture->bind());
 
-			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			/*
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-			glEnableClientState(GL_COLOR_ARRAY);
-
-			glVertexPointer(2, GL_FLOAT, sizeof(Vertex), &mVertices[0].pos);
-			glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), &mVertices[0].tex);
-			glColorPointer(4, GL_UNSIGNED_BYTE, 0, mColors);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-						
-			glDisableClientState(GL_VERTEX_ARRAY);
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-			glDisableClientState(GL_COLOR_ARRAY);
-			*/
-
-			glBegin(GL_QUADS);
-			
-			GLfloat red = ((mColorShift & 0xff000000) >> 24) / 255.0;
-			GLfloat green = ((mColorShift & 0x00ff0000) >> 16) / 255.0;
-			GLfloat blue = ((mColorShift & 0x0000ff00) >> 8) / 255.0;
-			GLfloat alpha = ((mColorShift & 0x000000ff)) / 255.0;
-			
-			glColor4f(red, green, blue, alpha);
-			glTexCoord2f(mVertices[0].tex.x(), mVertices[0].tex.y());
-			glVertex2f(mVertices[0].pos.x(), mVertices[0].pos.y());
-			
-			glColor4f(red, green, blue, alpha);
-			glTexCoord2f(mVertices[1].tex.x(), mVertices[1].tex.y());
-			glVertex2f(mVertices[1].pos.x(), mVertices[1].pos.y());
-			
-			glColor4f(red, green, blue, alpha);
-			glTexCoord2f(mVertices[2].tex.x(), mVertices[2].tex.y());
-			glVertex2f(mVertices[2].pos.x(), mVertices[2].pos.y());
-			
-			glColor4f(red, green, blue, alpha);
-			glTexCoord2f(mVertices[3].tex.x(), mVertices[3].tex.y());
-			glVertex2f(mVertices[3].pos.x(), mVertices[3].pos.y());
-
-			glEnd();
-
-			if (mMirror.x() != 0 || mMirror.y() != 0)
+			if (mColorShift & 0xff)
 			{
+				glEnable(GL_TEXTURE_2D);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+				/*
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+				glEnableClientState(GL_COLOR_ARRAY);
+
+				glVertexPointer(2, GL_FLOAT, sizeof(Vertex), &mVertices[0].pos);
+				glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), &mVertices[0].tex);
+				glColorPointer(4, GL_UNSIGNED_BYTE, 0, mColors);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+
+				glDisableClientState(GL_VERTEX_ARRAY);
+				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+				glDisableClientState(GL_COLOR_ARRAY);
+				*/
+
 				glBegin(GL_QUADS);
 
-				int h = mVertices[1].pos.y() - mVertices[0].pos.y();
-
-				GLfloat alpha2 = alpha * mMirror.y();
-				alpha *= mMirror.x();
-
-				glColor4f(red, green, blue, alpha);
-				glTexCoord2f(mVertices[0].tex.x(), mVertices[1].tex.y());
-				glVertex2f(mVertices[0].pos.x(), mVertices[0].pos.y() + h);
-
-				glColor4f(red, green, blue, alpha2);
-				glTexCoord2f(mVertices[1].tex.x(), mVertices[0].tex.y());
-				glVertex2f(mVertices[1].pos.x(), mVertices[1].pos.y() + h);
-
-				glColor4f(red, green, blue, alpha2);
-				glTexCoord2f(mVertices[2].tex.x(), mVertices[3].tex.y());
-				glVertex2f(mVertices[2].pos.x(), mVertices[2].pos.y() + h);
+				GLfloat red = ((mColorShift & 0xff000000) >> 24) / 255.0;
+				GLfloat green = ((mColorShift & 0x00ff0000) >> 16) / 255.0;
+				GLfloat blue = ((mColorShift & 0x0000ff00) >> 8) / 255.0;
+				GLfloat alpha = ((mColorShift & 0x000000ff)) / 255.0;
 
 				glColor4f(red, green, blue, alpha);
-				glTexCoord2f(mVertices[3].tex.x(), mVertices[2].tex.y());
-				glVertex2f(mVertices[3].pos.x(), mVertices[3].pos.y() + h);
+				glTexCoord2f(mVertices[0].tex.x(), mVertices[0].tex.y());
+				glVertex2f(mVertices[0].pos.x(), mVertices[0].pos.y());
+
+				glColor4f(red, green, blue, alpha);
+				glTexCoord2f(mVertices[1].tex.x(), mVertices[1].tex.y());
+				glVertex2f(mVertices[1].pos.x(), mVertices[1].pos.y());
+
+				glColor4f(red, green, blue, alpha);
+				glTexCoord2f(mVertices[2].tex.x(), mVertices[2].tex.y());
+				glVertex2f(mVertices[2].pos.x(), mVertices[2].pos.y());
+
+				glColor4f(red, green, blue, alpha);
+				glTexCoord2f(mVertices[3].tex.x(), mVertices[3].tex.y());
+				glVertex2f(mVertices[3].pos.x(), mVertices[3].pos.y());
 
 				glEnd();
-			}
 
-			glDisable(GL_TEXTURE_2D);
-			glDisable(GL_BLEND);
+				if (mMirror.x() != 0 || mMirror.y() != 0)
+				{
+					glBegin(GL_QUADS);
+
+					int h = mVertices[1].pos.y() - mVertices[0].pos.y();
+
+					GLfloat alpha2 = alpha * mMirror.y();
+					alpha *= mMirror.x();
+
+					glColor4f(red, green, blue, alpha);
+					glTexCoord2f(mVertices[0].tex.x(), mVertices[1].tex.y());
+					glVertex2f(mVertices[0].pos.x(), mVertices[0].pos.y() + h);
+
+					glColor4f(red, green, blue, alpha2);
+					glTexCoord2f(mVertices[1].tex.x(), mVertices[0].tex.y());
+					glVertex2f(mVertices[1].pos.x(), mVertices[1].pos.y() + h);
+
+					glColor4f(red, green, blue, alpha2);
+					glTexCoord2f(mVertices[2].tex.x(), mVertices[3].tex.y());
+					glVertex2f(mVertices[2].pos.x(), mVertices[2].pos.y() + h);
+
+					glColor4f(red, green, blue, alpha);
+					glTexCoord2f(mVertices[3].tex.x(), mVertices[2].tex.y());
+					glVertex2f(mVertices[3].pos.x(), mVertices[3].pos.y() + h);
+
+					glEnd();
+				}
+
+				glDisable(GL_TEXTURE_2D);
+				glDisable(GL_BLEND);
+			}
 		}
 		else
 		{

@@ -309,6 +309,10 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 	std::string customThemeName;
 	Vector2f gridSizeOverride = Vector2f::parseString(Settings::getInstance()->getString("DefaultGridSize"));
 		
+	
+	if (viewPreference != "automatic" && !system->getSystemViewMode().empty() && system->getTheme()->hasView(system->getSystemViewMode()) && system->getSystemViewMode() != viewPreference)
+		gridSizeOverride = Vector2f(0, 0);
+
 	Vector2f bySystemGridOverride = system->getGridSizeOverride(); //Vector2f(0,0);
 	if (bySystemGridOverride != Vector2f(0, 0))
 		gridSizeOverride = bySystemGridOverride;

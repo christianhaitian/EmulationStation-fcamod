@@ -114,10 +114,7 @@ void Window::deinit(bool deinitRenderer)
 	ResourceManager::getInstance()->unloadAll();
 
 	if (deinitRenderer)
-	{
-	//	ResourceManager::getInstance()->unloadAll();
 		Renderer::deinit();
-	}
 }
 
 void Window::textInput(const char* text)
