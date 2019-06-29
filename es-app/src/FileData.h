@@ -146,6 +146,8 @@ public:
 	void addChild(FileData* file); // Error if mType != FOLDER
 	void removeChild(FileData* file); //Error if mType != FOLDER
 
+	void createChildrenByFilenameMap(std::unordered_map<std::string, FileData*>& map);
+
 private:
 	std::vector<FileData*> mChildren;
 };

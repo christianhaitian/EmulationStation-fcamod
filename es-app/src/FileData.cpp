@@ -520,3 +520,16 @@ FileData* FolderData::FindByPath(const std::string& path)
 
 	return nullptr;
 }
+
+void FolderData::createChildrenByFilenameMap(std::unordered_map<std::string, FileData*>& map)
+{
+	std::vector<FileData*> children = getChildren();
+
+	for (std::vector<FileData*>::const_iterator it = children.cbegin(); it != children.cend(); ++it)
+	{
+		if ((*it)->getType() == FOLDER)
+			((FolderData*)(*it))->createChildrenByFilenameMap(map);			
+		else 
+			map[(*it)->getKey()] = (*it);
+	}	
+}

@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 class FileData;
 class FolderData;
@@ -93,7 +94,7 @@ private:
 	SystemData* getAllGamesCollection();
 	SystemData* createNewCollectionEntry(std::string name, CollectionSystemDecl sysDecl, bool index = true);
 	void populateAutoCollection(CollectionSystemData* sysData);
-	void populateCustomCollection(CollectionSystemData* sysData);
+	void populateCustomCollection(CollectionSystemData* sysData, std::unordered_map<std::string, FileData*>* pMap = nullptr);
 
 	void removeCollectionsFromDisplayedSystems();
 	void addEnabledCollectionsToDisplayedSystems(std::map<std::string, CollectionSystemData>* colSystemData);

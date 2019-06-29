@@ -103,8 +103,8 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			}
 			else
 			{
-				// it's a folder
-				if(folder->getChildren().size() > 0)
+				// it's a folder ? ( or PLACEHOLDER... )
+				if(folder != nullptr && folder->getChildren().size() > 0)
 				{
 					mCursorStack.push(cursor);
 					populateList(folder->getChildrenListToDisplay());

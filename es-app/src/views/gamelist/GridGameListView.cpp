@@ -153,7 +153,7 @@ FileData* GridGameListView::getCursor()
 
 void GridGameListView::setCursor(FileData* file)
 {
-	if(!mGrid.setCursor(file))
+	if(!mGrid.setCursor(file) && file->getParent() != nullptr)
 	{
 		populateList(file->getParent()->getChildrenListToDisplay());
 		mGrid.setCursor(file);

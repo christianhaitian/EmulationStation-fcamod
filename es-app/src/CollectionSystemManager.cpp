@@ -438,9 +438,8 @@ void CollectionSystemManager::setEditMode(std::string collectionName)
 
 	CollectionSystemData* sysData = &(mCustomCollectionSystemsData.at(mEditingCollection));
 	if (!sysData->isPopulated)
-	{
 		populateCustomCollection(sysData);
-	}
+
 	// if it's bundled, this needs to be the bundle system
 	mEditingCollectionSystemData = sysData;
 
@@ -477,9 +476,8 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 			SystemData* sysData = mEditingCollectionSystemData->system;
 			mEditingCollectionSystemData->needsSave = true;
 			if (!mEditingCollectionSystemData->isPopulated)
-			{
 				populateCustomCollection(mEditingCollectionSystemData);
-			}
+
 			std::string key = file->getFullPath();
 			FolderData* rootFolder = sysData->getRootFolder();
 
@@ -758,7 +756,7 @@ void CollectionSystemManager::populateAutoCollection(CollectionSystemData* sysDa
 }
 
 // populates a Custom Collection System
-void CollectionSystemManager::populateCustomCollection(CollectionSystemData* sysData)
+void CollectionSystemManager::populateCustomCollection(CollectionSystemData* sysData, std::unordered_map<std::string, FileData*>* pMap)
 {
 	SystemData* newSys = sysData->system;
 	sysData->isPopulated = true;
@@ -779,13 +777,21 @@ void CollectionSystemManager::populateCustomCollection(CollectionSystemData* sys
 
 	FolderData* folder = getAllGamesCollection()->getRootFolder();
 
+	std::unordered_map<std::string, FileData*> map;
+
+	if (pMap == nullptr)
+	{		
+		folder->createChildrenByFilenameMap(map);
+		pMap = &map;
+	}
+
 	// iterate list of files in config file
 	for(std::string gameKey; getline(input, gameKey); )
 	{
-		FileData* file = folder->FindByPath(gameKey);
-		if (file != nullptr) 
+		std::unordered_map<std::string, FileData*>::const_iterator it = pMap->find(gameKey);
+		if (it != pMap->cend())
 		{
-			CollectionFileData* newGame = new CollectionFileData(file, newSys);
+			CollectionFileData* newGame = new CollectionFileData(it->second, newSys);
 			rootFolder->addChild(newGame);
 			newSys->addToIndex(newGame);
 		}
@@ -830,6 +836,9 @@ void CollectionSystemManager::removeCollectionsFromDisplayedSystems()
 
 void CollectionSystemManager::addEnabledCollectionsToDisplayedSystems(std::map<std::string, CollectionSystemData>* colSystemData)
 {
+	std::unordered_map<std::string, FileData*> map;
+	getAllGamesCollection()->getRootFolder()->createChildrenByFilenameMap(map);
+
 	// add auto enabled ones
 	for(std::map<std::string, CollectionSystemData>::iterator it = colSystemData->begin() ; it != colSystemData->end() ; it++ )
 	{
@@ -840,7 +849,7 @@ void CollectionSystemManager::addEnabledCollectionsToDisplayedSystems(std::map<s
 			{
 				if(it->second.decl.isCustom)
 				{
-					populateCustomCollection(&(it->second));
+					populateCustomCollection(&(it->second), &map);
 				}
 				else
 				{
