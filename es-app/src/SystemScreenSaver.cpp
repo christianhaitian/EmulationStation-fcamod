@@ -464,12 +464,13 @@ void SystemScreenSaver::launchGame()
 	if (mCurrentGame != NULL)
 	{
 		// launching Game
-		ViewController::get()->goToGameList(mCurrentGame->getSystem());
 		IGameListView* view = ViewController::get()->getGameListView(mCurrentGame->getSystem()).get();
 		view->setCursor(mCurrentGame);
+
 		if (Settings::getInstance()->getBool("ScreenSaverControls"))
-		{
 			view->launch(mCurrentGame);
-		}
+		else 
+			ViewController::get()->goToGameList(mCurrentGame->getSystem());
+
 	}
 }

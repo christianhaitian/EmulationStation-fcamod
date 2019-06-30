@@ -2,6 +2,7 @@
 
 #include "resources/TextureResource.h"
 #include "utils/StringUtil.h"
+#include "utils/FileSystemUtil.h"
 #include "PowerSaver.h"
 #include "Renderer.h"
 #include "Settings.h"
@@ -43,7 +44,8 @@ static void display(void* data, void* id)
 
 VideoVlcComponent::VideoVlcComponent(Window* window, std::string subtitles) :
 	VideoComponent(window),
-	mMediaPlayer(nullptr)
+	mMediaPlayer(nullptr), 
+	mSubtitlePath(subtitles)
 {
 	memset(&mContext, 0, sizeof(mContext));
 
@@ -260,20 +262,20 @@ void VideoVlcComponent::setupVLC(std::string subtitles)
 	if (!mVLC)
 	{
 		const char** args;
-		const char* newargs[] = { "--quiet", "--sub-file", subtitles.c_str() };
+	//	const char* newargs[] = { "--quiet", "--sub-file", subtitles.c_str() };
 		const char* singleargs[] = { "--quiet" };
 		int argslen = 0;
-
+		/*
 		if (!subtitles.empty())
 		{
 			argslen = sizeof(newargs) / sizeof(newargs[0]);
 			args = newargs;
 		}
 		else
-		{
+		{*/
 			argslen = sizeof(singleargs) / sizeof(singleargs[0]);
 			args = singleargs;
-		}
+	//	}
 		mVLC = libvlc_new(argslen, args);
 	}
 }
@@ -313,6 +315,15 @@ void VideoVlcComponent::startVideo()
 			// Set the video that we are going to be playing so we don't attempt to restart it
 			mPlayingVideoPath = mVideoPath;
 
+			
+			if (!mSubtitlePath.empty())
+			{
+				auto ext = Utils::FileSystem::getExtension(path);
+				auto srt = Utils::String::replace(path, ext, ".srt");
+				Utils::FileSystem::copyFile(mSubtitlePath, srt);
+				mSubtitleTmpFile = srt;
+			}
+			
 			// Open the media
 			mMedia = libvlc_media_new_path(mVLC, path.c_str());
 			if (mMedia)
@@ -365,6 +376,8 @@ void VideoVlcComponent::startVideo()
 						libvlc_audio_set_mute(mMediaPlayer, 1);
 					}
 
+					auto cnt = libvlc_video_get_spu_count(mMediaPlayer);
+				
 					libvlc_media_player_play(mMediaPlayer);					
 					libvlc_video_set_callbacks(mMediaPlayer, lock, unlock, display, (void*)&mContext);
 					libvlc_video_set_format(mMediaPlayer, "RGBA", (int)mVideoWidth, (int)mVideoHeight, (int)mVideoWidth * 4);
@@ -380,6 +393,12 @@ void VideoVlcComponent::startVideo()
 
 void VideoVlcComponent::stopVideo()
 {
+	if (!mSubtitleTmpFile.empty())
+	{		
+		Utils::FileSystem::removeFile(mSubtitleTmpFile);
+		mSubtitlePath = "";
+	}
+
 	mIsPlaying = false;
 	mStartDelayed = false;
 	// Release the media player so it stops calling back to us

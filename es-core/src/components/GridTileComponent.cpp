@@ -78,7 +78,7 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 		mVideo = new VideoPlayerComponent(window, "");
 	else
 #endif
-		mVideo = new VideoVlcComponent(window, getTitlePath());
+		mVideo = new VideoVlcComponent(window, "");
 
 	// video
 	mVideo->setOrigin(0.5f, 0.5f);

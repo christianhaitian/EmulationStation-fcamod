@@ -33,9 +33,9 @@ VideoGameListView::VideoGameListView(Window* window, FolderData* root) :
 	if (Settings::getInstance()->getBool("VideoOmxPlayer"))
 		mVideo = new VideoPlayerComponent(window, "");
 	else
-		mVideo = new VideoVlcComponent(window, getTitlePath());
+		mVideo = new VideoVlcComponent(window, "");
 #else
-	mVideo = new VideoVlcComponent(window, getTitlePath());
+	mVideo = new VideoVlcComponent(window, "");
 #endif
 
 	mList.setPosition(mSize.x() * (0.50f + padding), mList.getPosition().y());

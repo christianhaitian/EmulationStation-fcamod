@@ -334,8 +334,7 @@ void Window::renderLoadingScreen(std::string text, float percent)
 		float y = Renderer::getScreenHeight() - (Renderer::getScreenHeight() * 3 * baseHeight);
 
 		Renderer::drawRect(x, y, w, h, 0x252525FF);
-		// Renderer::drawGradientRect(x + 1, y + 1, (w*percent) - 2, h - 2, 0x858585FF, 0x555555FF); // 0xFFFFFFFF
-		Renderer::drawGradientRect(x + 1, y + 1, (w*percent) - 2, h - 2, 0x006C9EFF, 0x003E5CFF); // 0xFFFFFFFF
+		Renderer::drawGradientRect(x, y, (w*percent), h, 0x006C9EFF, 0x003E5CFF); // 0xFFFFFFFF
 	}
 	
 	ImageComponent splash(this, true);

@@ -680,6 +680,34 @@ namespace Utils
 
 		} // removeFile
 
+		bool copyFile(const std::string& src, const std::string& dst)
+		{
+			std::string path = getGenericPath(src);
+			std::string pathD = getGenericPath(dst);
+
+			// don't remove if it doesn't exists
+			if (!exists(path))
+				return true;
+
+			char buf[BUFSIZ];
+			size_t size;
+
+			FILE* source = fopen(path.c_str(), "rb");
+			FILE* dest = fopen(pathD.c_str(), "wb");
+
+			// clean and more secure
+			// feof(FILE* stream) returns non-zero if the end of file indicator for stream is set
+
+			while (size = fread(buf, 1, BUFSIZ, source)) {
+				fwrite(buf, 1, size, dest);
+			}
+
+			fclose(source);
+			fclose(dest);
+
+			return true;
+		} // removeFile
+
 		bool createDirectory(const std::string& _path)
 		{
 			std::string path = getGenericPath(_path);
