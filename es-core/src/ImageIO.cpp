@@ -130,7 +130,7 @@ Vector2f ImageIO::adjustExternPictureSizef(Vector2f imageSize, Vector2f maxSize)
 	return Vector2f(cxDIB, cyDIB);
 }
 
-unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height, int maxWidth, int maxHeight, Vector2i& baseSize, Vector2i& packedSize)
+unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const size_t size, size_t & width, size_t & height, int maxWidth, int maxHeight, bool externZoom, Vector2i& baseSize, Vector2i& packedSize)
 {
 	baseSize = Vector2i(0, 0);
 	packedSize = Vector2i(0, 0);
@@ -171,9 +171,15 @@ unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const
 					if (maxWidth > 0 && maxHeight > 0 && (width > maxWidth || height > maxHeight))
 					{
 						Vector2i sz = adjustPictureSize(Vector2i(width, height), Vector2i(maxWidth, maxHeight));
+						if (externZoom)
+						{
+							Vector2f szf = adjustExternPictureSizef(Vector2f(width, height), Vector2f(maxWidth, maxHeight));
+							sz = Vector2i(szf.x(), szf.y()); // adjustPictureSize(Vector2i(width, height), Vector2i(maxWidth, maxHeight));
+						}
+
 						if (sz.x() != width || sz.y() != height)
 						{							
-							FIBITMAP* imageRescaled = FreeImage_Rescale(fiBitmap, sz.x(), sz.y(), FILTER_BOX);
+							FIBITMAP* imageRescaled = FreeImage_Rescale(fiBitmap, sz.x(), sz.y(), FILTER_BICUBIC);
 							FreeImage_Unload(fiBitmap);
 							fiBitmap = imageRescaled;
 

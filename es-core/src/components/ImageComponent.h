@@ -5,9 +5,10 @@
 #include "math/Vector2i.h"
 #include "GuiComponent.h"
 #include "platform.h"
+#include "resources/TextureResource.h"
 #include GLHEADER
 
-class TextureResource;
+//class TextureResource;
 
 class ImageComponent : public GuiComponent
 {
@@ -18,7 +19,7 @@ public:
 	void setDefaultImage(std::string path);
 
 	//Loads the image at the given filepath. Will tile if tile is true (retrieves texture as tiling, creates vertices accordingly).
-	void setImage(std::string path, bool tile = false, Vector2f maxSize = Vector2f(0  ,0));
+	void setImage(std::string path, bool tile = false, MaxSizeInfo maxSize = MaxSizeInfo());
 	//Loads an image from memory.
 	void setImage(const char* image, size_t length, bool tile = false);
 	//Use an already existing texture.

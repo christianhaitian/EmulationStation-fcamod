@@ -325,7 +325,8 @@ void DetailedGameListView::updateInfoPanel()
 
 			mVideo->setImage(imagePath, false, mVideo->getSize());
 		}
-
+	
+		//mSelectedProperties.mImageSizeMode == "minSize"));
 		if (mImage != nullptr)
 			mImage->setImage(imagePath, false, mImage->getSize());
 
