@@ -190,7 +190,7 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 				if (childGame != NULL)
 				{					
 					FileData* newGame = new FileData(GAME, childGame->getPath(), this);
-					folder->addChild(newGame);
+					mRootFolder->addChild(newGame);
 					fileMap[fileInfo.path] = newGame;
 					delete newFolder;
 				}
