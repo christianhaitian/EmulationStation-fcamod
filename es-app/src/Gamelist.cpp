@@ -22,6 +22,10 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 		return NULL;
 	}
 
+	auto pGame = fileMap.find(path);
+	if (pGame != fileMap.end())
+		return pGame->second;
+
 	Utils::FileSystem::stringList pathList = Utils::FileSystem::getPathList(relative);
 	auto path_it = pathList.begin();
 	FolderData* treeNode = root;
