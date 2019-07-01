@@ -295,7 +295,7 @@ std::string DetailedGameListView::getMetadata(FileData* file, std::string name)
 {
 	std::string ret = file->metadata.get(name);
 	if (ret == "unknown")
-		return _L(ret);
+		return _T(ret);
 
 	return ret;
 }

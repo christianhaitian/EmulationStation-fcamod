@@ -251,7 +251,7 @@ bool loadSystemConfigFile(Window* window, const char** errorString)
 {
 	*errorString = NULL;
 	
-	if(!SystemData::loadConfig(window))
+	if (!SystemData::loadConfig(window))
 	{
 		LOG(LogError) << "Error while parsing systems configuration file!";
 

@@ -141,94 +141,60 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 {
 	VideoComponent::render(parentTrans);
 
-	float x, y;
+	if (!mIsPlaying || !mContext.valid)
+		return;
 
+	float t = mFadeIn;
+	if (mFadeIn < 1.0)
+	{
+		t = 1.0 - mFadeIn;
+		t -= 1; // cubic ease in
+		t = Math::lerp(0, 1, t*t*t + 1);
+		t = 1.0 - t;
+	}
+
+	if (t == 0.0)
+		return;
+	
 	Transform4x4f trans = parentTrans * getTransform();
-
 	Renderer::setMatrix(trans);
 
-	if (mIsPlaying && mContext.valid)
-	{
-		float tex_offs_x = 0.0f;
-		float tex_offs_y = 0.0f;
-		float x2;
-		float y2;
+	// <font color = "#ff0000">red text< / font>
+	//<font size = "16px" color = "white">phrase< / font>
 
-		x = 0.0;
-		y = 0.0;
-		x2 = mSize.x();
-		y2 = mSize.y();
+	float x2 = mSize.x();
+	float y2 = mSize.y();
 
-		// Define a structure to contain the data for each vertex
-		struct Vertex
-		{
-			Vector2f pos;
-			Vector2f tex;
-			Vector4f colour;
-		} vertices[6];
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		// We need two triangles to cover the rectangular area
-		vertices[0].pos[0] = x; 			vertices[0].pos[1] = y;
-		vertices[1].pos[0] = x; 			vertices[1].pos[1] = y2;
-		vertices[2].pos[0] = x2;			vertices[2].pos[1] = y;
+	// Build a texture for the video frame
+	mTexture->initFromPixels((unsigned char*)mContext.surface->pixels, mContext.surface->w, mContext.surface->h);
+	mTexture->bind();
 
-		vertices[3].pos[0] = x2;			vertices[3].pos[1] = y;
-		vertices[4].pos[0] = x; 			vertices[4].pos[1] = y2;
-		vertices[5].pos[0] = x2;			vertices[5].pos[1] = y2;
+	glBegin(GL_QUADS);
 
-		// Texture coordinates
-		vertices[0].tex[0] = -tex_offs_x; 			vertices[0].tex[1] = -tex_offs_y;
-		vertices[1].tex[0] = -tex_offs_x; 			vertices[1].tex[1] = 1.0f + tex_offs_y;
-		vertices[2].tex[0] = 1.0f + tex_offs_x;		vertices[2].tex[1] = -tex_offs_y;
+	glColor4f(1.0f, 1.0f, 1.0f, t);
+	glTexCoord2f(0, 0);
+	glVertex2f(0, 0);
 
-		vertices[3].tex[0] = 1.0f + tex_offs_x;		vertices[3].tex[1] = -tex_offs_y;
-		vertices[4].tex[0] = -tex_offs_x;			vertices[4].tex[1] = 1.0f + tex_offs_y;
-		vertices[5].tex[0] = 1.0f + tex_offs_x;		vertices[5].tex[1] = 1.0f + tex_offs_y;
-		
-		float t = mFadeIn;
-		if (mFadeIn < 1.0)
-		{
-			t = 1.0 - mFadeIn;
-			t -= 1; // cubic ease in
-			t = Math::lerp(0, 1, t*t*t + 1);
-			t = 1.0 - t;
-		}
+	glColor4f(1.0f, 1.0f, 1.0f, t);
+	glTexCoord2f(0, 1.0f);
+	glVertex2f(0, y2);
 
-		// Colours - use this to fade the video in and out
-		for (int i = 0; i < (4 * 6); ++i) 
-		{
-			if ((i%4) == 3)
-				vertices[i / 4].colour[i % 4] = t;
-			else
-				vertices[i / 4].colour[i % 4] = 1.0f;
-		}
-		
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(1.0f, 1.0f, 1.0f, t);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex2f(x2, y2);
 
-		// Build a texture for the video frame
-		mTexture->initFromPixels((unsigned char*)mContext.surface->pixels, mContext.surface->w, mContext.surface->h);
-		mTexture->bind();
+	glColor4f(1.0f, 1.0f, 1.0f, t);
+	glTexCoord2f(1.0f, 0);
+	glVertex2f(x2, 0);
 
-		// Render it
-		glEnableClientState(GL_COLOR_ARRAY);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnd();
 
-		glColorPointer(4, GL_FLOAT, sizeof(Vertex), &vertices[0].colour);
-		glVertexPointer(2, GL_FLOAT, sizeof(Vertex), &vertices[0].pos);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), &vertices[0].tex);
-
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
-
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_BLEND);
-	}	
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);	
 }
 
 void VideoVlcComponent::setupContext()

@@ -411,10 +411,6 @@ bool SystemData::loadConfig(Window* window)
 
 	int currentSystem = 0;
 
-#ifdef WIN32
-	unsigned int Ticks = GetTickCount();
-#endif
-
 	typedef SystemData* SystemDataPtr;
 
 	ThreadPool* pThreadPool = NULL;
@@ -465,18 +461,11 @@ bool SystemData::loadConfig(Window* window)
 	{
 		if (window != NULL)
 		{
-			int cnt = 0;
-
-			pThreadPool->wait([window, &processedSystem, systemCount, systemsNames, &cnt]
+			pThreadPool->wait([window, &processedSystem, systemCount, &systemsNames]
 			{
-				int px = processedSystem;
-				if (px == cnt)
-					return;
-
-				cnt = px;
-
-				auto name = px < 0 || px > systemsNames.size() ? "" : systemsNames.at(px);
-				window->renderLoadingScreen(name, (float)px / (float)(systemCount + 1));
+				int px = processedSystem - 1;
+				if (px >= 0 && px < systemsNames.size())
+					window->renderLoadingScreen(systemsNames.at(px), (float)px / (float)(systemCount + 1));
 			}, 10);
 		}
 		else
@@ -488,7 +477,7 @@ bool SystemData::loadConfig(Window* window)
 			if (pSystem != nullptr)
 				sSystemVector.push_back(pSystem);
 		}
-
+		
 		delete[] systems;
 		delete pThreadPool;
 
@@ -504,11 +493,6 @@ bool SystemData::loadConfig(Window* window)
 
 		CollectionSystemManager::get()->loadCollectionSystems();
 	}
-
-#ifdef WIN32
-	Ticks = GetTickCount() - Ticks;
-//	::MessageBox(0, std::to_string(Ticks).c_str(), NULL, NULL);
-#endif
 
 	return true;
 }

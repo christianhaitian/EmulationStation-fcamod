@@ -30,13 +30,15 @@ void writeSubtitle(const char* gameName, const char* systemName, bool always)
 	{
 		fprintf(file, "1\n00:00:01,000 --> 00:00:08,000\n");
 	}
+
 	fprintf(file, "%s\n", gameName);
-	fprintf(file, "<i>%s</i>\n\n", systemName);
+	fprintf(file, "<i><font color=\"#c0c0c0\">%s</font></i>\n\n", systemName);
+	//fprintf(file, "<i>%s</i>\n\n", systemName);
 
 	if (!always) {
 		if (end > 12)
 		{
-			fprintf(file, "2\n00:00:%d,000 --> 00:00:%d,000\n%s\n<i>%s</i>\n", end-4, end, gameName, systemName);
+			fprintf(file, "2\n00:00:%d,000 --> 00:00:%d,000\n%s\n<i><font color=\"#c0c0c0\">%s</font></i>\n", end-4, end, gameName, systemName);
 		}
 	}
 

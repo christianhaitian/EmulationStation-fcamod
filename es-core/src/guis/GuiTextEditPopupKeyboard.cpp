@@ -74,7 +74,7 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 	{		
 		std::vector<std::vector<UNICODE_CHARTYPE>> &layout = kbUs;
 
-		if (GuiTextTool::getLanguage() == "fr")
+		if (EsLocale::getLanguage() == "fr")
 			layout = kbFrench;
 
 		for (unsigned int i = 0; i < layout.size() / 2; i++)
@@ -84,10 +84,10 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 			{				
 #ifdef WIN32
 				std::wstring toConvert = layout[2 * i][j];
-				std::string atj = GuiTextTool::convertFromWideString(toConvert);
+				std::string atj = Utils::String::convertFromWideString(toConvert);
 
 				toConvert = layout[2 * i + 1][j];
-				std::string atjs = GuiTextTool::convertFromWideString(toConvert);
+				std::string atjs = Utils::String::convertFromWideString(toConvert);
 #else
 				std::string atj = layout[2 * i][j];
 				std::string atjs = layout[2 * i + 1][j];
@@ -114,7 +114,7 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 	mGrid.setEntry(mKeyboardGrid, Vector2i(0, 2), true, false);
 
 	// Accept/Cancel buttons
-	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _L(acceptBtnText), _L(acceptBtnText), [this, okCallback] { okCallback(mText->getValue()); delete this; }));
+	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _T(acceptBtnText), _T(acceptBtnText), [this, okCallback] { okCallback(mText->getValue()); delete this; }));
 
 	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _T("SPACE"), _T("SPACE"), [this] {
 		mText->startEditing();

@@ -66,7 +66,7 @@ void SystemView::populate()
 		{
 			// no logo in theme; use text
 			TextComponent* text = new TextComponent(mWindow,
-				(*it)->getName(),
+				(*it)->getFullName(),
 				Font::get(FONT_SIZE_LARGE),
 				0x000000FF,
 				ALIGN_CENTER);

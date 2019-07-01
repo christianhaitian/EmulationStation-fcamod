@@ -151,7 +151,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 			continue;
 		}
 		
-		auto lbl = std::make_shared<TextComponent>(mWindow, _L(Utils::String::toUpper(iter->displayName)), theme->Text.font, theme->Text.color);
+		auto lbl = std::make_shared<TextComponent>(mWindow, _T(Utils::String::toUpper(iter->displayName)), theme->Text.font, theme->Text.color);
 		row.addElement(lbl, true); // label
 
 		switch (iter->type)

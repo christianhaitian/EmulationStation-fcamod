@@ -129,7 +129,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++)
 		{
 			const FolderData::SortType& sort = FileSorts::SortTypes.at(i);
-			mListSort->add(_L(Utils::String::toUpper(sort.description)), &sort, i == 0); // TODO - actually make the sort type persistent
+			mListSort->add(_T(Utils::String::toUpper(sort.description)), &sort, i == 0); // TODO - actually make the sort type persistent
 		}
 
 		mMenu.addWithLabel(_T("SORT GAMES BY"), mListSort);
@@ -153,7 +153,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		if (sel)
 			found = true;
 
-		mViewMode->add(_L(*it), *it, sel);
+		mViewMode->add(_T(*it), *it, sel);
 	}
 
 	if (!found)
@@ -178,7 +178,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 			if (sel)
 				found = true;
 
-			mGridSize->add(_L(*it), *it, sel);
+			mGridSize->add(_T(*it), *it, sel);
 		}
 
 		if (!found)

@@ -492,7 +492,7 @@ void GuiMenu::openUISettings()
 			viewPreference = "automatic";
 
 		for (auto it = styles.cbegin(); it != styles.cend(); it++)
-			gamelist_style->add(_L(*it), *it, viewPreference == *it);
+			gamelist_style->add(_T(*it), *it, viewPreference == *it);
 
 		s->addWithLabel(_T("GAMELIST VIEW STYLE"), gamelist_style);
 		s->addSaveFunc([gamelist_style, viewPreference] {
@@ -520,7 +520,7 @@ void GuiMenu::openUISettings()
 			if (sel)
 				found = true;
 
-			mGridSize->add(_L(*it), *it, sel);
+			mGridSize->add(_T(*it), *it, sel);
 		}
 
 		if (!found)
@@ -555,7 +555,7 @@ void GuiMenu::openUISettings()
 	auto UImodeSelection = std::make_shared< OptionListComponent<std::string> >(mWindow, _T("UI MODE"), false);
 	std::vector<std::string> UImodes = UIModeController::getInstance()->getUIModes();
 	for (auto it = UImodes.cbegin(); it != UImodes.cend(); it++)
-		UImodeSelection->add(_L(*it), *it, Settings::getInstance()->getString("UIMode") == *it);
+		UImodeSelection->add(_T(*it), *it, Settings::getInstance()->getString("UIMode") == *it);
 	s->addWithLabel(_T("UI MODE"), UImodeSelection);
 	Window* window = mWindow;
 	s->addSaveFunc([UImodeSelection, window]
@@ -627,7 +627,7 @@ void GuiMenu::openUISettings()
 	transitions.push_back("slide");
 	transitions.push_back("instant");
 	for (auto it = transitions.cbegin(); it != transitions.cend(); it++)
-		transition_style->add(_L(*it), *it, Settings::getInstance()->getString("TransitionStyle") == *it);
+		transition_style->add(_T(*it), *it, Settings::getInstance()->getString("TransitionStyle") == *it);
 
 	s->addWithLabel(_T("TRANSITION STYLE"), transition_style);
 	s->addSaveFunc([transition_style] {
@@ -649,7 +649,7 @@ void GuiMenu::openUISettings()
 	gameTransitions.push_back("slide");
 	gameTransitions.push_back("instant");
 	for (auto it = gameTransitions.cbegin(); it != gameTransitions.cend(); it++)
-		transitionOfGames_style->add(_L(*it), *it, Settings::getInstance()->getString("GameTransitionStyle") == *it);
+		transitionOfGames_style->add(_T(*it), *it, Settings::getInstance()->getString("GameTransitionStyle") == *it);
 
 	s->addWithLabel(_T("GAME LAUNCH TRANSITION"), transitionOfGames_style);
 	s->addSaveFunc([transitionOfGames_style] {
