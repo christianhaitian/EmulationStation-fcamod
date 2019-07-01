@@ -233,51 +233,42 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 
 void VideoVlcComponent::setupContext()
 {
-	if (!mContext.valid)
-	{
-		// Create an RGBA surface to render the video into
-		mContext.surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (int)mVideoWidth, (int)mVideoHeight, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
-		mContext.mutex = SDL_CreateMutex();
-		mContext.component = this;
-		mContext.valid = true;
-		resize();
-	}
+	if (mContext.valid)
+		return;
+
+	// Create an RGBA surface to render the video into
+	mContext.surface = SDL_CreateRGBSurface(SDL_SWSURFACE, (int)mVideoWidth, (int)mVideoHeight, 32, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
+	mContext.mutex = SDL_CreateMutex();
+	mContext.component = this;
+	mContext.valid = true;
+	resize();
 }
 
 void VideoVlcComponent::freeContext()
 {
-	if (mContext.valid)
-	{
-		SDL_FreeSurface(mContext.surface);
-		SDL_DestroyMutex(mContext.mutex);
-		
-		mContext.component = NULL;
-		mContext.valid = false;
-	}
+	if (!mContext.valid)
+		return;
+
+	SDL_FreeSurface(mContext.surface);
+	SDL_DestroyMutex(mContext.mutex);
+
+	mContext.component = NULL;
+	mContext.valid = false;
 }
 
 void VideoVlcComponent::setupVLC(std::string subtitles)
 {
 	// If VLC hasn't been initialised yet then do it now
-	if (!mVLC)
-	{
-		const char** args;
-	//	const char* newargs[] = { "--quiet", "--sub-file", subtitles.c_str() };
-		const char* singleargs[] = { "--quiet" };
-		int argslen = 0;
-		/*
-		if (!subtitles.empty())
-		{
-			argslen = sizeof(newargs) / sizeof(newargs[0]);
-			args = newargs;
-		}
-		else
-		{*/
-			argslen = sizeof(singleargs) / sizeof(singleargs[0]);
-			args = singleargs;
-	//	}
-		mVLC = libvlc_new(argslen, args);
-	}
+	if (mVLC != nullptr)
+		return;
+
+	const char** args;
+	const char* singleargs[] = { "--quiet" };
+
+	int argslen = sizeof(singleargs) / sizeof(singleargs[0]);
+	args = singleargs;
+
+	mVLC = libvlc_new(argslen, args);
 }
 
 void VideoVlcComponent::handleLooping()
@@ -314,13 +305,16 @@ void VideoVlcComponent::startVideo()
 		{
 			// Set the video that we are going to be playing so we don't attempt to restart it
 			mPlayingVideoPath = mVideoPath;
-
-			
+						
 			if (!mSubtitlePath.empty())
 			{
+				if (!mSubtitleTmpFile.empty())
+					Utils::FileSystem::removeFile(mSubtitleTmpFile);
+
 				auto ext = Utils::FileSystem::getExtension(path);
 				auto srt = Utils::String::replace(path, ext, ".srt");
 				Utils::FileSystem::copyFile(mSubtitlePath, srt);
+				
 				mSubtitleTmpFile = srt;
 			}
 			
@@ -393,12 +387,6 @@ void VideoVlcComponent::startVideo()
 
 void VideoVlcComponent::stopVideo()
 {
-	if (!mSubtitleTmpFile.empty())
-	{		
-		Utils::FileSystem::removeFile(mSubtitleTmpFile);
-		mSubtitlePath = "";
-	}
-
 	mIsPlaying = false;
 	mStartDelayed = false;
 	// Release the media player so it stops calling back to us
@@ -410,5 +398,11 @@ void VideoVlcComponent::stopVideo()
 		mMediaPlayer = NULL;
 		freeContext();
 		PowerSaver::resume();
+	}
+
+	if (!mSubtitleTmpFile.empty())
+	{
+		Utils::FileSystem::removeFile(mSubtitleTmpFile);
+		mSubtitleTmpFile = "";
 	}
 }
