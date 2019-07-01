@@ -52,7 +52,7 @@ namespace Utils
 		bool        isHidden           (const std::string& _path);
 
 		void		setHomePath		   (std::string path);
-		bool		copyFile		   (const std::string& src, const std::string& dst);
+		bool		copyFile		   (const std::string src, const std::string dst);
 
 		pugi::xml_parse_result	load_xml(pugi::xml_document& doc, const char* path);
 

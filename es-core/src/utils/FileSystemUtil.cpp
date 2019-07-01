@@ -680,7 +680,7 @@ namespace Utils
 
 		} // removeFile
 
-		bool copyFile(const std::string& src, const std::string& dst)
+		bool copyFile(const std::string src, const std::string dst)
 		{
 			std::string path = getGenericPath(src);
 			std::string pathD = getGenericPath(dst);
@@ -689,21 +689,25 @@ namespace Utils
 			if (!exists(path))
 				return true;
 
-			char buf[BUFSIZ];
+			char buf[512];
 			size_t size;
 
 			FILE* source = fopen(path.c_str(), "rb");
+			if (source == nullptr)
+				return false;
+
 			FILE* dest = fopen(pathD.c_str(), "wb");
-
-			// clean and more secure
-			// feof(FILE* stream) returns non-zero if the end of file indicator for stream is set
-
-			while (size = fread(buf, 1, BUFSIZ, source)) {
-				fwrite(buf, 1, size, dest);
+			if (dest == nullptr)
+			{
+				fclose(source);
+				return false;
 			}
 
-			fclose(source);
+			while (size = fread(buf, 1, 512, source))
+				fwrite(buf, 1, size, dest);			
+
 			fclose(dest);
+			fclose(source);
 
 			return true;
 		} // removeFile
@@ -738,6 +742,8 @@ namespace Utils
 			DWORD dwAttr = GetFileAttributes(_path.c_str());
 			if (0xFFFFFFFF == dwAttr)
 				return false;
+
+			return true;
 #else
 			std::string path = getGenericPath(_path);
 			struct stat64 info;
