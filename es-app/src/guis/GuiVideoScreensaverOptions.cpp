@@ -64,20 +64,20 @@ GuiVideoScreensaverOptions::GuiVideoScreensaverOptions(Window* window, const cha
 	});
 
 	// Define subtitle font
-	auto ss_omx_font_file = std::make_shared<TextComponent>(mWindow, "", Font::get(FONT_SIZE_SMALL), 0x777777FF);
+	auto ss_omx_font_file = std::make_shared<TextComponent>(mWindow, "", ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color);
 	addEditableTextComponent(row, "PATH TO FONT FILE", ss_omx_font_file, Settings::getInstance()->getString("SubtitleFont"));
 	addSaveFunc([ss_omx_font_file] {
 		Settings::getInstance()->setString("SubtitleFont", ss_omx_font_file->getValue());
 	});
 
 	// Define subtitle italic font
-	auto ss_omx_italic_font_file = std::make_shared<TextComponent>(mWindow, "", Font::get(FONT_SIZE_SMALL), 0x777777FF);
+	auto ss_omx_italic_font_file = std::make_shared<TextComponent>(mWindow, "", ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color);
 	addEditableTextComponent(row, "PATH TO ITALIC FONT FILE", ss_omx_italic_font_file, Settings::getInstance()->getString("SubtitleItalicFont"));
 	addSaveFunc([ss_omx_italic_font_file] {
 		Settings::getInstance()->setString("SubtitleItalicFont", ss_omx_italic_font_file->getValue());
 	});
 #endif
-
+	
 #ifndef _RPI_
 	auto captions_compatibility = std::make_shared<SwitchComponent>(mWindow);
 	captions_compatibility->setState(Settings::getInstance()->getBool("CaptionsCompatibility"));

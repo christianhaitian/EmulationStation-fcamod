@@ -1,6 +1,6 @@
 #include "guis/GuiScreensaverOptions.h"
 
-#include "guis/GuiTextEditPopup.h"
+#include "guis/GuiTextEditPopupKeyboard.h"
 #include "views/ViewController.h"
 #include "Settings.h"
 #include "SystemData.h"
@@ -73,7 +73,7 @@ void GuiScreensaverOptions::addEditableTextComponent(ComponentListRow row, const
 {
 	row.elements.clear();
 
-	auto lbl = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), Font::get(FONT_SIZE_MEDIUM), 0x777777FF);
+	auto lbl = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color);
 	row.addElement(lbl, true); // label
 
 	row.addElement(ed, true);
@@ -89,7 +89,7 @@ void GuiScreensaverOptions::addEditableTextComponent(ComponentListRow row, const
 
 	auto updateVal = [ed](const std::string& newVal) { ed->setValue(newVal); }; // ok callback (apply new value to ed)
 	row.makeAcceptInputHandler([this, label, ed, updateVal] {
-		mWindow->pushGui(new GuiTextEditPopup(mWindow, label, ed->getValue(), updateVal, false));
+		mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, label, ed->getValue(), updateVal, false));
 	});
 	assert(ed);
 	addRow(row);

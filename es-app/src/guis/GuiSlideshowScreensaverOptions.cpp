@@ -2,7 +2,7 @@
 
 #include "components/SliderComponent.h"
 #include "components/SwitchComponent.h"
-#include "guis/GuiTextEditPopup.h"
+#include "guis/GuiTextEditPopupKeyboard.h"
 #include "utils/StringUtil.h"
 #include "Settings.h"
 #include "Window.h"
@@ -30,7 +30,7 @@ GuiSlideshowScreensaverOptions::GuiSlideshowScreensaverOptions(Window* window, c
 	});
 
 	// background audio file
-	auto sss_bg_audio_file = std::make_shared<TextComponent>(mWindow, "", Font::get(FONT_SIZE_SMALL), 0x777777FF);
+	auto sss_bg_audio_file = std::make_shared<TextComponent>(mWindow, "", ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color);
 	addEditableTextComponent(row, "BACKGROUND AUDIO", sss_bg_audio_file, Settings::getInstance()->getString("SlideshowScreenSaverBackgroundAudioFile"));
 	addSaveFunc([sss_bg_audio_file] {
 		Settings::getInstance()->setString("SlideshowScreenSaverBackgroundAudioFile", sss_bg_audio_file->getValue());
@@ -43,7 +43,7 @@ GuiSlideshowScreensaverOptions::GuiSlideshowScreensaverOptions(Window* window, c
 	addSaveFunc([sss_custom_source] { Settings::getInstance()->setBool("SlideshowScreenSaverCustomImageSource", sss_custom_source->getState()); });
 
 	// custom image directory
-	auto sss_image_dir = std::make_shared<TextComponent>(mWindow, "", Font::get(FONT_SIZE_SMALL), 0x777777FF);
+	auto sss_image_dir = std::make_shared<TextComponent>(mWindow, "", ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color);
 	addEditableTextComponent(row, "CUSTOM IMAGE DIR", sss_image_dir, Settings::getInstance()->getString("SlideshowScreenSaverImageDir"));
 	addSaveFunc([sss_image_dir] {
 		Settings::getInstance()->setString("SlideshowScreenSaverImageDir", sss_image_dir->getValue());
@@ -58,7 +58,7 @@ GuiSlideshowScreensaverOptions::GuiSlideshowScreensaverOptions(Window* window, c
 	});
 
 	// custom image filter
-	auto sss_image_filter = std::make_shared<TextComponent>(mWindow, "", Font::get(FONT_SIZE_SMALL), 0x777777FF);
+	auto sss_image_filter = std::make_shared<TextComponent>(mWindow, "", ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color);
 	addEditableTextComponent(row, "CUSTOM IMAGE FILTER", sss_image_filter, Settings::getInstance()->getString("SlideshowScreenSaverImageFilter"));
 	addSaveFunc([sss_image_filter] {
 		Settings::getInstance()->setString("SlideshowScreenSaverImageFilter", sss_image_filter->getValue());
@@ -73,7 +73,7 @@ void GuiSlideshowScreensaverOptions::addWithLabel(ComponentListRow row, const st
 {
 	row.elements.clear();
 
-	auto lbl = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), Font::get(FONT_SIZE_MEDIUM), 0x777777FF);
+	auto lbl = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color);
 	row.addElement(lbl, true); // label
 
 	row.addElement(component, false, true);
@@ -85,7 +85,7 @@ void GuiSlideshowScreensaverOptions::addEditableTextComponent(ComponentListRow r
 {
 	row.elements.clear();
 
-	auto lbl = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), Font::get(FONT_SIZE_MEDIUM), 0x777777FF);
+	auto lbl = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color);
 	row.addElement(lbl, true); // label
 
 	row.addElement(ed, true);
@@ -101,7 +101,7 @@ void GuiSlideshowScreensaverOptions::addEditableTextComponent(ComponentListRow r
 
 	auto updateVal = [ed](const std::string& newVal) { ed->setValue(newVal); }; // ok callback (apply new value to ed)
 	row.makeAcceptInputHandler([this, label, ed, updateVal] {
-		mWindow->pushGui(new GuiTextEditPopup(mWindow, label, ed->getValue(), updateVal, false));
+		mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, label, ed->getValue(), updateVal, false));
 	});
 
 	assert(ed);

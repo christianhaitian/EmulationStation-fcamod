@@ -3,7 +3,7 @@
 #include "components/OptionListComponent.h"
 #include "components/SwitchComponent.h"
 #include "guis/GuiSettings.h"
-#include "guis/GuiTextEditPopup.h"
+#include "guis/GuiTextEditPopupKeyboard.h"
 #include "utils/StringUtil.h"
 #include "views/ViewController.h"
 #include "CollectionSystemManager.h"
@@ -43,7 +43,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 				};
 				row.makeAcceptInputHandler(createCollectionCall);
 
-				auto themeFolder = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(name), Font::get(FONT_SIZE_SMALL), 0x777777FF);
+				auto themeFolder = std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(name), ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color);
 				row.addElement(themeFolder, true);
 				s->addRow(row);
 			}
@@ -64,7 +64,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 		createCollection(name);
 	};
 	row.makeAcceptInputHandler([this, createCustomCollection] {
-		mWindow->pushGui(new GuiTextEditPopup(mWindow, _T("New Collection Name"), "", createCustomCollection, false));
+		mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, _T("New Collection Name"), "", createCustomCollection, false));
 	});
 
 	mMenu.addRow(row);
@@ -84,7 +84,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	if(CollectionSystemManager::get()->isEditing())
 	{
 		row.elements.clear();
-		row.addElement(std::make_shared<TextComponent>(mWindow, _T("FINISH EDITING COLLECTION")+" '" + Utils::String::toUpper(CollectionSystemManager::get()->getEditingCollection()) + "'", Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _T("FINISH EDITING COLLECTION")+" '" + Utils::String::toUpper(CollectionSystemManager::get()->getEditingCollection()) + "'", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.makeAcceptInputHandler(std::bind(&GuiCollectionSystemsOptions::exitEditMode, this));
 		mMenu.addRow(row);
 	}
