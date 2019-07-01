@@ -56,6 +56,9 @@ bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length
 		return false;
 	}
 
+	if (svgImage->width == 0 || svgImage->height == 0)
+		return false;
+
 	// We want to rasterise this texture at a specific resolution. If the source size
 	// variables are set then use them otherwise set them from the parsed file
 	if ((mSourceWidth == 0.0f) && (mSourceHeight == 0.0f))

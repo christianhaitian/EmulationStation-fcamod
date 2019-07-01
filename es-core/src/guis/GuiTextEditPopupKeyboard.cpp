@@ -4,39 +4,39 @@
 #include "utils/StringUtil.h"
 
 std::vector<std::vector<UNICODE_CHARTYPE>> kbFrench {
-	{ UNICODE_CHARS("&"), UNICODE_CHARS("é"), UNICODE_CHARS("\""), UNICODE_CHARS("'"), UNICODE_CHARS("("), UNICODE_CHARS("#"), UNICODE_CHARS("è"), UNICODE_CHARS("!"), UNICODE_CHARS("ç"), UNICODE_CHARS("à"), UNICODE_CHARS(")"), UNICODE_CHARS("-") },
-	{ UNICODE_CHARS("1"), UNICODE_CHARS("2"), UNICODE_CHARS("3"), UNICODE_CHARS("4"), UNICODE_CHARS("5"), UNICODE_CHARS("6"), UNICODE_CHARS("7"), UNICODE_CHARS("8"), UNICODE_CHARS("9"), UNICODE_CHARS("0"), UNICODE_CHARS("@"), UNICODE_CHARS("_") },
+	{ _L("&"), _L("é"), _L("\""), _L("'"), _L("("), _L("#"), _L("è"), _L("!"), _L("ç"), _L("à"), _L(")"), _L("-") },
+	{ _L("1"), _L("2"), _L("3"), _L("4"), _L("5"), _L("6"), _L("7"), _L("8"), _L("9"), _L("0"), _L("@"), _L("_") },
 	/*
-	{ UNICODE_CHARS("à"), UNICODE_CHARS("ä"), UNICODE_CHARS("ë"), UNICODE_CHARS("ì"), UNICODE_CHARS("ï"), UNICODE_CHARS("ò"), UNICODE_CHARS("ö"), UNICODE_CHARS("ü"), UNICODE_CHARS("\\"), UNICODE_CHARS("|"), UNICODE_CHARS("§"), UNICODE_CHARS("°") },
-	{ UNICODE_CHARS("á"), UNICODE_CHARS("â"), UNICODE_CHARS("ê"), UNICODE_CHARS("í"), UNICODE_CHARS("î"), UNICODE_CHARS("ó"), UNICODE_CHARS("ô"), UNICODE_CHARS("ú",  "û"), UNICODE_CHARS("ñ"), UNICODE_CHARS("¡"), UNICODE_CHARS("¿") },
+	{ _L("à"), _L("ä"), _L("ë"), _L("ì"), _L("ï"), _L("ò"), _L("ö"), _L("ü"), _L("\\"), _L("|"), _L("§"), _L("°") },
+	{ _L("á"), _L("â"), _L("ê"), _L("í"), _L("î"), _L("ó"), _L("ô"), _L("ú",  "û"), _L("ñ"), _L("¡"), _L("¿") },
 	*/
-	{ UNICODE_CHARS("a"), UNICODE_CHARS("z"), UNICODE_CHARS("e"), UNICODE_CHARS("r"), UNICODE_CHARS("t"), UNICODE_CHARS("y"), UNICODE_CHARS("u"), UNICODE_CHARS("i"), UNICODE_CHARS("o"), UNICODE_CHARS("p"), UNICODE_CHARS("^"), UNICODE_CHARS("$") },
-	{ UNICODE_CHARS("A"), UNICODE_CHARS("Z"), UNICODE_CHARS("E"), UNICODE_CHARS("R"), UNICODE_CHARS("T"), UNICODE_CHARS("Y"), UNICODE_CHARS("U"), UNICODE_CHARS("I"), UNICODE_CHARS("O"), UNICODE_CHARS("P"), UNICODE_CHARS("¨"), UNICODE_CHARS("*") },
+	{ _L("a"), _L("z"), _L("e"), _L("r"), _L("t"), _L("y"), _L("u"), _L("i"), _L("o"), _L("p"), _L("^"), _L("$") },
+	{ _L("A"), _L("Z"), _L("E"), _L("R"), _L("T"), _L("Y"), _L("U"), _L("I"), _L("O"), _L("P"), _L("¨"), _L("*") },
 
-	{ UNICODE_CHARS("q"), UNICODE_CHARS("s"), UNICODE_CHARS("d"), UNICODE_CHARS("f"), UNICODE_CHARS("g"), UNICODE_CHARS("h"), UNICODE_CHARS("j"), UNICODE_CHARS("k"), UNICODE_CHARS("l"), UNICODE_CHARS("m"), UNICODE_CHARS("ù"), UNICODE_CHARS("`") },
-	{ UNICODE_CHARS("Q"), UNICODE_CHARS("S"), UNICODE_CHARS("D"), UNICODE_CHARS("F"), UNICODE_CHARS("G"), UNICODE_CHARS("H"), UNICODE_CHARS("J"), UNICODE_CHARS("K"), UNICODE_CHARS("L"), UNICODE_CHARS("M"), UNICODE_CHARS("%"), UNICODE_CHARS("£") },
+	{ _L("q"), _L("s"), _L("d"), _L("f"), _L("g"), _L("h"), _L("j"), _L("k"), _L("l"), _L("m"), _L("ù"), _L("`") },
+	{ _L("Q"), _L("S"), _L("D"), _L("F"), _L("G"), _L("H"), _L("J"), _L("K"), _L("L"), _L("M"), _L("%"), _L("£") },
 
 	 //SHIFT key at position 0
-	{ UNICODE_CHARS("SHIFT"), UNICODE_CHARS("<"), UNICODE_CHARS("w"), UNICODE_CHARS("x"), UNICODE_CHARS("c"), UNICODE_CHARS("v"), UNICODE_CHARS("b"), UNICODE_CHARS("n"), UNICODE_CHARS(","), UNICODE_CHARS(";"), UNICODE_CHARS(":"), UNICODE_CHARS("=") },
-	{ UNICODE_CHARS("SHIFT"), UNICODE_CHARS(">"), UNICODE_CHARS("W"), UNICODE_CHARS("X"), UNICODE_CHARS("C"), UNICODE_CHARS("V"), UNICODE_CHARS("B"), UNICODE_CHARS("N"), UNICODE_CHARS("?"), UNICODE_CHARS("."), UNICODE_CHARS("/"), UNICODE_CHARS("+") }
+	{ _L("SHIFT"), _L("<"), _L("w"), _L("x"), _L("c"), _L("v"), _L("b"), _L("n"), _L(","), _L(";"), _L(":"), _L("=") },
+	{ _L("SHIFT"), _L(">"), _L("W"), _L("X"), _L("C"), _L("V"), _L("B"), _L("N"), _L("?"), _L("."), _L("/"), _L("+") }
 };
 
 std::vector<std::vector<UNICODE_CHARTYPE>> kbUs {
 
-	{ UNICODE_CHARS("1"), UNICODE_CHARS("2"), UNICODE_CHARS("3"), UNICODE_CHARS("4"), UNICODE_CHARS("5"), UNICODE_CHARS("6"), UNICODE_CHARS("7"), UNICODE_CHARS("8"), UNICODE_CHARS("9"), UNICODE_CHARS("0"), UNICODE_CHARS("_"), UNICODE_CHARS("+") },
-	{ UNICODE_CHARS("!"), UNICODE_CHARS("@"), UNICODE_CHARS("#"), UNICODE_CHARS("$"), UNICODE_CHARS("%"), UNICODE_CHARS("^"), UNICODE_CHARS("&"), UNICODE_CHARS("*"), UNICODE_CHARS("("), UNICODE_CHARS(")"), UNICODE_CHARS("-"), UNICODE_CHARS("=") },
+	{ _L("1"), _L("2"), _L("3"), _L("4"), _L("5"), _L("6"), _L("7"), _L("8"), _L("9"), _L("0"), _L("_"), _L("+") },
+	{ _L("!"), _L("@"), _L("#"), _L("$"), _L("%"), _L("^"), _L("&"), _L("*"), _L("("), _L(")"), _L("-"), _L("=") },
 /*
-	{ UNICODE_CHARS("à"), UNICODE_CHARS("ä"), UNICODE_CHARS("è"), UNICODE_CHARS("ë"), UNICODE_CHARS("ì"), UNICODE_CHARS("ï"), UNICODE_CHARS("ò"), UNICODE_CHARS("ö"), UNICODE_CHARS("ù"), UNICODE_CHARS("ü"), UNICODE_CHARS("¨"), UNICODE_CHARS("¿") },
-	{ UNICODE_CHARS("á"), UNICODE_CHARS("â"), UNICODE_CHARS("é"), UNICODE_CHARS("ê"), UNICODE_CHARS("í"), UNICODE_CHARS("î"), UNICODE_CHARS("ó"), UNICODE_CHARS("ô"), UNICODE_CHARS("ú"), UNICODE_CHARS("û"), UNICODE_CHARS("ñ"), UNICODE_CHARS("¡") },
+	{ _L("à"), _L("ä"), _L("è"), _L("ë"), _L("ì"), _L("ï"), _L("ò"), _L("ö"), _L("ù"), _L("ü"), _L("¨"), _L("¿") },
+	{ _L("á"), _L("â"), _L("é"), _L("ê"), _L("í"), _L("î"), _L("ó"), _L("ô"), _L("ú"), _L("û"), _L("ñ"), _L("¡") },
 	*/
-	{ UNICODE_CHARS("q"), UNICODE_CHARS("w"), UNICODE_CHARS("e"), UNICODE_CHARS("r"), UNICODE_CHARS("t"), UNICODE_CHARS("y"), UNICODE_CHARS("u"), UNICODE_CHARS("i"), UNICODE_CHARS("o"), UNICODE_CHARS("p"), UNICODE_CHARS("{"), UNICODE_CHARS("}") },
-	{ UNICODE_CHARS("Q"), UNICODE_CHARS("W"), UNICODE_CHARS("E"), UNICODE_CHARS("R"), UNICODE_CHARS("T"), UNICODE_CHARS("Y"), UNICODE_CHARS("U"), UNICODE_CHARS("I"), UNICODE_CHARS("O"), UNICODE_CHARS("P"), UNICODE_CHARS("["), UNICODE_CHARS("]") },
+	{ _L("q"), _L("w"), _L("e"), _L("r"), _L("t"), _L("y"), _L("u"), _L("i"), _L("o"), _L("p"), _L("{"), _L("}") },
+	{ _L("Q"), _L("W"), _L("E"), _L("R"), _L("T"), _L("Y"), _L("U"), _L("I"), _L("O"), _L("P"), _L("["), _L("]") },
 
-	{ UNICODE_CHARS("a"), UNICODE_CHARS("s"), UNICODE_CHARS("d"), UNICODE_CHARS("f"), UNICODE_CHARS("g"), UNICODE_CHARS("h"), UNICODE_CHARS("j"), UNICODE_CHARS("k"), UNICODE_CHARS("l"), UNICODE_CHARS(";"), UNICODE_CHARS("\""), UNICODE_CHARS("|") },
-	{ UNICODE_CHARS("A"), UNICODE_CHARS("S"), UNICODE_CHARS("D"), UNICODE_CHARS("F"), UNICODE_CHARS("G"), UNICODE_CHARS("H"), UNICODE_CHARS("J"), UNICODE_CHARS("K"), UNICODE_CHARS("L"), UNICODE_CHARS(":"), UNICODE_CHARS("'"), UNICODE_CHARS("\\") },
+	{ _L("a"), _L("s"), _L("d"), _L("f"), _L("g"), _L("h"), _L("j"), _L("k"), _L("l"), _L(";"), _L("\""), _L("|") },
+	{ _L("A"), _L("S"), _L("D"), _L("F"), _L("G"), _L("H"), _L("J"), _L("K"), _L("L"), _L(":"), _L("'"), _L("\\") },
 
-	{ UNICODE_CHARS("SHIFT"), UNICODE_CHARS("~"), UNICODE_CHARS("z"), UNICODE_CHARS("x"), UNICODE_CHARS("c"), UNICODE_CHARS("v"), UNICODE_CHARS("b"), UNICODE_CHARS("n"), UNICODE_CHARS("m"), UNICODE_CHARS(","), UNICODE_CHARS("."), UNICODE_CHARS("?") },
-	{ UNICODE_CHARS("SHIFT"), UNICODE_CHARS("`"), UNICODE_CHARS("Z"), UNICODE_CHARS("X"), UNICODE_CHARS("C"), UNICODE_CHARS("V"), UNICODE_CHARS("B"), UNICODE_CHARS("N"), UNICODE_CHARS("M"), UNICODE_CHARS("<"), UNICODE_CHARS(">"), UNICODE_CHARS("/") },
+	{ _L("SHIFT"), _L("~"), _L("z"), _L("x"), _L("c"), _L("v"), _L("b"), _L("n"), _L("m"), _L(","), _L("."), _L("?") },
+	{ _L("SHIFT"), _L("`"), _L("Z"), _L("X"), _L("C"), _L("V"), _L("B"), _L("N"), _L("M"), _L("<"), _L(">"), _L("/") },
 };
 
 GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::string& title, const std::string& initValue, 

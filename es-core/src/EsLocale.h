@@ -21,13 +21,16 @@ private:
 
 #if defined(_WIN32)
 	#define UNICODE_CHARTYPE wchar_t*
-	#define UNICODE_CHARS(x) L ## x
-	#define UNICODE_STRING(x) Utils::String::convertFromWideString(L ## x)
+	#define _L(x) L ## x
+	#define _U(x) Utils::String::convertFromWideString(L ## x)
+	
+	#define _T(x) EsLocale::getText(x)
 #else
 
 	#define UNICODE_CHARTYPE char*
-	#define UNICODE_CHARS(x) x
-	#define UNICODE_STRING(x) x
+	#define _L(x) x
+	#define _U(x) x
+
+	#define _T(x) EsLocale::getText(x)
 #endif // _WIN32
 
-#define _T(x) EsLocale::getText(x)

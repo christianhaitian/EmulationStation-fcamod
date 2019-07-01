@@ -221,7 +221,7 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 					continue;
 				
 				if (showFavoriteIcon)
-					mGrid.add(_T("\uF006 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);
+					mGrid.add(_U("\uF006 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);
 				else
 					mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);				
 			}
@@ -236,7 +236,7 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 
 				if (showFavoriteIcon)
 				{
-					mGrid.add(_T("\uF006 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);
+					mGrid.add(_U("\uF006 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), *it);
 					continue;
 				}
 			}
