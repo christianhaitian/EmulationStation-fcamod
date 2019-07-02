@@ -892,13 +892,13 @@ void GuiMenu::openOtherSettings()
 void GuiMenu::openConfigInput()
 {
 	Window* window = mWindow;
-	window->pushGui(new GuiDetectDevice(window, false, nullptr));
-		/*
+//	window->pushGui(new GuiDetectDevice(window, false, nullptr));
+		
 	window->pushGui(new GuiMsgBox(window, _T("ARE YOU SURE YOU WANT TO CONFIGURE INPUT?"), _T("YES"),
 		[window] {
 		window->pushGui(new GuiDetectDevice(window, false, nullptr));
 	}, _T("NO"), nullptr)
-	);*/
+	);
 
 }
 

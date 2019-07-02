@@ -32,10 +32,12 @@ struct SystemEnvironmentData
 	std::vector<std::string> mSearchExtensions;
 	std::string mLaunchCommand;
 	std::vector<PlatformIds::PlatformId> mPlatformIds;
-
-//	std::string mDefaultCore;
-
 	std::vector<EmulatorData> mEmulators;
+
+	bool isValidExtension(const std::string extension)
+	{
+		return std::find(mSearchExtensions.cbegin(), mSearchExtensions.cend(), extension) != mSearchExtensions.cend();
+	}
 
 	std::vector<std::string> getCores(std::string emulatorName) 
 	{

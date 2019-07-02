@@ -503,9 +503,9 @@ void GridTileComponent::setImage(const std::string& path)
 	mCurrentPath = path;		
 
 	if (mSelectedProperties.mSize.x() > mSize.x())
-		mImage->setImage(path, false, mSelectedProperties.mSize);
+		mImage->setImage(path, false, MaxSizeInfo(mSelectedProperties.mSize, mSelectedProperties.mImageSizeMode == "minSize"));
 	else
-		mImage->setImage(path, false, mSize);
+		mImage->setImage(path, false, MaxSizeInfo(mSize, mSelectedProperties.mImageSizeMode == "minSize"));
 
 	resize();	
 }

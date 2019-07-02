@@ -504,7 +504,11 @@ int main(int argc, char* argv[])
 		
 #ifdef WIN32		
 		if (processDuration < timeLimit)
-			Sleep(timeLimit - processDuration);
+		{
+			int timeToWait = timeLimit - processDuration;
+			if (timeToWait > 0 && timeToWait < 100)
+				Sleep(timeToWait);
+		}
 
 		int swapStart = SDL_GetTicks();
 #endif

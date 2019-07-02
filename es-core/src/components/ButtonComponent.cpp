@@ -17,6 +17,7 @@ ButtonComponent::ButtonComponent(Window* window, const std::string& text, const 
 	mTextColorUnfocused = menuTheme->Text.color;
 	mTextColorFocused = menuTheme->Text.selectedColor;	
 	mColor = menuTheme->Text.color;
+	mColorFocused = menuTheme->Text.selectorColor;
 	
 	setPressedFunc(func);
 	setText(text, helpText, upperCase);
@@ -94,8 +95,8 @@ void ButtonComponent::updateImage()
 		return;
 	}
 
-	mBox.setCenterColor(mColor);
-	mBox.setEdgeColor(mColor);	
+	mBox.setCenterColor(getCurBackColor());
+	mBox.setEdgeColor(getCurBackColor());
 	mBox.setImagePath(mFocused ? ThemeData::getMenuTheme()->Icons.button_filled : ThemeData::getMenuTheme()->Icons.button);	
 	//mBox.setImagePath(mFocused ? ":/button_filled.png" : ":/button.png");
 }
@@ -128,6 +129,14 @@ unsigned int ButtonComponent::getCurTextColor() const
 		return mTextColorUnfocused;
 	else
 		return mTextColorFocused;
+}
+
+unsigned int ButtonComponent::getCurBackColor() const
+{
+	if (!mFocused)
+		return mColor;
+	else
+		return mColorFocused;
 }
 
 std::vector<HelpPrompt> ButtonComponent::getHelpPrompts()

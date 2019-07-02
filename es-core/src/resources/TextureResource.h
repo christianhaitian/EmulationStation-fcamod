@@ -11,12 +11,44 @@
 
 class TextureData;
 
+class MaxSizeInfo
+{
+public:	
+	MaxSizeInfo() : mSize(Vector2f(0, 0)), mExternalZoom(false) {}
+
+	MaxSizeInfo(float x, float y) : mSize(Vector2f(x, y)), mExternalZoom(false), mExternalZoomKnown(false) { }
+	MaxSizeInfo(Vector2f size) : mSize(size), mExternalZoom(false), mExternalZoomKnown(false) { }
+
+	MaxSizeInfo(float x, float y, bool externalZoom) : mSize(Vector2f(x, y)), mExternalZoom(externalZoom), mExternalZoomKnown(true){ }
+	MaxSizeInfo(Vector2f size, bool externalZoom) : mSize(size), mExternalZoom(externalZoom), mExternalZoomKnown(true) { }
+
+	bool empty() { return mSize.x() == 0 && mSize.y() == 0; }
+
+	float x() { return mSize.x(); }
+	float y() { return mSize.y(); }
+
+	bool externalZoom() 
+	{ 
+		return mExternalZoom; 
+	}
+
+	bool isExternalZoomKnown()
+	{
+		return mExternalZoomKnown;
+	}
+
+private:
+	Vector2f mSize;
+	bool	 mExternalZoom;
+	bool	 mExternalZoomKnown;
+};
+
 // An OpenGL texture.
 // Automatically recreates the texture with renderer deinit/reinit.
 class TextureResource : public IReloadable
 {
 public:
-	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true, Vector2f maxSize = Vector2f(0, 0));
+	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true, MaxSizeInfo maxSize = MaxSizeInfo());
 	void initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height);
 	virtual void initFromMemory(const char* file, size_t length);
 
@@ -41,7 +73,7 @@ public:
 	virtual void reload();
 
 protected:
-	TextureResource(const std::string& path, bool tile, bool dynamic, Vector2f maxSize);
+	TextureResource(const std::string& path, bool tile, bool dynamic, MaxSizeInfo maxSize);
 
 private:
 	// mTextureData is used for textures that are not loaded from a file - these ones

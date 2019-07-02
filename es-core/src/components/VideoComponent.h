@@ -30,7 +30,7 @@ public:
 	// Loads the video at the given filepath
 	bool setVideo(std::string path);
 	// Loads a static image that is displayed if the video cannot be played
-	void setImage(std::string path, bool tile = false, Vector2f maxSize = Vector2f(0, 0));
+	void setImage(std::string path, bool tile = false, MaxSizeInfo maxSize = MaxSizeInfo());
 
 	// Configures the component to show the default video
 	void setDefaultVideo();

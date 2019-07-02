@@ -49,6 +49,13 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 			{
 				if (item == nullptr)
 				{
+					// Skip if the extension in the gamelist is unknown
+					if (!system->getSystemEnvData()->isValidExtension(Utils::FileSystem::getExtension(path)))
+					{
+						LOG(LogWarning) << "gameList: file extension is not known by systemlist";
+						return NULL;
+					}
+
 					// Add final game
 					item = new FileData(GAME, path, system);
 					if (!item->isArcadeAsset())
@@ -61,9 +68,8 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 				return item;
 			}
 		}
-
-		/*
-		if(!found)
+		
+		if (item == nullptr)
 		{
 			// don't create folders unless it's leading up to a game
 			// if type is a folder it's gonna be empty, so don't bother
@@ -73,17 +79,41 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 				return NULL;
 			}
 			
-			// create missing folder
-			//FCA TODO -> 1 seul jeu dans le folder ?
-			//FileData* folder = new FileData(FOLDER, Utils::FileSystem::getStem(treeNode->getPath()) + "/" + *path_it, system->getSystemEnvData(), system);
-			//treeNode->addChild(folder);
-			//treeNode = folder;
+			FolderData* folder = new FolderData(Utils::FileSystem::getStem(treeNode->getPath()) + "/" + *path_it, system);				
+			treeNode->addChild(folder);
+			treeNode = folder;
 		}
-		*/
+		
 		path_it++;
 	}
 
 	return NULL;
+}
+
+void refactorGameFolders(SystemData* system)
+{
+	FolderData* root = system->getRootFolder();
+
+	auto childs = root->getChildren();
+	for (int i = childs.size() - 1; i >= 0; i--)
+	{
+		FileData* item = childs.at(i);
+		if (item->getType() == FOLDER)
+		{
+			FolderData* folder = (FolderData*)item;
+			FileData* uniqueGame = folder->findUniqueGameForFolder();
+			if (uniqueGame != nullptr)
+			{
+				childs.erase(childs.begin() + i);
+
+				FileData* newFile = new FileData(GAME, uniqueGame->getPath(), system);
+				newFile->metadata = uniqueGame->metadata;
+				root->addChild(newFile);	
+				
+				delete folder;
+			}
+		}
+	}
 }
 
 void parseGamelist(SystemData* system, std::unordered_map<std::string, FileData*>& fileMap)
@@ -132,7 +162,7 @@ void parseGamelist(SystemData* system, std::unordered_map<std::string, FileData*
 			LOG(LogWarning) << "File \"" << path << "\" does not exist! Ignoring.";
 			continue;
 		}
-		
+				
 		FileData* file = findOrCreateFile(system, path, type, fileMap);
 		if(!file)
 		{
@@ -147,6 +177,9 @@ void parseGamelist(SystemData* system, std::unordered_map<std::string, FileData*
 			//make sure name gets set if one didn't exist
 			if (file->metadata.get("name").empty())
 				file->metadata.set("name", defaultName);
+
+			if (Utils::FileSystem::isHidden(path))
+				file->metadata.set("hidden", "true");
 
 			file->metadata.resetChangedFlag();
 		}

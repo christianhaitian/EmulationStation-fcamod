@@ -7,10 +7,9 @@ SwitchComponent::SwitchComponent(Window* window, bool state) : GuiComponent(wind
 {
 	auto menuTheme = ThemeData::getMenuTheme();
 
-	float height = Font::get(FONT_SIZE_MEDIUM)->getLetterHeight();
-	Vector2f maxSize = Vector2f(height, height);
+	float height = Font::get(FONT_SIZE_MEDIUM)->getLetterHeight();	
 
-	mImage.setImage(ThemeData::getMenuTheme()->Icons.off, false, maxSize);
+	mImage.setImage(ThemeData::getMenuTheme()->Icons.off, false, MaxSizeInfo(height, height));
 	mImage.setResize(0, height);
 	mImage.setColorShift(menuTheme->Text.color);
 

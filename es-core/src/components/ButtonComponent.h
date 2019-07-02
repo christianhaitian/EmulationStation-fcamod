@@ -45,13 +45,17 @@ private:
 	unsigned int mModdedColor;
 
 	unsigned int getCurTextColor() const;
+	unsigned int getCurBackColor()  const;
+
 	void updateImage();
 
 	std::string mText;
 	std::string mHelpText;
 	std::unique_ptr<TextCache> mTextCache;
 	NinePatchComponent mBox;
+	
 	unsigned int mColor;
+	unsigned int mColorFocused;
 };
 
 #endif // ES_CORE_COMPONENTS_BUTTON_COMPONENT_H

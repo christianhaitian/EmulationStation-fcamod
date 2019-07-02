@@ -16,7 +16,7 @@
 bool TextureData::OPTIMIZEVRAM = false;
 
 TextureData::TextureData(bool tile) : mTile(tile), mTextureID(0), mDataRGBA(nullptr), mScalable(false),
-									  mWidth(0), mHeight(0), mSourceWidth(0.0f), mSourceHeight(0.0f), mMaxSize(Vector2f(0,0)), mPackedSize(Vector2i(0,0)), mBaseSize(Vector2i(0, 0))
+									  mWidth(0), mHeight(0), mSourceWidth(0.0f), mSourceHeight(0.0f), mMaxSize(MaxSizeInfo()), mPackedSize(Vector2i(0,0)), mBaseSize(Vector2i(0, 0))
 {
 	
 }
@@ -132,7 +132,7 @@ bool TextureData::isRequiredTextureSizeOk()
 	if (mBaseSize == Vector2i(0, 0))
 		return true;
 
-	if (mMaxSize == Vector2f(0, 0))
+	if (mMaxSize.empty())
 		return true;
 
 	if ((int) mMaxSize.x() <= mPackedSize.x() || (int) mMaxSize.y() <= mPackedSize.y())
@@ -155,7 +155,7 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 			return true;
 	}
 	
-	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height, OPTIMIZEVRAM ? mMaxSize.x() : 0, mMaxSize.y(), mBaseSize, mPackedSize);
+	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height, OPTIMIZEVRAM ? mMaxSize.x() : 0, mMaxSize.y(), mMaxSize.externalZoom(), mBaseSize, mPackedSize);
 	if (imageRGBA == NULL)
 	{
 		LOG(LogError) << "Could not initialize texture from memory, invalid data!  (file path: " << mPath << ", data ptr: " << (size_t)fileData << ", reported size: " << length << ")";
