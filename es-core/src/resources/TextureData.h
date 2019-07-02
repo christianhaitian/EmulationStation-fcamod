@@ -9,8 +9,9 @@
 
 #include "math/Vector2f.h"
 #include "math/Vector2i.h"
+#include "resources/TextureResource.h"
 
-class TextureResource;
+// class TextureResource;
 
 class TextureData
 {
@@ -44,7 +45,7 @@ public:
 	// Release the texture from conventional RAM
 	void releaseRAM();
 
-	void setMaxSize(Vector2f maxSize) 
+	void setMaxSize(MaxSizeInfo maxSize)
 	{ 
 		if (mMaxSize.x() < maxSize.x() || mMaxSize.y() < maxSize.y())
 			mMaxSize = maxSize; 
@@ -79,7 +80,7 @@ private:
 
 	Vector2i		mPackedSize;
 	Vector2i		mBaseSize;
-	Vector2f		mMaxSize;
+	MaxSizeInfo		mMaxSize;
 };
 
 #endif // ES_CORE_RESOURCES_TEXTURE_DATA_H

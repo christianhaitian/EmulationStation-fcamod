@@ -138,8 +138,11 @@ void ImageComponent::setDefaultImage(std::string path)
 	mDefaultPath = path;
 }
 
-void ImageComponent::setImage(std::string path, bool tile, Vector2f maxSize)
+void ImageComponent::setImage(std::string path, bool tile, MaxSizeInfo maxSize)
 {
+	if (!maxSize.isExternalZoomKnown())
+		maxSize = MaxSizeInfo(maxSize.x(), maxSize.y(), mTargetIsMin);
+
 	if (path.empty() || !ResourceManager::getInstance()->fileExists(path))
 	{
 		if (mDefaultPath.empty() || !ResourceManager::getInstance()->fileExists(mDefaultPath))

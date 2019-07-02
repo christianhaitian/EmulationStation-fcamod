@@ -10,7 +10,7 @@ std::map< TextureResource::TextureKeyType, std::shared_ptr<TextureResource>> Tex
 
 std::set<TextureResource*> 	TextureResource::sAllTextures;
 
-TextureResource::TextureResource(const std::string& path, bool tile, bool dynamic, Vector2f maxSize) : mTextureData(nullptr), mForceLoad(false)
+TextureResource::TextureResource(const std::string& path, bool tile, bool dynamic, MaxSizeInfo maxSize) : mTextureData(nullptr), mForceLoad(false)
 {
 	// Create a texture data object for this texture
 	if (!path.empty())
@@ -118,7 +118,7 @@ void TextureResource::resetCache()
 	sTextureMap.clear();
 }
 
-std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile, bool forceLoad, bool dynamic, Vector2f maxSize)
+std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile, bool forceLoad, bool dynamic, MaxSizeInfo maxSize)
 {
 	std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
 
@@ -138,7 +138,7 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 		{
 			std::shared_ptr<TextureResource> rc = foundTexture->second.lock();
 
-			if (maxSize != Vector2f(0, 0) && TextureData::OPTIMIZEVRAM)
+			if (!maxSize.empty() && TextureData::OPTIMIZEVRAM)
 			{
 				auto dt = sTextureDataManager.get(rc.get());
 				if (dt != nullptr)
@@ -156,7 +156,7 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 	{
 		std::shared_ptr<TextureResource> rc = permanentTexture->second;
 
-		if (maxSize != Vector2f(0, 0) && TextureData::OPTIMIZEVRAM)
+		if (!maxSize.empty() && TextureData::OPTIMIZEVRAM)
 		{
 			auto dt = sTextureDataManager.get(rc.get());
 			if (dt != nullptr)

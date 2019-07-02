@@ -2,15 +2,16 @@
 
 #include "Renderer.h"
 #include "Settings.h"
+#include "ThemeData.h"
 
 using namespace GridFlags;
 
-ComponentGrid::ComponentGrid(Window* window, const Vector2i& gridDimensions, unsigned int separatorColor) : GuiComponent(window),
+ComponentGrid::ComponentGrid(Window* window, const Vector2i& gridDimensions) : GuiComponent(window),
 	mGridSize(gridDimensions), mCursor(0, 0)
 {
 	assert(gridDimensions.x() > 0 && gridDimensions.y() > 0);
 
-	mSeparatorColor = separatorColor;
+	mSeparatorColor = ThemeData::getMenuTheme()->Text.separatorColor;
 	mCells.reserve(gridDimensions.x() * gridDimensions.y());
 
 	mColWidths = new float[gridDimensions.x()];

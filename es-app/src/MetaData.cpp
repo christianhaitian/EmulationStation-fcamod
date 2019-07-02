@@ -202,9 +202,22 @@ const std::string& MetaDataList::getName() const
 void MetaDataList::set(const std::string& key, const std::string& value)
 {
 	if (key == "name")
+	{
+		if (mName == value)
+			return;
+
 		mName = value;
+	}
 	else
-		mMap[getId(key)] = value;
+	{
+		auto id = getId(key);
+		
+		auto prev = mMap.find(id);
+		if (prev != mMap.cend() && prev->second == value)
+			return;
+
+		mMap[id] = value;
+	}
 
 	mWasChanged = true;
 }
