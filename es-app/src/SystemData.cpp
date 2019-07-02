@@ -184,15 +184,24 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 
 			if (newFolder->getChildren().size() == 0)
 				delete newFolder;
-			else if (newFolder->findUniqueGameForFolder() != NULL)
-				delete newFolder;
 			else
 			{
-				const std::string& key = newFolder->getPath();
-				if (fileMap.find(key) == fileMap.end())
+				FileData* childGame = newFolder->findUniqueGameForFolder();
+				if (childGame != NULL)
+				{					
+					FileData* newGame = new FileData(GAME, childGame->getPath(), this);
+					folder->addChild(newGame);
+					fileMap[fileInfo.path] = newGame;
+					delete newFolder;
+				}
+				else
 				{
-					folder->addChild(newFolder);
-					fileMap[key] = newFolder;
+					const std::string& key = newFolder->getPath();
+					if (fileMap.find(key) == fileMap.end())
+					{
+						folder->addChild(newFolder);
+						fileMap[key] = newFolder;
+					}
 				}
 			}
 		}
