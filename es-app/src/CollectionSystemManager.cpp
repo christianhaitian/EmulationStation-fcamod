@@ -458,13 +458,6 @@ void CollectionSystemManager::exitEditMode()
 // adds or removes a game from a specific collection
 bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 {
-	/*
-	if (file->getType() == FOLDER)
-	{
-		if (file->findUniqueGameForFolder() == NULL)
-			return false;
-	}
-	*/
 	if (file->getType() == GAME)
 	{
 		GuiInfoPopup* s;

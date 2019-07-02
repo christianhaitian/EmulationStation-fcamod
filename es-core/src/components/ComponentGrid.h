@@ -29,7 +29,7 @@ namespace GridFlags
 class ComponentGrid : public GuiComponent
 {
 public:
-	ComponentGrid(Window* window, const Vector2i& gridDimensions, unsigned int separatorColor = 0xC6C7C6FF);
+	ComponentGrid(Window* window, const Vector2i& gridDimensions/*, unsigned int separatorColor = 0xC6C7C6FF*/);
 	virtual ~ComponentGrid();
 
 	void setSeparatorColor(unsigned int separatorColor) { mSeparatorColor = separatorColor; updateSeparators(); }

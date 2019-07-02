@@ -118,6 +118,9 @@ public:
 
 	~FolderData()
 	{
+		for (int i = mChildren.size() - 1; i >= 0; i--)
+			delete mChildren.at(i);
+
 		mChildren.clear();
 	}
 

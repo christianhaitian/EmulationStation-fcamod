@@ -45,6 +45,8 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 		if (!Settings::getInstance()->getBool("IgnoreGamelist"))
 			parseGamelist(this, fileMap);
 			
+		refactorGameFolders(this);
+
 		//StopWatch ws("sort " + mName);
 		mRootFolder->sort(FileSorts::SortTypes.at(0));
 
@@ -157,7 +159,7 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 		//see issue #75: https://github.com/Aloshi/EmulationStation/issues/75
 		
 		isGame = false;
-		if(std::find(mEnvData->mSearchExtensions.cbegin(), mEnvData->mSearchExtensions.cend(), extension) != mEnvData->mSearchExtensions.cend())
+		if (mEnvData->isValidExtension(extension)) //std::find(mEnvData->mSearchExtensions.cbegin(), mEnvData->mSearchExtensions.cend(), extension) != mEnvData->mSearchExtensions.cend())
 		{
 			if (fileMap.find(fileInfo.path) == fileMap.end())
 			{
@@ -186,22 +188,11 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 				delete newFolder;
 			else
 			{
-				FileData* childGame = newFolder->findUniqueGameForFolder();
-				if (childGame != NULL)
-				{					
-					FileData* newGame = new FileData(GAME, childGame->getPath(), this);
-					folder->addChild(newGame);
-					fileMap[fileInfo.path] = newGame;
-					delete newFolder;
-				}
-				else
+				const std::string& key = newFolder->getPath();
+				if (fileMap.find(key) == fileMap.end())
 				{
-					const std::string& key = newFolder->getPath();
-					if (fileMap.find(key) == fileMap.end())
-					{
-						folder->addChild(newFolder);
-						fileMap[key] = newFolder;
-					}
+					folder->addChild(newFolder);
+					fileMap[key] = newFolder;
 				}
 			}
 		}
