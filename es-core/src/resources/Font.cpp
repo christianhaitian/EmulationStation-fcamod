@@ -107,12 +107,16 @@ void Font::reload()
 	mLoaded = true;
 }
 
-void Font::unload()
+bool Font::unload()
 {
 	if (mLoaded)
+	{
 		unloadTextures();
+		mLoaded = false;
+		return true;
+	}
 
-	mLoaded = false;
+	return false;
 }
 
 std::shared_ptr<Font> Font::get(int size, const std::string& path)

@@ -357,11 +357,11 @@ void SystemView::render(const Transform4x4f& parentTrans)
 		return;  // nothing to render
 
 	Transform4x4f trans = getTransform() * parentTrans;
-
+	
 	Vector2f clipPos(trans.translation().x(), trans.translation().y());
 	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
 		return;
-
+		
 	auto systemInfoZIndex = mSystemInfo.getZIndex();
 	auto minMax = std::minmax(mCarousel.zIndex, systemInfoZIndex);
 

@@ -116,7 +116,7 @@ namespace Renderer {
 	{
 		return (value >= min) && (value <= max);
 	}
-
+	
 	bool rectOverlap(ClipRect A, ClipRect B)
 	{
 		bool xOverlap = valueInRange(A.x, B.x, B.x + B.w) ||
@@ -132,17 +132,17 @@ namespace Renderer {
 	{		
 		ClipRect screen = ClipRect(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
 		ClipRect box = ClipRect(x, y, w, h);
-
+		/*
 		if (w > 0 && x + w <= 0)
 			return false;
 
 		if (h > 0 && y + h <= 0)
 			return false;
-		
+
 		if (x == screen.w || y == screen.h)
 			return false;
-
-		if (!rectOverlap(screen, box))
+			*/
+		if (!rectOverlap(box, screen))
 			return false;
 
 		if (clipStack.empty())
@@ -151,7 +151,6 @@ namespace Renderer {
 		screen = nativeClipStack.top();
 		return rectOverlap(screen, box);
 	}
-
 
 	void drawRect(float x, float y, float w, float h, unsigned int color, GLenum blend_sfactor, GLenum blend_dfactor)
 	{

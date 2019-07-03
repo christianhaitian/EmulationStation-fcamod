@@ -53,7 +53,7 @@ public:
 	float getHeight(float lineSpacing = 1.5f) const;
 	float getLetterHeight();
 
-	void unload() override;
+	bool unload() override;
 	void reload() override;
 
 	int getSize() const;

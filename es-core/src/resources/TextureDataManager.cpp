@@ -48,7 +48,7 @@ void TextureDataManager::remove(const TextureResource* key)
 	}
 }
 
-std::shared_ptr<TextureData> TextureDataManager::get(const TextureResource* key)
+std::shared_ptr<TextureData> TextureDataManager::get(const TextureResource* key, bool enableLoading)
 {
 	// If it's in the cache then we want to remove it from it's current location and
 	// move it to the top
@@ -65,7 +65,7 @@ std::shared_ptr<TextureData> TextureDataManager::get(const TextureResource* key)
 		mTextureLookup[key] = mTextures.cbegin();
 
 		// Make sure it's loaded or queued for loading
-		if (!tex->isLoaded()) // FCATMP
+		if (enableLoading && !tex->isLoaded()) // FCATMP
 			load(tex);
 	}
 	return tex;
@@ -122,16 +122,10 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 	size_t size = TextureResource::getTotalMemUsage();
 	size_t max_texture = (size_t)Settings::getInstance()->getInt("MaxVRAM") * 1024 * 1024;
 
-	int cleanedMemory = 0;
-	int lastTime = SDL_GetTicks();
-
 	for (auto it = mTextures.crbegin(); it != mTextures.crend(); ++it)
 	{
 		if (size < max_texture)
 			break;
-
-		if (!(*it)->isLoaded()) // FCA added to avoid calling TextureResource::getTotalMemUsage() if texture is not loaded
-			continue;
 
 		(*it)->releaseVRAM();
 		(*it)->releaseRAM();
@@ -140,24 +134,14 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 		// any VRAM yet but it will be. Remove it from the loader queue
 		mLoader->remove(*it);
 		size = TextureResource::getTotalMemUsage();
-
-		cleanedMemory++;
 	}	
-
-#ifdef WIN32	
-	if (cleanedMemory > 0)
-	{
-		lastTime = SDL_GetTicks() - lastTime;
-		TRACE("cleanedMemory : " << cleanedMemory << " items in " << lastTime  << " ms")
-	}
-#endif
 
 	if (!block)
 	{
 		mLoader->load(tex);
 	}
 	else
-	{		
+	{				
 		mLoader->remove(tex);
 		tex->load();
 	}
@@ -259,4 +243,17 @@ size_t TextureLoader::getQueueSize()
 		mem += tex->width() * tex->height() * 4;
 	}
 	return mem;
+}
+
+void TextureLoader::clearQueue()
+{
+	// Just abort any waiting texture
+	mTextureDataQ.clear();
+	mTextureDataLookup.clear();
+}
+
+void TextureDataManager::clearQueue()
+{
+	if (mLoader != nullptr)
+		mLoader->clearQueue();
 }

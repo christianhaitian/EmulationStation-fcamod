@@ -689,7 +689,14 @@ void GuiMenu::openUISettings()
 	auto hideSystemView = std::make_shared<SwitchComponent>(mWindow);
 	hideSystemView->setState(Settings::getInstance()->getBool("HideSystemView"));
 	s->addWithLabel(_T("HIDE SYSTEM VIEW"), hideSystemView);
-	s->addSaveFunc([hideSystemView] { Settings::getInstance()->setBool("HideSystemView", hideSystemView->getState()); });
+	s->addSaveFunc([hideSystemView] 
+	{ 
+		bool hideSysView = Settings::getInstance()->getBool("HideSystemView");
+		Settings::getInstance()->setBool("HideSystemView", hideSystemView->getState());
+
+		if (!hideSysView && hideSystemView->getState())
+			ViewController::get()->goToStart(true);
+	});
 	
 
 #if defined(_WIN32)

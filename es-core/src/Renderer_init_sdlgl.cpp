@@ -33,6 +33,8 @@ namespace Renderer
 	SDL_Window* sdlWindow = NULL;
 	SDL_GLContext sdlContext = NULL;
 
+	Vector2i sdlWindowPosition = Vector2i(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED);
+
 	bool createSurface()
 	{
 		LOG(LogInfo) << "Creating surface...";
@@ -72,8 +74,8 @@ namespace Renderer
 		screenRotate = Settings::getInstance()->getInt("ScreenRotate") ? Settings::getInstance()->getInt("ScreenRotate") : 0;
 		
 		sdlWindow = SDL_CreateWindow("EmulationStation",
-			SDL_WINDOWPOS_UNDEFINED, 
-			SDL_WINDOWPOS_UNDEFINED,
+			sdlWindowPosition.x(),
+			sdlWindowPosition.y(),
 			windowWidth, windowHeight,
 			SDL_WINDOW_OPENGL | (Settings::getInstance()->getBool("Windowed") ? 0 : (Settings::getInstance()->getBool("FullscreenBorderless") ? SDL_WINDOW_BORDERLESS : SDL_WINDOW_FULLSCREEN))
 		);
@@ -147,7 +149,14 @@ namespace Renderer
 	}
 
 	void destroySurface()
-	{
+	{		
+		if (Settings::getInstance()->getBool("Windowed"))
+		{
+			int x; int y;
+			SDL_GetWindowPosition(sdlWindow, &x, &y);
+			sdlWindowPosition = Vector2i(x, y); // Save position to restore it later
+		}
+
 		SDL_GL_DeleteContext(sdlContext);
 		sdlContext = NULL;
 

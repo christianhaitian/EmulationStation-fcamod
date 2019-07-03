@@ -148,10 +148,10 @@ void ImageComponent::setImage(std::string path, bool tile, MaxSizeInfo maxSize)
 		if (mDefaultPath.empty() || !ResourceManager::getInstance()->fileExists(mDefaultPath))
 			mTexture.reset();
 		else
-			mTexture = TextureResource::get(mDefaultPath, tile, mForceLoad, mDynamic, maxSize);
+			mTexture = TextureResource::get(mDefaultPath, tile, mForceLoad, mDynamic, true, maxSize);
 	} 
 	else 
-		mTexture = TextureResource::get(path, tile, mForceLoad, mDynamic, maxSize);
+		mTexture = TextureResource::get(path, tile, mForceLoad, mDynamic, true, maxSize);
 	
 	resize();
 }
@@ -351,11 +351,11 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 		return;
 
 	Transform4x4f trans = parentTrans * getTransform();
-
+	
 	Vector2f clipPos(trans.translation().x(), trans.translation().y());
 	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
 		return;
-
+		
 	Renderer::setMatrix(trans);
 
 	if (mTexture)
@@ -375,7 +375,7 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			// when it finally loads
 			fadeIn(mTexture->bind());
 
-			if (mColorShift & 0xff)
+		//	if (mColorShift & 0xff)
 			{
 				glEnable(GL_TEXTURE_2D);
 				glEnable(GL_BLEND);

@@ -56,7 +56,7 @@ void ViewController::goToStart(bool forceImmediate)
 			if ((*it)->getName() == requestedSystem)
 			{
 				if (hideSystemView || startOnGamelist)
-					goToGameList(*it);
+					goToGameList(*it, forceImmediate);
 				else
 					goToSystemView(*it, forceImmediate);
 
@@ -69,7 +69,7 @@ void ViewController::goToStart(bool forceImmediate)
 	}
 
 	if (hideSystemView || startOnGamelist)
-		goToGameList(SystemData::sSystemVector.at(0));
+		goToGameList(SystemData::sSystemVector.at(0), forceImmediate);
 	else
 		goToSystemView(SystemData::sSystemVector.at(0), forceImmediate);
 }
@@ -126,7 +126,7 @@ void ViewController::goToPrevGameList()
 	goToGameList(system->getPrev());
 }
 
-void ViewController::goToGameList(SystemData* system)
+void ViewController::goToGameList(SystemData* system, bool forceImmediate)
 {
 	if(mState.viewing == SYSTEM_SELECT)
 	{
@@ -149,7 +149,7 @@ void ViewController::goToGameList(SystemData* system)
 	if (mCurrentView)
 		mCurrentView->onShow();
 
-	playViewTransition(false);
+	playViewTransition(forceImmediate);
 }
 
 void ViewController::playViewTransition(bool forceImmediate)
@@ -494,8 +494,7 @@ void ViewController::render(const Transform4x4f& parentTrans)
 	Vector3f sysEnd = getSystemListView()->getPosition() + Vector3f(getSystemListView()->getSize().x(), getSystemListView()->getSize().y(), 0);
 
 	// draw systemview
-//	if ((sysStart.x() == viewStart.x() && sysStart.y() < viewStart.y() && sysEnd.x() > viewEnd.x() && sysEnd.y() > viewEnd.y()) ||
-//		(sysStart.x() < viewEnd.x() && sysStart.y() < viewEnd.y() && sysEnd.x() > viewStart.x() && sysEnd.y() > viewStart.y()))
+	if (!Settings::getInstance()->getBool("HideSystemView"))
 		getSystemListView()->render(trans);
 	
 	// draw gamelists
@@ -505,8 +504,7 @@ void ViewController::render(const Transform4x4f& parentTrans)
 		Vector3f guiStart = it->second->getPosition();
 		Vector3f guiEnd = it->second->getPosition() + Vector3f(it->second->getSize().x(), it->second->getSize().y(), 0);
 
-//		if ((guiStart.x() == viewStart.x() && guiStart.y() < viewStart.y() && guiEnd.x() > viewEnd.x() && guiEnd.y() > viewEnd.y()) ||
-//			(guiStart.x() < viewEnd.x() && guiStart.y() < viewEnd.y() && guiEnd.x() > viewStart.x() && guiEnd.y() > viewStart.y()))
+		if (guiEnd.x() >= viewStart.x() && guiEnd.y() >= viewStart.y() && guiStart.x() <= viewEnd.x() && guiStart.y() <= viewEnd.y())
 			it->second->render(trans);
 	}
 

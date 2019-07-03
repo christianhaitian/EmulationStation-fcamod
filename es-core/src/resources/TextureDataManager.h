@@ -20,6 +20,7 @@ public:
 
 	void load(std::shared_ptr<TextureData> textureData);
 	void remove(std::shared_ptr<TextureData> textureData);
+	void clearQueue();
 
 	size_t getQueueSize();
 
@@ -63,7 +64,7 @@ public:
 	// will be deleted when the other thread has finished with it
 	void remove(const TextureResource* key);
 
-	std::shared_ptr<TextureData> get(const TextureResource* key);
+	std::shared_ptr<TextureData> get(const TextureResource* key, bool enableLoading = true);
 	bool bind(const TextureResource* key);
 
 	// Get the total size of all textures managed by this object, loaded and unloaded in bytes
@@ -76,6 +77,7 @@ public:
 	// Load a texture, freeing resources as necessary to make space
 	void load(std::shared_ptr<TextureData> tex, bool block = false);
 
+	void clearQueue();
 private:
 
 	std::list<std::shared_ptr<TextureData> >												mTextures;

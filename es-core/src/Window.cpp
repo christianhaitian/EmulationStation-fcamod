@@ -109,6 +109,8 @@ void Window::deinit(bool deinitRenderer)
 		(*i)->onHide();
 	}
 
+	TRACE("-- deinit");
+
 	InputManager::getInstance()->deinit();
 	TextureResource::resetCache();
 	ResourceManager::getInstance()->unloadAll();
@@ -317,7 +319,7 @@ void Window::endRenderLoadingScreen()
 void Window::renderLoadingScreen(std::string text, float percent)
 {	
 	if (mSplash == NULL)
-		mSplash = TextureResource::get(":/splash.svg", false, true, true);
+		mSplash = TextureResource::get(":/splash.svg", false, true, false, false);
 
 	Transform4x4f trans = Transform4x4f::Identity();
 	Renderer::setMatrix(trans);
@@ -369,6 +371,9 @@ void Window::renderLoadingScreen(std::string text, float percent)
 
 void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 {
+	if (mSplash == NULL)
+		mSplash = TextureResource::get(":/splash.svg", false, true, false, false);
+
 	Transform4x4f trans = Transform4x4f::Identity();
 	Renderer::setMatrix(trans);
 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x00000000 | (unsigned char)(opacity * 255));
@@ -376,16 +381,8 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 	ImageComponent splash(this, true);
 	splash.setResize(Renderer::getScreenWidth() * 0.4f, 0.0f);
 
-#if defined(_WIN32)
-	if (mSplash == NULL)
-		mSplash = TextureResource::get(":/splash.svg", false, true, true);
-#endif
-
 	if (mSplash != NULL)
-	{
-		mSplash->reload();  // Ensure splash is loaded
 		splash.setImage(mSplash);
-	}
 	else
 		splash.setImage(":/splash.svg");
 

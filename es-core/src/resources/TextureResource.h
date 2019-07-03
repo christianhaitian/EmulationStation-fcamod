@@ -48,7 +48,7 @@ private:
 class TextureResource : public IReloadable
 {
 public:
-	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true, MaxSizeInfo maxSize = MaxSizeInfo());
+	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true, bool asReloadable = true, MaxSizeInfo maxSize = MaxSizeInfo());
 	void initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height);
 	virtual void initFromMemory(const char* file, size_t length);
 
@@ -69,7 +69,7 @@ public:
 	static void resetCache();
 
 public:
-	virtual void unload();
+	virtual bool unload();
 	virtual void reload();
 
 protected:

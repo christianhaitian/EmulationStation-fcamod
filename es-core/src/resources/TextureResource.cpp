@@ -95,7 +95,8 @@ bool TextureResource::isTiled() const
 {
 	if (mTextureData != nullptr)
 		return mTextureData->tiled();
-	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(this, false);
 	return data->tiled();
 }
 
@@ -114,11 +115,12 @@ bool TextureResource::bind()
 
 void TextureResource::resetCache()
 {
+	sTextureDataManager.clearQueue();
 	sPermanentTextureMap.clear();
 	sTextureMap.clear();
 }
 
-std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile, bool forceLoad, bool dynamic, MaxSizeInfo maxSize)
+std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile, bool forceLoad, bool dynamic, bool asReloadable, MaxSizeInfo maxSize)
 {
 	std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
 
@@ -169,26 +171,20 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 	// need to create it
 	std::shared_ptr<TextureResource> tex;
 	tex = std::shared_ptr<TextureResource>(new TextureResource(key.first, tile, dynamic, maxSize));
-	std::shared_ptr<TextureData> data = sTextureDataManager.get(tex.get());
-
-	// is it an SVG?
-	// if (key.first.substr(key.first.size() - 4, std::string::npos) != ".svg") // FCATMP
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(tex.get(), !forceLoad);
+		
+	if (asReloadable) // // is it an SVG // if (key.first.substr(key.first.size() - 4, std::string::npos) != ".svg") // FCATMP	
 	{
 		// Probably not. Add it to our map. We don't add SVGs because 2 svgs might be rasterized at different sizes
-		// FCA useless -> If the svg is too small, it will be reloaded bigger with setSourceSize...
-
-		if (canonicalPath.length() > 0 && canonicalPath[0] == ':')
+		// FCA useless -> If the svg is too small, it will be reloaded bigger with setSourceSize...		
+	/*	if (canonicalPath.length() > 0 && canonicalPath[0] == ':')
 			sPermanentTextureMap[key] = std::shared_ptr<TextureResource>(tex);
-		else
+		else*/
 			sTextureMap[key] = std::shared_ptr<TextureResource>(tex);
+
+		rm->addReloadable(tex);
 	}
 		
-	// Add it to the reloadable list, exclusion for splash.svg manually managed
-#ifdef WIN32
-	if (path != ":/splash.svg")
-#endif
-		rm->addReloadable(tex);
-
 	if (data != nullptr)
 		data->setMaxSize(maxSize);
 
@@ -196,7 +192,8 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 	if (forceLoad)
 	{
 		tex->mForceLoad = forceLoad;
-		data->load();
+		if (data != nullptr && !data->isLoaded())
+			data->load();
 	}
 
 	return tex;
@@ -259,17 +256,24 @@ size_t TextureResource::getTotalTextureSize()
 	return total;
 }
 
-void TextureResource::unload()
+bool TextureResource::unload()
 {
 	// Release the texture's resources
 	std::shared_ptr<TextureData> data;
 	if (mTextureData == nullptr)
-		data = sTextureDataManager.get(this);
+		data = sTextureDataManager.get(this, false);
 	else
 		data = mTextureData;
 
-	data->releaseVRAM();
-	data->releaseRAM();
+	if (data != nullptr && data->isLoaded())
+	{
+		data->releaseVRAM();
+		data->releaseRAM();
+
+		return true;
+	}
+
+	return false;
 }
 
 void TextureResource::reload()
@@ -278,4 +282,6 @@ void TextureResource::reload()
 	// For manually loaded textures we have to reload them here
 	if (mTextureData && !mTextureData->isLoaded())
 		mTextureData->load();
+//	else if (mTextureData == nullptr)
+//		sTextureDataManager.get(this);
 }
