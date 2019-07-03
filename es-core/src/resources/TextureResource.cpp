@@ -6,7 +6,7 @@
 TextureDataManager		TextureResource::sTextureDataManager;
 
 std::map< TextureResource::TextureKeyType, std::weak_ptr<TextureResource>> TextureResource::sTextureMap;
-std::map< TextureResource::TextureKeyType, std::shared_ptr<TextureResource>> TextureResource::sPermanentTextureMap; // FCAWEAK
+std::map< TextureResource::TextureKeyType, std::shared_ptr<TextureResource>> TextureResource::sPermanentTextureMap;
 
 std::set<TextureResource*> 	TextureResource::sAllTextures;
 
@@ -134,7 +134,7 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 	auto foundTexture = sTextureMap.find(key);
 	if(foundTexture != sTextureMap.cend())
 	{
-		if (!foundTexture->second.expired()) // FCAWEAK
+		if (!foundTexture->second.expired()) 
 		{
 			std::shared_ptr<TextureResource> rc = foundTexture->second.lock();
 
@@ -172,18 +172,17 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 	std::shared_ptr<TextureData> data = sTextureDataManager.get(tex.get());
 
 	// is it an SVG?
-	// if(key.first.substr(key.first.size() - 4, std::string::npos) != ".svg") // FCATMP
+	// if (key.first.substr(key.first.size() - 4, std::string::npos) != ".svg") // FCATMP
 	{
 		// Probably not. Add it to our map. We don't add SVGs because 2 svgs might be rasterized at different sizes
 		// FCA useless -> If the svg is too small, it will be reloaded bigger with setSourceSize...
 
 		if (canonicalPath.length() > 0 && canonicalPath[0] == ':')
-			sPermanentTextureMap[key] = std::shared_ptr<TextureResource>(tex); // FCAWEAK
+			sPermanentTextureMap[key] = std::shared_ptr<TextureResource>(tex);
 		else
-			sTextureMap[key] = std::shared_ptr<TextureResource>(tex); // FCAWEAK
+			sTextureMap[key] = std::shared_ptr<TextureResource>(tex);
 	}
-
-	
+		
 	// Add it to the reloadable list, exclusion for splash.svg manually managed
 #ifdef WIN32
 	if (path != ":/splash.svg")
@@ -211,6 +210,7 @@ void TextureResource::rasterizeAt(size_t width, size_t height)
 		data = mTextureData;
 	else
 		data = sTextureDataManager.get(this);
+
 	mSourceSize = Vector2f((float)width, (float)height);
 	data->setSourceSize((float)width, (float)height);
 
@@ -278,6 +278,4 @@ void TextureResource::reload()
 	// For manually loaded textures we have to reload them here
 	if (mTextureData && !mTextureData->isLoaded())
 		mTextureData->load();
-	else if (mTextureData == nullptr)
-		sTextureDataManager.get(this);
 }
