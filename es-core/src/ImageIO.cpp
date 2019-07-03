@@ -86,8 +86,14 @@ std::vector<unsigned char> ImageIO::loadFromMemoryRGBA32(const unsigned char * d
 
 //public static Rectangle GetPictureRect(Size imageSize, Rectangle rcPhoto, bool outerZooming = false, bool sourceRect = false)
 
-Vector2i ImageIO::adjustPictureSize(Vector2i imageSize, Vector2i maxSize)
+Vector2i ImageIO::adjustPictureSize(Vector2i imageSize, Vector2i maxSize, bool externSize)
 {
+	if (externSize)
+	{
+		Vector2f szf = adjustExternPictureSizef(Vector2f(imageSize.x(), imageSize.y()), Vector2f(maxSize.x(), maxSize.y()));
+		return Vector2i(szf.x(), szf.y());
+	}
+
 	int cxDIB = imageSize.x();
 	int cyDIB = imageSize.y();
 	int iMaxX = maxSize.x();
@@ -170,16 +176,10 @@ unsigned char* ImageIO::loadFromMemoryRGBA32Ex(const unsigned char * data, const
 					
 					if (maxWidth > 0 && maxHeight > 0 && (width > maxWidth || height > maxHeight))
 					{
-						Vector2i sz = adjustPictureSize(Vector2i(width, height), Vector2i(maxWidth, maxHeight));
-						if (externZoom)
-						{
-							Vector2f szf = adjustExternPictureSizef(Vector2f(width, height), Vector2f(maxWidth, maxHeight));
-							sz = Vector2i(szf.x(), szf.y()); // adjustPictureSize(Vector2i(width, height), Vector2i(maxWidth, maxHeight));
-						}
-
+						Vector2i sz = adjustPictureSize(Vector2i(width, height), Vector2i(maxWidth, maxHeight), externZoom);
 						if (sz.x() != width || sz.y() != height)
 						{							
-							FIBITMAP* imageRescaled = FreeImage_Rescale(fiBitmap, sz.x(), sz.y(), FILTER_BICUBIC);
+							FIBITMAP* imageRescaled = FreeImage_Rescale(fiBitmap, sz.x(), sz.y(), FILTER_BOX);
 							FreeImage_Unload(fiBitmap);
 							fiBitmap = imageRescaled;
 

@@ -91,6 +91,10 @@ private:
 	static std::map< TextureKeyType, std::weak_ptr<TextureResource> > sTextureMap; // map of textures, used to prevent duplicate textures
 	static std::map< TextureKeyType, std::shared_ptr<TextureResource> > sPermanentTextureMap; // map of textures, used to prevent duplicate textures // FCAWEAK
 	static std::set<TextureResource*> 	sAllTextures;	// Set of all textures, used for memory management
+
+#if _DEBUG
+	std::string	mPath;
+#endif
 };
 
 #endif // ES_CORE_RESOURCES_TEXTURE_RESOURCE_H

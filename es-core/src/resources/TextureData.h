@@ -45,11 +45,7 @@ public:
 	// Release the texture from conventional RAM
 	void releaseRAM();
 
-	void setMaxSize(MaxSizeInfo maxSize)
-	{ 
-		if (mMaxSize.x() < maxSize.x() || mMaxSize.y() < maxSize.y())
-			mMaxSize = maxSize; 
-	};
+	void setMaxSize(MaxSizeInfo maxSize);
 
 	// Get the amount of VRAM currenty used by this texture
 	size_t getVRAMUsage();

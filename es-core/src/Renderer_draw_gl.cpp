@@ -132,7 +132,7 @@ namespace Renderer {
 	{		
 		ClipRect screen = ClipRect(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
 		ClipRect box = ClipRect(x, y, w, h);
-		/*
+		
 		if (w > 0 && x + w <= 0)
 			return false;
 
@@ -141,7 +141,7 @@ namespace Renderer {
 
 		if (x == screen.w || y == screen.h)
 			return false;
-			*/
+			
 		if (!rectOverlap(box, screen))
 			return false;
 

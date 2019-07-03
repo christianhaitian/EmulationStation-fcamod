@@ -88,18 +88,16 @@ bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length
 
 	mBaseSize = Vector2i(mWidth, mHeight);
 	
-	if (mMaxSize.x() > 0 && mMaxSize.y() > 0 && mHeight < mMaxSize.y() && mWidth < mMaxSize.y()) // FCATMP
+	if (mMaxSize.x() > 0 && mMaxSize.y() > 0 && mHeight < mMaxSize.y() && mWidth < mMaxSize.x()) // FCATMP
 	{
-		Vector2i sz = ImageIO::adjustPictureSize(Vector2i(mWidth, mHeight), Vector2i(mMaxSize.x(), mMaxSize.y()));
-		mWidth = sz.x();		
+		Vector2i sz = ImageIO::adjustPictureSize(Vector2i(mWidth, mHeight), Vector2i(mMaxSize.x(), mMaxSize.y()), mMaxSize.externalZoom());
 		mHeight = sz.y();
 		mWidth = (int)((mHeight * svgImage->width) / svgImage->height);
 	}
 	
 	if (OPTIMIZEVRAM && mMaxSize.x() > 0 && mMaxSize.y() > 0 && (mWidth > mMaxSize.x() || mHeight > mMaxSize.y()))
 	{
-		Vector2i sz = ImageIO::adjustPictureSize(Vector2i(mWidth, mHeight), Vector2i(mMaxSize.x(), mMaxSize.y()));
-		mWidth = sz.x();
+		Vector2i sz = ImageIO::adjustPictureSize(Vector2i(mWidth, mHeight), Vector2i(mMaxSize.x(), mMaxSize.y()), mMaxSize.externalZoom());
 		mHeight = sz.y();	
 		mWidth = (mHeight * svgImage->width) / svgImage->height;
 
@@ -168,6 +166,24 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 
 	return initFromRGBAEx(imageRGBA, width, height);
 }
+
+
+void TextureData::setMaxSize(MaxSizeInfo maxSize)
+{
+	if (mSourceWidth == 0 || mSourceHeight == 0)
+		mMaxSize = maxSize;
+	else
+	{
+		Vector2i value = ImageIO::adjustPictureSize(Vector2i(mSourceWidth, mSourceHeight), Vector2i(mMaxSize.x(), mMaxSize.y()), mMaxSize.externalZoom());
+		Vector2i newVal = ImageIO::adjustPictureSize(Vector2i(mSourceWidth, mSourceHeight), Vector2i(maxSize.x(), maxSize.y()), mMaxSize.externalZoom());
+
+		if (newVal.x() > value.x() || newVal.y() > value.y())
+			mMaxSize = maxSize;
+
+		//if (mMaxSize.x() < maxSize.x() || mMaxSize.y() < maxSize.y())
+	}
+};
+
 
 bool TextureData::initFromRGBA(const unsigned char* dataRGBA, size_t width, size_t height)
 {

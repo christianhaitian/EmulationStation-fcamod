@@ -12,6 +12,10 @@ std::set<TextureResource*> 	TextureResource::sAllTextures;
 
 TextureResource::TextureResource(const std::string& path, bool tile, bool dynamic, MaxSizeInfo maxSize) : mTextureData(nullptr), mForceLoad(false)
 {
+#if _DEBUG
+	mPath = path;
+#endif
+
 	// Create a texture data object for this texture
 	if (!path.empty())
 	{
@@ -46,7 +50,9 @@ TextureResource::TextureResource(const std::string& path, bool tile, bool dynami
 		// Create a texture managed by this class because it cannot be dynamically loaded and unloaded
 		mTextureData = std::shared_ptr<TextureData>(new TextureData(tile));
 	}
-	sAllTextures.insert(this);
+
+	if (sAllTextures.find(this) == sAllTextures.end())
+		sAllTextures.insert(this);
 }
 
 TextureResource::~TextureResource()
@@ -116,8 +122,6 @@ bool TextureResource::bind()
 void TextureResource::resetCache()
 {
 	sTextureDataManager.clearQueue();
-	sPermanentTextureMap.clear();
-	sTextureMap.clear();
 }
 
 std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile, bool forceLoad, bool dynamic, bool asReloadable, MaxSizeInfo maxSize)
@@ -177,9 +181,9 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 	{
 		// Probably not. Add it to our map. We don't add SVGs because 2 svgs might be rasterized at different sizes
 		// FCA useless -> If the svg is too small, it will be reloaded bigger with setSourceSize...		
-	/*	if (canonicalPath.length() > 0 && canonicalPath[0] == ':')
+		if (canonicalPath.length() > 0 && canonicalPath[0] == ':')
 			sPermanentTextureMap[key] = std::shared_ptr<TextureResource>(tex);
-		else*/
+		else
 			sTextureMap[key] = std::shared_ptr<TextureResource>(tex);
 
 		rm->addReloadable(tex);
@@ -282,6 +286,6 @@ void TextureResource::reload()
 	// For manually loaded textures we have to reload them here
 	if (mTextureData && !mTextureData->isLoaded())
 		mTextureData->load();
-//	else if (mTextureData == nullptr)
-//		sTextureDataManager.get(this);
+	else if (mTextureData == nullptr)
+		sTextureDataManager.get(this);
 }

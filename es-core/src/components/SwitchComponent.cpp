@@ -9,7 +9,7 @@ SwitchComponent::SwitchComponent(Window* window, bool state) : GuiComponent(wind
 
 	float height = Font::get(FONT_SIZE_MEDIUM)->getLetterHeight();	
 
-	mImage.setImage(ThemeData::getMenuTheme()->Icons.off, false, MaxSizeInfo(height, height));
+	mImage.setImage(ThemeData::getMenuTheme()->Icons.off);
 	mImage.setResize(0, height);
 	mImage.setColorShift(menuTheme->Text.color);
 
@@ -78,7 +78,6 @@ void SwitchComponent::onStateChanged()
 {
 	auto theme = ThemeData::getMenuTheme();
 	mImage.setImage(mState ? theme->Icons.on : theme->Icons.off);
-	//mImage.setImage(mState ? ":/on.svg" : ":/off.svg");
 }
 
 std::vector<HelpPrompt> SwitchComponent::getHelpPrompts()
