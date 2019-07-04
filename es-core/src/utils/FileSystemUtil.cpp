@@ -24,6 +24,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #endif // _WIN32
+#include <fstream>
 
 namespace Utils
 {
@@ -32,15 +33,6 @@ namespace Utils
 #if defined(_WIN32)
 		std::mutex mFileMutex;
 #endif
-
-		pugi::xml_parse_result	load_xml(pugi::xml_document& doc, const char* path)
-		{			
-#if defined(_WIN32)
-			std::unique_lock<std::mutex> lock(mFileMutex);
-#endif
-			return doc.load_file(path);
-		}
-
 		bool compareFileInfo(const FileInfo& first, const FileInfo& second)
 		{
 			unsigned int i = 0;
@@ -53,7 +45,13 @@ namespace Utils
 			return (first.path.length() < second.path.length());			
 		}
 
-
+		void writeAllText(const std::string fileName, const std::string text)
+		{
+			std::fstream fs;
+			fs.open(fileName.c_str(), std::fstream::out);
+			fs << text;
+			fs.close();
+		}
 
 		fileList getDirInfo(const std::string& _path/*, const bool _recursive*/)
 		{

@@ -62,6 +62,8 @@ namespace Renderer
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 #endif
 
+	
+
 		SDL_DisplayMode dispMode;
 		SDL_GetDesktopDisplayMode(0, &dispMode);
 
@@ -73,6 +75,37 @@ namespace Renderer
 		screenOffsetY = Settings::getInstance()->getInt("ScreenOffsetY") ? Settings::getInstance()->getInt("ScreenOffsetY") : 0;
 		screenRotate = Settings::getInstance()->getInt("ScreenRotate") ? Settings::getInstance()->getInt("ScreenRotate") : 0;
 		
+		int monitorId = Settings::getInstance()->getInt("MonitorID");
+		if (monitorId >=0 && sdlWindowPosition == Vector2i(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED))
+		{
+			int displays = SDL_GetNumVideoDisplays();
+			if (displays >= monitorId)
+			{
+				SDL_Rect rc;
+				SDL_GetDisplayBounds(monitorId, &rc);
+
+				sdlWindowPosition = Vector2i(rc.x, rc.y);
+
+				if (Settings::getInstance()->getBool("Windowed") && (Settings::getInstance()->getInt("WindowWidth") || Settings::getInstance()->getInt("ScreenWidth")))
+				{
+					if (windowWidth != rc.w || windowHeight != rc.h)
+					{
+						sdlWindowPosition = Vector2i(
+							rc.x + (rc.w - windowWidth) / 2,
+							rc.y + (rc.h - windowHeight) / 2						
+						);
+					}
+				}
+				else
+				{
+					windowWidth = rc.w;
+					windowHeight = rc.h;
+					screenWidth = rc.w;
+					screenHeight = rc.h;
+				}
+			}
+		}
+
 		sdlWindow = SDL_CreateWindow("EmulationStation",
 			sdlWindowPosition.x(),
 			sdlWindowPosition.y(),

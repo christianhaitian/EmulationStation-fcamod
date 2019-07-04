@@ -395,10 +395,10 @@ std::vector<HelpPrompt> SystemView::getHelpPrompts()
 		prompts.push_back(HelpPrompt("left/right", _T("CHOOSE")));
 
 	prompts.push_back(HelpPrompt("a", _T("SELECT")));
-	//prompts.push_back(HelpPrompt("x", "random"));
+	prompts.push_back(HelpPrompt("x", _T("RANDOM")));
 
-//	if (!UIModeController::getInstance()->isUIModeKid() && Settings::getInstance()->getBool("ScreenSaverControls"))
-	//	prompts.push_back(HelpPrompt("select", "launch screensaver"));
+	if (!UIModeController::getInstance()->isUIModeKid() && Settings::getInstance()->getBool("ScreenSaverControls"))
+		prompts.push_back(HelpPrompt("select", _T("LAUNCH SCREENSAVER")));
 
 	return prompts;
 }

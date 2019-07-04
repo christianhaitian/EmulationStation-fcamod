@@ -529,6 +529,10 @@ msgstr "OPTIONS DE L'INTERFACE"
 msgid "OVERSCAN"
 msgstr "OVERSCAN"
 
+#:
+msgid "LAUNCH SCREENSAVER"
+msgstr "ÉCRAN DE VEILLE"
+
 #: 
 msgid "SCREENSAVER SETTINGS"
 msgstr "ÉCRAN DE VEILLE"

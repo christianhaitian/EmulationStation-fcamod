@@ -7,6 +7,7 @@
 #include "utils/StringUtil.h"
 #include "Log.h"
 #include "Sound.h"
+#include "Settings.h"
 #include <memory>
 
 class TextCache;
@@ -139,6 +140,18 @@ void TextListComponent<T>::render(const Transform4x4f& parentTrans)
 
 	if(size() == 0)
 		return;
+
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
+
+	if (Settings::getInstance()->getBool("DebugGrid"))
+	{
+		Renderer::setMatrix(trans);
+		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0xFF000033);
+		Renderer::setMatrix(parentTrans);
+	}
+
 
 	const float entrySize = Math::max(font->getHeight(1.0), (float)font->getSize()) * mLineSpacing;
 

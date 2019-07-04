@@ -4,7 +4,6 @@
 
 #include <list>
 #include <string>
-#include <pugixml/src/pugixml.hpp>
 
 namespace Utils
 {
@@ -53,11 +52,8 @@ namespace Utils
 
 		void		setHomePath		   (std::string path);
 		bool		copyFile		   (const std::string src, const std::string dst);
-
-		pugi::xml_parse_result	load_xml(pugi::xml_document& doc, const char* path);
-
 	
-
+		void		writeAllText	   (const std::string fileName, const std::string text);
 	} // FileSystem::
 
 

@@ -30,13 +30,14 @@ std::vector<const char*> settings_dont_save {
 #endif
 	{ "FullscreenBorderless" },
 	{ "Windowed" },
-	{ "WindowWidth" },
+	{ "WindowWidth" },	
 	{ "WindowHeight" },
 	{ "ScreenWidth" },
 	{ "ScreenHeight" },
 	{ "ScreenOffsetX" },
 	{ "ScreenOffsetY" },
 	{ "ScreenRotate" },
+	{ "MonitorID" },
 	{ "ExePath" },
 	{ "HomePath" }
 };
@@ -191,7 +192,7 @@ void Settings::setDefaults()
 	mIntMap["ScreenOffsetX"] = 0;
 	mIntMap["ScreenOffsetY"] = 0;
 	mIntMap["ScreenRotate"]  = 0;
-
+	mIntMap["MonitorID"] = -1;	
 	mStringMap["ExePath"] = "";
 
 

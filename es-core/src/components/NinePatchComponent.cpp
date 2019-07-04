@@ -213,9 +213,27 @@ void NinePatchComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, con
 	using namespace ThemeFlags;
 
 	const ThemeData::ThemeElement* elem = theme->getElement(view, element, "ninepatch");
-	if(!elem)
+	if (!elem)
 		return;
 
-	if(properties & PATH && elem->has("path"))
+	if (properties & PATH && elem->has("path"))
 		setImagePath(elem->get<std::string>("path"));
+	
+	if (properties & COLOR)
+	{
+		if (elem->has("color"))
+		{
+			setCenterColor(elem->get<unsigned int>("color"));
+			setEdgeColor(elem->get<unsigned int>("color"));
+		}
+		
+		if (elem->has("centerColor"))
+			setCenterColor(elem->get<unsigned int>("centerColor"));
+
+		if (elem->has("edgeColor"))
+			setEdgeColor(elem->get<unsigned int>("edgeColor"));
+	}
+
+	if (elem->has("cornerSize"))
+		setCornerSize(elem->get<Vector2f>("cornerSize"));
 }

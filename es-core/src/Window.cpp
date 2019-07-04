@@ -79,9 +79,7 @@ bool Window::init(bool initRenderer)
 	}
 
 	InputManager::getInstance()->init();
-
-	//if (initRenderer)
-		ResourceManager::getInstance()->reloadAll();
+	ResourceManager::getInstance()->reloadAll();
 
 	//keep a reference to the default fonts, so they don't keep getting destroyed/recreated
 	if(mDefaultFonts.empty())
@@ -108,8 +106,6 @@ void Window::deinit(bool deinitRenderer)
 	{
 		(*i)->onHide();
 	}
-
-	TRACE("-- deinit");
 
 	InputManager::getInstance()->deinit();
 	TextureResource::resetCache();
@@ -167,17 +163,17 @@ void Window::input(InputConfig* config, Input input)
 	if (cancelScreenSaver())
 		return;
 
-	if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_g && SDL_GetModState() & KMOD_LCTRL && Settings::getInstance()->getBool("Debug"))
+	if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_g && SDL_GetModState() & KMOD_LCTRL/* && Settings::getInstance()->getBool("Debug")*/)
 	{
 		// toggle debug grid with Ctrl-G
 		Settings::getInstance()->setBool("DebugGrid", !Settings::getInstance()->getBool("DebugGrid"));
 	}
-	else if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_t && SDL_GetModState() & KMOD_LCTRL && Settings::getInstance()->getBool("Debug"))
+	else if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_t && SDL_GetModState() & KMOD_LCTRL/* && Settings::getInstance()->getBool("Debug")*/)
 	{
 		// toggle TextComponent debug view with Ctrl-T
 		Settings::getInstance()->setBool("DebugText", !Settings::getInstance()->getBool("DebugText"));
 	}
-	else if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_i && SDL_GetModState() & KMOD_LCTRL && Settings::getInstance()->getBool("Debug"))
+	else if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_i && SDL_GetModState() & KMOD_LCTRL/* && Settings::getInstance()->getBool("Debug")*/)
 	{
 		// toggle TextComponent debug view with Ctrl-I
 		Settings::getInstance()->setBool("DebugImage", !Settings::getInstance()->getBool("DebugImage"));

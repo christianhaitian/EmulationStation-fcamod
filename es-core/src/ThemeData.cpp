@@ -2,6 +2,7 @@
 
 #include "components/ImageComponent.h"
 #include "components/TextComponent.h"
+#include "components/NinePatchComponent.h"
 #include "utils/FileSystemUtil.h"
 #include "Log.h"
 #include "platform.h"
@@ -79,6 +80,8 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "glowColor", COLOR },
 		{ "glowSize", FLOAT },
 
+		{ "padding", NORMALIZED_RECT },
+
 		{ "zIndex", FLOAT } } },
 	{ "textlist", {
 		{ "pos", NORMALIZED_PAIR },
@@ -110,6 +113,12 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "pos", NORMALIZED_PAIR },
 		{ "size", NORMALIZED_PAIR },
 		{ "path", PATH },
+
+		{ "color", COLOR },
+		{ "cornerSize", NORMALIZED_PAIR },		
+		{ "centerColor", COLOR },
+		{ "edgeColor", COLOR },
+
 		{ "zIndex", FLOAT } } },
 	{ "datetime", {
 		{ "pos", NORMALIZED_PAIR },
@@ -952,6 +961,8 @@ std::vector<GuiComponent*> ThemeData::makeExtras(const std::shared_ptr<ThemeData
 				comp = new ImageComponent(window);
 			else if(t == "text")
 				comp = new TextComponent(window);
+			else if (t == "ninepatch")
+				comp = new NinePatchComponent(window);
 			else if (t == "video")
 			{
 #ifdef _RPI_

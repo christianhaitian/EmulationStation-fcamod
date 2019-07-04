@@ -160,6 +160,13 @@ void VideoComponent::render(const Transform4x4f& parentTrans)
 
 	Renderer::setMatrix(trans);
 
+	if (Settings::getInstance()->getBool("DebugImage"))
+	{
+		Vector2f targetSizePos = (mTargetSize - mSize) * mOrigin * -1;
+		Renderer::drawRect(targetSizePos.x(), targetSizePos.y(), mTargetSize.x(), mTargetSize.y(), 0xFF000033);
+		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000033);
+	}
+
 	// Handle the case where the video is delayed
 	handleStartDelay();
 

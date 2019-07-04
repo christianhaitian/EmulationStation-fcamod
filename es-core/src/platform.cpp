@@ -12,6 +12,7 @@
 #include "Window.h"
 
 #include "GuiComponent.h"
+#include "utils/FileSystemUtil.h"
 
 int runShutdownCommand()
 {
@@ -82,6 +83,23 @@ void split_cmd(const std::string& cmd,
 	}
 }
 
+#ifdef WIN32
+int _monitorEnumIndex = 0;
+HMONITOR _monitorEnumHandle = 0;
+
+BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{	
+	if (_monitorEnumIndex == dwData)
+	{
+		_monitorEnumHandle = hMonitor;
+		return FALSE;
+	}
+
+	_monitorEnumIndex++;
+	return TRUE;  // continue enumerating
+}
+#endif
+
 int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Window* window)
 {
 #ifdef WIN32
@@ -105,10 +123,36 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 	lpExecInfo.fMask = SEE_MASK_DOENVSUBST | SEE_MASK_NOCLOSEPROCESS;
 	lpExecInfo.hwnd = NULL;
 	lpExecInfo.lpVerb = "open"; // to open  program
-	lpExecInfo.lpParameters = args.c_str(); //  file name as an argument
+
 	lpExecInfo.lpDirectory = NULL;
 	lpExecInfo.nShow = SW_SHOW;  // show command prompt with normal window size 
 	lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;   //WINSHELLAPI BOOL WINAPI result;
+	
+	std::string extraConfigFile;
+
+	int monitorId = Settings::getInstance()->getInt("MonitorID");
+	if (monitorId > 0)
+	{
+		_monitorEnumIndex = 0;
+		_monitorEnumHandle = 0;
+		EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, monitorId);
+		if (_monitorEnumHandle != 0)
+		{
+			// Special processing for retroarch -> Set monitor index in the extra config file ( and disable save_on_exit )
+			if (Utils::String::toLower(exe).find("retroarch.") != std::string::npos)
+			{
+				std::string video_monitor_index = "video_monitor_index = \""+ std::to_string(monitorId+1) +"\"\r\nconfig_save_on_exit = \"false\"\r\n";
+				extraConfigFile = Utils::FileSystem::getGenericPath(Utils::FileSystem::getHomePath() + "/retroarch.custom.cfg");
+				Utils::FileSystem::writeAllText(extraConfigFile, video_monitor_index);
+				args = args + " --appendconfig \""+ extraConfigFile +"\"";
+			}
+
+			lpExecInfo.fMask |= SEE_MASK_HMONITOR;
+			lpExecInfo.hIcon = _monitorEnumHandle;
+		}
+	}
+	
+	lpExecInfo.lpParameters = args.c_str(); //  file name as an argument
 	ShellExecuteEx(&lpExecInfo);
 
 	if (lpExecInfo.hProcess != NULL)
@@ -129,11 +173,17 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 					window->renderGameLoadingScreen();
 			}
 		}
-		
+	
+		if (Utils::FileSystem::exists(extraConfigFile))
+			Utils::FileSystem::removeFile(extraConfigFile);
+
 		CloseHandle(lpExecInfo.hProcess);
 		return 0;
 	}
 	
+	if (Utils::FileSystem::exists(extraConfigFile))
+		Utils::FileSystem::removeFile(extraConfigFile);
+
 	return 1;
 	//return _wsystem(wchar_str.c_str());
 #else

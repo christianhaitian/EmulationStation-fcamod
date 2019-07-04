@@ -4,6 +4,7 @@
 
 #include "resources/Font.h"
 #include "GuiComponent.h"
+#include "math/Vector4f.h"
 
 class ThemeData;
 
@@ -75,6 +76,7 @@ private:
 
 	unsigned int mGlowColor;
 	unsigned int mGlowSize;
+	Vector4f	mPadding;
 };
 
 #endif // ES_CORE_COMPONENTS_TEXT_COMPONENT_H

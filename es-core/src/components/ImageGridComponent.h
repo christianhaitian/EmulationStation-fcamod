@@ -141,7 +141,7 @@ ImageGridComponent<T>::ImageGridComponent(Window* window) : IList<ImageGridData,
 
 	mSize = screen * 0.80f;
 	mMargin = screen * 0.07f;
-	mPadding = Vector4f();
+	mPadding = Vector4f(0, 0, 0, 0);
 	mTileSize = GridTileComponent::getDefaultTileSize();
 
 	mImageSource = THUMBNAIL;
@@ -264,16 +264,16 @@ void ImageGridComponent<T>::render(const Transform4x4f& parentTrans)
 	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
 		return;
 
-	float offsetX = isVertical() ? 0 : mCamera * mCameraDirection * (mTileSize.x() + mMargin.x());
-	float offsetY = isVertical() ? mCamera * mCameraDirection * (mTileSize.y() + mMargin.y()) : 0;
-
-	if (Settings::getInstance()->getBool("DebugImage"))
+	if (Settings::getInstance()->getBool("DebugGrid"))
 	{
 		Renderer::setMatrix(trans);
-		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0xFF000055);
+		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0xFF000033);
 		Renderer::setMatrix(parentTrans);
 	}
 
+	float offsetX = isVertical() ? 0 : mCamera * mCameraDirection * (mTileSize.x() + mMargin.x());
+	float offsetY = isVertical() ? mCamera * mCameraDirection * (mTileSize.y() + mMargin.y()) : 0;
+	
 	if (mEntriesDirty)
 	{
 		updateTiles();
@@ -287,6 +287,20 @@ void ImageGridComponent<T>::render(const Transform4x4f& parentTrans)
 	Vector2i pos((int)Math::round(trans.translation()[0]), (int)Math::round(trans.translation()[1]));
 	Vector2i size((int)Math::round(mSize.x() * scaleX), (int)Math::round(mSize.y() * scaleY));
 
+	if (Settings::getInstance()->getBool("DebugGrid"))
+	{
+		for (auto it = mTiles.begin(); it != mTiles.end(); it++)
+		{
+			std::shared_ptr<GridTileComponent> tile = (*it);
+
+			auto tt = tile->getTransform() * trans;
+			Renderer::setMatrix(tt);
+			Renderer::drawRect(0.0, 0.0, tile->getSize().x(), tile->getSize().y(), 0x00FF0033);
+		}
+
+		Renderer::setMatrix(parentTrans);
+	}
+
 	Renderer::pushClipRect(pos, size);
 
 	if (mCamera != 0)
@@ -294,6 +308,8 @@ void ImageGridComponent<T>::render(const Transform4x4f& parentTrans)
 		for (auto it = mTiles.begin(); it != mTiles.end(); it++)
 			(*it)->setPosition((*it)->getPosition().x() + offsetX, (*it)->getPosition().y() + offsetY);
 	}
+
+	
 
 	// Render the selected image background on bottom of the others if needed
 	std::shared_ptr<GridTileComponent> selectedTile = NULL;

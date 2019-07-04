@@ -8,7 +8,7 @@
 TextComponent::TextComponent(Window* window) : GuiComponent(window), 
 	mFont(Font::get(FONT_SIZE_MEDIUM)), mUppercase(false), mColor(0x000000FF), mAutoCalcExtent(true, true),
 	mHorizontalAlignment(ALIGN_LEFT), mVerticalAlignment(ALIGN_CENTER), mLineSpacing(1.5f), mBgColor(0),
-	mRenderBackground(false), mGlowColor(0), mGlowSize(2)
+	mRenderBackground(false), mGlowColor(0), mGlowSize(2), mPadding(Vector4f(0, 0, 0, 0))
 {
 }
 
@@ -16,7 +16,7 @@ TextComponent::TextComponent(Window* window, const std::string& text, const std:
 	Vector3f pos, Vector2f size, unsigned int bgcolor) : GuiComponent(window), 
 	mFont(NULL), mUppercase(false), mColor(1), mAutoCalcExtent(true, true),
 	mHorizontalAlignment(align), mVerticalAlignment(ALIGN_CENTER), mLineSpacing(1.5f), mBgColor(0),
-	mRenderBackground(false), mGlowColor(0), mGlowSize(2)
+	mRenderBackground(false), mGlowColor(0), mGlowSize(2), mPadding(Vector4f(0, 0, 0, 0))
 {
 	setFont(font);
 	setColor(color);
@@ -149,7 +149,8 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 				yOff = (int) (getSize().y() - textSize.y()) / 2.0f;
 				break;
 		}
-		Vector3f off(0, yOff, 0);
+
+		Vector3f off(mPadding.x(), mPadding.y() + yOff, 0);
 
 		if(Settings::getInstance()->getBool("DebugText"))
 		{
@@ -164,7 +165,7 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 			{
 				auto func = [this, off, yOff, parentTrans](float x, float y)
 				{
-					Vector3f off = Vector3f(x, yOff + y, 0);
+					Vector3f off = Vector3f(mPadding.x() + x, mPadding.y() + yOff + y, 0);
 					Transform4x4f trans = parentTrans * getTransform();
 
 					trans.translate(off);
@@ -247,10 +248,13 @@ void TextComponent::onTextChanged()
 		return;
 	}
 
+	int sx = mSize.x() - mPadding.x() - mPadding.z();
+	int sy = mSize.y() - mPadding.y() - mPadding.w();
+
 	std::string text = mUppercase ? Utils::String::toUpper(mText) : mText;
 
 	std::shared_ptr<Font> f = mFont;
-	const bool isMultiline = (mSize.y() == 0 || mSize.y() > f->getHeight()*1.2f);
+	const bool isMultiline = (mSize.y() == 0 || sy > f->getHeight()*1.2f);
 
 	bool addAbbrev = false;
 	if(!isMultiline)
@@ -261,13 +265,13 @@ void TextComponent::onTextChanged()
 	}
 
 	Vector2f size = f->sizeText(text);
-	if(!isMultiline && mSize.x() && text.size() && (size.x() > mSize.x() || addAbbrev))
+	if(!isMultiline && sx && text.size() && (size.x() > sx || addAbbrev))
 	{
 		// abbreviate text
 		const std::string abbrev = "...";
 		Vector2f abbrevSize = f->sizeText(abbrev);
 
-		while(text.size() && size.x() + abbrevSize.x() > mSize.x())
+		while(text.size() && size.x() + abbrevSize.x() > sx)
 		{
 			size_t newSize = Utils::String::prevCursor(text, text.size());
 			text.erase(newSize, text.size() - newSize);
@@ -276,9 +280,9 @@ void TextComponent::onTextChanged()
 
 		text.append(abbrev);
 
-		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(text, Vector2f(0, 0), (mColor >> 8 << 8) | mOpacity, mSize.x(), mHorizontalAlignment, mLineSpacing));
+		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(text, Vector2f(0, 0), (mColor >> 8 << 8) | mOpacity, sx, mHorizontalAlignment, mLineSpacing));
 	}else{
-		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(f->wrapText(text, mSize.x()), Vector2f(0, 0), (mColor >> 8 << 8) | mOpacity, mSize.x(), mHorizontalAlignment, mLineSpacing));
+		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(f->wrapText(text, sx), Vector2f(0, 0), (mColor >> 8 << 8) | mOpacity, sx, mHorizontalAlignment, mLineSpacing));
 	}
 }
 
@@ -347,6 +351,12 @@ void TextComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const st
 			setHorizontalAlignment(ALIGN_RIGHT);
 		else
 			LOG(LogError) << "Unknown text alignment string: " << str;
+	}
+
+	if (properties & ALIGNMENT && elem->has("padding"))
+	{
+		Vector2f scale = getParent() ? getParent()->getSize() : Vector2f((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
+		mPadding = elem->get<Vector4f>("padding") * Vector4f(scale.x(), scale.y(), scale.x(), scale.y());
 	}
 
 	if(properties & TEXT && elem->has("text"))
