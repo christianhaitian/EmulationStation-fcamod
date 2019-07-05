@@ -252,7 +252,7 @@ void VideoGameListView::updateInfoPanel()
 		}
 		mVideoPlaying = true;
 
-		mVideo->setImage(file->getThumbnailPath(), false, mVideo->getSize());
+		mVideo->setImage(file->getThumbnailPath(), false, mVideo->getTargetSize());
 		mMarquee.setImage(file->getMarqueePath(), false, mMarquee.getSize());
 		mImage.setImage(file->getImagePath(), false, mImage.getSize());
 

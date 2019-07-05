@@ -83,6 +83,14 @@ public:
 
 	void onVideoStarted();
 
+	Vector2f						getTargetSize() 
+	{ 
+		if (mTargetSize == Vector2f(0, 0))
+			return mSize;
+
+		return mTargetSize; 
+	};
+
 private:
 	// Start the video Immediately
 	virtual void startVideo() = 0;
@@ -99,6 +107,8 @@ private:
 
 	// Manage the playing state of the component
 	void manageState();
+
+
 
 protected:
 

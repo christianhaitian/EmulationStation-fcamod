@@ -422,7 +422,7 @@ void GridGameListView::updateInfoPanel()
 			if (file->getImagePath().empty())
 			{
 				if (mVideo != nullptr)
-					mVideo->setImage(file->getThumbnailPath(), false, mVideo->getSize());
+					mVideo->setImage(file->getThumbnailPath(), false, mVideo->getTargetSize());
 
 				mImage.setImage(file->getThumbnailPath(), false, mImage.getSize());
 			}

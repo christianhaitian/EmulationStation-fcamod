@@ -323,7 +323,7 @@ void DetailedGameListView::updateInfoPanel()
 			if (!mVideo->setVideo(file->getVideoPath()))
 				mVideo->setDefaultVideo();
 
-			mVideo->setImage(imagePath, false, mVideo->getSize());
+			mVideo->setImage(imagePath, false, mVideo->getTargetSize());
 		}
 	
 		//mSelectedProperties.mImageSizeMode == "minSize"));
