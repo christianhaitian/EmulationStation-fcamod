@@ -47,6 +47,9 @@ private:
 // Automatically recreates the texture with renderer deinit/reinit.
 class TextureResource : public IReloadable
 {
+protected:
+	TextureResource(const std::string& path, bool tile, bool dynamic, bool allowAsync, MaxSizeInfo maxSize);
+
 public:
 	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true, bool asReloadable = true, MaxSizeInfo maxSize = MaxSizeInfo());
 	void initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height);
@@ -72,8 +75,7 @@ public:
 	virtual bool unload();
 	virtual void reload();
 
-protected:
-	TextureResource(const std::string& path, bool tile, bool dynamic, MaxSizeInfo maxSize);
+	void onTextureLoaded(std::shared_ptr<TextureData> tex);
 
 private:
 	// mTextureData is used for textures that are not loaded from a file - these ones

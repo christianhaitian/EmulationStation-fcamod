@@ -77,6 +77,8 @@ public:
 	virtual void onHide();
 	virtual void update(int deltaTime);
 
+	std::shared_ptr<TextureResource> getTexture();
+
 private:
 	void resize();
 	const GridTileProperties& getCurrentProperties();

@@ -15,7 +15,7 @@ VideoGameListView::VideoGameListView(Window* window, FolderData* root) :
 	BasicGameListView(window, root),
 	mDescContainer(window), mDescription(window),
 	mMarquee(window),
-	mImage(window),
+	mImage(window, true),
 	mVideo(nullptr),
 	mVideoPlaying(false),
 
@@ -252,9 +252,9 @@ void VideoGameListView::updateInfoPanel()
 		}
 		mVideoPlaying = true;
 
-		mVideo->setImage(file->getThumbnailPath());
-		mMarquee.setImage(file->getMarqueePath());
-		mImage.setImage(file->getImagePath());
+		mVideo->setImage(file->getThumbnailPath(), false, mVideo->getSize());
+		mMarquee.setImage(file->getMarqueePath(), false, mMarquee.getSize());
+		mImage.setImage(file->getImagePath(), false, mImage.getSize());
 
 		mDescription.setText(file->metadata.get("desc"));
 		mDescContainer.reset();

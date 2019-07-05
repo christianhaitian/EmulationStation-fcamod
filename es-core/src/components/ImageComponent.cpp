@@ -24,7 +24,7 @@ Vector2f ImageComponent::getSize() const
 ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : GuiComponent(window),
 	mTargetIsMax(false), mTargetIsMin(false), mFlipX(false), mFlipY(false), mTargetSize(0, 0), mColorShift(0xFFFFFFFF),
 	mForceLoad(forceLoad), mDynamic(dynamic), mFadeOpacity(0), mFading(false), mRotateByTargetSize(false), mVisible(true),
-	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f), mMirror(0.0f, 0.0f)
+	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f), mMirror(0.0f, 0.0f), mAllowAsync(false)
 {
 	
 }
@@ -140,7 +140,7 @@ void ImageComponent::setDefaultImage(std::string path)
 
 void ImageComponent::setImage(std::string path, bool tile, MaxSizeInfo maxSize)
 {
-	if (!maxSize.isExternalZoomKnown())
+	if (!maxSize.isExternalZoomKnown() && !maxSize.empty())
 		maxSize = MaxSizeInfo(maxSize.x(), maxSize.y(), !mTargetIsMax);
 
 	if (path.empty() || !ResourceManager::getInstance()->fileExists(path))
@@ -482,7 +482,7 @@ void ImageComponent::fadeIn(bool textureLoaded)
 				mColorShift = (mColorShift >> 8 << 8) | 0;				
 			}
 		}
-		else if (mFading)
+		else if (mFading && textureLoaded)
 		{
 			// The texture is loaded and we need to fade it in. The fade is based on the frame rate
 			// and is 1/4 second if running at 60 frames per second although the actual value is not
@@ -553,7 +553,7 @@ void ImageComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 		if (Utils::FileSystem::exists(path))
 		{
 			bool tile = (elem->has("tile") && elem->get<bool>("tile"));
-			setImage(path, tile, Vector2f(mTargetSize.x(), mTargetSize.y()));
+			setImage(path, tile/*, Vector2f(mTargetSize.x(), mTargetSize.y())*/);
 		}
 	}
 

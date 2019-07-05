@@ -101,7 +101,7 @@ void DetailedGameListView::createImage()
 	const float padding = 0.01f;
 
 	// Image
-	mImage = new ImageComponent(mWindow);
+	mImage = new ImageComponent(mWindow, true);
 	mImage->setOrigin(0.5f, 0.5f);
 	mImage->setPosition(mSize.x() * 0.25f, mList.getPosition().y() + mSize.y() * 0.2125f);
 	mImage->setMaxSize(mSize.x() * (0.50f - 2 * padding), mSize.y() * 0.4f);
@@ -331,7 +331,7 @@ void DetailedGameListView::updateInfoPanel()
 			mImage->setImage(imagePath, false, mImage->getSize());
 
 		if (mMarquee != nullptr)
-			mMarquee->setImage(file->getMarqueePath());
+			mMarquee->setImage(file->getMarqueePath(), false, mMarquee->getSize());
 
 		mDescription.setText(getMetadata(file, "desc"));
 		mDescContainer.reset();
@@ -392,11 +392,11 @@ void DetailedGameListView::launch(FileData* game)
 {
 	Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
 	
-	if (mImage != nullptr && mImage->hasImage())
-		target = Vector3f(mImage->getCenter().x(), mImage->getCenter().y(), 0); 
-	else if (mVideo != nullptr)
+	if (mVideo != nullptr)
 		target = Vector3f(mVideo->getCenter().x(), mVideo->getCenter().y(), 0);
-
+	else if (mImage != nullptr && mImage->hasImage())
+		target = Vector3f(mImage->getCenter().x(), mImage->getCenter().y(), 0); 
+	
 	ViewController::get()->launch(game, target);
 }
 

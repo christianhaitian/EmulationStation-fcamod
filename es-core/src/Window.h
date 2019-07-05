@@ -67,7 +67,7 @@ public:
 	void setAllowSleep(bool sleep);
 
 	void endRenderLoadingScreen();
-	void renderLoadingScreen(std::string text, float percent = -1);
+	void renderLoadingScreen(std::string text, float percent = -1, unsigned char opacity = 255);
 	void renderGameLoadingScreen(float opacity=1, bool swapBuffers=true);
 
 	void renderHelpPromptsEarly(); // used to render HelpPrompts before a fade

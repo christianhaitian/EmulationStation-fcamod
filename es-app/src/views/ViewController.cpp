@@ -76,8 +76,6 @@ void ViewController::goToStart(bool forceImmediate)
 
 void ViewController::ReloadAndGoToStart()
 {
-	mWindow->renderLoadingScreen(_T("Loading..."));
-
 	ViewController::get()->reloadAll();
 	ViewController::get()->goToStart(false);
 }
@@ -449,7 +447,9 @@ bool ViewController::input(InputConfig* config, Input input)
 
 	if (config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_F5)
 	{
-		mWindow->renderLoadingScreen("Reloading...");		
+		mWindow->render();
+		mWindow->renderLoadingScreen(_T("Loading..."), -1, 180);
+
 		ViewController::get()->reloadAll();
 		mWindow->endRenderLoadingScreen();
 		return true;

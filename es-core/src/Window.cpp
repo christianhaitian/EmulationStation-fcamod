@@ -312,14 +312,14 @@ void Window::endRenderLoadingScreen()
 	mSplash = NULL;
 }
 
-void Window::renderLoadingScreen(std::string text, float percent)
+void Window::renderLoadingScreen(std::string text, float percent, unsigned char opacity)
 {	
 	if (mSplash == NULL)
 		mSplash = TextureResource::get(":/splash.svg", false, true, false, false);
 
 	Transform4x4f trans = Transform4x4f::Identity();
 	Renderer::setMatrix(trans);
-	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x000000FF);
+	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x00000000 | opacity);
 	
 	if (percent >= 0)
 	{
@@ -331,8 +331,8 @@ void Window::renderLoadingScreen(std::string text, float percent)
 		float x = Renderer::getScreenWidth() / 2 - w / 2;
 		float y = Renderer::getScreenHeight() - (Renderer::getScreenHeight() * 3 * baseHeight);
 
-		Renderer::drawRect(x, y, w, h, 0x252525FF);
-		Renderer::drawGradientRect(x, y, (w*percent), h, 0x006C9EFF, 0x003E5CFF); // 0xFFFFFFFF
+		Renderer::drawRect(x, y, w, h, 0x25252500 | opacity);
+		Renderer::drawGradientRect(x, y, (w*percent), h, 0x006C9E00 | opacity, 0x003E5C00 | opacity); // 0xFFFFFFFF
 	}
 	
 	ImageComponent splash(this, true);
@@ -347,7 +347,7 @@ void Window::renderLoadingScreen(std::string text, float percent)
 	splash.render(trans);
 	
 	auto& font = mDefaultFonts.at(1);
-	TextCache* cache = font->buildTextCache(text, 0, 0, 0x656565FF);
+	TextCache* cache = font->buildTextCache(text, 0, 0, 0x65656500 | opacity);
 
 	float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);
 	float y = Math::round(Renderer::getScreenHeight() * 0.78f); // 35

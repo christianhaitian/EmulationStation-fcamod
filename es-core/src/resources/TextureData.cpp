@@ -223,7 +223,7 @@ bool TextureData::load()
 	if (!mPath.empty())
 	{
 #ifdef WIN32	
-		// TRACE("TextureData::load(" << mPath << ", " << mTextureID << ")")
+		 TRACE("TextureData::load(" << mPath << ", " << (mMaxSize.empty() ? "" : "(hasMaxSize)") << ")")
 #endif
 
 		std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
@@ -333,6 +333,14 @@ float TextureData::sourceHeight()
 	if (mSourceHeight == 0)
 		load();
 	return mSourceHeight;
+}
+
+void TextureData::setTemporarySize(float width, float height)
+{
+	mWidth = width;
+	mHeight = height;
+	mSourceWidth = width;
+	mSourceHeight = height;
 }
 
 void TextureData::setSourceSize(float width, float height)

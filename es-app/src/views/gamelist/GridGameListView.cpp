@@ -18,7 +18,7 @@ GridGameListView::GridGameListView(Window* window, FolderData* root, const std::
 	ISimpleGameListView(window, root),
 	mGrid(window),
 	mDescContainer(window), mDescription(window),
-	mImage(window),
+	mImage(window, true),
 	mVideo(nullptr),
 	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window),
 	mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),

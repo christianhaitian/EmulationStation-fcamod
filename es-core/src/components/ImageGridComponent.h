@@ -521,11 +521,16 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 	float endPos = 1;
 
 	if (isAnimationPlaying(2))
-	{
-		startPos = -(mCamera*2.0 / 3.0);
-		if (startPos < -1)
-			startPos = -1;
+	{		
+		/*
+		startPos = -(mCamera * 0.75);
 
+		if (startPos > 1)
+			startPos = 1;
+		else if (startPos < -1)
+			startPos = -1;
+		*/	
+		startPos = 0;
 		cancelAnimation(2);
 		updateTiles(direction, false, !GuiComponent::ALLOWANIMATIONS);		
 	}
@@ -644,6 +649,14 @@ void ImageGridComponent<T>::updateTiles(bool ascending, bool allowAnimation, boo
 			tile->setVisible(false);
 		}
 		return;
+	}
+
+	// Temporary store previous texture so they can't be unloaded
+	std::vector<std::shared_ptr<TextureResource>> previousTextures;
+	for (int ti = 0; ti < (int)mTiles.size(); ti++)
+	{
+		std::shared_ptr<GridTileComponent> tile = mTiles.at(ti);
+		previousTextures.push_back(tile->getTexture());
 	}
 
 	if (!ascending)

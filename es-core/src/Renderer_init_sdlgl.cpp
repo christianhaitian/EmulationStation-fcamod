@@ -79,7 +79,7 @@ namespace Renderer
 		if (monitorId >=0 && sdlWindowPosition == Vector2i(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED))
 		{
 			int displays = SDL_GetNumVideoDisplays();
-			if (displays >= monitorId)
+			if (displays > monitorId)
 			{
 				SDL_Rect rc;
 				SDL_GetDisplayBounds(monitorId, &rc);

@@ -81,12 +81,16 @@ public:
 
 	void render(const Transform4x4f& parentTrans) override;
 
+	void setAllowAsync(bool async) { mAllowAsync = async; };
 	void setAllowFading(bool fade) { mAllowFading = fade; };
 	void setMirroring(Vector2f mirror) { mMirror = mirror; };
 
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties) override;
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
+
+	std::shared_ptr<TextureResource> getTexture() { return mTexture; };
+
 private:
 	Vector2f mTargetSize;
 
@@ -114,13 +118,14 @@ private:
 
 	std::shared_ptr<TextureResource> mTexture;
 	unsigned char			mFadeOpacity;
+
 	bool					mFading;
 	bool					mForceLoad;
 	bool					mDynamic;
 	bool					mRotateByTargetSize;
 	bool					mVisible;
-
 	bool					mAllowFading;
+	bool					mAllowAsync;
 
 	Vector2f mTopLeftCrop;
 	Vector2f mBottomRightCrop;	

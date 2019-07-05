@@ -66,7 +66,7 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 
 	mImage = std::make_shared<ImageComponent>(mWindow);
 	mImage->setOrigin(0.5f, 0.5f);
-	mImage->setAllowFading(false);
+	// mImage->setAllowFading(false);
 
 	addChild(&mBackground);
 	addChild(&(*mImage));
@@ -103,6 +103,14 @@ GridTileComponent::~GridTileComponent()
 
 	mVideo = nullptr;
 }
+
+std::shared_ptr<TextureResource> GridTileComponent::getTexture() 
+{ 
+	if (mImage != nullptr)
+		return mImage->getTexture();
+
+	return nullptr; 
+};
 
 void GridTileComponent::resize()
 {

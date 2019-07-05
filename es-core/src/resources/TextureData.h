@@ -56,6 +56,8 @@ public:
 	float sourceHeight();
 	void setSourceSize(float width, float height);
 
+	void setTemporarySize(float width, float height);
+
 	bool tiled() { return mTile; }
 
 	bool isRequiredTextureSizeOk();

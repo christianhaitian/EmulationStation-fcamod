@@ -173,7 +173,10 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 
 					Renderer::setMatrix(trans);
 
-					mTextCache->setColor(mGlowColor);
+					unsigned char o = (unsigned char)((float)(mGlowColor & 0x000000FF) / 255.f * (float)(mColor & 0x000000FF));
+					unsigned int color = (mGlowColor & 0xFFFFFF00) | (unsigned char)o;
+
+					mTextCache->setColor(color);
 					mFont->renderTextCache(mTextCache.get());
 					mTextCache->setColor(mColor);
 				};
