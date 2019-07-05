@@ -416,7 +416,7 @@ bool SystemData::loadConfig(Window* window)
 	ThreadPool* pThreadPool = NULL;
 	SystemDataPtr* systems = NULL;
 	
-	if (ThreadPool::getProcessorCount() > 2 && Settings::getInstance()->getBool("ThreadedLoading"))
+	if (std::thread::hardware_concurrency() > 2 && Settings::getInstance()->getBool("ThreadedLoading"))
 	{
 		pThreadPool = new ThreadPool();
 

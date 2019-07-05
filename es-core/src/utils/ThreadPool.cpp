@@ -6,22 +6,9 @@
 
 namespace Utils
 {
-	size_t ThreadPool::getProcessorCount()
-	{
-		//unsigned num_cpus = std::thread::hardware_concurrency();
-
-#ifdef WIN32
-		SYSTEM_INFO sysinfo;
-		GetSystemInfo(&sysinfo);
-		return sysinfo.dwNumberOfProcessors;
-#else
-		return sysconf(_SC_NPROCESSORS_ONLN);
-#endif
-	}
-
 	ThreadPool::ThreadPool() : mRunning(true), mWaiting(false), mNumWork(0)
 	{
-		size_t num_threads = getProcessorCount() - 1;
+		size_t num_threads = std::thread::hardware_concurrency() - 1;
 
 		auto doWork = [&](size_t id)
 		{

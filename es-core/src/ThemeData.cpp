@@ -351,9 +351,12 @@ void ThemeData::loadFile(std::string system, std::map<std::string, std::string> 
 const std::shared_ptr<ThemeData::ThemeMenu>& ThemeData::getMenuTheme()
 { 	
 	if (mMenuTheme == nullptr && mCurrentTheme != nullptr)
-		mMenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(*mCurrentTheme));
+		mMenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(mCurrentTheme));
 	else if (mMenuTheme == nullptr)
-		return std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(ThemeData()));
+	{
+		auto emptyData = ThemeData();
+		return std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(&emptyData));
+	}
 
 	return mMenuTheme;
 }
@@ -1036,14 +1039,14 @@ std::string ThemeData::getThemeFromCurrentSet(const std::string& system)
 	return set->second.getThemePath(system);
 }
 
-ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
+ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 {
 	Title.font = Font::get(FONT_SIZE_LARGE);
 	Footer.font = Font::get(FONT_SIZE_SMALL);
 	Text.font = Font::get(FONT_SIZE_MEDIUM);
 	TextSmall.font = Font::get(FONT_SIZE_SMALL);
 
-	auto elem = theme.getElement("menu", "menubg", "menuBackground");
+	auto elem = theme->getElement("menu", "menubg", "menuBackground");
 	if (elem)
 	{
 		if (elem->has("path") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("path")))
@@ -1056,7 +1059,7 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 			Background.color = elem->get<unsigned int>("color");
 	}
 
-	elem = theme.getElement("menu", "menutitle", "menuText");
+	elem = theme->getElement("menu", "menutitle", "menuText");
 	if (elem)
 	{
 		if (elem->has("fontPath") || elem->has("fontSize"))
@@ -1065,7 +1068,7 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 			Title.color = elem->get<unsigned int>("color");
 	}
 
-	elem = theme.getElement("menu", "menufooter", "menuText");
+	elem = theme->getElement("menu", "menufooter", "menuText");
 
 	if (elem)
 	{
@@ -1075,7 +1078,7 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 			Footer.color = elem->get<unsigned int>("color");
 	}
 
-	elem = theme.getElement("menu", "menutextsmall", "menuTextSmall");
+	elem = theme->getElement("menu", "menutextsmall", "menuTextSmall");
 
 	if (elem)
 	{
@@ -1090,7 +1093,7 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 			Text.selectedColor = elem->get<unsigned int>("selectorColor");
 	}
 
-	elem = theme.getElement("menu", "menutext", "menuText");
+	elem = theme->getElement("menu", "menutext", "menuText");
 
 	if (elem)
 	{
@@ -1109,7 +1112,7 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 			Text.selectorGradientColor = elem->get<unsigned int>("selectorGradientColor");
 	}
 
-	elem = theme.getElement("menu", "menubutton", "menuButton");
+	elem = theme->getElement("menu", "menubutton", "menuButton");
 
 	if (elem)
 	{
@@ -1119,7 +1122,7 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 			Icons.button_filled = elem->get<std::string>("filledPath");
 	}
 
-	elem = theme.getElement("menu", "menuswitch", "menuSwitch");
+	elem = theme->getElement("menu", "menuswitch", "menuSwitch");
 
 	if (elem)
 	{
@@ -1129,12 +1132,12 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData& theme)
 			Icons.off = elem->get<std::string>("pathOff");
 	}
 
-	elem = theme.getElement("menu", "menuslider", "menuSlider");
+	elem = theme->getElement("menu", "menuslider", "menuSlider");
 
 	if (elem && elem->has("path") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("path")))
 		Icons.knob = elem->get<std::string>("path");
 
-	elem = theme.getElement("menu", "menuicons", "menuIcons");
+	elem = theme->getElement("menu", "menuicons", "menuIcons");
 
 	if (elem) 
 	{

@@ -245,8 +245,9 @@ void TextureLoader::load(std::shared_ptr<TextureData> textureData)
 		std::unique_lock<std::mutex> lock(mMutex);
 		
 		// If is is currently loading, don't add again
-		if (std::find(mProcessingTextureDataQ.begin(), mProcessingTextureDataQ.end(), textureData) != mProcessingTextureDataQ.cend())
-			return;
+		for (auto it = mProcessingTextureDataQ.begin(); it != mProcessingTextureDataQ.end(); it++)
+			if ((*it) == textureData)
+				return;
 
 		// Remove it from the queue if it is already there
 		auto td = mTextureDataLookup.find(textureData.get());

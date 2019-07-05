@@ -107,7 +107,7 @@ namespace Utils
 
 							FileInfo fi;
 							fi.path = fullName;
-							fi.readOnly = Utils::FileSystem::isHidden(fullName);
+							fi.hidden = Utils::FileSystem::isHidden(fullName);
 							fi.directory = isDirectory(fullName);
 							contentList.push_back(fi);
 						}

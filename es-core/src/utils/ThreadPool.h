@@ -4,14 +4,13 @@
 #include <mutex>
 #include <queue>
 #include <atomic>
+#include <functional>
 
 namespace Utils
 {
 	class ThreadPool
 	{
 	public:
-		static size_t getProcessorCount();
-
 		typedef std::function<void(void)> work_function;
 
 		ThreadPool();

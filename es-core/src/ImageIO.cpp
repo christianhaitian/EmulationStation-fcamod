@@ -184,8 +184,13 @@ Vector2i ImageIO::adjustPictureSize(Vector2i imageSize, Vector2i maxSize, bool e
 	double xCoef = (double)iMaxX / (double)cxDIB;
 	double yCoef = (double)iMaxY / (double)cyDIB;
 	
+#if WIN32
 	cyDIB = (int)((double)cyDIB * std::fmax(xCoef, yCoef));
 	cxDIB = (int)((double)cxDIB * std::fmax(xCoef, yCoef));
+#else
+	cyDIB = (int)((double)cyDIB * std::max(xCoef, yCoef));
+	cxDIB = (int)((double)cxDIB * std::max(xCoef, yCoef));
+#endif
 
 	if (cxDIB > iMaxX)
 	{

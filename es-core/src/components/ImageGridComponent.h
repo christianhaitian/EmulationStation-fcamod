@@ -520,7 +520,7 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 	float startPos = 0;
 	float endPos = 1;
 
-	if (isAnimationPlaying(2))
+	if (((GuiComponent*)this)->isAnimationPlaying(2))
 	{		
 		/*
 		startPos = -(mCamera * 0.75);
@@ -531,7 +531,7 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 			startPos = -1;
 		*/	
 		startPos = 0;
-		cancelAnimation(2);
+		((GuiComponent*)this)->cancelAnimation(2);
 		updateTiles(direction, false, !GuiComponent::ALLOWANIMATIONS);		
 	}
 	
@@ -623,7 +623,7 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 		mCamera = t;
 	};
 
-	setAnimation(new LambdaAnimation(func, 250), 0, [this, direction] {
+	((GuiComponent*)this)->setAnimation(new LambdaAnimation(func, 250), 0, [this, direction] {
 		mCamera = 0;
 		updateTiles(direction, false);
 	}, false, 2);
@@ -755,7 +755,8 @@ void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowA
 				if (idx < 0 || idx >= mTiles.size())
 					idx = 0;
 
-				tile->setSelected(true, allowAnimation, &mTiles.at(idx)->getBackgroundPosition());
+				Vector3f pos = mTiles.at(idx)->getBackgroundPosition();
+				tile->setSelected(true, allowAnimation, &pos);
 			}
 			else
 				tile->setSelected(imgPos == mCursor, allowAnimation);

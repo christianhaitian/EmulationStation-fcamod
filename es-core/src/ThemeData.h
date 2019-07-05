@@ -125,7 +125,7 @@ public:
 	class ThemeMenu
 	{
 	public:
-		ThemeMenu(ThemeData& theme);
+		ThemeMenu(ThemeData* theme);
 
 		MenuElement Background{ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0, ":/frame.png", ":/scroll_gradient.png", nullptr };
 		MenuElement Title{ 0x555555FF, 0x555555FF, 0x555555FF, 0xFFFFFFFF, 0, "", "", nullptr };
@@ -231,7 +231,7 @@ public:
 
 	static const std::shared_ptr<ThemeData::ThemeMenu>& getMenuTheme();
 	static std::map<std::string, std::string> sortThemeSubSets(const std::map<std::string, std::string>& subsetmap, const std::string& subset);
-	static std::map<std::string, std::string> ThemeData::getThemeSubSets(const std::string& theme);
+	static std::map<std::string, std::string> getThemeSubSets(const std::string& theme);
 
 private:
 	static void crawlIncludes(const pugi::xml_node& root, std::map<std::string, std::string>& sets, std::deque<std::string>& dequepath);
