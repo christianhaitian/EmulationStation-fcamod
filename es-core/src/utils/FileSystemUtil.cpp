@@ -257,13 +257,23 @@ namespace Utils
 			// only construct the homepath once
 			if (!path.length())
 			{
-				// verify if .emulationstation/es_systems.cfg is under exe's path to make app portable
-				std::string portableDir = getExePath() + "/.emulationstation/es_systems.cfg";
-				if (Utils::FileSystem::exists(portableDir))
+#if defined(_WIN32)
+				char buffer[MAX_PATH];
+				DWORD size = MAX_PATH;
+				DWORD result = GetModuleFileNameA(NULL, buffer, size);
+				if (result)
 				{
-					path = getExePath();
-					return path;
+					// verify if .emulationstation/es_systems.cfg is under exe's path to make app portable
+
+					std::string ret = buffer;
+					std::string portableDir = getGenericPath(getParent(ret)) + "/.emulationstation/es_systems.cfg";
+					if (Utils::FileSystem::exists(portableDir))
+					{
+						path = getExePath();
+						return path;
+					}
 				}
+#endif
 				
 				// this should give us something like "/home/YOUR_USERNAME" on Linux and "C:/Users/YOUR_USERNAME/" on Windows
 				char* envHome = getenv("HOME");
