@@ -6,6 +6,7 @@
 #include "components/IList.h"
 #include "resources/TextureResource.h"
 #include "GridTileComponent.h"
+#include "Settings.h"
 
 #define EXTRAITEMS 2
 
