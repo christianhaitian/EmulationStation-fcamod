@@ -96,6 +96,8 @@ bool Window::init(bool initRenderer)
 	if (peekGui())
 		peekGui()->updateHelpPrompts();
 
+	Renderer::activateWindow();
+
 	return true;
 }
 

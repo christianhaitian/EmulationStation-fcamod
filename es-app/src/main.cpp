@@ -298,9 +298,12 @@ int main(int argc, char* argv[])
 {
 	srand((unsigned int)time(NULL));
 
-	//std::locale::global(std::locale("C"));
+#if WIN32
 	std::locale::global(std::locale("en-US"));
-	
+#else
+	std::locale::global(std::locale("C"));
+#endif
+
 	if(!parseArgs(argc, argv))
 		return 0;
 

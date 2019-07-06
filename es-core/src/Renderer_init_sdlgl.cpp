@@ -6,6 +6,10 @@
 #include "Settings.h"
 #include <SDL.h>
 
+#if WIN32
+#include <SDL_syswm.h>
+#endif
+
 #ifdef USE_OPENGL_ES
 	#define glOrtho glOrthof
 #endif
@@ -34,6 +38,8 @@ namespace Renderer
 	SDL_GLContext sdlContext = NULL;
 
 	Vector2i sdlWindowPosition = Vector2i(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED);
+
+
 
 	bool createSurface()
 	{
@@ -76,7 +82,7 @@ namespace Renderer
 		screenRotate = Settings::getInstance()->getInt("ScreenRotate") ? Settings::getInstance()->getInt("ScreenRotate") : 0;
 		
 		int monitorId = Settings::getInstance()->getInt("MonitorID");
-		if (monitorId >=0 && sdlWindowPosition == Vector2i(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED))
+		if (monitorId >= 0 && sdlWindowPosition == Vector2i(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED))
 		{
 			int displays = SDL_GetNumVideoDisplays();
 			if (displays > monitorId)
@@ -183,7 +189,7 @@ namespace Renderer
 
 	void destroySurface()
 	{		
-		if (Settings::getInstance()->getBool("Windowed"))
+		if (Settings::getInstance()->getBool("Windowed") && Settings::getInstance()->getInt("WindowWidth") && Settings::getInstance()->getInt("WindowHeight"))
 		{
 			int x; int y;
 			SDL_GetWindowPosition(sdlWindow, &x, &y);
@@ -200,6 +206,23 @@ namespace Renderer
 		SDL_ShowCursor(initialCursorState);
 
 		SDL_Quit();
+	}
+
+
+	void activateWindow()
+	{
+#if WIN32
+		if (sdlWindow == NULL)
+			return;
+
+		SDL_SysWMinfo wmInfo;
+		SDL_VERSION(&wmInfo.version);
+		SDL_GetWindowWMInfo(sdlWindow, &wmInfo);
+		HWND hwnd = wmInfo.info.win.window;
+
+		::SetForegroundWindow(hwnd);
+		::SetActiveWindow(hwnd);
+#endif
 	}
 
 	bool init()

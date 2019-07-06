@@ -318,12 +318,15 @@ void updateGamelist(SystemData* system)
 				{
 					std::string savFile = xmlWritePath + ".old";
 
+					// remove previous gamelist.xml.old file
 					if (Utils::FileSystem::exists(savFile))
 						Utils::FileSystem::removeFile(savFile);
 
+					// rename gamelist.xml to gamelist.xml.old
 					if (Utils::FileSystem::exists(xmlWritePath))
 						std::rename(xmlWritePath.c_str(), savFile.c_str());
 
+					// rename gamelist.tmp.xml to gamelist.xml
 					std::rename(tmpFile.c_str(), xmlWritePath.c_str());
 				}
 				else 

@@ -17,6 +17,7 @@ namespace Renderer
 {
 	bool init();
 	void deinit();
+	void activateWindow();
 
 	unsigned int getWindowWidth();
 	unsigned int getWindowHeight();
