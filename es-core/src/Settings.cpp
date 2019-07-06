@@ -66,7 +66,11 @@ void Settings::setDefaults()
 	mBoolMap["ShowHiddenFiles"] = false;
 	mBoolMap["DrawFramerate"] = false;
 	mBoolMap["ShowExit"] = true;
+#if WIN32
 	mBoolMap["FullscreenBorderless"] = true;
+#else
+	mBoolMap["FullscreenBorderless"] = false;
+#endif
 	mBoolMap["Windowed"] = false;
 	mBoolMap["SplashScreen"] = true;
 	mBoolMap["SplashScreenProgress"] = true;
