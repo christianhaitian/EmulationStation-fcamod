@@ -6,6 +6,7 @@
 #include "components/IList.h"
 #include "resources/TextureResource.h"
 #include "GridTileComponent.h"
+#include "animations/LambdaAnimation.h"
 #include "Settings.h"
 
 #define EXTRAITEMS 2
@@ -632,7 +633,7 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 
 
 template<typename T>
-void ImageGridComponent<T>::updateTiles(bool ascending, bool allowAnimation, bool updateSelectedState = true)
+void ImageGridComponent<T>::updateTiles(bool ascending, bool allowAnimation, bool updateSelectedState)
 {
 	if (!mTiles.size())
 		return;
