@@ -211,7 +211,7 @@ void TextureLoader::threadProc()
 		{
 			// Wait for an event to say there is something in the queue
 			std::unique_lock<std::mutex> lock(mMutex);
-			mEvent.wait(lock);
+			//mEvent.wait(lock);
 			if (!mTextureDataQ.empty())
 			{
 				textureData = mTextureDataQ.front();
@@ -231,9 +231,15 @@ void TextureLoader::threadProc()
 				std::unique_lock<std::mutex> lock(mMutex);
 				mProcessingTextureDataQ.remove(textureData);
 			}
-		}
 
-		std::this_thread::yield();		
+			std::this_thread::yield();
+		}
+		else
+		{
+			std::this_thread::yield();
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		}
+				
 	}
 }
 
@@ -260,7 +266,7 @@ void TextureLoader::load(std::shared_ptr<TextureData> textureData)
 		// Put it on the start of the queue as we want the newly requested textures to load first
 		mTextureDataQ.push_front(textureData);
 		mTextureDataLookup[textureData.get()] = mTextureDataQ.cbegin();
-		mEvent.notify_one();
+		mEvent.notify_all();
 	}
 }
 
