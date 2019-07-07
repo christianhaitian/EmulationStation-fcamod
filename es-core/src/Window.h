@@ -70,6 +70,8 @@ public:
 	void renderLoadingScreen(std::string text, float percent = -1, unsigned char opacity = 255);
 	void renderGameLoadingScreen(float opacity=1, bool swapBuffers=true);
 
+	void loadCustomImageLoadingScreen(std::string imagePath, std::string customText);
+
 	void renderHelpPromptsEarly(); // used to render HelpPrompts before a fade
 	void setHelpPrompts(const std::vector<HelpPrompt>& prompts, const HelpStyle& style);
 
@@ -95,6 +97,7 @@ private:
 	bool			mRenderScreenSaver;
 
 	std::shared_ptr<TextureResource> mSplash;
+	std::string						 mCustomSplash;
 
 	std::vector<GuiComponent*> mGuiStack;
 

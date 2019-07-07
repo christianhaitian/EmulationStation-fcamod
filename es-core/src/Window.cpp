@@ -18,7 +18,7 @@ Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCoun
 {
 	mHelp = new HelpComponent(this);
 	mBackgroundOverlay = new ImageComponent(this);
-	mSplash = NULL;
+	mSplash = NULL;	
 }
 
 Window::~Window()
@@ -308,10 +308,8 @@ void Window::setAllowSleep(bool sleep)
 
 void Window::endRenderLoadingScreen()
 {
-	if (mSplash != NULL)
-		mSplash->unload();
-
 	mSplash = NULL;
+	mCustomSplash = "";
 }
 
 void Window::renderLoadingScreen(std::string text, float percent, unsigned char opacity)
@@ -367,6 +365,24 @@ void Window::renderLoadingScreen(std::string text, float percent, unsigned char 
 #endif
 }
 
+void Window::loadCustomImageLoadingScreen(std::string imagePath, std::string customText)
+{
+	if (!Utils::FileSystem::exists(imagePath))
+		return;
+
+	if (Settings::getInstance()->getBool("HideWindow"))
+		return;
+
+	if (mSplash != NULL)
+		endRenderLoadingScreen();
+
+	mSplash = TextureResource::get(imagePath, false, true, false, false);
+	mCustomSplash = customText;
+	
+	std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
+	rm->removeReloadable(mSplash);
+}
+
 void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 {
 	if (mSplash == NULL)
@@ -377,6 +393,7 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x00000000 | (unsigned char)(opacity * 255));
 	
 	ImageComponent splash(this, true);
+
 	splash.setResize(Renderer::getScreenWidth() * 0.4f, 0.0f);
 
 	if (mSplash != NULL)
@@ -385,13 +402,18 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 		splash.setImage(":/splash.svg");
 
 	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.7f);
-	splash.setColorShift(0xFFFFFF00 | (unsigned char)(opacity * 255));
+
+	if (!mCustomSplash.empty())
+		splash.setColorShift(0xFFFFFF00 | (unsigned char)(opacity * 210));
+	else
+		splash.setColorShift(0xFFFFFF00 | (unsigned char)(opacity * 255));
+
 	splash.render(trans);
 	
 	auto& font = mDefaultFonts.at(1);
 	font->reload(); // Ensure font is loaded
 
-	TextCache* cache = font->buildTextCache(_T("Loading..."), 0, 0, 0x65656500 | (unsigned char)(opacity * 255));
+	TextCache* cache = font->buildTextCache(mCustomSplash.empty() ? _T("Loading...") : mCustomSplash, 0, 0, 0x65656500 | (unsigned char)(opacity * 255));
 
 	float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);
 	float y = Math::round(Renderer::getScreenHeight() * 0.835f);
