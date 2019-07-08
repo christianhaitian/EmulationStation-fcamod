@@ -157,6 +157,9 @@ public:
 		if (mFilterIndex != nullptr) mFilterIndex->setUIModeFilters();
 	}
 
+	unsigned int getSortId() const { return mSortId; };
+	void setSortId(const unsigned int sortId = 0);
+
 private:
 	static SystemData* loadSystem(pugi::xml_node system);
 
@@ -171,6 +174,8 @@ private:
 	std::string mViewMode;
 	Vector2f    mGridSizeOverride;
 	bool mViewModeChanged;
+
+	unsigned int mSortId;
 
 	void populateFolder(FolderData* folder, std::unordered_map<std::string, FileData*>& fileMap);
 	void indexAllGameFilters(const FolderData* folder);

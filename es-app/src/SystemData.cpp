@@ -23,6 +23,7 @@ std::vector<SystemData*> SystemData::sSystemVector;
 SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem) :
 	mName(name), mFullName(fullName), mEnvData(envData), mThemeFolder(themeFolder), mIsCollectionSystem(CollectionSystem), mIsGameSystem(true)
 {
+	mSortId = 0;
 	mGridSizeOverride = Vector2f(0, 0);
 	mViewModeChanged = false;
 	mFilterIndex = nullptr;// new FileFilterIndex();
@@ -61,6 +62,8 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 	auto defaultView = Settings::getInstance()->getString(getName() + ".defaultView");
 	auto gridSizeOverride = Vector2f::parseString(Settings::getInstance()->getString(getName() + ".gridSize"));
 	setSystemViewMode(defaultView, gridSizeOverride, false);
+
+	mSortId = Settings::getInstance()->getInt(getName() + ".sort"),
 
 	setIsGameSystemStatus();
 	loadTheme();
@@ -728,4 +731,10 @@ void SystemData::loadTheme()
 		LOG(LogError) << e.what();
 		mTheme = std::make_shared<ThemeData>(); // reset to empty
 	}
+}
+
+void SystemData::setSortId(const unsigned int sortId)
+{
+	mSortId = sortId;
+	Settings::getInstance()->setInt(getName() + ".sort", mSortId);
 }

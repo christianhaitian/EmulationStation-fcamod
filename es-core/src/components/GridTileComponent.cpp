@@ -212,6 +212,14 @@ void GridTileComponent::resize()
 	{
 		if (currentProperties.mImageSizeMode == "minSize")
 			bkSize = Vector2f(size.x(), size.y() - bottomPadding + topPadding);
+		else if (mAnimPosition == Vector3f(0, 0, 0))
+		{
+			bkposition = Vector3f(
+				mImage->getPosition().x() - mImage->getSize().x() / 2 - mSelectedProperties.mPadding.x(),
+				mImage->getPosition().y() - mImage->getSize().y() / 2 - mSelectedProperties.mPadding.y(), 0);
+
+			bkSize = Vector2f(mImage->getSize().x() + 2 * mSelectedProperties.mPadding.x(), mImage->getSize().y() + 2 * mSelectedProperties.mPadding.y());
+		}
 		else
 		{
 			bkposition = Vector3f(
@@ -239,6 +247,11 @@ void GridTileComponent::resize()
 	mBackground.setCenterColor(currentProperties.mBackgroundCenterColor);
 	mBackground.setEdgeColor(currentProperties.mBackgroundEdgeColor);
 	mBackground.setImagePath(currentProperties.mBackgroundImage);
+	
+	if (mSelected && mAnimPosition == Vector3f(0, 0, 0) && mSelectedZoomPercent != 1.0)
+		mBackground.setOpacity(mSelectedZoomPercent * 255);
+	else
+		mBackground.setOpacity(255);
 }
 
 void GridTileComponent::update(int deltaTime)

@@ -74,6 +74,8 @@ public:
 
 	void setGridSizeOverride(Vector2f size);
 
+	std::shared_ptr<GridTileComponent> getSelectedTile();
+	
 protected:
 	virtual void onCursorChanged(const CursorState& state) override;	
 
@@ -93,6 +95,7 @@ private:
 
 	// TILES
 	bool mLastRowPartial;
+	bool mAnimateSelection;
 	Vector2f mAutoLayout;
 	float mAutoLayoutZoom;
 	Vector4f mPadding;
@@ -141,6 +144,7 @@ ImageGridComponent<T>::ImageGridComponent(Window* window) : IList<ImageGridData,
 	mDefaultGameTexture = ":/cartridge.svg";
 	mDefaultFolderTexture = ":/folder.svg";
 
+	mAnimateSelection = true;
 	mSize = screen * 0.80f;
 	mMargin = screen * 0.07f;
 	mPadding = Vector4f(0, 0, 0, 0);
@@ -246,6 +250,19 @@ void ImageGridComponent<T>::setGridSizeOverride(Vector2f size)
 }
 
 template<typename T>
+std::shared_ptr<GridTileComponent> ImageGridComponent<T>::getSelectedTile()
+{
+	for (int ti = 0; ti < (int)mTiles.size(); ti++)
+	{
+		std::shared_ptr<GridTileComponent> tile = mTiles.at(ti);
+		if (tile->isSelected())
+			return tile;		
+	}
+
+	return nullptr;
+}
+
+template<typename T>
 void ImageGridComponent<T>::onHide()
 {
 	GuiComponent::onHide();
@@ -311,8 +328,6 @@ void ImageGridComponent<T>::render(const Transform4x4f& parentTrans)
 			(*it)->setPosition((*it)->getPosition().x() + offsetX, (*it)->getPosition().y() + offsetY);
 	}
 
-	
-
 	// Render the selected image background on bottom of the others if needed
 	std::shared_ptr<GridTileComponent> selectedTile = NULL;
 	for(auto it = mTiles.begin(); it != mTiles.end(); it++)
@@ -321,7 +336,8 @@ void ImageGridComponent<T>::render(const Transform4x4f& parentTrans)
 		if (tile->isSelected())
 		{
 			selectedTile = tile;
-			if (tile->shouldSplitRendering())
+
+			if (mAnimateSelection && tile->shouldSplitRendering())
 				tile->renderBackground(trans);
 
 			break;
@@ -338,7 +354,7 @@ void ImageGridComponent<T>::render(const Transform4x4f& parentTrans)
 	// Render the selected image content on top of the others
 	if (selectedTile != NULL)
 	{
-		if (selectedTile->shouldSplitRendering())
+		if (mAnimateSelection && selectedTile->shouldSplitRendering())
 			selectedTile->renderContent(trans);
 		else 
 			selectedTile->render(trans);
@@ -379,6 +395,9 @@ void ImageGridComponent<T>::applyTheme(const std::shared_ptr<ThemeData>& theme, 
 
 		if (elem->has("autoLayout"))
 			mAutoLayout = elem->get<Vector2f>("autoLayout");		
+
+		if (elem->has("animateSelection"))
+			mAnimateSelection = elem->get<bool>("animateSelection");
 
 		if (elem->has("autoLayoutSelectedZoom"))
 			mAutoLayoutZoom = elem->get<float>("autoLayoutSelectedZoom");
@@ -568,7 +587,15 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 		}
 
 		if (newTile != nullptr)
-			newTile->setSelected(true, true, oldPos == Vector3f(0, 0) ? nullptr : &oldPos, true);
+		{
+			if (!mAnimateSelection)
+			{
+				oldPos = Vector3f(0, 0);
+				newTile->setSelected(true, true, &oldPos, true);
+			}
+			else
+				newTile->setSelected(true, true, oldPos == Vector3f(0, 0) ? nullptr : &oldPos, true);
+		}
 	}
 	
 	int firstVisibleCol = mStartPosition / dimOpposite;
@@ -758,6 +785,9 @@ void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowA
 					idx = 0;
 
 				Vector3f pos = mTiles.at(idx)->getBackgroundPosition();
+				if (!mAnimateSelection)
+					pos = Vector3f(0, 0, 0);
+
 				tile->setSelected(true, allowAnimation, &pos);
 			}
 			else

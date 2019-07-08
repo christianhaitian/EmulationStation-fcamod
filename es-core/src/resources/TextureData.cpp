@@ -10,6 +10,7 @@
 #include <nanosvg/nanosvgrast.h>
 #include <assert.h>
 #include <string.h>
+#include "Renderer.h"
 
 #define DPI 96
 
@@ -153,7 +154,16 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 			return true;
 	}
 	
-	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height, OPTIMIZEVRAM ? mMaxSize.x() : 0, mMaxSize.y(), mMaxSize.externalZoom(), mBaseSize, mPackedSize);
+
+	auto x = OPTIMIZEVRAM ? mMaxSize.x() : Renderer::getScreenWidth();
+	if (x > Renderer::getScreenWidth())
+		x = Renderer::getScreenWidth();
+
+	auto y = OPTIMIZEVRAM ? mMaxSize.y() : Renderer::getScreenHeight();
+	if (y > Renderer::getScreenHeight())
+		y = Renderer::getScreenHeight();
+
+	unsigned char* imageRGBA = ImageIO::loadFromMemoryRGBA32Ex((const unsigned char*)(fileData), length, width, height, x, y, mMaxSize.externalZoom(), mBaseSize, mPackedSize);
 	if (imageRGBA == NULL)
 	{
 		LOG(LogError) << "Could not initialize texture from memory, invalid data!  (file path: " << mPath << ", data ptr: " << (size_t)fileData << ", reported size: " << length << ")";

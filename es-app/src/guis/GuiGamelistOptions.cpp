@@ -125,11 +125,16 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		mMenu.addRow(row);
 
 		// sort list by
+		unsigned int currentSortId = mSystem->getSortId();
+		if (currentSortId > FileSorts::SortTypes.size()) {
+			currentSortId = 0;
+		}
+
 		mListSort = std::make_shared<SortList>(mWindow, _T("SORT GAMES BY"), false);
 		for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++)
 		{
 			const FolderData::SortType& sort = FileSorts::SortTypes.at(i);
-			mListSort->add(_T(Utils::String::toUpper(sort.description)), &sort, i == 0); // TODO - actually make the sort type persistent
+			mListSort->add(_T(Utils::String::toUpper(sort.description)), i, i == currentSortId);
 		}
 
 		mMenu.addWithLabel(_T("SORT GAMES BY"), mListSort);
@@ -286,9 +291,13 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 GuiGamelistOptions::~GuiGamelistOptions()
 {
 	// apply sort
-	if (!fromPlaceholder) {
+	if (!fromPlaceholder && mListSort->getSelected() != mSystem->getSortId())
+	{
+		mSystem->setSortId(mListSort->getSelected());
+
 		FolderData* root = mSystem->getRootFolder();
-		root->sort(*mListSort->getSelected()); // will also recursively sort children
+		const FolderData::SortType& sort = FileSorts::SortTypes.at(mListSort->getSelected());
+		root->sort(sort);
 
 		// notify that the root folder was sorted
 		getGamelist()->onFileChanged(root, FILE_SORTED);

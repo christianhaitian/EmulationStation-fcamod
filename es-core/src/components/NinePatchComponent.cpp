@@ -30,8 +30,26 @@ void NinePatchComponent::updateColors()
 	if (mColors == NULL)
 		return;
 
+	unsigned int oe = mEdgeColor;
+	unsigned int oc = mCenterColor;
+
+	mEdgeColor = (mEdgeColor >> 8 << 8) | (unsigned char)(((mEdgeColor & 0xff) / 255.0f * (mOpacity / 255.0f)) * 255.0f);
+	mCenterColor = (mCenterColor >> 8 << 8) | (unsigned char)(((mCenterColor & 0xff) / 255.0f * (mOpacity / 255.0f)) * 255.0f);
+
 	Renderer::buildGLColorArray(mColors, mEdgeColor, 6 * 9);
 	Renderer::buildGLColorArray(&mColors[4 * 6 * 4], mCenterColor, 6);
+
+	mEdgeColor = oe;
+	mCenterColor = oc;
+}
+
+void NinePatchComponent::setOpacity(unsigned char opacity)
+{
+	if (mOpacity == opacity)
+		return;
+
+	mOpacity = opacity;
+	updateColors();
 }
 
 void NinePatchComponent::buildVertices()

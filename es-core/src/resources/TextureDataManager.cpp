@@ -3,7 +3,8 @@
 #include "resources/TextureData.h"
 #include "resources/TextureResource.h"
 #include "Settings.h"
-
+#include "utils/StringUtil.h"
+#include "utils/FileSystemUtil.h"
 #include <SDL_timer.h>
 
 TextureDataManager::TextureDataManager()
@@ -129,6 +130,38 @@ size_t TextureDataManager::getQueueSize()
 	return mLoader->getQueueSize();
 }
 
+bool compareTextures(const std::shared_ptr<TextureData>& first, const std::shared_ptr<TextureData>& second)
+{	
+	bool isResource = first->mPath.rfind(":/") == 0;
+	bool secondIsResource = second->mPath.rfind(":/") == 0;
+	if (isResource && !secondIsResource)
+		return true;
+	/*
+	if (secondIsResource)
+		return false;
+		
+	bool firstisTheme = first->mPath.rfind("/themes/") != std::string::npos;
+	bool secondIsTheme = second->mPath.rfind("/themes/") != std::string::npos;
+
+
+	if (firstisTheme && secondIsTheme)
+	{
+		auto firstExt = Utils::String::toLower(Utils::FileSystem::getExtension(first->mPath));
+		if (firstExt == ".svg")
+		{
+			auto secondExt = Utils::String::toLower(Utils::FileSystem::getExtension(second->mPath));
+			if (secondExt != ".svg")
+				return true;
+
+			return false;
+		}
+	}
+
+	if (firstisTheme && !secondIsTheme)
+		return true;
+	*/
+	return false;
+}
 
 void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 {
@@ -149,22 +182,34 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 	size_t size = TextureResource::getTotalMemUsage();
 	size_t max_texture = (size_t)Settings::getInstance()->getInt("MaxVRAM") * 1024 * 1024;
 
-	for (auto it = mTextures.crbegin(); it != mTextures.crend(); ++it)
+	if (size >= max_texture)
 	{
-		if (size < max_texture)
-			break;
+		std::list<std::shared_ptr<TextureData>> orderedTextures(mTextures);
+		orderedTextures.sort(compareTextures);
 
-		if ((*it) == tex)
-			continue;
+		for (auto it = orderedTextures.crbegin(); it != orderedTextures.crend(); ++it)
+		{
+			if (size < max_texture)
+				break;
 
-		(*it)->releaseVRAM();
-		(*it)->releaseRAM();
+			if ((*it) == tex)
+				continue;
 
-		// It may be already in the loader queue. In this case it wouldn't have been using
-		// any VRAM yet but it will be. Remove it from the loader queue
-		mLoader->remove(*it);
-		size = TextureResource::getTotalMemUsage();
-	}	
+
+#if _DEBUG
+			if ((*it)->isLoaded())
+				TRACE("Unloading " << (*it)->mPath);
+#endif
+
+			(*it)->releaseVRAM();
+			(*it)->releaseRAM();
+
+			// It may be already in the loader queue. In this case it wouldn't have been using
+			// any VRAM yet but it will be. Remove it from the loader queue
+			mLoader->remove(*it);
+			size = TextureResource::getTotalMemUsage();
+		}
+	}
 
 	if (!block)
 	{
@@ -237,7 +282,7 @@ void TextureLoader::threadProc()
 		else
 		{
 			std::this_thread::yield();
-			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 				
 	}

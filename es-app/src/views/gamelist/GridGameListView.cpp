@@ -496,7 +496,20 @@ void GridGameListView::addPlaceholder()
 
 void GridGameListView::launch(FileData* game)
 {
-	ViewController::get()->launch(game);
+	Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
+
+	if (mVideoVisible && mVideo)
+		target = Vector3f(mVideo->getCenter().x(), mVideo->getCenter().y(), 0);
+	else if (mImageVisible)
+		target = Vector3f(mImage.getCenter().x(), mImage.getCenter().y(), 0);
+	else
+	{
+		auto tile = mGrid.getSelectedTile();
+		if (tile != nullptr)
+			target = Vector3f(tile->getCenter().x(), tile->getCenter().y(), 0);
+	}
+
+	ViewController::get()->launch(game, target);
 }
 
 void GridGameListView::remove(FileData *game, bool deleteFile)

@@ -542,9 +542,6 @@ void ViewController::preload()
 	bool splash = Settings::getInstance()->getBool("SplashScreen") && Settings::getInstance()->getBool("SplashScreenProgress");
 	if (splash)
 		mWindow->renderLoadingScreen(_T("Preloading UI"), (float)i / (float)max);
-
-	// First load the system list
-	getSystemListView();
 	
 	for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
 	{
@@ -557,6 +554,9 @@ void ViewController::preload()
 		(*it)->resetFilters();
 		getGameListView(*it);
 	}
+
+	// First load the system list
+	getSystemListView();
 }
 
 void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
