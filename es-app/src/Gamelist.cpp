@@ -55,7 +55,7 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 			if (type == GAME) // Final file
 			{
 				// Skip if the extension in the gamelist is unknown
-				if (!system->getSystemEnvData()->isValidExtension(Utils::FileSystem::getExtension(path)))
+				if (!system->getSystemEnvData()->isValidExtension(Utils::String::toLower(Utils::FileSystem::getExtension(path))))
 				{
 					LOG(LogWarning) << "gameList: file extension is not known by systemlist";
 					return NULL;
