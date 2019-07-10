@@ -233,6 +233,8 @@ public:
 	static std::map<std::string, std::string> sortThemeSubSets(const std::map<std::string, std::string>& subsetmap, const std::string& subset);
 	static std::map<std::string, std::string> getThemeSubSets(const std::string& theme);
 
+	static void setDefaultTheme(ThemeData* theme) { mCurrentTheme = theme; };
+
 private:
 	static void crawlIncludes(const pugi::xml_node& root, std::map<std::string, std::string>& sets, std::deque<std::string>& dequepath);
 	static void findRegion(const pugi::xml_document& doc, std::map<std::string, std::string>& sets);

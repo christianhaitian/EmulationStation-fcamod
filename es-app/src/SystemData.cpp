@@ -497,6 +497,9 @@ bool SystemData::loadConfig(Window* window)
 		CollectionSystemManager::get()->loadCollectionSystems();
 	}
 
+	if (SystemData::sSystemVector.size() > 0)
+		ThemeData::setDefaultTheme(SystemData::sSystemVector.at(0)->getTheme().get());
+
 	return true;
 }
 
