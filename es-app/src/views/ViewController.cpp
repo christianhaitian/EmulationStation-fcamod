@@ -505,7 +505,19 @@ void ViewController::render(const Transform4x4f& parentTrans)
 
 	// draw systemview
 	if (!Settings::getInstance()->getBool("HideSystemView"))
+	{		
+		/*
+		//getSystemListView()->setSize(Vector2f(getSystemListView()->getSize().x(), getSystemListView()->getSize().y()));
+		getSystemListView()->setSize(Vector2f(getSystemListView()->getSize().x(), 400));
+
+		Transform4x4f ts = Transform4x4f::Identity();
+		Transform4x4f transInverse;
+		transInverse.invert(getSystemListView()->getTransform());
+
+		getSystemListView()->render(transInverse);
+		*/
 		getSystemListView()->render(trans);
+	}
 	
 	// draw gamelists
 	for(auto it = mGameListViews.cbegin(); it != mGameListViews.cend(); it++)

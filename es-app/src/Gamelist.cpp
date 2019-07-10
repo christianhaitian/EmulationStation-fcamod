@@ -9,10 +9,15 @@
 #include "SystemData.h"
 #include <pugixml/src/pugixml.hpp>
 
+#ifdef WIN32
+#include <Windows.h>
+#endif
+
 FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType type, std::unordered_map<std::string, FileData*>& fileMap)
 {
 	// first, verify that path is within the system's root folder
 	FolderData* root = system->getRootFolder();
+
 	bool contains = false;
 	std::string relative = Utils::FileSystem::removeCommonPath(path, root->getPath(), contains);
 
@@ -35,6 +40,8 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 	{
 		std::string key = Utils::FileSystem::combine(treeNode->getPath(), *path_it);	
 		FileData* item = (fileMap.find(key) != fileMap.end()) ? fileMap[key] : nullptr;
+		if (item != nullptr)
+			return item;
 
 		// this is the end
 		if(path_it == --pathList.end())
@@ -47,22 +54,19 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 
 			if (type == GAME) // Final file
 			{
-				if (item == nullptr)
+				// Skip if the extension in the gamelist is unknown
+				if (!system->getSystemEnvData()->isValidExtension(Utils::FileSystem::getExtension(path)))
 				{
-					// Skip if the extension in the gamelist is unknown
-					if (!system->getSystemEnvData()->isValidExtension(Utils::FileSystem::getExtension(path)))
-					{
-						LOG(LogWarning) << "gameList: file extension is not known by systemlist";
-						return NULL;
-					}
+					LOG(LogWarning) << "gameList: file extension is not known by systemlist";
+					return NULL;
+				}
 
-					// Add final game
-					item = new FileData(GAME, path, system);
-					if (!item->isArcadeAsset())
-					{
-						fileMap[key] = item;
-						treeNode->addChild(item);
-					}
+				// Add final game
+				item = new FileData(GAME, path, system);
+				if (!item->isArcadeAsset())
+				{
+					fileMap[key] = item;
+					treeNode->addChild(item);
 				}
 
 				return item;
@@ -93,12 +97,14 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 void refactorGameFolders(SystemData* system)
 {
 	FolderData* root = system->getRootFolder();
+	if (root == nullptr)
+		return;
 
 	auto childs = root->getChildren();
 	for (int i = childs.size() - 1; i >= 0; i--)
 	{
 		FileData* item = childs.at(i);
-		if (item->getType() == FOLDER)
+		if (item != nullptr && item->getType() == FOLDER)
 		{
 			FolderData* folder = (FolderData*)item;
 			FileData* uniqueGame = folder->findUniqueGameForFolder();
@@ -186,7 +192,7 @@ void parseGamelist(SystemData* system, std::unordered_map<std::string, FileData*
 	}
 }
 
-void addFileDataNode(pugi::xml_node& parent, const FileData* file, const char* tag, SystemData* system)
+bool addFileDataNode(pugi::xml_node& parent, const FileData* file, const char* tag, SystemData* system)
 {
 	//create game and add to parent node
 	pugi::xml_node newNode = parent.append_child(tag);
@@ -201,12 +207,13 @@ void addFileDataNode(pugi::xml_node& parent, const FileData* file, const char* t
 		//if the only info is the default name, don't bother with this node
 		//delete it and ultimately do nothing
 		parent.remove_child(newNode);
-	}else{
-		//there's something useful in there so we'll keep the node, add the path
-
-		// try and make the path relative if we can so things still work if we change the rom folder location in the future
-		newNode.prepend_child("path").text().set(Utils::FileSystem::createRelativePath(file->getPath(), system->getStartPath(), false).c_str());
+		return false;
 	}
+
+	//there's something useful in there so we'll keep the node, add the path
+	// try and make the path relative if we can so things still work if we change the rom folder location in the future
+	newNode.prepend_child("path").text().set(Utils::FileSystem::createRelativePath(file->getPath(), system->getStartPath(), false).c_str());	
+	return true;
 }
 
 void updateGamelist(SystemData* system)
@@ -290,8 +297,8 @@ void updateGamelist(SystemData* system)
 			}
 
 			// it was either removed or never existed to begin with; either way, we can add it now
-			addFileDataNode(root, *fit, tag, system);
-			++numUpdated;
+			if (addFileDataNode(root, *fit, tag, system))
+				++numUpdated; // Only if really added
 		}
 
 		//now write the file
@@ -313,8 +320,14 @@ void updateGamelist(SystemData* system)
 			}
 			else if (Utils::FileSystem::exists(tmpFile))
 			{				
+				doc.reset();
+
+#ifdef WIN32
+				::Sleep(50); // Introduce a small sleep
+#endif
+
 				// Secure XML writing
-				if ((int) Utils::FileSystem::getFileSize(tmpFile) > 0)
+				if (Utils::FileSystem::getFileSize(tmpFile) != 0)
 				{
 					std::string savFile = xmlWritePath + ".old";
 

@@ -43,7 +43,8 @@ void SystemView::populate()
 		Entry e;
 		e.name = (*it)->getName();
 		e.object = *it;
-		
+		e.data.logoIsImage = false;
+
 		// make logo
 		const ThemeData::ThemeElement* logoElem = theme->getElement("system", "logo", "image");
 		if (logoElem)
@@ -56,10 +57,11 @@ void SystemView::populate()
 			{								
 				// Remove dynamic flags for png & jpg files : themes can contain oversized images that can't be unloaded by the TextureResource manager
 				ImageComponent* logo = new ImageComponent(mWindow, false, Utils::String::toLower(Utils::FileSystem::getExtension(path)) != ".svg");
-				logo->setMaxSize(mCarousel.logoSize * mCarousel.logoScale);
+				logo->setMaxSize(carouselLogoSize() * mCarousel.logoScale);
 				logo->applyTheme(theme, "system", "logo", ThemeFlags::PATH | ThemeFlags::SIZE | ThemeFlags::COLOR);
 				logo->setRotateByTargetSize(true);
 				e.data.logo = std::shared_ptr<GuiComponent>(logo);
+				e.data.logoIsImage = true;
 			}
 		}
 
@@ -71,7 +73,7 @@ void SystemView::populate()
 				Font::get(FONT_SIZE_LARGE),
 				0x000000FF,
 				ALIGN_CENTER);
-			text->setSize(mCarousel.logoSize * mCarousel.logoScale);
+			text->setSize(carouselLogoSize() * mCarousel.logoScale);
 			text->applyTheme((*it)->getTheme(), "system", "logoText", ThemeFlags::FONT_PATH | ThemeFlags::FONT_SIZE | ThemeFlags::COLOR | ThemeFlags::FORCE_UPPERCASE | ThemeFlags::LINE_SPACING | ThemeFlags::TEXT);
 			e.data.logo = std::shared_ptr<GuiComponent>(text);
 
@@ -105,7 +107,7 @@ void SystemView::populate()
 		}
 
 		
-		Vector2f denormalized = mCarousel.logoSize * e.data.logo->getOrigin();
+		Vector2f denormalized = carouselLogoSize() * e.data.logo->getOrigin();
 		e.data.logo->setPosition(denormalized.x(), denormalized.y(), 0.0);
 		// delete any existing extras
 		for (auto extra : e.data.backgroundExtras)
@@ -356,6 +358,26 @@ void SystemView::render(const Transform4x4f& parentTrans)
 {
 	if(size() == 0)
 		return;  // nothing to render
+	
+	if (mSize.x() != Renderer::getScreenWidth() || mSize.x() != Renderer::getScreenHeight())
+	{
+		for (int i = 0; i < mEntries.size(); i++)
+		{
+			if (mEntries[i].data.logo)
+			{
+				Vector2f denormalized = carouselLogoSize() * mEntries[i].data.logo->getOrigin();
+				mEntries[i].data.logo->setPosition(denormalized.x(), denormalized.y(), 0.0);
+
+				if (mEntries[i].data.logoIsImage)
+				{
+					ImageComponent* img = (ImageComponent*)mEntries[i].data.logo.get();
+					img->setMaxSize(carouselLogoSize() * mCarousel.logoScale);
+				}
+				else
+					mEntries[i].data.logo->setSize(carouselLogoSize() * mCarousel.logoScale);
+			}
+		}
+	}
 
 	Transform4x4f trans = getTransform() * parentTrans;
 	
@@ -443,18 +465,18 @@ void SystemView::renderCarousel(const Transform4x4f& trans)
 {
 	// background box behind logos
 	Transform4x4f carouselTrans = trans;
-	carouselTrans.translate(Vector3f(mCarousel.pos.x(), mCarousel.pos.y(), 0.0));
-	carouselTrans.translate(Vector3f(mCarousel.origin.x() * mCarousel.size.x() * -1, mCarousel.origin.y() * mCarousel.size.y() * -1, 0.0f));
+	carouselTrans.translate(Vector3f(carouselPos().x(), carouselPos().y(), 0.0));
+	carouselTrans.translate(Vector3f(mCarousel.origin.x() * carouselSize().x() * -1, mCarousel.origin.y() * carouselSize().y() * -1, 0.0f));
 
 	Vector2f clipPos(carouselTrans.translation().x(), carouselTrans.translation().y());
-	Renderer::pushClipRect(Vector2i((int)clipPos.x(), (int)clipPos.y()), Vector2i((int)mCarousel.size.x(), (int)mCarousel.size.y()));
+	Renderer::pushClipRect(Vector2i((int)clipPos.x(), (int)clipPos.y()), Vector2i((int)carouselSize().x(), (int)carouselSize().y()));
 
 	Renderer::setMatrix(carouselTrans);
 
 	if (mCarousel.colorGradient != 0)
-		Renderer::drawGradientRect(0.0, 0.0, mCarousel.size.x(), mCarousel.size.y(), mCarousel.color, mCarousel.colorGradient, mCarousel.colorGradientHorz);
+		Renderer::drawGradientRect(0.0, 0.0, carouselSize().x(), carouselSize().y(), mCarousel.color, mCarousel.colorGradient, mCarousel.colorGradientHorz);
 	else
-		Renderer::drawRect(0.0, 0.0, mCarousel.size.x(), mCarousel.size.y(), mCarousel.color);
+		Renderer::drawRect(0.0, 0.0, carouselSize().x(), carouselSize().y(), mCarousel.color);
 
 	// draw logos
 	Vector2f logoSpacing(0.0, 0.0); // NB: logoSpacing will include the size of the logo itself as well!
@@ -464,53 +486,53 @@ void SystemView::renderCarousel(const Transform4x4f& trans)
 	switch (mCarousel.type)
 	{
 		case VERTICAL_WHEEL:
-			yOff = (mCarousel.size.y() - mCarousel.logoSize.y()) / 2.f - (mCamOffset * logoSpacing[1]);
+			yOff = (carouselSize().y() - carouselLogoSize().y()) / 2.f - (mCamOffset * logoSpacing[1]);
 			if (mCarousel.logoAlignment == ALIGN_LEFT)
-				xOff = mCarousel.logoSize.x() / 10.f;
+				xOff = carouselLogoSize().x() / 10.f;
 			else if (mCarousel.logoAlignment == ALIGN_RIGHT)
-				xOff = mCarousel.size.x() - (mCarousel.logoSize.x() * 1.1f);
+				xOff = carouselSize().x() - (carouselLogoSize().x() * 1.1f);
 			else
-				xOff = (mCarousel.size.x() - mCarousel.logoSize.x()) / 2.f;
+				xOff = (carouselSize().x() - carouselLogoSize().x()) / 2.f;
 			break;
 		case VERTICAL:
-			logoSpacing[1] = ((mCarousel.size.y() - (mCarousel.logoSize.y() * mCarousel.maxLogoCount)) / (mCarousel.maxLogoCount)) + mCarousel.logoSize.y();
-			yOff = (mCarousel.size.y() - mCarousel.logoSize.y()) / 2.f - (mCamOffset * logoSpacing[1]);
+			logoSpacing[1] = ((carouselSize().y() - (carouselLogoSize().y() * mCarousel.maxLogoCount)) / (mCarousel.maxLogoCount)) + carouselLogoSize().y();
+			yOff = (carouselSize().y() - carouselLogoSize().y()) / 2.f - (mCamOffset * logoSpacing[1]);
 
 			if (mCarousel.logoAlignment == ALIGN_LEFT)
-				xOff = mCarousel.logoSize.x() / 10.f;
+				xOff = carouselLogoSize().x() / 10.f;
 			else if (mCarousel.logoAlignment == ALIGN_RIGHT)
-				xOff = mCarousel.size.x() - (mCarousel.logoSize.x() * 1.1f);
+				xOff = carouselSize().x() - (carouselLogoSize().x() * 1.1f);
 			else
-				xOff = (mCarousel.size.x() - mCarousel.logoSize.x()) / 2;
+				xOff = (carouselSize().x() - carouselLogoSize().x()) / 2;
 			break;
 		case HORIZONTAL_WHEEL:
-			xOff = (mCarousel.size.x() - mCarousel.logoSize.x()) / 2 - (mCamOffset * logoSpacing[1]);
+			xOff = (carouselSize().x() - carouselLogoSize().x()) / 2 - (mCamOffset * logoSpacing[1]);
 			if (mCarousel.logoAlignment == ALIGN_TOP)
-				yOff = mCarousel.logoSize.y() / 10;
+				yOff = carouselLogoSize().y() / 10;
 			else if (mCarousel.logoAlignment == ALIGN_BOTTOM)
-				yOff = mCarousel.size.y() - (mCarousel.logoSize.y() * 1.1f);
+				yOff = carouselSize().y() - (carouselLogoSize().y() * 1.1f);
 			else
-				yOff = (mCarousel.size.y() - mCarousel.logoSize.y()) / 2;
+				yOff = (carouselSize().y() - carouselLogoSize().y()) / 2;
 			break;
 		case HORIZONTAL:
 		default:
-			logoSpacing[0] = ((mCarousel.size.x() - (mCarousel.logoSize.x() * mCarousel.maxLogoCount)) / (mCarousel.maxLogoCount)) + mCarousel.logoSize.x();
-			xOff = (mCarousel.size.x() - mCarousel.logoSize.x()) / 2.f - (mCamOffset * logoSpacing[0]);
+			logoSpacing[0] = ((carouselSize().x() - (carouselLogoSize().x() * mCarousel.maxLogoCount)) / (mCarousel.maxLogoCount)) + carouselLogoSize().x();
+			xOff = (carouselSize().x() - carouselLogoSize().x()) / 2.f - (mCamOffset * logoSpacing[0]);
 
 			if (mCarousel.logoAlignment == ALIGN_TOP)
-				yOff = mCarousel.logoSize.y() / 10.f;
+				yOff = carouselLogoSize().y() / 10.f;
 			else if (mCarousel.logoAlignment == ALIGN_BOTTOM)
-				yOff = mCarousel.size.y() - (mCarousel.logoSize.y() * 1.1f);
+				yOff = carouselSize().y() - (carouselLogoSize().y() * 1.1f);
 			else
-				yOff = (mCarousel.size.y() - mCarousel.logoSize.y()) / 2.f;
+				yOff = (carouselSize().y() - carouselLogoSize().y()) / 2.f;
 			break;
 	}
 
 	if (mCarousel.logoPos.x() >= 0)
-		xOff = mCarousel.logoPos.x() - (mCarousel.type == HORIZONTAL ? (mCamOffset * logoSpacing[0]) : 0);
+		xOff = carouselLogoPos().x() - (mCarousel.type == HORIZONTAL ? (mCamOffset * logoSpacing[0]) : 0);
 
 	if (mCarousel.logoPos.y() >= 0)
-		yOff = mCarousel.logoPos.y() - (mCarousel.type == VERTICAL ? (mCamOffset * logoSpacing[1]) : 0);
+		yOff = carouselLogoPos().y() - (mCarousel.type == VERTICAL ? (mCamOffset * logoSpacing[1]) : 0);
 
 	int center = (int)(mCamOffset);
 	int logoCount = Math::min(mCarousel.maxLogoCount, (int)mEntries.size());
@@ -621,10 +643,10 @@ void  SystemView::getDefaultElements(void)
 	// Carousel
 	mCarousel.type = HORIZONTAL;
 	mCarousel.logoAlignment = ALIGN_CENTER;
-	mCarousel.size.x() = mSize.x();
-	mCarousel.size.y() = 0.2325f * mSize.y();
+	mCarousel.size.x() = 1; // mSize.x();
+	mCarousel.size.y() = 0.2325f; // *mSize.y();
 	mCarousel.pos.x() = 0.0f;
-	mCarousel.pos.y() = 0.5f * (mSize.y() - mCarousel.size.y());
+	mCarousel.pos.y() = 0.5f - mCarousel.size.y(); // *(mSize.y() - mCarousel.size.y());
 	mCarousel.origin.x() = 0.0f;
 	mCarousel.origin.y() = 0.0f;
 	mCarousel.color = 0xFFFFFFD8;
@@ -634,8 +656,8 @@ void  SystemView::getDefaultElements(void)
 	mCarousel.logoRotation = 7.5;
 	mCarousel.logoRotationOrigin.x() = -5;
 	mCarousel.logoRotationOrigin.y() = 0.5;
-	mCarousel.logoSize.x() = 0.25f * mSize.x();
-	mCarousel.logoSize.y() = 0.155f * mSize.y();
+	mCarousel.logoSize.x() = 0.25f; // *mSize.x();
+	mCarousel.logoSize.y() = 0.155f; // *mSize.y();
 	mCarousel.logoPos = Vector2f(-1, -1);
 	mCarousel.maxLogoCount = 3;
 	mCarousel.zIndex = 40;
@@ -649,6 +671,26 @@ void  SystemView::getDefaultElements(void)
 	mSystemInfo.setColor(0x000000FF);
 	mSystemInfo.setZIndex(50);
 	mSystemInfo.setDefaultZIndex(50);
+}
+
+Vector2f SystemView::carouselSize()
+{
+	return  mCarousel.size * mSize;
+}
+
+Vector2f SystemView::carouselLogoPos()
+{
+	return mCarousel.logoPos * mSize;
+}
+
+Vector2f SystemView::carouselPos()
+{
+	return mCarousel.pos * mSize;
+}
+
+Vector2f SystemView::carouselLogoSize()
+{
+	return mCarousel.logoSize * mSize;
 }
 
 void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
@@ -665,9 +707,9 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 			mCarousel.type = HORIZONTAL;
 	}
 	if (elem->has("size"))
-		mCarousel.size = elem->get<Vector2f>("size") * mSize;
+		mCarousel.size = elem->get<Vector2f>("size"); // *mSize;
 	if (elem->has("pos"))
-		mCarousel.pos = elem->get<Vector2f>("pos") * mSize;
+		mCarousel.pos = elem->get<Vector2f>("pos"); // *mSize;
 	if (elem->has("origin"))
 		mCarousel.origin = elem->get<Vector2f>("origin");
 	if (elem->has("color"))
@@ -681,9 +723,9 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 	if (elem->has("logoScale"))
 		mCarousel.logoScale = elem->get<float>("logoScale");
 	if (elem->has("logoSize"))
-		mCarousel.logoSize = elem->get<Vector2f>("logoSize") * mSize;
+		mCarousel.logoSize = elem->get<Vector2f>("logoSize"); // *mSize;
 	if (elem->has("logoPos"))
-		mCarousel.logoPos = elem->get<Vector2f>("logoPos") * mSize;
+		mCarousel.logoPos = elem->get<Vector2f>("logoPos"); // *mSize;
 	if (elem->has("maxLogoCount"))
 		mCarousel.maxLogoCount = (int)Math::round(elem->get<float>("maxLogoCount"));
 	if (elem->has("zIndex"))

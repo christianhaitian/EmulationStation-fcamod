@@ -103,15 +103,21 @@ void CollectionSystemManager::saveCustomCollection(SystemData* sys)
 	auto games = sys->getRootFolder()->getChildren();
 
 	bool found = mCustomCollectionSystemsData.find(name) != mCustomCollectionSystemsData.cend();
-	if (found) {
+	if (found) 
+	{
 		CollectionSystemData sysData = mCustomCollectionSystemsData.at(name);
 		if (sysData.needsSave)
 		{
+			auto home = Utils::FileSystem::getHomePath();
+
 			std::ofstream configFile;
 			configFile.open(getCustomCollectionConfigPath(name));
 			for(auto iter = games.cbegin(); iter != games.cend(); ++iter)
 			{
 				std::string path = (*iter)->getKey();
+
+				path = Utils::FileSystem::createRelativePath(path, "portnawak", true);
+				
 				configFile << path << std::endl;
 			}
 			configFile.close();
@@ -781,6 +787,8 @@ void CollectionSystemManager::populateCustomCollection(CollectionSystemData* sys
 	// iterate list of files in config file
 	for(std::string gameKey; getline(input, gameKey); )
 	{
+		gameKey = Utils::FileSystem::resolveRelativePath(gameKey, "portnawak", true);
+
 		std::unordered_map<std::string, FileData*>::const_iterator it = pMap->find(gameKey);
 		if (it != pMap->cend())
 		{
@@ -793,6 +801,7 @@ void CollectionSystemManager::populateCustomCollection(CollectionSystemData* sys
 			LOG(LogInfo) << "Couldn't find game referenced at '" << gameKey << "' for system config '" << path << "'";
 		}
 	}
+
 	rootFolder->sort(getSortTypeFromString(sysDecl.defaultSort));
 	updateCollectionFolderMetadata(newSys);
 }

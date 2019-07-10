@@ -123,7 +123,7 @@ void ImageComponent::resize()
 	mSize[0] = Math::round(mSize.x());
 	mSize[1] = Math::round(mSize.y());
 
-	mTexture->rasterizeAt((size_t)mSize.x(), (size_t)mSize.y());
+	mTexture->rasterizeAt(mSize.x(), mSize.y());
 
 	onSizeChanged();
 }

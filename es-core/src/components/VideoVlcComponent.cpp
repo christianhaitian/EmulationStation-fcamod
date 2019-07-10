@@ -132,7 +132,7 @@ void VideoVlcComponent::resize()
 		}
 
 	// mSize.y() should already be rounded
-	mTexture->rasterizeAt((size_t)Math::round(mSize.x()), (size_t)Math::round(mSize.y()));
+	mTexture->rasterizeAt(Math::round(mSize.x()), Math::round(mSize.y()));
 
 	onSizeChanged();
 }

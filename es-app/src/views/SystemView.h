@@ -20,8 +20,9 @@ enum CarouselType : unsigned int
 };
 
 struct SystemViewData
-{
+{	
 	std::shared_ptr<GuiComponent> logo;
+	bool logoIsImage;
 	std::vector<GuiComponent*> backgroundExtras;
 };
 
@@ -67,6 +68,12 @@ protected:
 	void onCursorChanged(const CursorState& state) override;
 
 private:
+	Vector2f carouselLogoPos();
+	Vector2f carouselLogoSize();
+	Vector2f carouselPos();
+	Vector2f carouselSize();
+
+
 	void populate();
 	void getViewElements(const std::shared_ptr<ThemeData>& theme);
 	void getDefaultElements(void);

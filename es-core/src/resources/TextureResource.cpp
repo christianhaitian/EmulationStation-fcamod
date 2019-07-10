@@ -236,8 +236,11 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 }
 
 // For scalable source images in textures we want to set the resolution to rasterize at
-void TextureResource::rasterizeAt(size_t width, size_t height)
+void TextureResource::rasterizeAt(float width, float height)
 {
+	if (width < 0) width = -width;
+	if (height < 0) height = -height;
+
 	std::shared_ptr<TextureData> data;
 	if (mTextureData != nullptr)
 		data = mTextureData;
