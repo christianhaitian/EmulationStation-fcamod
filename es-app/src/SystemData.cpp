@@ -49,7 +49,7 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 		refactorGameFolders(this);
 
 		//StopWatch ws("sort " + mName);
-		// mRootFolder->sort(FileSorts::SortTypes.at(0));
+		mRootFolder->sort(FileSorts::SortTypes.at(0));
 
 		//indexAllGameFilters(mRootFolder);
 	}
