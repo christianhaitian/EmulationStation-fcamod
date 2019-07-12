@@ -63,6 +63,7 @@ public:
 
 	std::vector<HelpPrompt> getHelpPrompts() override;
 	virtual HelpStyle getHelpStyle() override;
+	void onSizeChanged() override;
 
 protected:
 	void onCursorChanged(const CursorState& state) override;
@@ -73,6 +74,7 @@ private:
 	Vector2f carouselPos();
 	Vector2f carouselSize();
 
+	
 
 	void populate();
 	void getViewElements(const std::shared_ptr<ThemeData>& theme);

@@ -26,6 +26,8 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 	populate();
 }
 
+
+
 void SystemView::populate()
 {
 	mEntries.clear();
@@ -356,9 +358,9 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 
 void SystemView::render(const Transform4x4f& parentTrans)
 {
-	if(size() == 0)
+	if (size() == 0)
 		return;  // nothing to render
-	
+
 	if (mSize.x() != Renderer::getScreenWidth() || mSize.x() != Renderer::getScreenHeight())
 	{
 		for (int i = 0; i < mEntries.size(); i++)
@@ -646,7 +648,7 @@ void  SystemView::getDefaultElements(void)
 	mCarousel.size.x() = 1; // mSize.x();
 	mCarousel.size.y() = 0.2325f; // *mSize.y();
 	mCarousel.pos.x() = 0.0f;
-	mCarousel.pos.y() = 0.5f - mCarousel.size.y(); // *(mSize.y() - mCarousel.size.y());
+	mCarousel.pos.y() = 0.5f * (1 - 0.2325f);//- mCarousel.size.y(); // *(mSize.y() - mCarousel.size.y());
 	mCarousel.origin.x() = 0.0f;
 	mCarousel.origin.y() = 0.0f;
 	mCarousel.color = 0xFFFFFFD8;
@@ -664,13 +666,26 @@ void  SystemView::getDefaultElements(void)
 
 	// System Info Bar
 	mSystemInfo.setSize(mSize.x(), mSystemInfo.getFont()->getLetterHeight()*2.2f);
-	mSystemInfo.setPosition(0, (mCarousel.pos.y() + mCarousel.size.y() - 0.2f));
+	mSystemInfo.setPosition(0, (carouselPos().y() + carouselSize().y() - 0.2f));
 	mSystemInfo.setBackgroundColor(0xDDDDDDD8);
 	mSystemInfo.setRenderBackground(true);
 	mSystemInfo.setFont(Font::get((int)(0.035f * mSize.y()), Font::getDefaultPath()));
 	mSystemInfo.setColor(0x000000FF);
 	mSystemInfo.setZIndex(50);
 	mSystemInfo.setDefaultZIndex(50);
+}
+
+void SystemView::onSizeChanged()
+{
+	mSystemInfo.setPosition(0, (carouselPos().y() + carouselSize().y() - 0.2f));
+
+	if (SystemData::sSystemVector.size() == 0)
+		return;
+
+	const std::shared_ptr<ThemeData>& theme = SystemData::sSystemVector.at(0)->getTheme();	
+	const ThemeData::ThemeElement* sysInfoElem = theme->getElement("system", "systemInfo", "text");
+	if (sysInfoElem)
+		mSystemInfo.applyTheme(theme, "system", "systemInfo", ThemeFlags::POSITION);
 }
 
 Vector2f SystemView::carouselSize()

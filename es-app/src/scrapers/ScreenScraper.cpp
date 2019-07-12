@@ -7,6 +7,7 @@
 #include "PlatformId.h"
 #include "Settings.h"
 #include "SystemData.h"
+#include "EsLocale.h"
 #include <pugixml/src/pugixml.hpp>
 #include <cstring>
 
@@ -158,8 +159,10 @@ void ScreenScraperRequest::process(const std::unique_ptr<HttpReq>& req, std::vec
 {
 	assert(req->status() == HttpReq::REQ_SUCCESS);
 
-	pugi::xml_document doc;
-	pugi::xml_parse_result parseResult = doc.load(req->getContent().c_str());
+	std::string content = req->getContent();
+
+	pugi::xml_document doc;	
+	pugi::xml_parse_result parseResult = doc.load(content.c_str());
 
 	if (!parseResult)
 	{
@@ -187,10 +190,13 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 	{
 		ScraperSearchResult result;
 		ScreenScraperRequest::ScreenScraperConfig ssConfig;
+				
+		std::string region = Utils::String::toLower(ssConfig.region);
+		std::string language = Utils::String::toLower(EsLocale::getLanguage());		
+		if (language != "EN")
+			region = "eu";
 
-		std::string region = Utils::String::toLower(ssConfig.region).c_str();
-		std::string language = Utils::String::toLower(ssConfig.language).c_str();
-
+		// ssConfig.language
 		// Name fallback: US, WOR(LD). ( Xpath: Data/jeu[0]/noms/nom[*] ). 
 		result.mdl.set("name", find_child_by_attribute_list(game.child("noms"), "nom", "region", { region, "wor", "us" , "ss", "eu", "jp" }).text().get());
 
@@ -254,6 +260,7 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 			// We need to do this because any child of 'medias' has the form
 			// <media type="..." region="..." format="..."> 
 			// and we need to find the right media for the region.
+
 			pugi::xpath_node_set results = media_list.select_nodes((static_cast<std::string>("media[@type='") + ssConfig.media_name + "']").c_str());
 
 			if (results.size())

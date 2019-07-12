@@ -37,7 +37,7 @@ GuiMsgBox::GuiMsgBox(Window* window, const std::string& text,
 	}else{
 		for(auto it = mButtons.cbegin(); it != mButtons.cend(); it++)
 		{
-			if(Utils::String::toUpper((*it)->getText()) == "OK" || Utils::String::toUpper((*it)->getText()) == "NO")
+			if(Utils::String::toUpper((*it)->getText()) == _T("OK") || Utils::String::toUpper((*it)->getText()) == _T("NO"))
 			{
 				mAcceleratorFunc = (*it)->getPressedFunc();
 				break;
@@ -80,10 +80,7 @@ bool GuiMsgBox::input(InputConfig* config, Input input)
 	}
 
 	if(mAcceleratorFunc && config->isMappedTo("b", input) && input.value != 0)
-	{
 		mAcceleratorFunc();
-		return true;
-	}
 
 	return GuiComponent::input(config, input);
 }

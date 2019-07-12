@@ -51,7 +51,7 @@ public:
 
 		// Which Language to use when selecting the textual information
 		// Applies to: description, genre
-		std::string language = "EN";
+		//std::string language = "EN";
 
 		ScreenScraperConfig() {};
 	} configuration;
