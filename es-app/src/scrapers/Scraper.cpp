@@ -143,7 +143,6 @@ MDResolveHandle::MDResolveHandle(const ScraperSearchResult& result, const Scrape
 {
 	if(!result.imageUrl.empty())
 	{
-
 		std::string ext;
 
 		// If we have a file extension returned by the scraper, then use it.
@@ -158,13 +157,38 @@ MDResolveHandle::MDResolveHandle(const ScraperSearchResult& result, const Scrape
 				ext = result.imageUrl.substr(dot, std::string::npos);
 		}
 
-		std::string imgPath = getSaveAsPath(search, "image", ext);     
-
-		mFuncs.push_back(ResolvePair(downloadImageAsync(result.imageUrl, imgPath), [this, imgPath]
+		if (!result.imageUrl.empty())
 		{
-			mResult.mdl.set("image", imgPath);
-			mResult.imageUrl = "";
-		}));
+			std::string imgPath = getSaveAsPath(search, "image", ext);
+
+			mFuncs.push_back(ResolvePair(downloadImageAsync(result.imageUrl, imgPath), [this, imgPath]
+			{
+				mResult.mdl.set("image", imgPath);
+				mResult.imageUrl = "";
+			}));
+		}
+
+		if (!result.thumbnailUrl.empty() && result.thumbnailUrl.find(result.imageUrl) != 0)
+		{
+			std::string thumbPath = getSaveAsPath(search, "thumb", ext);
+
+			mFuncs.push_back(ResolvePair(downloadImageAsync(result.thumbnailUrl, thumbPath), [this, thumbPath]
+			{
+				mResult.mdl.set("thumbnail", thumbPath);
+				mResult.thumbnailUrl = "";
+			}));
+		}
+
+		if (!result.videoUrl.empty())
+		{
+			std::string videoPath = getSaveAsPath(search, "video", ".mp4");
+
+			mFuncs.push_back(ResolvePair(downloadImageAsync(result.videoUrl, videoPath), [this, videoPath]
+			{
+				mResult.mdl.set("video", videoPath);
+				mResult.videoUrl = "";
+			}));
+		}
 	}
 }
 
@@ -233,12 +257,13 @@ void ImageDownloadHandle::update()
 		setError("Failed to save image. Disk full?");
 		return;
 	}
-
-	// resize it
-	if(!resizeImage(mSavePath, mMaxWidth, mMaxHeight))
+	
+	// resize downloaded image
+	if (Utils::FileSystem::getExtension(mSavePath) != ".mp4")
 	{
-		setError("Error saving resized image. Out of memory? Disk full?");
-		return;
+		resizeImage(mSavePath, mMaxWidth, mMaxHeight);
+		//setError("Error saving resized image. Out of memory? Disk full?");
+		//return;
 	}
 
 	setStatus(ASYNC_DONE);
@@ -304,10 +329,24 @@ bool resizeImage(const std::string& path, int maxWidth, int maxHeight)
 
 std::string getSaveAsPath(const ScraperSearchParams& params, const std::string& suffix, const std::string& extension)
 {
-	const std::string subdirectory = params.system->getName();
+	std::string subFolder = "downloaded_images";
+	if (suffix == "video")
+		subFolder = "downloaded_videos";
+
 	const std::string name = Utils::FileSystem::getStem(params.game->getPath()) + "-" + suffix;
 
-	std::string path = Utils::FileSystem::getHomePath() + "/.emulationstation/downloaded_images/";
+	const std::string basePath = Utils::FileSystem::getParent(params.system->getGamelistPath(false));
+	if (basePath.find("/.emulationstation/") == std::string::npos)
+	{
+		const std::string pth = Utils::FileSystem::getGenericPath(params.system->getRootFolder()->getPath() + "/"+ subFolder +"/");
+		if (!Utils::FileSystem::exists(pth))
+			Utils::FileSystem::createDirectory(pth);
+
+		return pth + "/" + name + extension;
+	}
+
+	const std::string subdirectory = params.system->getName();
+	std::string path = Utils::FileSystem::getHomePath() + "/.emulationstation/"+ subFolder +"/";
 
 	if(!Utils::FileSystem::exists(path))
 		Utils::FileSystem::createDirectory(path);
@@ -316,7 +355,6 @@ std::string getSaveAsPath(const ScraperSearchParams& params, const std::string& 
 
 	if(!Utils::FileSystem::exists(path))
 		Utils::FileSystem::createDirectory(path);
-
 
 	path += name + extension;
 	return path;

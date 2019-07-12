@@ -53,6 +53,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 	mList = std::make_shared<ComponentList>(mWindow);
 	mGrid.setEntry(mList, Vector2i(0, 1), true, true);
 
+
 	SystemData* system = file->getSystem();
 
 	auto emul_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _T("EMULATOR"), false);
@@ -66,14 +67,14 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 		// don't add statistics
 		if(iter->isStatistic)
 			continue;
-		
+		/*
 #if defined(_WIN32)
 		if (iter->displayName == "sortname" || iter->displayName == "image" || iter->displayName == "video" || iter->displayName == "marquee" || 
 			iter->displayName == "thumbnail" || iter->displayName == "kidgame" || iter->displayName == "description" || iter->displayName == "release date" || 
 			iter->displayName == "genre" || iter->displayName == "publisher" || iter->displayName == "developer" || iter->displayName == "players")
 			continue;
 #endif
-
+*/
 		// create ed and add it (and any related components) to mMenu
 		// ed's value will be set below
 		ComponentListRow row;
@@ -251,6 +252,21 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 
 	mButtons = makeButtonGrid(mWindow, buttons);
 	mGrid.setEntry(mButtons, Vector2i(0, 2), true, false);
+
+	mGrid.setUnhandledInputCallback([this](InputConfig* config, Input input) -> bool {
+		if (config->isMappedLike("down", input)) {
+			mGrid.setCursorTo(mList);
+			mList->setCursorIndex(0);
+			return true;
+		}
+		if (config->isMappedLike("up", input)) {
+			mList->setCursorIndex(mList->size() - 1);
+			mGrid.moveCursor(Vector2i(0, 1));
+			return true;
+		}
+		return false;
+	});
+
 
 	// resize + center	
 	float width = (float)Math::min(Renderer::getScreenHeight(), (int)(Renderer::getScreenWidth() * 0.90f));

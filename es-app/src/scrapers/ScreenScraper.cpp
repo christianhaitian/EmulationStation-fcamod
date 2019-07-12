@@ -180,6 +180,68 @@ void ScreenScraperRequest::process(const std::unique_ptr<HttpReq>& req, std::vec
 
 }
 
+pugi::xml_node ScreenScraperRequest::findMedia(pugi::xml_node media_list, std::vector<std::string> mediaNames, std::string region)
+{
+	for (std::string media : mediaNames)
+	{
+		pugi::xml_node art = findMedia(media_list, media, region);
+		if (art)
+			return art;
+	}
+
+	return pugi::xml_node(NULL);
+}
+
+pugi::xml_node ScreenScraperRequest::findMedia(pugi::xml_node media_list, std::string mediaName, std::string region)
+{
+	pugi::xml_node art = pugi::xml_node(NULL);
+
+	// Do an XPath query for media[type='$media_type'], then filter by region
+	// We need to do this because any child of 'medias' has the form
+	// <media type="..." region="..." format="..."> 
+	// and we need to find the right media for the region.
+
+	pugi::xpath_node_set results = media_list.select_nodes((static_cast<std::string>("media[@type='") + mediaName + "']").c_str());
+
+	if (!results.size())
+		return art;
+	
+	// Region fallback: WOR(LD), US, CUS(TOM?), JP, EU
+	for (auto _region : std::vector<std::string>{ region, "wor", "us", "cus", "jp", "eu", "" })
+	{
+		if (art)
+			break;
+
+		for (auto node : results)
+		{
+			if (node.node().attribute("region").value() == _region)
+			{
+				art = node.node();
+				break;
+			}
+		}
+	}
+
+	return art;
+}
+
+std::vector<std::string> ScreenScraperRequest::getRipList(std::string imageSource)
+{
+	std::vector<std::string> ripList;
+
+	if (imageSource == "ss")
+		ripList = { "ss", "mixrbv1", "mixrbv2", "box-2D", "box-3D" };
+	else if (imageSource == "mixrbv1" || imageSource == "mixrbv2" || imageSource == "mixrbv")
+		ripList = { "mixrbv1", "mixrbv2", "ss", "box-3D", "box-2D" };
+	else if (imageSource == "box-2D")
+		ripList = { "box-2D", "box-3D" };
+	else if (imageSource == "box-3D")
+		ripList = { "box-3D", "box-2D" };
+	else if (imageSource == "wheel")
+		ripList = { "wheel", "screenmarqueesmall", "screenmarquee" };
+
+	return ripList;
+}
 
 void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::vector<ScraperSearchResult>& out_results)
 {
@@ -254,51 +316,60 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 
 		if (media_list)
 		{
-			pugi::xml_node art = pugi::xml_node(NULL);
-
-			// Do an XPath query for media[type='$media_type'], then filter by region
-			// We need to do this because any child of 'medias' has the form
-			// <media type="..." region="..." format="..."> 
-			// and we need to find the right media for the region.
-
-			pugi::xpath_node_set results = media_list.select_nodes((static_cast<std::string>("media[@type='") + ssConfig.media_name + "']").c_str());
-
-			if (results.size())
+			std::vector<std::string> ripList = getRipList(Settings::getInstance()->getString("ScrapperImageSrc"));
+			if (!ripList.empty())
 			{
-				// Region fallback: WOR(LD), US, CUS(TOM?), JP, EU
-				for (auto _region : std::vector<std::string>{ region, "wor", "us", "cus", "jp", "eu" })
+				pugi::xml_node art = findMedia(media_list, ripList, region);
+				if (art)
 				{
-					if (art)
-						break;
+					// Sending a 'softname' containing space will make the image URLs returned by the API also contain the space. 
+					//  Escape any spaces in the URL here
+					result.imageUrl = Utils::String::replace(art.text().get(), " ", "%20");
 
-					for (auto node : results)
-					{
-						if (node.node().attribute("region").value() == _region)
-						{
-							art = node.node();
-							break;
-						}
-					}
+					// Get the media type returned by ScreenScraper
+					std::string media_type = art.attribute("format").value();
+					if (!media_type.empty())
+						result.imageType = "." + media_type;
+
+					// Ask for the same image, but with a smaller size, for the thumbnail displayed during scraping
+					result.thumbnailUrl = result.imageUrl + "&maxheight=250";
 				}
-			} // results
-
-			if (art)
+				else
+					LOG(LogDebug) << "Failed to find media XML node for image";
+			}
+			
+			if (!Settings::getInstance()->getString("ScrapperThumbSrc").empty() && 
+				Settings::getInstance()->getString("ScrapperThumbSrc") != Settings::getInstance()->getString("ScrapperImageSrc"))
 			{
-				// Sending a 'softname' containing space will make the image URLs returned by the API also contain the space. 
-				//  Escape any spaces in the URL here
-				result.imageUrl = Utils::String::replace(art.text().get(), " ", "%20");
-
-				// Get the media type returned by ScreenScraper
-				std::string media_type = art.attribute("format").value();
-				if (!media_type.empty())
-					result.imageType = "." + media_type;
-
-				// Ask for the same image, but with a smaller size, for the thumbnail displayed during scraping
-				result.thumbnailUrl = result.imageUrl + "&maxheight=250";
-			}else{
-				LOG(LogDebug) << "Failed to find media XML node with name=" << ssConfig.media_name;
+				ripList = getRipList(Settings::getInstance()->getString("ScrapperThumbSrc"));
+				if (!ripList.empty())
+				{
+					pugi::xml_node art = findMedia(media_list, ripList, region);
+					if (art)
+					{
+						// Sending a 'softname' containing space will make the image URLs returned by the API also contain the space. 
+						//  Escape any spaces in the URL here
+						// Ask for the same image, but with a smaller size, for the thumbnail displayed during scraping
+						result.thumbnailUrl = Utils::String::replace(art.text().get(), " ", "%20");
+					}
+					else
+						LOG(LogDebug) << "Failed to find media XML node for thumbnail";
+				}
 			}
 
+			if (Settings::getInstance()->getBool("ScrapeVideos"))
+			{
+				pugi::xml_node art = findMedia(media_list, "video", region);
+				if (art)
+				{
+					// Sending a 'softname' containing space will make the image URLs returned by the API also contain the space. 
+					//  Escape any spaces in the URL here
+					// Ask for the same image, but with a smaller size, for the thumbnail displayed during scraping
+					result.videoUrl = Utils::String::replace(art.text().get(), " ", "%20");
+				}
+				else
+					LOG(LogDebug) << "Failed to find media XML node for video";
+			}
 		}
 
 		out_results.push_back(result);
@@ -335,8 +406,6 @@ void ScreenScraperRequest::processList(const pugi::xml_document& xmldoc, std::ve
 
 		game = game.next_sibling("jeu");
 	}
-
-
 }
 
 std::string ScreenScraperRequest::ScreenScraperConfig::getGameSearchUrl(const std::string gameName) const

@@ -92,6 +92,7 @@ void Settings::setDefaults()
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;
 	
+
 	mBoolMap["Debug"] = false;
 	mBoolMap["DebugGrid"] = false;
 	mBoolMap["DebugText"] = false;
@@ -199,6 +200,10 @@ void Settings::setDefaults()
 	mIntMap["MonitorID"] = -1;	
 	mStringMap["ExePath"] = "";
 
+
+	mStringMap["ScrapperImageSrc"] = "box-2D";
+	mStringMap["ScrapperThumbSrc"] = "";
+	mBoolMap["ScrapeVideos"] = false;
 
 	mDefaultBoolMap = mBoolMap;
 	mDefaultIntMap = mIntMap;

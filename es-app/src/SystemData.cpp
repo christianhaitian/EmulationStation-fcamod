@@ -603,16 +603,20 @@ SystemData* SystemData::getPrev() const
 
 std::string SystemData::getGamelistPath(bool forWrite) const
 {
-	std::string filePath;
+	std::string fileRomPath = mRootFolder->getPath() + "/gamelist.xml";
+	if(Utils::FileSystem::exists(fileRomPath))
+		return fileRomPath;
 
-	filePath = mRootFolder->getPath() + "/gamelist.xml";
-	if(Utils::FileSystem::exists(filePath))
-		return filePath;
+	std::string filePath = Utils::FileSystem::getHomePath() + "/.emulationstation/gamelists/" + mName + "/gamelist.xml";
 
-	filePath = Utils::FileSystem::getHomePath() + "/.emulationstation/gamelists/" + mName + "/gamelist.xml";
+	// Default to system rom folder
+	if (forWrite && !Utils::FileSystem::exists(filePath) && Utils::FileSystem::isDirectory(mRootFolder->getPath()))
+		return fileRomPath;
+
 	if(forWrite) // make sure the directory exists if we're going to write to it, or crashes will happen
 		Utils::FileSystem::createDirectory(Utils::FileSystem::getParent(filePath));
-	if(forWrite || Utils::FileSystem::exists(filePath))
+	
+	if (forWrite || Utils::FileSystem::exists(filePath))
 		return filePath;
 
 	return "/etc/emulationstation/gamelists/" + mName + "/gamelist.xml";

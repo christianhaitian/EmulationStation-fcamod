@@ -105,6 +105,51 @@ void GuiMenu::openScraperSettings()
 	s->addWithLabel(_T("SCRAPE RATINGS"), scrape_ratings);
 	s->addSaveFunc([scrape_ratings] { Settings::getInstance()->setBool("ScrapeRatings", scrape_ratings->getState()); });
 
+
+
+
+
+
+
+	std::string imageSourceName = Settings::getInstance()->getString("ScrapperImageSrc");
+	auto imageSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _T("PREFERED IMAGE SOURCE"), false);
+	imageSource->add(_T("NONE"), "", imageSourceName.empty());
+	imageSource->add(_T("SCREENSHOT"), "ss", imageSourceName == "ss");
+	imageSource->add(_T("BOX 2D"), "box-2D", imageSourceName == "box-2D");
+	imageSource->add(_T("BOX 3D"), "box-3D", imageSourceName == "box-3D");
+	imageSource->add(_T("MIX"), "mixrbv1", imageSourceName == "mixrbv1");
+	imageSource->add(_T("WHEEL"), "wheel", imageSourceName == "wheel");	
+	s->addWithLabel("PREFERED IMAGE SOURCE", imageSource);
+	
+	s->addSaveFunc([imageSource] {
+		if (Settings::getInstance()->getString("ScrapperImageSrc") != imageSource->getSelected())
+			Settings::getInstance()->setString("ScrapperImageSrc", imageSource->getSelected());
+	});
+
+
+	std::string thumbSourceName = Settings::getInstance()->getString("ScrapperThumbSrc");
+	auto thumbSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _T("PREFERED THUMBNAIL SOURCE"), false);
+	thumbSource->add(_T("NONE"), "", thumbSourceName.empty());
+	thumbSource->add(_T("SCREENSHOT"), "ss", thumbSourceName == "ss");
+	thumbSource->add(_T("BOX 2D"), "box-2D", thumbSourceName == "box-2D");
+	thumbSource->add(_T("BOX 3D"), "box-3D", thumbSourceName == "box-3D");
+	thumbSource->add(_T("MIX"), "mixrbv1", thumbSourceName == "mixrbv1");
+	thumbSource->add(_T("WHEEL"), "wheel", thumbSourceName == "wheel");
+	s->addWithLabel("PREFERED THUMBNAIL SOURCE", thumbSource);
+
+	s->addSaveFunc([thumbSource] {
+		if (Settings::getInstance()->getString("ScrapperThumbSrc") != thumbSource->getSelected())
+			Settings::getInstance()->setString("ScrapperThumbSrc", thumbSource->getSelected());
+	});	
+
+
+	// scrape video
+	auto scrape_video = std::make_shared<SwitchComponent>(mWindow);
+	scrape_video->setState(Settings::getInstance()->getBool("ScrapeVideos"));
+	s->addWithLabel(_T("SCRAPE VIDEOS"), scrape_video);
+	s->addSaveFunc([scrape_video] { Settings::getInstance()->setBool("ScrapeVideos", scrape_video->getState()); });
+
+
 	// scrape now
 	ComponentListRow row;
 	auto openScrapeNow = [this] { mWindow->pushGui(new GuiScraperStart(mWindow)); };
