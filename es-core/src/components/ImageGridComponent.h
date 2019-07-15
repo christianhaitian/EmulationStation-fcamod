@@ -82,7 +82,7 @@ protected:
 private:
 	// TILES
 	void buildTiles();
-	void updateTiles(bool ascending = true, bool allowAnimation = true, bool updateSelectedState = true);
+	void updateTiles(bool allowAnimation = true, bool updateSelectedState = true);
 	void updateTileAtPos(int tilePos, int imgPos, bool allowAnimation = true, bool updateSelectedState = true);
 	void calcGridDimension();
 
@@ -505,8 +505,6 @@ void ImageGridComponent<T>::onSizeChanged()
 template<typename T>
 void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 {
-
-
 	if (mLastCursor == mCursor)
 	{
 		if (state == CURSOR_STOPPED && mCursorChangedCallback)
@@ -553,7 +551,7 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 		*/	
 		startPos = 0;
 		((GuiComponent*)this)->cancelAnimation(2);
-		updateTiles(direction, false, !GuiComponent::ALLOWANIMATIONS);		
+		updateTiles(false, !GuiComponent::ALLOWANIMATIONS);		
 	}
 	
 	if (GuiComponent::ALLOWANIMATIONS)
@@ -627,7 +625,7 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 
 	if (lastCursor < 0 || !GuiComponent::ALLOWANIMATIONS)
 	{
-		updateTiles(direction, lastCursor >= 0 && GuiComponent::ALLOWANIMATIONS);
+		updateTiles(lastCursor >= 0 && GuiComponent::ALLOWANIMATIONS);
 
 		if (mCursorChangedCallback)
 			mCursorChangedCallback(state);
@@ -654,13 +652,13 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 
 	((GuiComponent*)this)->setAnimation(new LambdaAnimation(func, 250), 0, [this, direction] {
 		mCamera = 0;
-		updateTiles(direction, false);
+		updateTiles(false);
 	}, false, 2);
 }
 
 
 template<typename T>
-void ImageGridComponent<T>::updateTiles(bool ascending, bool allowAnimation, bool updateSelectedState)
+void ImageGridComponent<T>::updateTiles(bool allowAnimation, bool updateSelectedState)
 {
 	if (!mTiles.size())
 		return;
@@ -671,7 +669,7 @@ void ImageGridComponent<T>::updateTiles(bool ascending, bool allowAnimation, boo
 		for (int ti = 0; ti < (int)mTiles.size(); ti++)
 		{
 			std::shared_ptr<GridTileComponent> tile = mTiles.at(ti);
-			
+
 			tile->setSelected(false, allowAnimation);
 			tile->setLabel("");
 			tile->setImage(mDefaultGameTexture);
@@ -688,47 +686,27 @@ void ImageGridComponent<T>::updateTiles(bool ascending, bool allowAnimation, boo
 		previousTextures.push_back(tile->getTexture());
 	}
 
-	if (!ascending)
-	{
-		int i = (int)mTiles.size() - 1;
-		int end = -1;
-		int img = mStartPosition + (int)mTiles.size() - 1;
-		
-		if (isVertical())
-			img -= EXTRAITEMS * mGridDimension.x();
-		else
-			img -= EXTRAITEMS * mGridDimension.y();
+	int i = 0;
+	int end = (int)mTiles.size();
+	int img = mStartPosition;
 
-		while (i != end)
-		{
-			updateTileAtPos(i, img, allowAnimation, updateSelectedState);
-			i--; img--;
-		}
-	}
+	if (isVertical())
+		img -= EXTRAITEMS * mGridDimension.x();
 	else
+		img -= EXTRAITEMS * mGridDimension.y();
+
+	while (i != end)
 	{
-		int i = 0;
-		int end = (int)mTiles.size();
-		int img = mStartPosition;
-
-		if (isVertical())
-			img -= EXTRAITEMS * mGridDimension.x();
-		else
-			img -= EXTRAITEMS * mGridDimension.y();
-
-		while (i != end)
-		{
-			updateTileAtPos(i, img, allowAnimation, updateSelectedState);
-			i++; img++;
-		}
+		updateTileAtPos(i, img, allowAnimation, updateSelectedState);
+		i++; img++;
 	}
+
 
 	if (updateSelectedState)
 		mLastCursor = mCursor;
 
 	mEntriesDirty = false;
 }
-
 
 template<typename T>
 void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowAnimation, bool updateSelectedState)

@@ -168,6 +168,10 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 		return tex;
 	}
 
+	// internal resources should not be dynamic
+	if (canonicalPath.length() > 0 && canonicalPath[0] == ':')
+		dynamic = false;
+
 	TextureKeyType key(canonicalPath, tile);
 	auto foundTexture = sTextureMap.find(key);
 	if(foundTexture != sTextureMap.cend())
