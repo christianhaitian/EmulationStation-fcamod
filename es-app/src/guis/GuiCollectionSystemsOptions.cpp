@@ -81,6 +81,10 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	favoritesFirstSwitch->setState(Settings::getInstance()->getBool("FavoritesFirst"));
 	mMenu.addWithLabel(_T("DISPLAY FAVORITES FIRST IN GAMELIST"), favoritesFirstSwitch);
 
+	toggleSystemNameInCollections = std::make_shared<SwitchComponent>(mWindow);
+	toggleSystemNameInCollections->setState(Settings::getInstance()->getBool("CollectionShowSystemInfo"));
+	mMenu.addWithLabel("SHOW SYSTEM NAME IN COLLECTIONS", toggleSystemNameInCollections);
+
 	if(CollectionSystemManager::get()->isEditing())
 	{
 		row.elements.clear();
@@ -179,6 +183,9 @@ void GuiCollectionSystemsOptions::applySettings()
 	bool prevSort = Settings::getInstance()->getBool("SortAllSystems");
 	bool outBundle = bundleCustomCollections->getState();
 	bool prevBundle = Settings::getInstance()->getBool("UseCustomCollectionsSystem");
+	bool prevShow = Settings::getInstance()->getBool("CollectionShowSystemInfo");
+	bool outShow = toggleSystemNameInCollections->getState();
+	bool needUpdateSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle || prevShow != outShow ;
 
 	bool outFavoritesFirst = favoritesFirstSwitch->getState();
 	bool prevFavoritesFirst = Settings::getInstance()->getBool("FavoritesFirst");
@@ -188,6 +195,7 @@ void GuiCollectionSystemsOptions::applySettings()
 	{
 		updateSettings(outAuto, outCustom);
 	}
+
 	delete this;
 }
 
@@ -197,6 +205,7 @@ void GuiCollectionSystemsOptions::updateSettings(std::string newAutoSettings, st
 	Settings::getInstance()->setString("CollectionSystemsCustom", newCustomSettings);
 	Settings::getInstance()->setBool("SortAllSystems", sortAllSystemsSwitch->getState());
 	Settings::getInstance()->setBool("UseCustomCollectionsSystem", bundleCustomCollections->getState());
+	Settings::getInstance()->setBool("CollectionShowSystemInfo", toggleSystemNameInCollections->getState());
 	Settings::getInstance()->setBool("FavoritesFirst", favoritesFirstSwitch->getState());
 
 	Settings::getInstance()->saveFile();
