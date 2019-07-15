@@ -83,7 +83,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 
 	toggleSystemNameInCollections = std::make_shared<SwitchComponent>(mWindow);
 	toggleSystemNameInCollections->setState(Settings::getInstance()->getBool("CollectionShowSystemInfo"));
-	mMenu.addWithLabel("SHOW SYSTEM NAME IN COLLECTIONS", toggleSystemNameInCollections);
+	mMenu.addWithLabel(_T("SHOW SYSTEM NAME IN COLLECTIONS"), toggleSystemNameInCollections);
 
 	if(CollectionSystemManager::get()->isEditing())
 	{
@@ -183,14 +183,14 @@ void GuiCollectionSystemsOptions::applySettings()
 	bool prevSort = Settings::getInstance()->getBool("SortAllSystems");
 	bool outBundle = bundleCustomCollections->getState();
 	bool prevBundle = Settings::getInstance()->getBool("UseCustomCollectionsSystem");
+
 	bool prevShow = Settings::getInstance()->getBool("CollectionShowSystemInfo");
 	bool outShow = toggleSystemNameInCollections->getState();
-	bool needUpdateSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle || prevShow != outShow ;
 
 	bool outFavoritesFirst = favoritesFirstSwitch->getState();
 	bool prevFavoritesFirst = Settings::getInstance()->getBool("FavoritesFirst");
 	
-	bool needUpdateSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle || outFavoritesFirst != prevFavoritesFirst;
+	bool needUpdateSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle || outFavoritesFirst != prevFavoritesFirst || prevShow != outShow;
 	if (needUpdateSettings)
 	{
 		updateSettings(outAuto, outCustom);

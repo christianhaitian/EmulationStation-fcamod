@@ -113,7 +113,7 @@ const bool FileData::getKidGame()
 	return metadata.get("kidgame") != "false";
 }
 
-const std::string& FileData::getName()
+const std::string FileData::getName()
 {
 	return metadata.getName();
 }
@@ -322,7 +322,7 @@ void CollectionFileData::refreshMetadata()
 	mDirty = true;
 }
 
-const std::string& CollectionFileData::getName()
+const std::string CollectionFileData::getName()
 {
 	if (mDirty) {
 		mCollectionFileName = Utils::String::removeParenthesis(mSourceFileData->metadata.get("name"));
@@ -332,7 +332,8 @@ const std::string& CollectionFileData::getName()
 
 	if (Settings::getInstance()->getBool("CollectionShowSystemInfo"))
 		return mCollectionFileName;
-	return mSourceFileData->metadata.get("name");
+		
+	return Utils::String::removeParenthesis(mSourceFileData->metadata.get("name"));
 }
 
 // returns Sort Type based on a string description

@@ -34,7 +34,7 @@ public:
 	FileData(FileType type, const std::string& path, SystemData* system);
 	virtual ~FileData();
 
-	virtual const std::string& getName();
+	virtual const std::string getName();
 
 	inline FileType getType() const { return mType; }
 	
@@ -92,7 +92,7 @@ class CollectionFileData : public FileData
 public:
 	CollectionFileData(FileData* file, SystemData* system);
 	~CollectionFileData();
-	const std::string& getName();
+	const std::string getName();
 	void refreshMetadata();
 	FileData* getSourceFileData();
 	std::string getKey();
