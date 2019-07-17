@@ -164,7 +164,11 @@ MDResolveHandle::MDResolveHandle(const ScraperSearchResult& result, const Scrape
 			mFuncs.push_back(ResolvePair(downloadImageAsync(result.imageUrl, imgPath), [this, imgPath]
 			{
 				mResult.mdl.set("image", imgPath);
-				mResult.imageUrl = "";
+
+				if (mResult.thumbnailUrl.find(mResult.imageUrl) == 0)
+					mResult.thumbnailUrl = "";
+
+				mResult.imageUrl = "";				
 			}));
 		}
 

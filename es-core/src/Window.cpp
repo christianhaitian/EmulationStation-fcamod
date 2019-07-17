@@ -391,17 +391,17 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 	Transform4x4f trans = Transform4x4f::Identity();
 	Renderer::setMatrix(trans);
 	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x00000000 | (unsigned char)(opacity * 255));
-	
-	ImageComponent splash(this, true);
 
-	splash.setResize(Renderer::getScreenWidth() * 0.4f, 0.0f);
+	ImageComponent splash(this, true);
 
 	if (mSplash != NULL)
 		splash.setImage(mSplash);
 	else
 		splash.setImage(":/splash.svg");
 
-	splash.setPosition((Renderer::getScreenWidth() - splash.getSize().x()) / 2, (Renderer::getScreenHeight() - splash.getSize().y()) / 2 * 0.7f);
+	splash.setOrigin(0.5, 0.5);
+	splash.setPosition(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() * 0.835f / 2.0f);
+	splash.setMaxSize(Renderer::getScreenWidth() * 0.60f, Renderer::getScreenHeight() * 0.60f);
 
 	if (!mCustomSplash.empty())
 		splash.setColorShift(0xFFFFFF00 | (unsigned char)(opacity * 210));
@@ -409,7 +409,7 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 		splash.setColorShift(0xFFFFFF00 | (unsigned char)(opacity * 255));
 
 	splash.render(trans);
-	
+
 	auto& font = mDefaultFonts.at(1);
 	font->reload(); // Ensure font is loaded
 

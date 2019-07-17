@@ -50,7 +50,9 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "gameImage", PATH },
 		{ "folderImage", PATH },
 		{ "showVideoAtDelay", FLOAT },		
-		{ "scrollDirection", STRING } } },
+		{ "scrollDirection", STRING },
+		{ "centerSelection", BOOLEAN },
+		{ "scrollLoop", BOOLEAN } } },
 	{ "gridtile", {
 		{ "size", NORMALIZED_PAIR },
 		{ "padding", NORMALIZED_PAIR },

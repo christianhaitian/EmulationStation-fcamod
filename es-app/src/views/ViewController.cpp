@@ -113,7 +113,13 @@ void ViewController::goToNextGameList()
 	assert(mState.viewing == GAME_LIST);
 	SystemData* system = getState().getSystem();
 	assert(system);
-	goToGameList(system->getNext());
+
+	system = system->getNext();
+	goToGameList(system);
+
+	// FixedCarousel
+	if (Settings::getInstance()->getBool("FixedCarousel"))
+		getSystemListView()->goToSystem(system, true);
 }
 
 void ViewController::goToPrevGameList()
@@ -121,7 +127,13 @@ void ViewController::goToPrevGameList()
 	assert(mState.viewing == GAME_LIST);
 	SystemData* system = getState().getSystem();
 	assert(system);
-	goToGameList(system->getPrev());
+
+	system = system->getPrev();
+	goToGameList(system);
+
+	// FixedCarousel
+	if (Settings::getInstance()->getBool("FixedCarousel"))
+		getSystemListView()->goToSystem(system, true);
 }
 
 void ViewController::goToGameList(SystemData* system, bool forceImmediate)
@@ -447,6 +459,7 @@ bool ViewController::input(InputConfig* config, Input input)
 	if (mLockInput)
 		return true;
 
+	
 	if (config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_F5)
 	{
 		mWindow->render();
@@ -480,6 +493,10 @@ void ViewController::update(int deltaTime)
 {
 	if(mCurrentView)
 	{
+		// FixedCarousel
+		if (Settings::getInstance()->getBool("FixedCarousel"))
+			getSystemListView()->update(deltaTime);
+
 		mCurrentView->update(deltaTime);
 	}
 
@@ -504,20 +521,8 @@ void ViewController::render(const Transform4x4f& parentTrans)
 	Vector3f sysEnd = getSystemListView()->getPosition() + Vector3f(getSystemListView()->getSize().x(), getSystemListView()->getSize().y(), 0);
 
 	// draw systemview
-	if (!Settings::getInstance()->getBool("HideSystemView"))
-	{		
-		/*
-		//getSystemListView()->setSize(Vector2f(getSystemListView()->getSize().x(), getSystemListView()->getSize().y()));
-		getSystemListView()->setSize(Vector2f(getSystemListView()->getSize().x(), 400));
-
-		Transform4x4f ts = Transform4x4f::Identity();
-		Transform4x4f transInverse;
-		transInverse.invert(getSystemListView()->getTransform());
-
-		getSystemListView()->render(transInverse);
-		*/
+	if (!Settings::getInstance()->getBool("HideSystemView") && !Settings::getInstance()->getBool("FixedCarousel"))
 		getSystemListView()->render(trans);
-	}
 	
 	// draw gamelists
 	for(auto it = mGameListViews.cbegin(); it != mGameListViews.cend(); it++)
@@ -529,6 +534,24 @@ void ViewController::render(const Transform4x4f& parentTrans)
 		if (guiEnd.x() >= viewStart.x() && guiEnd.y() >= viewStart.y() && guiStart.x() <= viewEnd.x() && guiStart.y() <= viewEnd.y())
 			it->second->render(trans);
 	}
+
+
+	// FixedCarousel
+	if (Settings::getInstance()->getBool("FixedCarousel"))
+	{
+		getSystemListView()->setPosition(Vector3f(0, 0, 0));
+		getSystemListView()->setSize(Vector2f(Renderer::getScreenWidth(), Renderer::getScreenHeight() * 0.1));
+
+		Transform4x4f ts = Transform4x4f::Identity();
+		Transform4x4f transInverse;
+		transInverse.invert(getSystemListView()->getTransform());
+
+		getSystemListView()->render(transInverse);
+	}
+
+
+
+
 
 	if(mWindow->peekGui() == this)
 		mWindow->renderHelpPromptsEarly();

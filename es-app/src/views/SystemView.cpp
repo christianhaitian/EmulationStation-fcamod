@@ -390,7 +390,9 @@ void SystemView::render(const Transform4x4f& parentTrans)
 	auto systemInfoZIndex = mSystemInfo.getZIndex();
 	auto minMax = std::minmax(mCarousel.zIndex, systemInfoZIndex);
 
-	renderExtras(trans, INT16_MIN, minMax.first);
+	if (!Settings::getInstance()->getBool("FixedCarousel"))
+		renderExtras(trans, INT16_MIN, minMax.first);
+
 	renderFade(trans);
 
 	if (mCarousel.zIndex > mSystemInfo.getZIndex()) {
@@ -407,7 +409,8 @@ void SystemView::render(const Transform4x4f& parentTrans)
 		renderInfoBar(trans);
 	}
 
-	renderExtras(trans, minMax.second, INT16_MAX);
+	if (!Settings::getInstance()->getBool("FixedCarousel"))
+		renderExtras(trans, minMax.second, INT16_MAX);
 }
 
 std::vector<HelpPrompt> SystemView::getHelpPrompts()
@@ -467,7 +470,12 @@ void SystemView::renderCarousel(const Transform4x4f& trans)
 {
 	// background box behind logos
 	Transform4x4f carouselTrans = trans;
-	carouselTrans.translate(Vector3f(carouselPos().x(), carouselPos().y(), 0.0));
+
+	if (Settings::getInstance()->getBool("FixedCarousel"))
+		carouselTrans.translate(Vector3f(mPosition.x() + carouselPos().x(), mPosition.y() + carouselPos().y(), 0.0));
+	else
+		carouselTrans.translate(Vector3f(carouselPos().x(), carouselPos().y(), 0.0));
+
 	carouselTrans.translate(Vector3f(mCarousel.origin.x() * carouselSize().x() * -1, mCarousel.origin.y() * carouselSize().y() * -1, 0.0f));
 
 	Vector2f clipPos(carouselTrans.translation().x(), carouselTrans.translation().y());
@@ -595,7 +603,10 @@ void SystemView::renderExtras(const Transform4x4f& trans, float lower, float upp
 	// Adding texture loading buffers depending on scrolling speed and status
 	int bufferIndex = getScrollingVelocity() + 1;
 
-	Renderer::pushClipRect(Vector2i::Zero(), Vector2i((int)mSize.x(), (int)mSize.y()));
+	if (Settings::getInstance()->getBool("FixedCarousel"))
+		Renderer::pushClipRect(Vector2i((int)mPosition.x(), (int)mPosition.y()), Vector2i((int)mSize.x(), (int)mSize.y()));
+	else
+		Renderer::pushClipRect(Vector2i(0, 0), Vector2i((int)mSize.x(), (int)mSize.y()));
 
 	for (int i = extrasCenter + logoBuffersLeft[bufferIndex]; i <= extrasCenter + logoBuffersRight[bufferIndex]; i++)
 	{
@@ -609,10 +620,24 @@ void SystemView::renderExtras(const Transform4x4f& trans, float lower, float upp
 		if (mShowing || index == mCursor)
 		{
 			Transform4x4f extrasTrans = trans;
-			if (mCarousel.type == HORIZONTAL || mCarousel.type == HORIZONTAL_WHEEL)
-				extrasTrans.translate(Vector3f((i - mExtrasCamOffset) * mSize.x(), 0, 0));
+
+			if (Settings::getInstance()->getBool("FixedCarousel"))
+			{
+				if (mCarousel.type == HORIZONTAL || mCarousel.type == HORIZONTAL_WHEEL)
+					extrasTrans.translate(Vector3f(mPosition.x() + (i - mExtrasCamOffset) * mSize.x(), mPosition.y(), 0));
+				else
+					extrasTrans.translate(Vector3f(mPosition.x(), mPosition.y() + (i - mExtrasCamOffset) * mSize.y(), 0));
+
+				if (mSize.x() != (float)Renderer::getScreenWidth() || mSize.y() != (float)Renderer::getScreenHeight())
+					extrasTrans.scale(Vector3f(mSize.x() / (float)Renderer::getScreenWidth(), mSize.y() / (float)Renderer::getScreenHeight(), 0.0));
+			}
 			else
-				extrasTrans.translate(Vector3f(0, (i - mExtrasCamOffset) * mSize.y(), 0));
+			{
+				if (mCarousel.type == HORIZONTAL || mCarousel.type == HORIZONTAL_WHEEL)
+					extrasTrans.translate(Vector3f((i - mExtrasCamOffset) * mSize.x(), 0, 0));
+				else
+					extrasTrans.translate(Vector3f(0,(i - mExtrasCamOffset) * mSize.y(), 0));
+			}				
 
 			Renderer::pushClipRect(Vector2i((int)extrasTrans.translation()[0], (int)extrasTrans.translation()[1]),
 								   Vector2i((int)mSize.x(), (int)mSize.y()));
@@ -635,7 +660,7 @@ void SystemView::renderFade(const Transform4x4f& trans)
 	if (mExtrasFadeOpacity)
 	{
 		Renderer::setMatrix(trans);
-		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000000 | (unsigned char)(mExtrasFadeOpacity * 255));
+		Renderer::drawRect(mPosition.x(), mPosition.y(), mSize.x(), mSize.y(), 0x00000000 | (unsigned char)(mExtrasFadeOpacity * 255));
 	}
 }
 
@@ -690,6 +715,9 @@ void SystemView::onSizeChanged()
 
 Vector2f SystemView::carouselSize()
 {
+	if (Settings::getInstance()->getBool("FixedCarousel"))
+		return mSize;
+
 	return  mCarousel.size * mSize;
 }
 
@@ -700,11 +728,17 @@ Vector2f SystemView::carouselLogoPos()
 
 Vector2f SystemView::carouselPos()
 {
+	if (Settings::getInstance()->getBool("FixedCarousel"))
+		return Vector2f(0, 0);
+
 	return mCarousel.pos * mSize;
 }
 
 Vector2f SystemView::carouselLogoSize()
 {
+	if (Settings::getInstance()->getBool("FixedCarousel"))
+		return mCarousel.logoSize / mCarousel.size * mSize;
+
 	return mCarousel.logoSize * mSize;
 }
 
