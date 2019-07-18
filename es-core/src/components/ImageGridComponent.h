@@ -14,9 +14,7 @@
 enum ScrollDirection
 {
 	SCROLL_VERTICALLY,
-	SCROLL_HORIZONTALLY,
-	SCROLL_VERTICALLY_CENTER,
-	SCROLL_HORIZONTALLY_CENTER,
+	SCROLL_HORIZONTALLY
 };
 
 enum ImageSource
@@ -85,8 +83,8 @@ private:
 	void updateTiles(bool allowAnimation = true, bool updateSelectedState = true);
 	void updateTileAtPos(int tilePos, int imgPos, bool allowAnimation = true, bool updateSelectedState = true);
 	void calcGridDimension();
-
-	bool isVertical() { return mScrollDirection == SCROLL_VERTICALLY || mScrollDirection == SCROLL_VERTICALLY_CENTER; };
+	
+	bool isVertical() { return mScrollDirection == SCROLL_VERTICALLY; };
 
 	bool mEntriesDirty;
 	int mLastCursor;
@@ -110,6 +108,7 @@ private:
 	std::string mName;
 
 	int mStartPosition;
+
 	bool mAllowVideo;
 	float mVideoDelay;
 
@@ -127,7 +126,7 @@ private:
 };
 
 template<typename T>
-ImageGridComponent<T>::ImageGridComponent(Window* window) : IList<ImageGridData, T>(window, LIST_SCROLL_STYLE_QUICK, LIST_ALWAYS_LOOP)
+ImageGridComponent<T>::ImageGridComponent(Window* window) : IList<ImageGridData, T>(window)
 {
 	Vector2f screen = Vector2f((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 
@@ -141,7 +140,7 @@ ImageGridComponent<T>::ImageGridComponent(Window* window) : IList<ImageGridData,
 	mVideoDelay = 750;
 	mAllowVideo = false;
 	mName = "grid";
-	mStartPosition = 0;
+	mStartPosition = 0;	
 	mEntriesDirty = true;
 	mLastCursor = 0;
 	mDefaultGameTexture = ":/cartridge.svg";
@@ -423,12 +422,12 @@ void ImageGridComponent<T>::applyTheme(const std::shared_ptr<ThemeData>& theme, 
 			else if (direction == "horizontalCenter")
 			{
 				mCenterSelection = true;
-				mScrollDirection = SCROLL_HORIZONTALLY_CENTER;
+				mScrollDirection = SCROLL_HORIZONTALLY;
 			}
 			else if (direction == "verticalCenter")
 			{
 				mCenterSelection = true;
-				mScrollDirection = SCROLL_VERTICALLY_CENTER;
+				mScrollDirection = SCROLL_VERTICALLY;
 			}
 			else
 			{
@@ -452,12 +451,7 @@ void ImageGridComponent<T>::applyTheme(const std::shared_ptr<ThemeData>& theme, 
 			mScrollLoop = (elem->get<bool>("scrollLoop"));
 		else
 			mScrollLoop = false;
-		/*
-		if (mScrollLoop)
-			mLoopType = LIST_ALWAYS_LOOP;
-		else 
-			mLoopType = LIST_PAUSE_AT_END;
-			*/
+
 		if (elem->has("gameImage"))
 		{
 			std::string path = elem->get<std::string>("gameImage");
@@ -535,8 +529,6 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 		return;
 	}
 	
-	if (mScrollLoop && mEntries.size() < mGridDimension.y() * mGridDimension.x())
-		mScrollLoop = false;
 		
 	bool direction = mCursor >= mLastCursor;
 
@@ -580,13 +572,13 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 
 		int newIdx = mCursor - mStartPosition + (dimOpposite * EXTRAITEMS);
 
-		if (mScrollLoop)
+		if (mScrollLoop && mScrollTier == 0 && diff == mEntries.size() - 1)
 		{
-			if (newIdx < 0)
+			if (direction)
 				newIdx += mEntries.size();
-			else if (newIdx >= mTiles.size())
-				newIdx -= mEntries.size();
-		}
+			else
+				newIdx -= mEntries.size();		
+		}		
 
 		if (newIdx >= 0 && newIdx < mTiles.size())
 			newTile = mTiles[newIdx];
@@ -639,7 +631,7 @@ void ImageGridComponent<T>::onCursorChanged(const CursorState& state)
 			mStartPosition = (col - maxCentralCol) * dimOpposite;
 		else
 			mStartPosition = (col - centralCol) * dimOpposite;
-	}
+	}	
 
 	auto lastCursor = mLastCursor;
 	mLastCursor = mCursor;
@@ -733,12 +725,29 @@ void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowA
 {
 	std::shared_ptr<GridTileComponent> tile = mTiles.at(tilePos);
 
-	if (mScrollLoop)
+	bool loopedIndex = false;
+
+	if (mScrollLoop && mEntries.size() > 0)
 	{
-		if (imgPos < 0)
-			imgPos += mEntries.size();
-		else if (imgPos >= size())
-			imgPos -= mEntries.size();
+		int dimOpposite = isVertical() ? mGridDimension.x() : mGridDimension.y();
+
+		int min = dimOpposite == 1 ? 0 : (mEntries.size() % dimOpposite) - dimOpposite;
+		int max = mEntries.size() - min;
+
+		if (imgPos < min)
+		{
+			loopedIndex = true;
+
+			while (imgPos < min)
+				imgPos += max;
+		}
+		else if (imgPos >= max)
+		{
+			loopedIndex = true;
+
+			while (imgPos >= max)
+				imgPos -= max;
+		}
 	}
 
 	// If we have more tiles than we have to display images on screen, hide them
@@ -782,7 +791,7 @@ void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowA
 			
 		if (updateSelectedState)
 		{
-			if (imgPos == mCursor && mCursor != mLastCursor)
+			if (!loopedIndex && imgPos == mCursor && mCursor != mLastCursor)
 			{
 				int dif = mCursor - tilePos;
 				int idx = mLastCursor - dif;
@@ -797,7 +806,7 @@ void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowA
 				tile->setSelected(true, allowAnimation, &pos);
 			}
 			else
-				tile->setSelected(imgPos == mCursor, allowAnimation);
+				tile->setSelected(!loopedIndex && imgPos == mCursor, allowAnimation);
 		}
 	}
 }
