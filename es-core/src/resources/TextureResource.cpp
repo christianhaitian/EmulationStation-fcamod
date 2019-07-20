@@ -220,7 +220,7 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 		if (canonicalPath.length() > 0 && canonicalPath[0] == ':')
 			sPermanentTextureMap[key] = std::shared_ptr<TextureResource>(tex);
 		else
-			sTextureMap[key] = std::shared_ptr<TextureResource>(tex);
+			sTextureMap[key] = std::weak_ptr<TextureResource>(tex);
 
 		rm->addReloadable(tex);
 	}

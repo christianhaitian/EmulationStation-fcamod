@@ -60,7 +60,12 @@ void NinePatchComponent::buildVertices()
 	if(mColors != NULL)
 		delete[] mColors;
 
-	mTexture = TextureResource::get(mPath);
+	if (mPath.empty())
+		return;
+	
+	auto tr = TextureResource::get(mPath);
+	if (tr != mTexture)
+		mTexture = tr;	
 
 	if(mTexture->getSize() == Vector2i::Zero())
 	{
@@ -203,6 +208,7 @@ void NinePatchComponent::setImagePath(const std::string& path)
 		return;
 
 	mPath = path;
+	mTexture = nullptr;
 	buildVertices();
 }
 
