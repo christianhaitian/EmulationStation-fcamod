@@ -8,8 +8,6 @@
 TextureDataManager		TextureResource::sTextureDataManager;
 
 std::map< TextureResource::TextureKeyType, std::weak_ptr<TextureResource>> TextureResource::sTextureMap;
-std::map< TextureResource::TextureKeyType, std::shared_ptr<TextureResource>> TextureResource::sPermanentTextureMap;
-
 std::set<TextureResource*> 	TextureResource::sAllTextures;
 
 TextureResource::TextureResource(const std::string& path, bool tile, bool dynamic, bool allowAsync, MaxSizeInfo maxSize) : mTextureData(nullptr), mForceLoad(false)
@@ -193,21 +191,6 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 			sTextureMap.erase(foundTexture);
 	}
 
-	auto permanentTexture = sPermanentTextureMap.find(key);
-	if (permanentTexture != sPermanentTextureMap.cend())
-	{
-		std::shared_ptr<TextureResource> rc = permanentTexture->second;
-
-		if (!maxSize.empty() && TextureData::OPTIMIZEVRAM)
-		{
-			auto dt = sTextureDataManager.get(rc.get());
-			if (dt != nullptr)
-				dt->setMaxSize(maxSize);
-		}
-
-		return rc;
-	}
-	
 	// need to create it
 	std::shared_ptr<TextureResource> tex;
 	tex = std::shared_ptr<TextureResource>(new TextureResource(key.first, tile, dynamic, !forceLoad, maxSize));
@@ -215,13 +198,7 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 		
 	if (asReloadable) // // is it an SVG // if (key.first.substr(key.first.size() - 4, std::string::npos) != ".svg") // FCATMP	
 	{
-		// Probably not. Add it to our map. We don't add SVGs because 2 svgs might be rasterized at different sizes
-		// FCA useless -> If the svg is too small, it will be reloaded bigger with setSourceSize...		
-		if (canonicalPath.length() > 0 && canonicalPath[0] == ':')
-			sPermanentTextureMap[key] = std::shared_ptr<TextureResource>(tex);
-		else
-			sTextureMap[key] = std::weak_ptr<TextureResource>(tex);
-
+		sTextureMap[key] = std::weak_ptr<TextureResource>(tex);
 		rm->addReloadable(tex);
 	}
 		
