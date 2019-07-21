@@ -87,8 +87,9 @@ private:
 	void renderFade(const Transform4x4f& trans);
 
 
-	SystemViewCarousel mCarousel;
-	TextComponent mSystemInfo;
+	SystemViewCarousel	mCarousel;
+	TextComponent		mSystemInfo;
+	SystemData*			mLastSystem;
 
 	// unit is list index
 	float mCamOffset;

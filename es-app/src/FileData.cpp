@@ -259,6 +259,7 @@ void FileData::launchGame(Window* window)
 	window->init(hideWindow);
 
 	VolumeControl::getInstance()->init();
+	AudioManager::getInstance()->setSystemName(mSystem->getTheme()->getSystemThemeFolder()); // system-specific music -> automatic Init
 	window->normalizeNextUpdate();
 
 	//update number of times the game has been launched
@@ -273,6 +274,10 @@ void FileData::launchGame(Window* window)
 		gameToUpdate->metadata.set("lastplayed", Utils::Time::DateTime(Utils::Time::now()));
 		CollectionSystemManager::get()->refreshCollectionSystems(gameToUpdate);
 	}
+
+	// music
+	if (Settings::getInstance()->getBool("audio.bgmusic"))
+		AudioManager::getInstance()->playRandomMusic();
 }
 
 CollectionFileData::CollectionFileData(FileData* file, SystemData* system)

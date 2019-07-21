@@ -16,6 +16,7 @@
 #include "Settings.h"
 #include "SystemData.h"
 #include "Window.h"
+#include "AudioManager.h"
 
 ViewController* ViewController::sInstance = NULL;
 
@@ -115,7 +116,9 @@ void ViewController::goToNextGameList()
 	assert(system);
 
 	system = system->getNext();
-	goToGameList(system);
+	goToGameList(system);	
+
+	AudioManager::getInstance()->themeChanged(system->getTheme());
 
 	// FixedCarousel
 	if (Settings::getInstance()->getBool("FixedCarousel"))
@@ -130,6 +133,8 @@ void ViewController::goToPrevGameList()
 
 	system = system->getPrev();
 	goToGameList(system);
+
+	AudioManager::getInstance()->themeChanged(system->getTheme());
 
 	// FixedCarousel
 	if (Settings::getInstance()->getBool("FixedCarousel"))

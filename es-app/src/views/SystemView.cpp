@@ -9,6 +9,7 @@
 #include "Settings.h"
 #include "SystemData.h"
 #include "Window.h"
+#include "AudioManager.h"
 
 // buffer values for scrolling velocity (left, stopped, right)
 const int logoBuffersLeft[] = { -5, -2, -1 };
@@ -21,12 +22,11 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 	mCamOffset = 0;
 	mExtrasCamOffset = 0;
 	mExtrasFadeOpacity = 0.0f;
+	mLastSystem = nullptr;
 
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 	populate();
 }
-
-
 
 void SystemView::populate()
 {
@@ -226,6 +226,11 @@ void SystemView::update(int deltaTime)
 
 void SystemView::onCursorChanged(const CursorState& /*state*/)
 {
+	if (mLastSystem != getSelected()) {
+		mLastSystem = getSelected();
+		AudioManager::getInstance()->themeChanged(getSelected()->getTheme());
+	}
+
 	// update help style
 	updateHelpPrompts();
 
@@ -253,6 +258,7 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 	std::string transition_style = Settings::getInstance()->getString("TransitionStyle");
 	bool goFast = transition_style == "instant";
 	const float infoStartOpacity = mSystemInfo.getOpacity() / 255.f;
+
 
 	Animation* infoFadeOut = new LambdaAnimation(
 		[infoStartOpacity, this] (float t)

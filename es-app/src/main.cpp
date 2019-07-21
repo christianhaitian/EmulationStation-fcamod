@@ -27,6 +27,7 @@
 
 #include "resources/TextureData.h"
 #include <FreeImage.h>
+#include "AudioManager.h"
 
 bool scrape_cmdline = false;
 
@@ -440,6 +441,9 @@ int main(int argc, char* argv[])
 	SDL_JoystickEventState(SDL_ENABLE);
 
 	window.endRenderLoadingScreen();
+
+	if (Settings::getInstance()->getBool("audio.bgmusic"))
+		AudioManager::getInstance()->playRandomMusic();
 
 #ifdef WIN32	
 	DWORD displayFrequency = 60;

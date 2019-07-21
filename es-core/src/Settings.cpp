@@ -30,7 +30,7 @@ std::vector<const char*> settings_dont_save {
 #endif
 	{ "FullscreenBorderless" },
 	{ "Windowed" },
-	{ "WindowWidth" },	
+	{ "WindowWidth" },
 	{ "WindowHeight" },
 	{ "ScreenWidth" },
 	{ "ScreenHeight" },
@@ -39,8 +39,10 @@ std::vector<const char*> settings_dont_save {
 	{ "ScreenRotate" },
 	{ "MonitorID" },
 	{ "ExePath" },
-	{ "FixedCarousel" },	
-	{ "HomePath" }
+	{ "FixedCarousel" },
+	{ "HomePath" },
+	{ "MusicDirectory"},
+	{ "UserMusicDirectory" }
 };
 
 Settings::Settings()
@@ -212,6 +214,22 @@ void Settings::setDefaults()
 	mStringMap["ScrapperImageSrc"] = "box-2D";
 	mStringMap["ScrapperThumbSrc"] = "";
 	mBoolMap["ScrapeVideos"] = false;
+	
+	mBoolMap["audio.bgmusic"] = true;
+	mBoolMap["audio.persystem"] = false;
+	
+#ifdef BATOCERA
+	mStringMap["MusicDirectory"] = "/usr/share/batocera/music";
+	mStringMap["UserMusicDirectory"] = "/userdata/music";
+#else 
+#ifdef RECALBOX
+	mStringMap["MusicDirectory"] = "/recalbox/share/music/";
+	mStringMap["UserMusicDirectory"] = "/recalbox/share/music/";
+#else
+	mStringMap["MusicDirectory"] = "";
+	mStringMap["UserMusicDirectory"] = "";
+#endif
+#endif
 
 	mDefaultBoolMap = mBoolMap;
 	mDefaultIntMap = mIntMap;

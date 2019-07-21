@@ -18,7 +18,7 @@
 #include "VolumeControl.h"
 #include <SDL_events.h>
 #include <algorithm>
-
+#include "AudioManager.h"
 #include "resources/TextureData.h"
 #include "animations/LambdaAnimation.h"
 #include "GuiGamelistOptions.h" // grid sizes
@@ -231,7 +231,27 @@ void GuiMenu::openSoundSettings()
 			VolumeControl::getInstance()->init();
 		});
 #endif
+		// disable sounds
+		auto music_enabled = std::make_shared<SwitchComponent>(mWindow);
+		music_enabled->setState(Settings::getInstance()->getBool("audio.bgmusic"));
+		s->addWithLabel(_T("FRONTEND MUSIC"), music_enabled);
+		s->addSaveFunc([music_enabled] {
+			Settings::getInstance()->setBool("audio.bgmusic", music_enabled->getState());
+			if (music_enabled->getState())
+				AudioManager::getInstance()->playRandomMusic();
+			else
+				AudioManager::getInstance()->stopMusic();
+		});
 
+		
+		// music per system
+		auto music_per_system = std::make_shared<SwitchComponent>(mWindow);
+		music_per_system->setState(Settings::getInstance()->getBool("audio.persystem"));
+		s->addWithLabel(_T("ONLY PLAY SYSTEM-SPECIFIC MUSIC FOLDER"), music_per_system);
+		s->addSaveFunc([music_per_system] {
+			Settings::getInstance()->setBool("audio.persystem", music_per_system->getState());
+		});
+		
 		// disable sounds
 		auto sounds_enabled = std::make_shared<SwitchComponent>(mWindow);
 		sounds_enabled->setState(Settings::getInstance()->getBool("EnableSounds"));

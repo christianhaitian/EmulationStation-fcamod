@@ -4,111 +4,74 @@
 #include "Settings.h"
 #include "Sound.h"
 #include <SDL.h>
+#include <time.h>
+#include "utils/FileSystemUtil.h"
+#include "utils/StringUtil.h"
 
 std::vector<std::shared_ptr<Sound>> AudioManager::sSoundVector;
-SDL_AudioSpec AudioManager::sAudioFormat;
 std::shared_ptr<AudioManager> AudioManager::sInstance;
-
-
-void AudioManager::mixAudio(void* /*unused*/, Uint8 *stream, int len)
-{
-	bool stillPlaying = false;
-
-	//initialize the buffer to "silence"
-	SDL_memset(stream, 0, len);
-
-	//iterate through all our samples
-	std::vector<std::shared_ptr<Sound>>::const_iterator soundIt = sSoundVector.cbegin();
-	while (soundIt != sSoundVector.cend())
-	{
-		std::shared_ptr<Sound> sound = *soundIt;
-		if(sound->isPlaying())
-		{
-			//calculate rest length of current sample
-			Uint32 restLength = (sound->getLength() - sound->getPosition());
-			if (restLength > (Uint32)len) {
-				//if stream length is smaller than smaple lenght, clip it
-				restLength = len;
-			}
-			//mix sample into stream
-			SDL_MixAudio(stream, &(sound->getData()[sound->getPosition()]), restLength, SDL_MIX_MAXVOLUME);
-			if (sound->getPosition() + restLength < sound->getLength())
-			{
-				//sample hasn't ended yet
-				stillPlaying = true;
-			}
-			//set new sound position. if this is at or beyond the end of the sample, it will stop automatically
-			sound->setPosition(sound->getPosition() + restLength);
-		}
-		//advance to next sound
-		++soundIt;
-	}
-
-	//we have processed all samples. check if some will still be playing
-	if (!stillPlaying) {
-		//no. pause audio till a Sound::play() wakes us up
-		SDL_PauseAudio(1);
-	}
-}
+Mix_Music* AudioManager::mCurrentMusic = NULL;
 
 AudioManager::AudioManager()
-{
+{	
 	init();
 }
 
 AudioManager::~AudioManager()
 {
-	deinit();
+	//stop all playback
+	stop();
+	stopMusic();
+
+	// Stop playing all Sounds & reload them 
+	for (unsigned int i = 0; i < sSoundVector.size(); i++)
+		sSoundVector[i]->deinit();
+
+	Mix_HookMusicFinished(nullptr);
+	Mix_HaltMusic();
+
+	//completely tear down SDL audio. else SDL hogs audio resources and emulators might fail to start...
+	SDL_CloseAudio();
+	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 std::shared_ptr<AudioManager> & AudioManager::getInstance()
 {
 	//check if an AudioManager instance is already created, if not create one
-	if (sInstance == nullptr && Settings::getInstance()->getBool("EnableSounds")) {
+	//  && Settings::getInstance()->getBool("EnableSounds")
+	if (sInstance == nullptr)
 		sInstance = std::shared_ptr<AudioManager>(new AudioManager);
-	}
+	
 	return sInstance;
 }
 
 void AudioManager::init()
 {
+	mRunningFromPlaylist = false;
+
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
 	{
 		LOG(LogError) << "Error initializing SDL audio!\n" << SDL_GetError();
 		return;
 	}
 
-	//stop playing all Sounds
-	for(unsigned int i = 0; i < sSoundVector.size(); i++)
+	// Stop playing all Sounds & reload them 
+	for (unsigned int i = 0; i < sSoundVector.size(); i++)
 	{
-		if(sSoundVector.at(i)->isPlaying())
-		{
-			sSoundVector[i]->stop();
-		}
+		sSoundVector[i]->stop();
+		sSoundVector[i]->init();
 	}
-
-	//Set up format and callback. Play 16-bit stereo audio at 44.1Khz
-	sAudioFormat.freq = 44100;
-	sAudioFormat.format = AUDIO_S16;
-	sAudioFormat.channels = 2;
-	sAudioFormat.samples = 4096;
-	sAudioFormat.callback = mixAudio;
-	sAudioFormat.userdata = NULL;
 
 	//Open the audio device and pause
-	if (SDL_OpenAudio(&sAudioFormat, NULL) < 0) {
-		LOG(LogError) << "AudioManager Error - Unable to open SDL audio: " << SDL_GetError() << std::endl;
-	}
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
+		LOG(LogError) << "MUSIC Error - Unable to open SDLMixer audio: " << SDL_GetError() << std::endl;
+	else
+		LOG(LogInfo) << "SDL AUDIO Initialized";
 }
 
 void AudioManager::deinit()
 {
-	//stop all playback
-	stop();
-	//completely tear down SDL audio. else SDL hogs audio resources and emulators might fail to start...
-	SDL_CloseAudio();
-	SDL_QuitSubSystem(SDL_INIT_AUDIO);
-	sInstance = NULL;
+	sInstance = NULL;	
 }
 
 void AudioManager::registerSound(std::shared_ptr<Sound> & sound)
@@ -120,9 +83,9 @@ void AudioManager::registerSound(std::shared_ptr<Sound> & sound)
 void AudioManager::unregisterSound(std::shared_ptr<Sound> & sound)
 {
 	getInstance();
-	for(unsigned int i = 0; i < sSoundVector.size(); i++)
+	for (unsigned int i = 0; i < sSoundVector.size(); i++)
 	{
-		if(sSoundVector.at(i) == sound)
+		if (sSoundVector.at(i) == sound)
 		{
 			sSoundVector[i]->stop();
 			sSoundVector.erase(sSoundVector.cbegin() + i);
@@ -135,21 +98,148 @@ void AudioManager::unregisterSound(std::shared_ptr<Sound> & sound)
 void AudioManager::play()
 {
 	getInstance();
-
-	//unpause audio, the mixer will figure out if samples need to be played...
-	SDL_PauseAudio(0);
 }
 
 void AudioManager::stop()
 {
-	//stop playing all Sounds
-	for(unsigned int i = 0; i < sSoundVector.size(); i++)
-	{
-		if(sSoundVector.at(i)->isPlaying())
-		{
+	// Stop playing all Sounds
+	for (unsigned int i = 0; i < sSoundVector.size(); i++)
+		if (sSoundVector.at(i)->isPlaying())
 			sSoundVector[i]->stop();
+}
+
+void AudioManager::findMusic(const std::string &path, std::vector<std::string>& all_matching_files) 
+{
+	if (!Utils::FileSystem::isDirectory(path))
+		return;
+	
+	bool anySystem = !Settings::getInstance()->getBool("audio.persystem");
+
+	auto dirContent = Utils::FileSystem::getDirContent(path);
+	for (auto it = dirContent.cbegin(); it != dirContent.cend(); ++it) 
+	{
+		if (Utils::FileSystem::isDirectory(*it)) 
+		{
+			if (*it == "." || *it == "..")
+				continue;
+
+			if (anySystem || mSystemName == Utils::FileSystem::getFileName(*it))
+				findMusic(*it, all_matching_files);
 		}
+		else 
+		{
+			std::string extension = Utils::String::toLower(Utils::FileSystem::getExtension(*it));
+			if (extension == ".mp3" || extension == ".ogg")
+				all_matching_files.push_back(*it);			
+		}		
 	}
-	//pause audio
-	SDL_PauseAudio(1);
+}
+
+void AudioManager::playRandomMusic(bool continueIfPlaying) 
+{
+	std::vector<std::string> musics;
+
+	// check in Theme music directory
+	if (!mCurrentThemeMusicDirectory.empty())
+		findMusic(mCurrentThemeMusicDirectory, musics);
+
+	// check in User music directory
+	if (musics.empty() && !Settings::getInstance()->getString("UserMusicDirectory").empty())
+		findMusic(Settings::getInstance()->getString("MusicDirectory"), musics);
+
+	// check in System music directory
+	if (musics.empty() && !Settings::getInstance()->getString("MusicDirectory").empty())
+		findMusic(Settings::getInstance()->getString("MusicDirectory"), musics);
+
+	// check in .emulationstation/music directory
+	if (musics.empty())
+		findMusic(Utils::FileSystem::getHomePath() + "/.emulationstation/music", musics);
+			
+	if (musics.empty()) 
+		return;
+	
+#if defined(WIN32)
+	srand(time(NULL) % getpid());
+#else
+	srand(time(NULL) % getpid() + getppid());
+#endif
+
+	int randomIndex = rand() % musics.size();
+
+	// continue playing ?
+	if (mCurrentMusic != NULL && continueIfPlaying) 
+		return;
+
+	playMusic(musics.at(randomIndex));
+	mRunningFromPlaylist = true;
+	Mix_HookMusicFinished(AudioManager::onMusicFinished);
+}
+
+void AudioManager::playMusic(std::string path)
+{
+	// free the previous music
+	stopMusic();
+
+	// load a new music
+	mCurrentMusic = Mix_LoadMUS(path.c_str());
+	if (mCurrentMusic == NULL)
+	{
+		LOG(LogError) << Mix_GetError() << " for " << path;
+		return;
+	}
+
+	if (Mix_FadeInMusic(mCurrentMusic, 1, 1000) == -1) 
+	{
+		stopMusic();
+		return;
+	}
+
+	Mix_HookMusicFinished(AudioManager::onMusicFinished);
+}
+
+void AudioManager::onMusicFinished() 
+{
+	AudioManager::getInstance()->playRandomMusic(false);
+}
+
+void AudioManager::stopMusic() 
+{
+	if (mCurrentMusic == NULL)
+		return;
+	
+	Mix_HookMusicFinished(nullptr);
+	Mix_FreeMusic(mCurrentMusic);
+	Mix_HaltMusic();
+
+	mCurrentMusic = NULL;	
+}
+
+void AudioManager::themeChanged(const std::shared_ptr<ThemeData>& theme)
+{
+	mCurrentThemeMusicDirectory = "";
+
+	if (Settings::getInstance()->getBool("audio.bgmusic"))
+	{
+		const ThemeData::ThemeElement* elem = theme->getElement("system", "directory", "sound");
+		if (elem && elem->has("path"))
+			mCurrentThemeMusicDirectory = elem->get<std::string>("path");
+
+		std::string bgSound;
+
+		elem = theme->getElement("system", "bgsound", "sound");
+		if (elem && elem->has("path") && Utils::FileSystem::exists(elem->get<std::string>("path")))
+			bgSound = elem->get<std::string>("path");
+
+		// Found a music for the system
+		if (!bgSound.empty())
+		{			
+			mRunningFromPlaylist = false;
+			playMusic(bgSound);
+			return;
+		}
+
+		mSystemName = theme->getSystemThemeFolder();
+		if (!mRunningFromPlaylist || Settings::getInstance()->getBool("audio.persystem"))
+			playRandomMusic(false);
+	}
 }

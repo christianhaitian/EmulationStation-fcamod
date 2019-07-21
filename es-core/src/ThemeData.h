@@ -234,6 +234,9 @@ public:
 	static std::map<std::string, std::string> getThemeSubSets(const std::string& theme);
 
 	static void setDefaultTheme(ThemeData* theme) { mCurrentTheme = theme; };
+	std::string getSystemThemeFolder() {
+		return mSystemThemeFolder;
+	}
 
 private:
 	static void crawlIncludes(const pugi::xml_node& root, std::map<std::string, std::string>& sets, std::deque<std::string>& dequepath);
@@ -262,7 +265,7 @@ private:
 
 	std::string resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path);
 	std::string resolvePlaceholders(const char* in);
-
+	
 	std::map<std::string, ThemeView> mViews;
 
 	std::string mColorset;
