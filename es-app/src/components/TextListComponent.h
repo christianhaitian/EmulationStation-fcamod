@@ -390,8 +390,8 @@ void TextListComponent<T>::applyTheme(const std::shared_ptr<ThemeData>& theme, c
 			setColor(0, elem->get<unsigned int>("primaryColor"));
 		if(elem->has("secondaryColor"))
 			setColor(1, elem->get<unsigned int>("secondaryColor"));
-		if (elem->has("selectorGradientColor"))
-			setSelectorGradientColor(elem->get<unsigned int>("selectorGradientColor"));
+		if (elem->has("selectorColorEnd"))
+			setSelectorGradientColor(elem->get<unsigned int>("selectorColorEnd"));
 	}
 
 	setFont(Font::getFromTheme(elem, properties, mFont));

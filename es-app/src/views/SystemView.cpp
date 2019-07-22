@@ -770,8 +770,8 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 	if (elem->has("color"))
 		mCarousel.color = elem->get<unsigned int>("color");
 
-	if (elem->has("colorGradient"))
-		mCarousel.colorGradient = elem->get<unsigned int>("colorGradient");
+	if (elem->has("colorEnd"))
+		mCarousel.colorGradient = elem->get<unsigned int>("colorEnd");
 
 	mCarousel.colorGradientHorz = (elem->has("gradientType") && !(elem->get<std::string>("type").compare("horizontal")));
 

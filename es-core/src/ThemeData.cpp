@@ -94,7 +94,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "selectorHeight", FLOAT },
 		{ "selectorOffsetY", FLOAT },
 		{ "selectorColor", COLOR },
-		{ "selectorGradientColor", COLOR },		
+		{ "selectorColorEnd", COLOR },		
 		{ "selectorImagePath", PATH },
 		{ "selectorImageTile", BOOLEAN },
 		{ "selectedColor", COLOR },
@@ -179,7 +179,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "pos", NORMALIZED_PAIR },
 		{ "origin", NORMALIZED_PAIR },
 		{ "color", COLOR },
-		{ "colorGradient", COLOR },
+		{ "colorEnd", COLOR },
 		{ "gradientType", STRING },
 		{ "logoScale", FLOAT },
 		{ "logoRotation", FLOAT },
@@ -195,7 +195,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "fontSize", FLOAT },
 		{ "separatorColor", COLOR },
 		{ "selectorColor", COLOR },
-		{ "selectorGradientColor", COLOR },
+		{ "selectorColorEnd", COLOR },
 		{ "selectedColor", COLOR },
 		{ "color", COLOR } } },
 
@@ -1112,8 +1112,8 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 			Text.selectedColor = elem->get<unsigned int>("selectedColor");
 		if (elem->has("selectorColor"))
 			Text.selectorColor = elem->get<unsigned int>("selectorColor");
-		if (elem->has("selectorGradientColor"))
-			Text.selectorGradientColor = elem->get<unsigned int>("selectorGradientColor");
+		if (elem->has("selectorColorEnd"))
+			Text.selectorGradientColor = elem->get<unsigned int>("selectorColorEnd");
 	}
 
 	elem = theme->getElement("menu", "menubutton", "menuButton");
