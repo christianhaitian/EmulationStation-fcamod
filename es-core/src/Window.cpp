@@ -72,12 +72,16 @@ GuiComponent* Window::peekGui()
 
 bool Window::init(bool initRenderer)
 {
+	LOG(LogInfo) << "Window::init";
+	
 	if (initRenderer && !Renderer::init())
 	{
 		LOG(LogError) << "Renderer failed to initialize!";
 		return false;
 	}
-
+	else
+		Renderer::activateWindow();
+	
 	InputManager::getInstance()->init();
 	ResourceManager::getInstance()->reloadAll();
 
@@ -95,9 +99,7 @@ bool Window::init(bool initRenderer)
 	// update our help because font sizes probably changed
 	if (peekGui())
 		peekGui()->updateHelpPrompts();
-
-	Renderer::activateWindow();
-
+	
 	return true;
 }
 
