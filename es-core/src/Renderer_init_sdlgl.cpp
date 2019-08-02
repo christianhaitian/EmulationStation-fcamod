@@ -211,6 +211,9 @@ namespace Renderer
 
 	void activateWindow()
 	{
+		SDL_RaiseWindow(sdlWindow);
+		SDL_SetWindowInputFocus(sdlWindow);
+		/*
 #if WIN32
 		if (sdlWindow == NULL)
 			return;
@@ -222,7 +225,7 @@ namespace Renderer
 
 		::SetForegroundWindow(hwnd);
 		::SetActiveWindow(hwnd);
-#endif
+#endif*/
 	}
 
 	bool init()
