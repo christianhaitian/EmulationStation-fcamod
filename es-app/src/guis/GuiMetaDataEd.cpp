@@ -370,9 +370,9 @@ void GuiMetaDataEd::close(bool closeAllWindows)
 	{
 		// changes were made, ask if the user wants to save them
 		mWindow->pushGui(new GuiMsgBox(mWindow,
-			"ENREGISTRER LES MODIFICATIONS ?",
-			"OUI", [this, closeFunc] { save(); closeFunc(); },
-			"NON", closeFunc
+			_T("SAVE CHANGES ?"),
+			_T("YES"), [this, closeFunc] { save(); closeFunc(); },
+			_T("NO"), closeFunc
 		));
 	}else{
 		closeFunc();
