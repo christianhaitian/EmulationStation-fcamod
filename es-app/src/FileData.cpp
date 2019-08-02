@@ -16,6 +16,7 @@
 #include "Window.h"
 #include "views/UIModeController.h"
 #include <assert.h>
+#include "Renderer.h"
 
 FileData::FileData(FileType type, const std::string& path, SystemData* system)
 	: mType(type), mSystem(system), mParent(NULL), metadata(type == GAME ? GAME_METADATA : FOLDER_METADATA) // metadata is REALLY set in the constructor!
@@ -256,7 +257,10 @@ void FileData::launchGame(Window* window)
 
 	Scripting::fireEvent("game-end");
 
-	window->init(hideWindow);
+	if (!hideWindow)
+		Renderer::deinit();
+	
+	window->init(true);
 
 	VolumeControl::getInstance()->init();
 	AudioManager::getInstance()->setSystemName(mSystem->getTheme()->getSystemThemeFolder()); // system-specific music -> automatic Init
