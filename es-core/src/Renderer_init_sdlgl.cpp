@@ -211,8 +211,8 @@ namespace Renderer
 
 	void activateWindow()
 	{
-		SDL_RaiseWindow(sdlWindow);
-		SDL_SetWindowInputFocus(sdlWindow);
+	//	SDL_RaiseWindow(sdlWindow);
+	//	SDL_SetWindowInputFocus(sdlWindow);
 		
 #if WIN32
 		if (sdlWindow == NULL)
@@ -223,15 +223,15 @@ namespace Renderer
 		SDL_GetWindowWMInfo(sdlWindow, &wmInfo);
 		HWND hWnd = wmInfo.info.win.window;
 
-		HWND hCurWnd = ::GetForegroundWindow();
-		DWORD dwMyID = ::GetCurrentThreadId();
-		DWORD dwCurID = ::GetWindowThreadProcessId(hCurWnd, NULL);
-		::AttachThreadInput(dwCurID, dwMyID, TRUE);
-		::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-		::SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	//	HWND hCurWnd = ::GetForegroundWindow();
+	//	DWORD dwMyID = ::GetCurrentThreadId();
+	//	DWORD dwCurID = ::GetWindowThreadProcessId(hCurWnd, NULL);
+	//	::AttachThreadInput(dwCurID, dwMyID, TRUE);
+	//	::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	//	::SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 		::SetForegroundWindow(hWnd);
-		::AttachThreadInput(dwCurID, dwMyID, FALSE);
-		::SetFocus(hWnd);
+	//	::AttachThreadInput(dwCurID, dwMyID, FALSE);
+	//	::SetFocus(hWnd);
 		::SetActiveWindow(hWnd);
 #endif
 	}
