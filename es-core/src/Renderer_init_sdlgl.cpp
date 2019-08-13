@@ -223,17 +223,9 @@ namespace Renderer
 		SDL_GetWindowWMInfo(sdlWindow, &wmInfo);
 		HWND hWnd = wmInfo.info.win.window;
 
-		//	HWND hCurWnd = ::GetForegroundWindow();
-		//	DWORD dwMyID = ::GetCurrentThreadId();
-		//	DWORD dwCurID = ::GetWindowThreadProcessId(hCurWnd, NULL);
-		//	::AttachThreadInput(dwCurID, dwMyID, TRUE);
-		//	::SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-		//	::SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-		::SetForegroundWindow(hWnd);
-		//	::AttachThreadInput(dwCurID, dwMyID, FALSE);
-		//	::SetFocus(hWnd);
-		::SetActiveWindow(hWnd);
-#endif*/
+		::SetForegroundWindow(hwnd);
+		::SetActiveWindow(hwnd);
+#endif
 	}
 
 	bool init()
