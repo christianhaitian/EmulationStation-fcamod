@@ -74,15 +74,19 @@ bool Window::init(bool initRenderer)
 {
 	LOG(LogInfo) << "Window::init";
 	
-	if (initRenderer && !Renderer::init())
+	if (initRenderer)
 	{
-		LOG(LogError) << "Renderer failed to initialize!";
-		return false;
+		if (!Renderer::init())
+		{
+			LOG(LogError) << "Renderer failed to initialize!";
+			return false;
+		}
+
+		InputManager::getInstance()->init();
 	}
 	else
 		Renderer::activateWindow();
-	
-	InputManager::getInstance()->init();
+		
 	ResourceManager::getInstance()->reloadAll();
 
 	//keep a reference to the default fonts, so they don't keep getting destroyed/recreated
@@ -111,7 +115,9 @@ void Window::deinit(bool deinitRenderer)
 		(*i)->onHide();
 	}
 
-	InputManager::getInstance()->deinit();
+	if (deinitRenderer)
+		InputManager::getInstance()->deinit();
+
 	TextureResource::resetCache();
 	ResourceManager::getInstance()->unloadAll();
 
