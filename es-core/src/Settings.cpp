@@ -75,11 +75,16 @@ void Settings::setDefaults()
 	mBoolMap["ShowHiddenFiles"] = false;
 	mBoolMap["DrawFramerate"] = false;
 	mBoolMap["ShowExit"] = true;
+	
+
 #if WIN32
+	mBoolMap["ShowOnlyExit"] = true;
 	mBoolMap["FullscreenBorderless"] = true;
 #else
+	mBoolMap["ShowOnlyExit"] = false;
 	mBoolMap["FullscreenBorderless"] = false;
 #endif
+
 	mBoolMap["Windowed"] = false;
 	mBoolMap["SplashScreen"] = true;
 	mBoolMap["SplashScreenProgress"] = true;
@@ -99,8 +104,7 @@ void Settings::setDefaults()
 	mBoolMap["MoveCarousel"] = true;
 	mBoolMap["SaveGamelistsOnExit"] = true;
 	mBoolMap["OptimizeVRAM"] = true;	
-	mBoolMap["ThreadedLoading"] = true;
-	
+	mBoolMap["ThreadedLoading"] = true;	
 
 	mBoolMap["Debug"] = false;
 	mBoolMap["DebugGrid"] = false;

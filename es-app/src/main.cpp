@@ -463,6 +463,7 @@ int main(int argc, char* argv[])
 
 	int lastTime = SDL_GetTicks();
 	int ps_time = SDL_GetTicks();
+	int exitMode = 0;
 
 	bool running = true;
 
@@ -479,8 +480,24 @@ int main(int argc, char* argv[])
 			{
 				InputManager::getInstance()->parseEvent(event, &window);
 
-				if (event.type == SDL_QUIT)
+				switch (event.type)
+				{
+				case SDL_QUIT:
 					running = false;
+					break;			
+				case SDL_QUIT | SDL_MSG_REBOOT:
+					running = false;
+					exitMode = SDL_MSG_REBOOT;
+					break;
+				case SDL_QUIT | SDL_MSG_SHUTDOWN:
+					running = false;
+					exitMode = SDL_MSG_SHUTDOWN;
+					break;
+				case SDL_QUIT | SDL_MSG_RESTART:
+					running = false;
+					exitMode = SDL_MSG_RESTART;
+					break;
+				}				
 			} 
 			while(SDL_PollEvent(&event));
 
@@ -557,6 +574,24 @@ int main(int argc, char* argv[])
 #ifdef FREEIMAGE_LIB
 	FreeImage_DeInitialise();
 #endif
+
+	if (exitMode == SDL_MSG_RESTART)
+	{
+		LOG(LogInfo) << "Restarting EmulationStation";
+		touch("/tmp/es-restart");	
+	}
+	else if (exitMode == SDL_MSG_REBOOT)
+	{
+		LOG(LogInfo) << "Rebooting system";
+		touch("/tmp/es-sysrestart");
+		runRestartCommand();		
+	}
+	else if (exitMode == SDL_MSG_SHUTDOWN)
+	{
+		LOG(LogInfo) << "Shutting system down";
+		touch("/tmp/es-shutdown");
+		runShutdownCommand();		
+	}
 
 	LOG(LogInfo) << "EmulationStation cleanly shutting down.";
 

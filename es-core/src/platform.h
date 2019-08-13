@@ -25,10 +25,17 @@
 
 class Window;
 
+#define SDL_MSG_RESTART 0X8000
+#define SDL_MSG_SHUTDOWN 0X4000
+#define SDL_MSG_REBOOT 0x2000
+
 int runShutdownCommand(); // shut down the system (returns 0 if successful)
 int runRestartCommand(); // restart the system (returns 0 if successful)
 int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Window* window); // run a utf-8 encoded in the shell (requires wstring conversion on Windows)
-int quitES(const std::string& filename);
+
+int quitES(int mode = 0);
+
+//int quitES(const std::string& filename);
 void touch(const std::string& filename);
 
 #if defined(WIN32)

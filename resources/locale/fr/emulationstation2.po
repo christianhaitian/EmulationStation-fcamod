@@ -702,6 +702,14 @@ msgid "QUIT"
 msgstr "QUITTER"
 
 #: 
+msgid "QUIT EMULATIONSTATION"
+msgstr "QUITTER EMULATIONSTATION"
+
+#: 
+msgid "RESTART EMULATIONSTATION"
+msgstr "REDEMARRER EMULATIONSTATION"
+
+#: 
 msgid "REALLY RESTART?"
 msgstr "REDÉMARRER ?"
 
@@ -1966,6 +1974,9 @@ msgstr "Verification"
 msgid "EMPTY LIST"
 msgstr "Liste vide"
 
+#:
+msgid "COMPLETE QUIT MENU"
+msgstr "AFFICHER TOUTES LES COMMANDES DU MENU QUITTER"
 
 #: Retroarch ratio
 msgid "Auto"

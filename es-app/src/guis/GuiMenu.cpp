@@ -46,11 +46,7 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _T("MAIN 
 		addEntry(_T("ADVANCED SETTINGS"), theme->Text.color, true, [this] { openOtherSettings(); }, theme->MenuIcons.advanced);
 	}
 	
-#ifdef WIN32
-	addEntry(_T("QUIT"), theme->Text.color, false, [this] {openQuitMenu(); }, theme->MenuIcons.quit);
-#else
-	addEntry(_T("QUIT"), theme->Text.color, true, [this] {openQuitMenu(); }, theme->MenuIcons.quit);
-#endif
+	addEntry(_T("QUIT"), theme->Text.color, !Settings::getInstance()->getBool("ShowOnlyExit"), [this] {openQuitMenu(); }, theme->MenuIcons.quit);
 
 	addChild(&mMenu);
 	addVersionInfo();
@@ -956,6 +952,14 @@ void GuiMenu::openOtherSettings()
 	s->addWithLabel(_T("THREADED LOADING"), threadedLoading);
 	s->addSaveFunc([threadedLoading] { Settings::getInstance()->setBool("ThreadedLoading", threadedLoading->getState()); });
 
+#ifndef _RPI_
+	// full exit
+	auto fullExitMenu = std::make_shared<SwitchComponent>(mWindow);
+	fullExitMenu->setState(!Settings::getInstance()->getBool("ShowOnlyExit"));
+	s->addWithLabel(_T("COMPLETE QUIT MENU"), fullExitMenu);
+	s->addSaveFunc([fullExitMenu] { Settings::getInstance()->setBool("ShowOnlyExit", !fullExitMenu->getState()); });
+#endif
+
 	s->updatePosition();
 	mWindow->pushGui(s);
 
@@ -976,11 +980,12 @@ void GuiMenu::openConfigInput()
 
 void GuiMenu::openQuitMenu()
 {
-#ifdef WIN32
-	Scripting::fireEvent("quit");
-	quitES("");
-	return;
-#endif
+	if (Settings::getInstance()->getBool("ShowOnlyExit"))
+	{
+		Scripting::fireEvent("quit");
+		quitES();
+		return;
+	}
 
 	auto s = new GuiSettings(mWindow, _T("QUIT"));
 
@@ -990,54 +995,54 @@ void GuiMenu::openQuitMenu()
 	if (UIModeController::getInstance()->isUIModeFull())
 	{
 		row.makeAcceptInputHandler([window] {
-			window->pushGui(new GuiMsgBox(window, "REALLY RESTART?", "YES",
+			window->pushGui(new GuiMsgBox(window, _T("REALLY RESTART?"), _T("YES"),
 				[] {
 				Scripting::fireEvent("quit");
-				if(quitES("/tmp/es-restart") != 0)
+				if(quitES(SDL_MSG_RESTART) != 0)
 					LOG(LogWarning) << "Restart terminated with non-zero result!";
-			}, "NO", nullptr));
+			}, _T("NO"), nullptr));
 		});
-		row.addElement(std::make_shared<TextComponent>(window, "RESTART EMULATIONSTATION", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(window, _T("RESTART EMULATIONSTATION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		s->addRow(row);
 
 		if(Settings::getInstance()->getBool("ShowExit"))
 		{
 			row.elements.clear();
 			row.makeAcceptInputHandler([window] {
-				window->pushGui(new GuiMsgBox(window, "REALLY QUIT?", "YES",
+				window->pushGui(new GuiMsgBox(window, _T("REALLY QUIT?"), _T("YES"),
 					[] {
 					Scripting::fireEvent("quit");
-					quitES("");
-				}, "NO", nullptr));
+					quitES();
+				}, _T("NO"), nullptr));
 			});
-			row.addElement(std::make_shared<TextComponent>(window, "QUIT EMULATIONSTATION", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+			row.addElement(std::make_shared<TextComponent>(window, _T("QUIT EMULATIONSTATION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 			s->addRow(row);
 		}
 	}
 	row.elements.clear();
 	row.makeAcceptInputHandler([window] {
-		window->pushGui(new GuiMsgBox(window, "REALLY RESTART?", "YES",
+		window->pushGui(new GuiMsgBox(window, _T("REALLY RESTART?"), _T("YES"),
 			[] {
 			Scripting::fireEvent("quit", "reboot");
 			Scripting::fireEvent("reboot");
-			if (quitES("/tmp/es-sysrestart") != 0)
+			if (quitES(SDL_MSG_REBOOT) != 0)
 				LOG(LogWarning) << "Restart terminated with non-zero result!";
-		}, "NO", nullptr));
+		}, _T("NO"), nullptr));
 	});
-	row.addElement(std::make_shared<TextComponent>(window, "RESTART SYSTEM", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+	row.addElement(std::make_shared<TextComponent>(window, _T("RESTART SYSTEM"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 	s->addRow(row);
 
 	row.elements.clear();
 	row.makeAcceptInputHandler([window] {
-		window->pushGui(new GuiMsgBox(window, "REALLY SHUTDOWN?", "YES",
+		window->pushGui(new GuiMsgBox(window, _T("REALLY SHUTDOWN?"), _T("YES"),
 			[] {
 			Scripting::fireEvent("quit", "shutdown");
 			Scripting::fireEvent("shutdown");
-			if (quitES("/tmp/es-shutdown") != 0)
+			if (quitES(SDL_MSG_SHUTDOWN) != 0)
 				LOG(LogWarning) << "Shutdown terminated with non-zero result!";
-		}, "NO", nullptr));
+		}, _T("NO"), nullptr));
 	});
-	row.addElement(std::make_shared<TextComponent>(window, "SHUTDOWN SYSTEM", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+	row.addElement(std::make_shared<TextComponent>(window, _T("SHUTDOWN SYSTEM"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 	s->addRow(row);
 
 	s->updatePosition();

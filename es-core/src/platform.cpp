@@ -191,6 +191,14 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 #endif
 }
 
+int quitES(int mode) 
+{
+	SDL_Event *quit = new SDL_Event();
+	quit->type = SDL_QUIT | mode;
+	SDL_PushEvent(quit);
+	return 0;
+}
+/*
 int quitES(const std::string& filename)
 {
 	if (!filename.empty())
@@ -200,7 +208,7 @@ int quitES(const std::string& filename)
 	SDL_PushEvent(quit);
 	return 0;
 }
-
+*/
 void touch(const std::string& filename)
 {
 #ifdef WIN32
