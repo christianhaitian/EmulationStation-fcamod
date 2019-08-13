@@ -234,7 +234,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		CollectionSystemManager::get()->getCustomCollectionsBundle()->getName() == system->getName()))
 	{
 		row.elements.clear();
-		row.addElement(std::make_shared<TextComponent>(mWindow, "ADD/REMOVE GAMES TO THIS GAME COLLECTION", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _T("ADD/REMOVE GAMES TO THIS GAME COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::startEditMode, this));
 		mMenu.addRow(row);
 	}
@@ -242,7 +242,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 	if(UIModeController::getInstance()->isUIModeFull() && CollectionSystemManager::get()->isEditing())
 	{
 		row.elements.clear();
-		row.addElement(std::make_shared<TextComponent>(mWindow, "FINISH EDITING '" + Utils::String::toUpper(CollectionSystemManager::get()->getEditingCollection()) + "' COLLECTION", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _T("FINISH EDITING")+" '" + Utils::String::toUpper(CollectionSystemManager::get()->getEditingCollection()) + "' "+_T("COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::exitEditMode, this));
 		mMenu.addRow(row);
 	}

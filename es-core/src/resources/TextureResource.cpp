@@ -182,7 +182,16 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 			{
 				auto dt = sTextureDataManager.get(rc.get());
 				if (dt != nullptr)
+				{
 					dt->setMaxSize(maxSize);
+
+					if (dt->isLoaded() && !dt->isRequiredTextureSizeOk())
+					{
+						dt->releaseVRAM();
+						dt->releaseRAM();
+						dt->load();
+					}
+				}
 			}
 
 			return rc;

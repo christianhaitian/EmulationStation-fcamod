@@ -34,13 +34,14 @@ protected:
 
 private:
 	void updateInfoPanel();
+	void createImage();
 
 	void initMDLabels();
 	void initMDValues();
 
 	ImageComponent mMarquee;
 	VideoComponent* mVideo;
-	ImageComponent mImage;
+	ImageComponent* mImage;
 
 	TextComponent mLblRating, mLblReleaseDate, mLblDeveloper, mLblPublisher, mLblGenre, mLblPlayers, mLblLastPlayed, mLblPlayCount;
 

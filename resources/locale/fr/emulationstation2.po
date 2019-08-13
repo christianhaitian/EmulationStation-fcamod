@@ -8,6 +8,30 @@ msgstr ""
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+#:
+msgid "This collection is empty"
+msgstr "Cette collection est vide"
+
+#:
+msgid "None"
+msgstr "Aucun"
+
+#:
+msgid "Various"
+msgstr "Multiple"
+
+#:
+msgid "among other titles."
+msgstr "d'autres jeux"
+
+#:
+msgid "This collection contains"
+msgstr "Cette collection contient"
+
+#:
+msgid "games, including"
+msgstr "jeux, incluant "
+
 #: 
 msgid "Loading..."
 msgstr "Chargement en cours"
@@ -15,6 +39,14 @@ msgstr "Chargement en cours"
 #: 
 msgid "Preloading UI"
 msgstr "Chargement de l'interface"
+
+#: 
+msgid "ADD/REMOVE GAMES TO THIS GAME COLLECTION"
+msgstr "Ajouter/Retirer des jeux à cette collection"
+
+#:
+msgid "FINISH EDITING"
+msgstr "Terminer l'édition"
 
 #: 
 msgid "GRID SIZE"
