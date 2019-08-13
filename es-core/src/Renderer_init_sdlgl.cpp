@@ -225,7 +225,7 @@ namespace Renderer
 
 		::SetForegroundWindow(hwnd);
 		::SetActiveWindow(hwnd);
-#endif
+#endif*/
 	}
 
 	bool init()
