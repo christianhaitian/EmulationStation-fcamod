@@ -244,7 +244,9 @@ namespace Utils
 
 		bool endsWith(const std::string& _string, const std::string& _end)
 		{
-			return (_string.find(_end) == (_string.size() - _end.size()));
+			if (_end.size() > _string.size()) return false;
+			return std::equal(_end.rbegin(), _end.rend(), _string.rbegin());
+			//return (_string.find(_end, 0, ) == (_string.size() - _end.size()));
 
 		} // endsWith
 

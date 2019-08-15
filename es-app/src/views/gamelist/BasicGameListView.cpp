@@ -204,17 +204,17 @@ std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
 	std::vector<HelpPrompt> prompts;
 
 	if(Settings::getInstance()->getBool("QuickSystemSelect"))
-		prompts.push_back(HelpPrompt("left/right", _T("SYSTEM")));
+		prompts.push_back(HelpPrompt("left/right", _("SYSTEM")));
 
-	prompts.push_back(HelpPrompt("up/down", _T("CHOOSE")));
-	prompts.push_back(HelpPrompt("a", _T("LAUNCH")));
-	prompts.push_back(HelpPrompt("b", _T("BACK")));
+	prompts.push_back(HelpPrompt("up/down", _("CHOOSE")));
+	prompts.push_back(HelpPrompt("a", _("LAUNCH")));
+	prompts.push_back(HelpPrompt("b", _("BACK")));
 
 	if(!UIModeController::getInstance()->isUIModeKid())
-		prompts.push_back(HelpPrompt("select", _T("options")));
+		prompts.push_back(HelpPrompt("select", _("options")));
 	
 	if(mRoot->getSystem()->isGameSystem())
-		prompts.push_back(HelpPrompt("x", _T("RANDOM")));
+		prompts.push_back(HelpPrompt("x", _("RANDOM")));
 
 	if(mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
 	{

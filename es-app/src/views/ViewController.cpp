@@ -468,7 +468,7 @@ bool ViewController::input(InputConfig* config, Input input)
 	if (config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_F5)
 	{
 		mWindow->render();
-		mWindow->renderLoadingScreen(_T("Loading..."), -1, 180);
+		mWindow->renderLoadingScreen(_("Loading..."), -1, 180);
 
 		ViewController::get()->reloadAll();
 		mWindow->endRenderLoadingScreen();
@@ -581,14 +581,14 @@ void ViewController::preload()
 
 	bool splash = Settings::getInstance()->getBool("SplashScreen") && Settings::getInstance()->getBool("SplashScreenProgress");
 	if (splash)
-		mWindow->renderLoadingScreen(_T("Preloading UI"), (float)i / (float)max);
+		mWindow->renderLoadingScreen(_("Preloading UI"), (float)i / (float)max);
 	
 	for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
 	{
 		if (splash)
 		{
 			i++;
-			mWindow->renderLoadingScreen(_T("Preloading UI"), (float) i / (float)max);
+			mWindow->renderLoadingScreen(_("Preloading UI"), (float) i / (float)max);
 		}
 
 		(*it)->resetFilters();

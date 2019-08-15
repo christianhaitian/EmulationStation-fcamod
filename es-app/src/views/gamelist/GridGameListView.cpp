@@ -588,18 +588,18 @@ std::vector<HelpPrompt> GridGameListView::getHelpPrompts()
 	std::vector<HelpPrompt> prompts;
 
 	if (Settings::getInstance()->getBool("QuickSystemSelect"))
-		prompts.push_back(HelpPrompt("lr", _T("SYSTEM")));
-	prompts.push_back(HelpPrompt("up/down/left/right", _T("CHOOSE")));
-	prompts.push_back(HelpPrompt("a", _T("LAUNCH")));
+		prompts.push_back(HelpPrompt("lr", _("SYSTEM")));
+	prompts.push_back(HelpPrompt("up/down/left/right", _("CHOOSE")));
+	prompts.push_back(HelpPrompt("a", _("LAUNCH")));
 
 	if (!Settings::getInstance()->getBool("HideSystemView"))
-		prompts.push_back(HelpPrompt("b", _T("BACK")));
+		prompts.push_back(HelpPrompt("b", _("BACK")));
 
 	if (!UIModeController::getInstance()->isUIModeKid())
-		prompts.push_back(HelpPrompt("select", _T("OPTIONS")));
+		prompts.push_back(HelpPrompt("select", _("OPTIONS")));
 
 	if (mRoot->getSystem()->isGameSystem())
-		prompts.push_back(HelpPrompt("x", _T("RANDOM")));
+		prompts.push_back(HelpPrompt("x", _("RANDOM")));
 
 	if (mRoot->getSystem()->isGameSystem() && !UIModeController::getInstance()->isUIModeKid())
 	{

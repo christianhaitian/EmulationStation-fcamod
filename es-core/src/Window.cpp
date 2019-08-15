@@ -421,7 +421,7 @@ void Window::renderGameLoadingScreen(float opacity, bool swapBuffers)
 	auto& font = mDefaultFonts.at(1);
 	font->reload(); // Ensure font is loaded
 
-	TextCache* cache = font->buildTextCache(mCustomSplash.empty() ? _T("Loading...") : mCustomSplash, 0, 0, 0x65656500 | (unsigned char)(opacity * 255));
+	TextCache* cache = font->buildTextCache(mCustomSplash.empty() ? _("Loading...") : mCustomSplash, 0, 0, 0x65656500 | (unsigned char)(opacity * 255));
 
 	float x = Math::round((Renderer::getScreenWidth() - cache->metrics.size.x()) / 2.0f);
 	float y = Math::round(Renderer::getScreenHeight() * 0.835f);

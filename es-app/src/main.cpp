@@ -385,7 +385,7 @@ int main(int argc, char* argv[])
 		LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "ok" : "MISSING");
 
 		if (splashScreen)
-			window.renderLoadingScreen(_T("Loading..."));
+			window.renderLoadingScreen(_("Loading..."));
 	}
 
 	const char* errorMsg = NULL;
@@ -405,7 +405,7 @@ int main(int argc, char* argv[])
 		// we can't handle es_systems.cfg file problems inside ES itself, so display the error message then quit
 		window.pushGui(new GuiMsgBox(&window,
 			errorMsg,
-			_T("QUIT"), [] {
+			_("QUIT"), [] {
 				SDL_Event* quit = new SDL_Event();
 				quit->type = SDL_QUIT;
 				SDL_PushEvent(quit);
@@ -426,7 +426,7 @@ int main(int argc, char* argv[])
 		ViewController::get()->preload();
 	
 	if (splashScreen && splashScreenProgress)	
-		window.renderLoadingScreen(_T("Starting UI"));
+		window.renderLoadingScreen(_("Starting UI"));
 
 	//choose which GUI to open depending on if an input configuration already exists
 	if (errorMsg == NULL)

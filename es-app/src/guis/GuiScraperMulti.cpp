@@ -37,7 +37,7 @@ GuiScraperMulti::GuiScraperMulti(Window* window, const std::queue<ScraperSearchP
 	mTitle = std::make_shared<TextComponent>(mWindow, "SCRAPING IN PROGRESS", ThemeData::getMenuTheme()->Title.font, ThemeData::getMenuTheme()->Title.color, ALIGN_CENTER);
 	mGrid.setEntry(mTitle, Vector2i(0, 0), false, true);
 
-	mSystem = std::make_shared<TextComponent>(mWindow, _T("SYSTEM"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color, ALIGN_CENTER);
+	mSystem = std::make_shared<TextComponent>(mWindow, _("SYSTEM"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color, ALIGN_CENTER);
 	mGrid.setEntry(mSystem, Vector2i(0, 1), false, true);
 
 	mSubtitle = std::make_shared<TextComponent>(mWindow, "subtitle text", ThemeData::getMenuTheme()->TextSmall.font, ThemeData::getMenuTheme()->TextSmall.color, ALIGN_CENTER);

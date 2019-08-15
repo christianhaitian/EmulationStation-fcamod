@@ -62,6 +62,11 @@ find_package(VLC REQUIRED)
 find_package(RapidJSON REQUIRED)
 find_package(libCEC)
 
+# i18n
+# if(MSVC)
+# 	find_package(Intl REQUIRED)
+# endif()
+
 #add ALSA for Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     find_package(ALSA REQUIRED)
@@ -129,6 +134,12 @@ set(COMMON_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/es-core/src
 )
 
+# if(MSVC)
+#         LIST(APPEND COMMON_INCLUDE_DIRS
+#             ${Intl_INCLUDE_DIRS}
+#         )
+# endif()
+
 #add libCEC_INCLUDE_DIR
 if(DEFINED libCEC_FOUND)
     LIST(APPEND COMMON_INCLUDE_DIRS
@@ -181,7 +192,7 @@ endif()
 
 set(COMMON_LIBRARIES
     ${FREETYPE_LIBRARIES}
-    ${FreeImage_LIBRARIES}
+    ${FreeImage_LIBRARIES}	
     ${SDL2_LIBRARY}
 	${SDLMIXER_LIBRARY}
     ${CURL_LIBRARIES}
@@ -189,6 +200,12 @@ set(COMMON_LIBRARIES
     pugixml
     nanosvg
 )
+
+# if(MSVC)
+#         LIST(APPEND COMMON_LIBRARIES
+#             ${Intl_LIBRARIES}
+#         )
+# endif()
 
 #add libCEC_LIBRARIES
 if(DEFINED libCEC_FOUND)

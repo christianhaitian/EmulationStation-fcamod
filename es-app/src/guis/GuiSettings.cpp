@@ -8,13 +8,13 @@
 GuiSettings::GuiSettings(Window* window, std::string title) : GuiComponent(window), mMenu(window, title)
 {
 	addChild(&mMenu);
-	mMenu.addButton(_T("BACK"), _T("BACK"), [this] { delete this; });
+	mMenu.addButton(_("BACK"), _("BACK"), [this] { saveAndClose(); });
 	updatePosition();
 }
 
 GuiSettings::~GuiSettings()
 {
-	save();
+	
 }
 
 void GuiSettings::updatePosition()
@@ -25,20 +25,30 @@ void GuiSettings::updatePosition()
 
 void GuiSettings::save()
 {
-	if(!mSaveFuncs.size())
+	if (!mSaveFuncs.size())
 		return;
 
-	for(auto it = mSaveFuncs.cbegin(); it != mSaveFuncs.cend(); it++)
+	for (auto it = mSaveFuncs.cbegin(); it != mSaveFuncs.cend(); it++)
 		(*it)();
 
 	Settings::getInstance()->saveFile();
+}
+
+void GuiSettings::saveAndClose()
+{
+	save();
+
+	if (mBeforeCloseFunc != nullptr && mEnableBeforeCloseFunc)
+		mBeforeCloseFunc();
+
+	delete this;
 }
 
 bool GuiSettings::input(InputConfig* config, Input input)
 {
 	if(config->isMappedTo("b", input) && input.value != 0)
 	{
-		delete this;
+		saveAndClose();
 		return true;
 	}
 
@@ -48,6 +58,7 @@ bool GuiSettings::input(InputConfig* config, Input input)
 		Window* window = mWindow;
 		while(window->peekGui() && window->peekGui() != ViewController::get())
 			delete window->peekGui();
+
 		return true;
 	}
 	
@@ -65,8 +76,8 @@ std::vector<HelpPrompt> GuiSettings::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
 
-	prompts.push_back(HelpPrompt("b", _T("BACK")));
-	prompts.push_back(HelpPrompt("start", _T("CLOSE")));
+	prompts.push_back(HelpPrompt("b", _("BACK")));
+	prompts.push_back(HelpPrompt("start", _("CLOSE")));
 
 	return prompts;
 }

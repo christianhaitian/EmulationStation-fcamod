@@ -9,33 +9,33 @@
 #include "SystemData.h"
 
 GuiScraperStart::GuiScraperStart(Window* window) : GuiComponent(window),
-	mMenu(window, _T("SCRAPE NOW"))
+	mMenu(window, _("SCRAPE NOW"))
 {
 	addChild(&mMenu);
 
 	// add filters (with first one selected)
-	mFilters = std::make_shared< OptionListComponent<GameFilterFunc> >(mWindow, _T("SCRAPE THESE GAMES"), false);
-	mFilters->add(_T("All Games"),
+	mFilters = std::make_shared< OptionListComponent<GameFilterFunc> >(mWindow, _("SCRAPE THESE GAMES"), false);
+	mFilters->add(_("All Games"),
 		[](SystemData*, FileData*) -> bool { return true; }, false);
-	mFilters->add(_T("Only missing image"),
+	mFilters->add(_("Only missing image"),
 		[](SystemData*, FileData* g) -> bool { return g->metadata.get("image").empty(); }, true);
-	mMenu.addWithLabel(_T("FILTER"), mFilters);
+	mMenu.addWithLabel(_("FILTER"), mFilters);
 
 	//add systems (all with a platformid specified selected)
-	mSystems = std::make_shared< OptionListComponent<SystemData*> >(mWindow, _T("SCRAPE THESE SYSTEMS"), true);
+	mSystems = std::make_shared< OptionListComponent<SystemData*> >(mWindow, _("SCRAPE THESE SYSTEMS"), true);
 	for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
 	{
 		if(!(*it)->hasPlatformId(PlatformIds::PLATFORM_IGNORE))
 			mSystems->add((*it)->getFullName(), *it, !(*it)->getPlatformIds().empty());
 	}
-	mMenu.addWithLabel(_T("SYSTEMS"), mSystems);
+	mMenu.addWithLabel(_("SYSTEMS"), mSystems);
 
 	mApproveResults = std::make_shared<SwitchComponent>(mWindow);
 	mApproveResults->setState(true);
-	mMenu.addWithLabel(_T("USER DECIDES ON CONFLICTS"), mApproveResults);
+	mMenu.addWithLabel(_("USER DECIDES ON CONFLICTS"), mApproveResults);
 
-	mMenu.addButton(_T("START"), _T("START"), std::bind(&GuiScraperStart::pressedStart, this));
-	mMenu.addButton(_T("BACK"), _T("BACK"), [&] { delete this; });
+	mMenu.addButton(_("START"), _("START"), std::bind(&GuiScraperStart::pressedStart, this));
+	mMenu.addButton(_("BACK"), _("BACK"), [&] { delete this; });
 
 	mMenu.setPosition((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.15f);
 }
@@ -49,8 +49,8 @@ void GuiScraperStart::pressedStart()
 		{
 			mWindow->pushGui(new GuiMsgBox(mWindow, 
 				Utils::String::toUpper("Warning: some of your selected systems do not have a platform set. Results may be even more inaccurate than usual!\nContinue anyway?"), 
-				_T("YES"), std::bind(&GuiScraperStart::start, this), 
-				_T("NO"), nullptr));
+				_("YES"), std::bind(&GuiScraperStart::start, this), 
+				_("NO"), nullptr));
 			return;
 		}
 	}
@@ -64,7 +64,7 @@ void GuiScraperStart::start()
 
 	if(searches.empty())
 	{
-		mWindow->pushGui(new GuiMsgBox(mWindow, _T("NO GAMES FIT THAT CRITERIA.")));
+		mWindow->pushGui(new GuiMsgBox(mWindow, _("NO GAMES FIT THAT CRITERIA.")));
 	}
 	else
 	{
@@ -123,7 +123,7 @@ bool GuiScraperStart::input(InputConfig* config, Input input)
 std::vector<HelpPrompt> GuiScraperStart::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
-	prompts.push_back(HelpPrompt("b", _T("BACK")));
-	prompts.push_back(HelpPrompt("start", _T("CLOSE")));
+	prompts.push_back(HelpPrompt("b", _("BACK")));
+	prompts.push_back(HelpPrompt("start", _("CLOSE")));
 	return prompts;
 }

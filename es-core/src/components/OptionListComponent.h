@@ -90,11 +90,11 @@ private:
 				mMenu.addRow(row, (!mParent->mMultiSelect && it->selected));
 			}
 
-			mMenu.addButton(_T("BACK"), _T("accept"), [this] { delete this; });
+			mMenu.addButton(_("BACK"), _("accept"), [this] { delete this; });
 
 			if(mParent->mMultiSelect)
 			{
-				mMenu.addButton(_T("SELECT ALL"), _T("SELECT ALL"), [this, checkboxes] {
+				mMenu.addButton(_("SELECT ALL"), _("SELECT ALL"), [this, checkboxes] {
 					for(unsigned int i = 0; i < mParent->mEntries.size(); i++)
 					{
 						mParent->mEntries.at(i).selected = true;
@@ -103,7 +103,7 @@ private:
 					mParent->onSelectedChanged();
 				});
 
-				mMenu.addButton(_T("SELECT NONE"), _T("SELECT NONE"), [this, checkboxes] {
+				mMenu.addButton(_("SELECT NONE"), _("SELECT NONE"), [this, checkboxes] {
 					for(unsigned int i = 0; i < mParent->mEntries.size(); i++)
 					{
 						mParent->mEntries.at(i).selected = false;
@@ -134,7 +134,7 @@ private:
 		std::vector<HelpPrompt> getHelpPrompts() override
 		{
 			auto prompts = mMenu.getHelpPrompts();
-			prompts.push_back(HelpPrompt("b", _T("BACK")));
+			prompts.push_back(HelpPrompt("b", _("BACK")));
 			return prompts;
 		}
 	};

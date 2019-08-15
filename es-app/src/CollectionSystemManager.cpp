@@ -590,12 +590,12 @@ void CollectionSystemManager::updateCollectionFolderMetadata(SystemData* sys)
 {
 	FolderData* rootFolder = sys->getRootFolder();
 
-	std::string desc = _T("This collection is empty.");
+	std::string desc = _("This collection is empty.");
 	std::string rating = "0";
 	std::string players = "1";
 	std::string releasedate = "N/A";
-	std::string developer = _T("None");
-	std::string genre = _T("None");
+	std::string developer = _("None");
+	std::string genre = _("None");
 	std::string video = "";
 	std::string thumbnail = "";
 	std::string image = "";
@@ -620,8 +620,8 @@ void CollectionSystemManager::updateCollectionFolderMetadata(SystemData* sys)
 			rating = (new_rating > rating ? (new_rating != "" ? new_rating : rating) : rating);
 			players = (new_players > players ? (new_players != "" ? new_players : players) : players);
 			releasedate = (new_releasedate < releasedate ? (new_releasedate != "" ? new_releasedate : releasedate) : releasedate);
-			developer = (developer == _T("None") ? new_developer : (new_developer != developer ? _T("Various") : new_developer));
-			genre = (genre == _T("None") ? new_genre : (new_genre != genre ? _T("Various") : new_genre));
+			developer = (developer == _("None") ? new_developer : (new_developer != developer ? _("Various") : new_developer));
+			genre = (genre == _("None") ? new_genre : (new_genre != genre ? _("Various") : new_genre));
 
 			switch(games_counter)
 			{
@@ -632,11 +632,11 @@ void CollectionSystemManager::updateCollectionFolderMetadata(SystemData* sys)
 					games_list += "'" + file->getName() + "'";
 					break;
 				case 4:
-					games_list += " " + _T("among other titles.");
+					games_list += " " + _("among other titles.");
 			}
 		}
 
-		desc = _T("This collection contains") + " " + std::to_string(games_counter) + " " + _T("games, including") + " " + games_list;
+		desc = _("This collection contains") + " " + std::to_string(games_counter) + " " + _("games, including") + " " + games_list;
 
 		FileData* randomGame = sys->getRandomGame();
 		if (randomGame != nullptr)

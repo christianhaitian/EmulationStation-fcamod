@@ -21,14 +21,14 @@ void GuiGamelistFilter::initializeMenu()
 	
 	// show filtered menu
 	row.elements.clear();
-	row.addElement(std::make_shared<TextComponent>(mWindow, _T("RESET ALL FILTERS"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+	row.addElement(std::make_shared<TextComponent>(mWindow, _("RESET ALL FILTERS"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 	row.makeAcceptInputHandler(std::bind(&GuiGamelistFilter::resetAllFilters, this));
 	mMenu.addRow(row);
 	row.elements.clear();
 
 	addFiltersToMenu();
 
-	mMenu.addButton(_T("BACK"), _T("BACK"), std::bind(&GuiGamelistFilter::applyFilters, this));
+	mMenu.addButton(_("BACK"), _("BACK"), std::bind(&GuiGamelistFilter::applyFilters, this));
 
 	mMenu.setPosition((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.15f);
 }
@@ -61,7 +61,7 @@ void GuiGamelistFilter::addFiltersToMenu()
 
 		FilterIndexType type = (*it).type; // type of filter
 		std::map<std::string, int>* allKeys = (*it).allIndexKeys; // all possible filters for this type
-		std::string menuLabel = _T((*it).menuLabel); // text to show in menu
+		std::string menuLabel = _((*it).menuLabel); // text to show in menu
 		std::shared_ptr< OptionListComponent<std::string> > optionList;
 		
 		// add filters (with first one selected)
@@ -111,6 +111,6 @@ bool GuiGamelistFilter::input(InputConfig* config, Input input)
 std::vector<HelpPrompt> GuiGamelistFilter::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
-	prompts.push_back(HelpPrompt("b", _T("BACK")));
+	prompts.push_back(HelpPrompt("b", _("BACK")));
 	return prompts;
 }

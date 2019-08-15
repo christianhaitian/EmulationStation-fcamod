@@ -212,7 +212,7 @@ std::string DateTimeEditComponent::getDisplayString(DisplayMode mode) const
 		{
 			//relative time
 			if(mTime.getTime() == 0)
-				return _T("never");
+				return _("never");
 
 			Utils::Time::DateTime now(Utils::Time::now());
 			Utils::Time::Duration dur(now.getTime() - mTime.getTime());
@@ -234,7 +234,7 @@ std::string DateTimeEditComponent::getDisplayString(DisplayMode mode) const
 	}
 	
 	if(mTime.getTime() == 0)
-		return _T("unknown");
+		return _("unknown");
 
 	return Utils::Time::timeToString(mTime, fmt);
 }

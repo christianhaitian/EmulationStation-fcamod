@@ -9,7 +9,7 @@
 #include "CollectionSystemManager.h"
 #include "Window.h"
 
-GuiCollectionSystemsOptions::GuiCollectionSystemsOptions(Window* window) : GuiComponent(window), mMenu(window, _T("GAME COLLECTION SETTINGS"))
+GuiCollectionSystemsOptions::GuiCollectionSystemsOptions(Window* window) : GuiComponent(window), mMenu(window, _("GAME COLLECTION SETTINGS"))
 {
 	initializeMenu();
 }
@@ -27,9 +27,9 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	std::vector<std::string> unusedFolders = CollectionSystemManager::get()->getUnusedSystemsFromTheme();
 	if (unusedFolders.size() > 0)
 	{
-		addEntry(_T("CREATE NEW CUSTOM COLLECTION FROM THEME"), ThemeData::getMenuTheme()->Text.color, true,
+		addEntry(_("CREATE NEW CUSTOM COLLECTION FROM THEME"), ThemeData::getMenuTheme()->Text.color, true,
 		[this, unusedFolders] {
-			auto s = new GuiSettings(mWindow, _T("SELECT THEME FOLDER"));
+			auto s = new GuiSettings(mWindow, _("SELECT THEME FOLDER"));
 			std::shared_ptr< OptionListComponent<std::string> > folderThemes = std::make_shared< OptionListComponent<std::string> >(mWindow, "SELECT THEME FOLDER", true);
 
 			// add Custom Systems
@@ -54,7 +54,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	}
 
 	ComponentListRow row;
-	row.addElement(std::make_shared<TextComponent>(mWindow, _T("CREATE NEW CUSTOM COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+	row.addElement(std::make_shared<TextComponent>(mWindow, _("CREATE NEW CUSTOM COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 	auto createCustomCollection = [this](const std::string& newVal) {
 		std::string name = newVal;
 		// we need to store the first Gui and remove it, as it'll be deleted by the actual Gui
@@ -64,36 +64,36 @@ void GuiCollectionSystemsOptions::initializeMenu()
 		createCollection(name);
 	};
 	row.makeAcceptInputHandler([this, createCustomCollection] {
-		mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, _T("New Collection Name"), "", createCustomCollection, false));
+		mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, _("New Collection Name"), "", createCustomCollection, false));
 	});
 
 	mMenu.addRow(row);
 
 	bundleCustomCollections = std::make_shared<SwitchComponent>(mWindow);
 	bundleCustomCollections->setState(Settings::getInstance()->getBool("UseCustomCollectionsSystem"));
-	mMenu.addWithLabel(_T("GROUP UNTHEMED CUSTOM COLLECTIONS"), bundleCustomCollections);
+	mMenu.addWithLabel(_("GROUP UNTHEMED CUSTOM COLLECTIONS"), bundleCustomCollections);
 
 	sortAllSystemsSwitch = std::make_shared<SwitchComponent>(mWindow);
 	sortAllSystemsSwitch->setState(Settings::getInstance()->getBool("SortAllSystems"));
-	mMenu.addWithLabel(_T("SORT CUSTOM COLLECTIONS AND SYSTEMS"), sortAllSystemsSwitch);
+	mMenu.addWithLabel(_("SORT CUSTOM COLLECTIONS AND SYSTEMS"), sortAllSystemsSwitch);
 
 	favoritesFirstSwitch = std::make_shared<SwitchComponent>(mWindow);
 	favoritesFirstSwitch->setState(Settings::getInstance()->getBool("FavoritesFirst"));
-	mMenu.addWithLabel(_T("DISPLAY FAVORITES FIRST IN GAMELIST"), favoritesFirstSwitch);
+	mMenu.addWithLabel(_("DISPLAY FAVORITES FIRST IN GAMELIST"), favoritesFirstSwitch);
 
 	toggleSystemNameInCollections = std::make_shared<SwitchComponent>(mWindow);
 	toggleSystemNameInCollections->setState(Settings::getInstance()->getBool("CollectionShowSystemInfo"));
-	mMenu.addWithLabel(_T("SHOW SYSTEM NAME IN COLLECTIONS"), toggleSystemNameInCollections);
+	mMenu.addWithLabel(_("SHOW SYSTEM NAME IN COLLECTIONS"), toggleSystemNameInCollections);
 
 	if(CollectionSystemManager::get()->isEditing())
 	{
 		row.elements.clear();
-		row.addElement(std::make_shared<TextComponent>(mWindow, _T("FINISH EDITING COLLECTION")+" '" + Utils::String::toUpper(CollectionSystemManager::get()->getEditingCollection()) + "'", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _("FINISH EDITING COLLECTION")+" '" + Utils::String::toUpper(CollectionSystemManager::get()->getEditingCollection()) + "'", ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.makeAcceptInputHandler(std::bind(&GuiCollectionSystemsOptions::exitEditMode, this));
 		mMenu.addRow(row);
 	}
 
-	mMenu.addButton(_T("BACK"), _T("BACK"), std::bind(&GuiCollectionSystemsOptions::applySettings, this));
+	mMenu.addButton(_("BACK"), _("BACK"), std::bind(&GuiCollectionSystemsOptions::applySettings, this));
 
 	mMenu.setPosition((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, (Renderer::getScreenHeight() - mMenu.getSize().y()) / 2);
 }
@@ -151,25 +151,25 @@ void GuiCollectionSystemsOptions::addSystemsToMenu()
 
 	std::map<std::string, CollectionSystemData> autoSystems = CollectionSystemManager::get()->getAutoCollectionSystems();
 
-	autoOptionList = std::make_shared< OptionListComponent<std::string> >(mWindow, _T("SELECT COLLECTIONS"), true);
+	autoOptionList = std::make_shared< OptionListComponent<std::string> >(mWindow, _("SELECT COLLECTIONS"), true);
 
 	// add Auto Systems
 	for(std::map<std::string, CollectionSystemData>::const_iterator it = autoSystems.cbegin() ; it != autoSystems.cend() ; it++ )
 	{
 		autoOptionList->add(it->second.decl.longName, it->second.decl.name, it->second.isEnabled);
 	}
-	mMenu.addWithLabel(_T("AUTOMATIC GAME COLLECTIONS"), autoOptionList);
+	mMenu.addWithLabel(_("AUTOMATIC GAME COLLECTIONS"), autoOptionList);
 
 	std::map<std::string, CollectionSystemData> customSystems = CollectionSystemManager::get()->getCustomCollectionSystems();
 
-	customOptionList = std::make_shared< OptionListComponent<std::string> >(mWindow, _T("SELECT COLLECTIONS"), true);
+	customOptionList = std::make_shared< OptionListComponent<std::string> >(mWindow, _("SELECT COLLECTIONS"), true);
 
 	// add Custom Systems
 	for(std::map<std::string, CollectionSystemData>::const_iterator it = customSystems.cbegin() ; it != customSystems.cend() ; it++ )
 	{
 		customOptionList->add(it->second.decl.longName, it->second.decl.name, it->second.isEnabled);
 	}
-	mMenu.addWithLabel(_T("CUSTOM GAME COLLECTIONS"), customOptionList);
+	mMenu.addWithLabel(_("CUSTOM GAME COLLECTIONS"), customOptionList);
 }
 
 void GuiCollectionSystemsOptions::applySettings()
@@ -233,6 +233,6 @@ bool GuiCollectionSystemsOptions::input(InputConfig* config, Input input)
 std::vector<HelpPrompt> GuiCollectionSystemsOptions::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
-	prompts.push_back(HelpPrompt("b", _T("BACK")));
+	prompts.push_back(HelpPrompt("b", _("BACK")));
 	return prompts;
 }

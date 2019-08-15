@@ -91,7 +91,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		if(curChar < startChar || curChar > endChar)
 			curChar = startChar;
 
-		mJumpToLetterList = std::make_shared<LetterList>(mWindow, _T("JUMP TO LETTER"), false);
+		mJumpToLetterList = std::make_shared<LetterList>(mWindow, _("JUMP TO LETTER"), false);
 		for (char c = startChar; c <= endChar; c++)
 		{
 			// check if c is a valid first letter in current list
@@ -107,7 +107,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 			}
 		}
 
-		row.addElement(std::make_shared<TextComponent>(mWindow, _T("JUMP TO LETTER"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _("JUMP TO LETTER"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.addElement(mJumpToLetterList, false);
 		row.input_handler = [&](InputConfig* config, Input input) 
 		{
@@ -130,18 +130,18 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 			currentSortId = 0;
 		}
 
-		mListSort = std::make_shared<SortList>(mWindow, _T("SORT GAMES BY"), false);
+		mListSort = std::make_shared<SortList>(mWindow, _("SORT GAMES BY"), false);
 		for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++)
 		{
 			const FolderData::SortType& sort = FileSorts::SortTypes.at(i);
-			mListSort->add(_T(Utils::String::toUpper(sort.description)), i, i == currentSortId);
+			mListSort->add(_(Utils::String::toUpper(sort.description)), i, i == currentSortId);
 		}
 
-		mMenu.addWithLabel(_T("SORT GAMES BY"), mListSort);
+		mMenu.addWithLabel(_("SORT GAMES BY"), mListSort);
 	}
 
 	// GameList view style
-	mViewMode = std::make_shared< OptionListComponent<std::string> >(mWindow, _T("GAMELIST VIEW STYLE"), false);
+	mViewMode = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
 	std::vector<std::string> styles;
 	styles.push_back("automatic");
 
@@ -158,13 +158,13 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		if (sel)
 			found = true;
 
-		mViewMode->add(_T(*it), *it, sel);
+		mViewMode->add(_(*it), *it, sel);
 	}
 
 	if (!found)
 		mViewMode->selectFirstItem();
 
-	mMenu.addWithLabel(_T("GAMELIST VIEW STYLE"), mViewMode);	
+	mMenu.addWithLabel(_("GAMELIST VIEW STYLE"), mViewMode);	
 	
 	
 
@@ -174,7 +174,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		auto gridOverride = system->getGridSizeOverride();
 		auto ovv = std::to_string((int)gridOverride.x()) + "x" + std::to_string((int)gridOverride.y());
 
-		mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _T("GRID SIZE"), false);
+		mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _("GRID SIZE"), false);
 
 		found = false;
 		for (auto it = gridSizes.cbegin(); it != gridSizes.cend(); it++)
@@ -183,20 +183,20 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 			if (sel)
 				found = true;
 
-			mGridSize->add(_T(*it), *it, sel);
+			mGridSize->add(_(*it), *it, sel);
 		}
 
 		if (!found)
 			mGridSize->selectFirstItem();
 
-		mMenu.addWithLabel(_T("GRID SIZE"), mGridSize);
+		mMenu.addWithLabel(_("GRID SIZE"), mGridSize);
 	}
 
 	// show filtered menu
 	if(!Settings::getInstance()->getBool("ForceDisableFilters"))
 	{
 		row.elements.clear();
-		row.addElement(std::make_shared<TextComponent>(mWindow, _T("APPLY FILTER"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _("APPLY FILTER"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.addElement(makeArrow(mWindow), false);
 		row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::openGamelistFilter, this));
 		mMenu.addRow(row);		
@@ -208,7 +208,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 	// maximum vram
 	auto max_vram = std::make_shared<SliderComponent>(mWindow, 0.f, 2000.f, 10.f, "Mb");
 	max_vram->setValue((float)(Settings::getInstance()->getInt("MaxVRAM")));
-	s->addWithLabel(_T("VRAM LIMIT"), max_vram);
+	s->addWithLabel(_("VRAM LIMIT"), max_vram);
 	s->addSaveFunc([max_vram] { Settings::getInstance()->setInt("MaxVRAM", (int)Math::round(max_vram->getValue())); });
 	*/
 
@@ -234,7 +234,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		CollectionSystemManager::get()->getCustomCollectionsBundle()->getName() == system->getName()))
 	{
 		row.elements.clear();
-		row.addElement(std::make_shared<TextComponent>(mWindow, _T("ADD/REMOVE GAMES TO THIS GAME COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _("ADD/REMOVE GAMES TO THIS GAME COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::startEditMode, this));
 		mMenu.addRow(row);
 	}
@@ -242,7 +242,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 	if(UIModeController::getInstance()->isUIModeFull() && CollectionSystemManager::get()->isEditing())
 	{
 		row.elements.clear();
-		row.addElement(std::make_shared<TextComponent>(mWindow, _T("FINISH EDITING")+" '" + Utils::String::toUpper(CollectionSystemManager::get()->getEditingCollection()) + "' "+_T("COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _("FINISH EDITING")+" '" + Utils::String::toUpper(CollectionSystemManager::get()->getEditingCollection()) + "' "+_("COLLECTION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::exitEditMode, this));
 		mMenu.addRow(row);
 	}
@@ -250,7 +250,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 	if (UIModeController::getInstance()->isUIModeFull() && !fromPlaceholder && !(mSystem->isCollection() && file->getType() == FOLDER))
 	{
 		row.elements.clear();
-		row.addElement(std::make_shared<TextComponent>(mWindow, _T("EDIT THIS GAME'S METADATA"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
+		row.addElement(std::make_shared<TextComponent>(mWindow, _("EDIT THIS GAME'S METADATA"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		row.addElement(makeArrow(mWindow), false);
 		row.makeAcceptInputHandler(std::bind(&GuiGamelistOptions::openMetaDataEd, this));
 		mMenu.addRow(row);
@@ -450,7 +450,7 @@ HelpStyle GuiGamelistOptions::getHelpStyle()
 std::vector<HelpPrompt> GuiGamelistOptions::getHelpPrompts()
 {
 	auto prompts = mMenu.getHelpPrompts();
-	prompts.push_back(HelpPrompt("b", _T("CLOSE")));
+	prompts.push_back(HelpPrompt("b", _("CLOSE")));
 	return prompts;
 }
 

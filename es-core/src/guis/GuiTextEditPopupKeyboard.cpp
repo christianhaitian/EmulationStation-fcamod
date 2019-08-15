@@ -97,7 +97,7 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 				if (atj == "SHIFT")
 				{
 					// Special case for shift key
-					mShiftButton = std::make_shared<ButtonComponent>(mWindow, "SHIFT", _T("SHIFTS FOR UPPER,LOWER, AND SPECIAL"), [this] {
+					mShiftButton = std::make_shared<ButtonComponent>(mWindow, "SHIFT", _("SHIFTS FOR UPPER,LOWER, AND SPECIAL"), [this] {
 						shiftKeys();
 					});
 					buttons.push_back(mShiftButton);
@@ -114,21 +114,21 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 	mGrid.setEntry(mKeyboardGrid, Vector2i(0, 2), true, false);
 
 	// Accept/Cancel buttons
-	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _T(acceptBtnText), _T(acceptBtnText), [this, okCallback] { okCallback(mText->getValue()); delete this; }));
+	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _(acceptBtnText), _(acceptBtnText), [this, okCallback] { okCallback(mText->getValue()); delete this; }));
 
-	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _T("SPACE"), _T("SPACE"), [this] {
+	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _("SPACE"), _("SPACE"), [this] {
 		mText->startEditing();
 		mText->textInput(" ");
 		mText->stopEditing();
 	}));
 
-	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _T("DELETE"), _T("DELETE A CHAR"), [this] {
+	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _("DELETE"), _("DELETE A CHAR"), [this] {
 		mText->startEditing();
 		mText->textInput("\b");
 		mText->stopEditing();
 	}));
 
-	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _T("CANCEL"), _T("discard changes"), [this] { delete this; }));
+	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _("CANCEL"), _("discard changes"), [this] { delete this; }));
 
 	mButtons = makeButtonGrid(mWindow, buttons);
 	mGrid.setEntry(mButtons, Vector2i(0, 3), true, false);
@@ -257,10 +257,10 @@ void GuiTextEditPopupKeyboard::shiftKeys()
 std::vector<HelpPrompt> GuiTextEditPopupKeyboard::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mGrid.getHelpPrompts();
-	prompts.push_back(HelpPrompt("x", _T("SHIFT")));
-	prompts.push_back(HelpPrompt("b", _T("BACK")));
-	prompts.push_back(HelpPrompt("r", _T("SPACE")));
-	prompts.push_back(HelpPrompt("l", _T("DELETE")));
+	prompts.push_back(HelpPrompt("x", _("SHIFT")));
+	prompts.push_back(HelpPrompt("b", _("BACK")));
+	prompts.push_back(HelpPrompt("r", _("SPACE")));
+	prompts.push_back(HelpPrompt("l", _("DELETE")));
 	return prompts;
 }
 

@@ -34,29 +34,29 @@ DetailedGameListView::DetailedGameListView(Window* window, FolderData* root) :
 	createImage();
 
 	// metadata labels + values
-	mLblRating.setText(_T("Rating") + ": ");
+	mLblRating.setText(_("Rating") + ": ");
 	addChild(&mLblRating);
 	addChild(&mRating);
-	mLblReleaseDate.setText(_T("Released") + ": ");
+	mLblReleaseDate.setText(_("Released") + ": ");
 	addChild(&mLblReleaseDate);
 	addChild(&mReleaseDate);
-	mLblDeveloper.setText(_T("Developer") + ": ");
+	mLblDeveloper.setText(_("Developer") + ": ");
 	addChild(&mLblDeveloper);
 	addChild(&mDeveloper);
-	mLblPublisher.setText(_T("Publisher")+": ");
+	mLblPublisher.setText(_("Publisher")+": ");
 	addChild(&mLblPublisher);
 	addChild(&mPublisher);
-	mLblGenre.setText(_T("Genre") + ": ");
+	mLblGenre.setText(_("Genre") + ": ");
 	addChild(&mLblGenre);
 	addChild(&mGenre);
-	mLblPlayers.setText(_T("Players") + ": ");
+	mLblPlayers.setText(_("Players") + ": ");
 	addChild(&mLblPlayers);
 	addChild(&mPlayers);
-	mLblLastPlayed.setText(_T("Last played") + ": ");
+	mLblLastPlayed.setText(_("Last played") + ": ");
 	addChild(&mLblLastPlayed);
 	mLastPlayed.setDisplayRelative(true);
 	addChild(&mLastPlayed);
-	mLblPlayCount.setText(_T("Times played"));
+	mLblPlayCount.setText(_("Times played"));
 	addChild(&mLblPlayCount);
 	addChild(&mPlayCount);
 
@@ -295,7 +295,7 @@ std::string DetailedGameListView::getMetadata(FileData* file, std::string name)
 {
 	std::string ret = file->metadata.get(name);
 	if (ret == "unknown")
-		return _T(ret);
+		return _(ret);
 
 	return ret;
 }

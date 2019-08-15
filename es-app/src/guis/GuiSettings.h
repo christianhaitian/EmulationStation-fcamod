@@ -10,10 +10,8 @@ class GuiSettings : public GuiComponent
 public:
 	GuiSettings(Window* window, std::string title);
 	virtual ~GuiSettings(); // just calls save();
-
-
+	
 	void updatePosition();
-	void save();
 	inline void addRow(const ComponentListRow& row) { mMenu.addRow(row); };
 	inline void addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp) { mMenu.addWithLabel(label, comp); };
 	inline void addSaveFunc(const std::function<void()>& func) { mSaveFuncs.push_back(func); };
@@ -34,9 +32,18 @@ public:
 	std::vector<HelpPrompt> getHelpPrompts() override;
 	HelpStyle getHelpStyle() override;
 
+	inline void setBeforeCloseFunc(const std::function<void()>& func) { mBeforeCloseFunc = func; mEnableBeforeCloseFunc = (mBeforeCloseFunc != nullptr); };
+	void enableBeforeCloseFunc(bool use) { mEnableBeforeCloseFunc = use; }
+
+	void save();
+
 private:
+	void saveAndClose();
+
 	MenuComponent mMenu;
 	std::vector< std::function<void()> > mSaveFuncs;
+	std::function<void()> mBeforeCloseFunc;
+	bool mEnableBeforeCloseFunc;
 };
 
 #endif // ES_APP_GUIS_GUI_SETTINGS_H
