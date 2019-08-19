@@ -10,6 +10,7 @@
 #include <fcntl.h>
 
 #include "Window.h"
+#include "Log.h"
 
 #include "GuiComponent.h"
 #include "utils/FileSystemUtil.h"
@@ -198,24 +199,18 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 #endif
 }
 
-int quitES(int mode) 
+QuitMode quitMode = QuitMode::QUIT;
+
+int quitES(QuitMode mode)
 {
+	quitMode = mode;
+
 	SDL_Event *quit = new SDL_Event();
-	quit->type = SDL_QUIT | mode;
-	SDL_PushEvent(quit);
-	return 0;
-}
-/*
-int quitES(const std::string& filename)
-{
-	if (!filename.empty())
-		touch(filename);
-	SDL_Event* quit = new SDL_Event();
 	quit->type = SDL_QUIT;
 	SDL_PushEvent(quit);
 	return 0;
 }
-*/
+
 void touch(const std::string& filename)
 {
 #ifdef WIN32
@@ -227,4 +222,25 @@ void touch(const std::string& filename)
 	if (fd >= 0)
 		close(fd);
 #endif
+}
+
+void processQuitMode()
+{
+	switch (quitMode)
+	{
+	case QuitMode::RESTART:
+		LOG(LogInfo) << "Restarting EmulationStation";
+		touch("/tmp/es-restart");
+		break;
+	case QuitMode::REBOOT:
+		LOG(LogInfo) << "Rebooting system";
+		touch("/tmp/es-sysrestart");
+		runRestartCommand();
+		break;
+	case QuitMode::SHUTDOWN:
+		LOG(LogInfo) << "Shutting system down";
+		touch("/tmp/es-shutdown");
+		runShutdownCommand();
+		break;
+	}
 }
