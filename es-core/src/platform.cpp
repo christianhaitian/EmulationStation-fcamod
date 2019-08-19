@@ -43,7 +43,7 @@ std::string trim(const std::string& str)
 	return str.substr(first, (last - first + 1));
 }
 
-void split_cmd(const std::string& cmd,
+void split_cmd(std::string cmd,
 	std::string* executable,
 	std::string* parameters)
 {
@@ -51,7 +51,6 @@ void split_cmd(const std::string& cmd,
 	size_t exec_end;
 
 	c = trim(c);
-	//boost::trim_all(c);
 
 	if (c[0] == '\"')
 	{
@@ -108,14 +107,22 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 
 	// on Windows we use _wsystem to support non-ASCII paths
 	// which requires converting from utf8 to a wstring
-	typedef std::codecvt_utf8<wchar_t> convert_type;
-	std::wstring_convert<convert_type, wchar_t> converter;
-	std::wstring wchar_str = converter.from_bytes(cmd_utf8);
-	
+	//typedef std::codecvt_utf8<wchar_t> convert_type;
+	//std::wstring_convert<convert_type, wchar_t> converter;
+	//std::wstring wchar_str = converter.from_bytes(cmd_utf8);
+	std::string command = cmd_utf8;
+
+	#define BUFFER_SIZE 8192
+
+	TCHAR szEnvPath[BUFFER_SIZE];
+	DWORD dwLen = ExpandEnvironmentStringsA(command.c_str(), szEnvPath, BUFFER_SIZE);
+	if (dwLen > 0 && dwLen < BUFFER_SIZE)
+		command = std::string(szEnvPath);
+
 	std::string exe;
 	std::string args;
 
-	split_cmd(cmd_utf8, &exe, &args);
+	split_cmd(command, &exe, &args);
 	
 	SHELLEXECUTEINFO lpExecInfo;
 	lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
