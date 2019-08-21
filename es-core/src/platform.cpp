@@ -112,10 +112,17 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 	std::wstring_convert<convert_type, wchar_t> converter;
 	std::wstring wchar_str = converter.from_bytes(cmd_utf8);
 	
+	std::string command = cmd_utf8;
+
+	char    expandedString[MAX_PATH];
+	DWORD rc = ExpandEnvironmentStringsA(cmd_utf8.c_str(), expandedString, MAX_PATH - 1);
+	if (0 != rc && MAX_PATH - 1 >= rc)
+		command = expandedString;
+
 	std::string exe;
 	std::string args;
 
-	split_cmd(cmd_utf8, &exe, &args);
+	split_cmd(command, &exe, &args);
 	
 	SHELLEXECUTEINFO lpExecInfo;
 	lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);

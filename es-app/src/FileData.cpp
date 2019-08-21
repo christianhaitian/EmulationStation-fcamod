@@ -235,6 +235,8 @@ void FileData::launchGame(Window* window)
 	if (customCommandLine.length() > 0)
 		command = customCommandLine;
 	
+
+
 	command = Utils::String::replace(command, "%EMULATOR%", emulator);
 	command = Utils::String::replace(command, "%CORE%", core);
 

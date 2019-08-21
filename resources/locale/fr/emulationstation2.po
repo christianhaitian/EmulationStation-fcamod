@@ -1011,11 +1011,23 @@ msgstr "entrer la date de la dernière partie"
 msgid "GAMES AVAILABLE"
 msgstr "JEUX DISPONIBLES"
 
+#:
+msgid "%i GAME AVAILABLE"
+msgid_plural "%i GAMES AVAILABLE"
+msgstr[0] "%i JEU DISPONIBLE"
+msgstr[1] "%i JEUX DISPONIBLES"
+
 #: 
 msgid "%i FAVORITE"
 msgid_plural "%i FAVORITES"
 msgstr[0] "%i FAVORI"
 msgstr[1] "%i FAVORIS"
+
+#:
+msgid "%i GAME SUCCESSFULLY SCRAPED!"
+msgid_plural "%i GAMES SUCCESSFULLY SCRAPED!"
+msgstr[0] "%i JEU SCRAPPÉ !"
+msgstr[1] "%i JEUX SCRAPPÉS !"
 
 #: 
 msgid "SCROLL"
