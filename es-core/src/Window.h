@@ -99,7 +99,7 @@ private:
 	std::shared_ptr<TextureResource> mSplash;
 	std::string						 mCustomSplash;
 
-	std::vector<GuiComponent*> mGuiStack;
+	std::vector<GuiComponent*> mGuiStack;	
 
 	std::vector< std::shared_ptr<Font> > mDefaultFonts;
 

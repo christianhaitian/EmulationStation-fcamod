@@ -203,6 +203,7 @@ void AudioManager::playMusic(std::string path)
 	}
 
 	Mix_HookMusicFinished(AudioManager::onMusicFinished);
+	mCurrentSong = Utils::FileSystem::getStem(path);
 }
 
 void AudioManager::onMusicFinished() 

@@ -295,6 +295,28 @@ void onExit()
 	Log::close();
 }
 
+#include "AudioManager.h"
+#include "guis/GuiInfoPopup.h"
+
+static std::vector<std::string> mMessages;
+
+void processAudioTitles(Window* window)
+{
+	if (Settings::getInstance()->getBool("MusicTitles"))
+	{
+		std::string songName = AudioManager::getInstance()->popSongName();
+		if (!songName.empty())
+			mMessages.push_back(_("Now playing: ") + songName);		
+	}
+
+	if (!mMessages.empty())
+	{
+		std::string message = mMessages.back();
+		mMessages.pop_back();
+		window->setInfoPopup(new GuiInfoPopup(window, message, 4000));
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	srand((unsigned int)time(NULL));
@@ -514,6 +536,8 @@ int main(int argc, char* argv[])
 		// cap deltaTime if it ever goes negative
 		if (deltaTime < 0)
 			deltaTime = 1000;
+
+		processAudioTitles(&window);
 
 		window.update(deltaTime);
 		window.render();

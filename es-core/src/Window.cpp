@@ -10,7 +10,6 @@
 #include "Scripting.h"
 #include <algorithm>
 #include <iomanip>
-
 #include <SDL_events.h>
 
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
@@ -198,7 +197,7 @@ void Window::input(InputConfig* config, Input input)
 }
 
 void Window::update(int deltaTime)
-{
+{	
 	if(mNormalizeNextUpdate)
 	{
 		mNormalizeNextUpdate = false;

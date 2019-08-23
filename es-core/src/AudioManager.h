@@ -34,6 +34,18 @@ public:
 		mSystemName = name;
 	}
 
+	std::string popSongName() 
+	{ 		
+		if (!mCurrentSong.empty())
+		{
+			std::string ret = mCurrentSong;
+			mCurrentSong = "";
+			return ret;
+		}
+
+		return "";
+	}
+
 	virtual ~AudioManager();
 
 private:
@@ -48,6 +60,7 @@ private:
 	void	findMusic(const std::string &path, std::vector<std::string>& all_matching_files);
 	void	playMusic(std::string path);
 		
+	std::string mCurrentSong;
 	std::string mSystemName;
 	std::string mCurrentThemeMusicDirectory;	
 	bool		mRunningFromPlaylist;	

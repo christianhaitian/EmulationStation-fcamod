@@ -239,7 +239,14 @@ void GuiMenu::openSoundSettings()
 				AudioManager::getInstance()->stopMusic();
 		});
 
-		
+		//display music titles
+		auto display_titles = std::make_shared<SwitchComponent>(mWindow);
+		display_titles->setState(Settings::getInstance()->getBool("MusicTitles"));
+		s->addWithLabel(_("DISPLAY SONG TITLES"), display_titles);
+		s->addSaveFunc([display_titles] {
+			Settings::getInstance()->setBool("MusicTitles", display_titles->getState());
+		});
+
 		// music per system
 		auto music_per_system = std::make_shared<SwitchComponent>(mWindow);
 		music_per_system->setState(Settings::getInstance()->getBool("audio.persystem"));

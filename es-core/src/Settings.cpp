@@ -74,8 +74,7 @@ void Settings::setDefaults()
 	mBoolMap["ParseGamelistOnly"] = false;
 	mBoolMap["ShowHiddenFiles"] = false;
 	mBoolMap["DrawFramerate"] = false;
-	mBoolMap["ShowExit"] = true;
-	
+	mBoolMap["ShowExit"] = true;		
 
 #if WIN32
 	mBoolMap["ShowOnlyExit"] = true;
@@ -105,6 +104,7 @@ void Settings::setDefaults()
 	mBoolMap["SaveGamelistsOnExit"] = true;
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;	
+	mBoolMap["MusicTitles"] = true;
 
 	mBoolMap["Debug"] = false;
 	mBoolMap["DebugGrid"] = false;
@@ -222,18 +222,8 @@ void Settings::setDefaults()
 	mBoolMap["audio.bgmusic"] = true;
 	mBoolMap["audio.persystem"] = false;
 	
-#ifdef BATOCERA
-	mStringMap["MusicDirectory"] = "/usr/share/batocera/music";
-	mStringMap["UserMusicDirectory"] = "/userdata/music";
-#else 
-#ifdef RECALBOX
-	mStringMap["MusicDirectory"] = "/recalbox/share/music/";
-	mStringMap["UserMusicDirectory"] = "/recalbox/share/music/";
-#else
 	mStringMap["MusicDirectory"] = "";
 	mStringMap["UserMusicDirectory"] = "";
-#endif
-#endif
 
 	mDefaultBoolMap = mBoolMap;
 	mDefaultIntMap = mIntMap;
