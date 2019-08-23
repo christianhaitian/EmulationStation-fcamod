@@ -997,16 +997,19 @@ void GuiMenu::openQuitMenu()
 	ComponentListRow row;
 	if (UIModeController::getInstance()->isUIModeFull())
 	{
+#ifndef WIN32
+		// Restart does not work on Windows
 		row.makeAcceptInputHandler([window] {
 			window->pushGui(new GuiMsgBox(window, _("REALLY RESTART?"), _("YES"),
 				[] {
 				Scripting::fireEvent("quit");
-				if(quitES(SDL_MSG_RESTART) != 0)
+				if(quitES(QuitMode::RESTART) != 0)
 					LOG(LogWarning) << "Restart terminated with non-zero result!";
 			}, _("NO"), nullptr));
 		});
 		row.addElement(std::make_shared<TextComponent>(window, _("RESTART EMULATIONSTATION"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color), true);
 		s->addRow(row);
+#endif
 
 		if(Settings::getInstance()->getBool("ShowExit"))
 		{
@@ -1028,7 +1031,7 @@ void GuiMenu::openQuitMenu()
 			[] {
 			Scripting::fireEvent("quit", "reboot");
 			Scripting::fireEvent("reboot");
-			if (quitES(SDL_MSG_REBOOT) != 0)
+			if (quitES(QuitMode::REBOOT) != 0)
 				LOG(LogWarning) << "Restart terminated with non-zero result!";
 		}, _("NO"), nullptr));
 	});
@@ -1041,7 +1044,7 @@ void GuiMenu::openQuitMenu()
 			[] {
 			Scripting::fireEvent("quit", "shutdown");
 			Scripting::fireEvent("shutdown");
-			if (quitES(SDL_MSG_SHUTDOWN) != 0)
+			if (quitES(QuitMode::SHUTDOWN) != 0)
 				LOG(LogWarning) << "Shutdown terminated with non-zero result!";
 		}, _("NO"), nullptr));
 	});

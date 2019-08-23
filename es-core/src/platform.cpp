@@ -10,6 +10,7 @@
 #include <fcntl.h>
 
 #include "Window.h"
+#include "Log.h"
 
 #include "GuiComponent.h"
 #include "utils/FileSystemUtil.h"
@@ -43,7 +44,7 @@ std::string trim(const std::string& str)
 	return str.substr(first, (last - first + 1));
 }
 
-void split_cmd(const std::string& cmd,
+void split_cmd(std::string cmd,
 	std::string* executable,
 	std::string* parameters)
 {
@@ -51,7 +52,6 @@ void split_cmd(const std::string& cmd,
 	size_t exec_end;
 
 	c = trim(c);
-	//boost::trim_all(c);
 
 	if (c[0] == '\"')
 	{
@@ -108,16 +108,17 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 
 	// on Windows we use _wsystem to support non-ASCII paths
 	// which requires converting from utf8 to a wstring
-	typedef std::codecvt_utf8<wchar_t> convert_type;
-	std::wstring_convert<convert_type, wchar_t> converter;
-	std::wstring wchar_str = converter.from_bytes(cmd_utf8);
-	
+	//typedef std::codecvt_utf8<wchar_t> convert_type;
+	//std::wstring_convert<convert_type, wchar_t> converter;
+	//std::wstring wchar_str = converter.from_bytes(cmd_utf8);
 	std::string command = cmd_utf8;
 
-	char    expandedString[MAX_PATH];
-	DWORD rc = ExpandEnvironmentStringsA(cmd_utf8.c_str(), expandedString, MAX_PATH - 1);
-	if (0 != rc && MAX_PATH - 1 >= rc)
-		command = expandedString;
+	#define BUFFER_SIZE 8192
+
+	TCHAR szEnvPath[BUFFER_SIZE];
+	DWORD dwLen = ExpandEnvironmentStringsA(command.c_str(), szEnvPath, BUFFER_SIZE);
+	if (dwLen > 0 && dwLen < BUFFER_SIZE)
+		command = std::string(szEnvPath);
 
 	std::string exe;
 	std::string args;
@@ -198,24 +199,18 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 #endif
 }
 
-int quitES(int mode) 
+QuitMode quitMode = QuitMode::QUIT;
+
+int quitES(QuitMode mode)
 {
+	quitMode = mode;
+
 	SDL_Event *quit = new SDL_Event();
-	quit->type = SDL_QUIT | mode;
-	SDL_PushEvent(quit);
-	return 0;
-}
-/*
-int quitES(const std::string& filename)
-{
-	if (!filename.empty())
-		touch(filename);
-	SDL_Event* quit = new SDL_Event();
 	quit->type = SDL_QUIT;
 	SDL_PushEvent(quit);
 	return 0;
 }
-*/
+
 void touch(const std::string& filename)
 {
 #ifdef WIN32
@@ -227,4 +222,25 @@ void touch(const std::string& filename)
 	if (fd >= 0)
 		close(fd);
 #endif
+}
+
+void processQuitMode()
+{
+	switch (quitMode)
+	{
+	case QuitMode::RESTART:
+		LOG(LogInfo) << "Restarting EmulationStation";
+		touch("/tmp/es-restart");
+		break;
+	case QuitMode::REBOOT:
+		LOG(LogInfo) << "Rebooting system";
+		touch("/tmp/es-sysrestart");
+		runRestartCommand();
+		break;
+	case QuitMode::SHUTDOWN:
+		LOG(LogInfo) << "Shutting system down";
+		touch("/tmp/es-shutdown");
+		runShutdownCommand();
+		break;
+	}
 }
