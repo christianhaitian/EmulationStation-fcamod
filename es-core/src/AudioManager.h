@@ -41,7 +41,7 @@ private:
 
 	static std::vector<std::shared_ptr<Sound>> sSoundVector;
 	static std::shared_ptr<AudioManager> sInstance;
-	static Mix_Music* mCurrentMusic;
+	
 	
 	static void onMusicFinished();
 
@@ -51,7 +51,9 @@ private:
 	std::string mSystemName;
 	std::string mCurrentThemeMusicDirectory;	
 	bool		mRunningFromPlaylist;	
+	bool		mInitialized;
 
+	Mix_Music* mCurrentMusic;
 };
 
 #endif // ES_CORE_AUDIO_MANAGER_H

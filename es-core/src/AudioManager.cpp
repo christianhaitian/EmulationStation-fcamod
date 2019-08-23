@@ -10,35 +10,19 @@
 
 std::vector<std::shared_ptr<Sound>> AudioManager::sSoundVector;
 std::shared_ptr<AudioManager> AudioManager::sInstance;
-Mix_Music* AudioManager::mCurrentMusic = NULL;
 
-AudioManager::AudioManager()
+AudioManager::AudioManager() : mCurrentMusic(NULL), mInitialized(false)
 {	
 	init();
 }
 
 AudioManager::~AudioManager()
 {
-	//stop all playback
-	stop();
-	stopMusic();
-
-	// Stop playing all Sounds & reload them 
-	for (unsigned int i = 0; i < sSoundVector.size(); i++)
-		sSoundVector[i]->deinit();
-
-	Mix_HookMusicFinished(nullptr);
-	Mix_HaltMusic();
-
-	//completely tear down SDL audio. else SDL hogs audio resources and emulators might fail to start...
-	SDL_CloseAudio();
-	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	deinit();
 }
 
 std::shared_ptr<AudioManager> & AudioManager::getInstance()
 {
-	//check if an AudioManager instance is already created, if not create one
-	//  && Settings::getInstance()->getBool("EnableSounds")
 	if (sInstance == nullptr)
 		sInstance = std::shared_ptr<AudioManager>(new AudioManager);
 	
@@ -47,6 +31,9 @@ std::shared_ptr<AudioManager> & AudioManager::getInstance()
 
 void AudioManager::init()
 {
+	if (mInitialized)
+		return;
+
 	mRunningFromPlaylist = false;
 
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
@@ -66,12 +53,33 @@ void AudioManager::init()
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
 		LOG(LogError) << "MUSIC Error - Unable to open SDLMixer audio: " << SDL_GetError() << std::endl;
 	else
+	{
+		mInitialized = true;
 		LOG(LogInfo) << "SDL AUDIO Initialized";
+	}
 }
 
 void AudioManager::deinit()
 {
-	sInstance = NULL;	
+	if (!mInitialized)
+		return;
+
+	mInitialized = false;
+
+	//stop all playback
+	stop();
+	stopMusic();
+
+	// Stop playing all Sounds & reload them 
+	for (unsigned int i = 0; i < sSoundVector.size(); i++)
+		sSoundVector[i]->deinit();
+
+	Mix_HookMusicFinished(nullptr);
+	Mix_HaltMusic();
+
+	//completely tear down SDL audio. else SDL hogs audio resources and emulators might fail to start...
+	Mix_CloseAudio();
+	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 void AudioManager::registerSound(std::shared_ptr<Sound> & sound)
@@ -208,8 +216,8 @@ void AudioManager::stopMusic()
 		return;
 	
 	Mix_HookMusicFinished(nullptr);
-	Mix_FreeMusic(mCurrentMusic);
 	Mix_HaltMusic();
+	Mix_FreeMusic(mCurrentMusic);
 
 	mCurrentMusic = NULL;	
 }

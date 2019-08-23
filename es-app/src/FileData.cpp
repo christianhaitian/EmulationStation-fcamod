@@ -259,7 +259,7 @@ void FileData::launchGame(Window* window)
 	window->init(hideWindow);
 
 	VolumeControl::getInstance()->init();
-	AudioManager::getInstance()->setSystemName(mSystem->getTheme()->getSystemThemeFolder()); // system-specific music -> automatic Init
+	AudioManager::getInstance()->init();	
 	window->normalizeNextUpdate();
 
 	//update number of times the game has been launched
