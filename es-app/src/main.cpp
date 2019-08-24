@@ -306,7 +306,7 @@ void processAudioTitles(Window* window)
 	{
 		std::string songName = AudioManager::getInstance()->popSongName();
 		if (!songName.empty())
-			mMessages.push_back(_("Now playing: ") + songName);		
+			mMessages.push_back(/*_("Now playing: ") +*/songName);		
 	}
 
 	if (!mMessages.empty())
