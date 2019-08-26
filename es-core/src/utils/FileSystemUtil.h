@@ -23,8 +23,10 @@ namespace Utils
 		fileList  getDirInfo(const std::string& _path/*, const bool _recursive = false*/);
 		stringList  getDirContent      (const std::string& _path, const bool _recursive = false, const bool includeHidden = true);
 		stringList  getPathList        (const std::string& _path);
+		void        setHomePath        (const std::string& _path);
 		std::string getHomePath        ();
 		std::string getCWDPath         ();
+		void        setExePath         (const std::string& _path);
 		std::string getExePath         ();
 		std::string getPreferredPath   (const std::string& _path);
 		std::string getGenericPath     (const std::string& _path);

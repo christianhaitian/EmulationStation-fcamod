@@ -2,7 +2,6 @@
 
 #include "resources/TextureResource.h"
 #include "ThemeData.h"
-#include "Renderer.h"
 
 #include <algorithm>
 
