@@ -1,6 +1,4 @@
 #include "components/ComponentGrid.h"
-
-#include "Renderer.h"
 #include "Settings.h"
 #include "ThemeData.h"
 
@@ -155,6 +153,8 @@ void ComponentGrid::updateSeparators()
 
 	bool drawAll = Settings::getInstance()->getBool("DebugGrid");
 
+	const unsigned int color = Renderer::convertColor(mSeparatorColor);
+
 	Vector2f pos;
 	Vector2f size;
 	for(auto it = mCells.cbegin(); it != mCells.cend(); it++)
@@ -174,30 +174,27 @@ void ComponentGrid::updateSeparators()
 		for(int y = it->pos.y(); y < it->pos.y() + it->dim.y(); y++)
 			size[1] += getRowHeight(y);
 
-		if(it->border & BORDER_TOP || drawAll)
+		if (it->border & BORDER_TOP || drawAll)
 		{
-			mLines.push_back(Vert(pos.x(), pos.y()));
-			mLines.push_back(Vert(pos.x() + size.x(), pos.y()));
+			mLines.push_back({ { pos.x(),               pos.y()               }, { 0.0f, 0.0f }, color });
+			mLines.push_back({ { pos.x() + size.x(),    pos.y()               }, { 0.0f, 0.0f }, color });
 		}
-		if(it->border & BORDER_BOTTOM || drawAll)
+		if (it->border & BORDER_BOTTOM || drawAll)
 		{
-			mLines.push_back(Vert(pos.x(), pos.y() + size.y()));
-			mLines.push_back(Vert(pos.x() + size.x(), mLines.back().y));
+			mLines.push_back({ { pos.x(),               pos.y() + size.y()    }, { 0.0f, 0.0f }, color });
+			mLines.push_back({ { pos.x() + size.x(),    mLines.back().pos.y() }, { 0.0f, 0.0f }, color });
 		}
-		if(it->border & BORDER_LEFT || drawAll)
+		if (it->border & BORDER_LEFT || drawAll)
 		{
-			mLines.push_back(Vert(pos.x(), pos.y()));
-			mLines.push_back(Vert(pos.x(), pos.y() + size.y()));
+			mLines.push_back({ { pos.x(),               pos.y()               }, { 0.0f, 0.0f }, color });
+			mLines.push_back({ { pos.x(),               pos.y() + size.y()    }, { 0.0f, 0.0f }, color });
 		}
-		if(it->border & BORDER_RIGHT || drawAll)
+		if (it->border & BORDER_RIGHT || drawAll)
 		{
-			mLines.push_back(Vert(pos.x() + size.x(), pos.y()));
-			mLines.push_back(Vert(mLines.back().x, pos.y() + size.y()));
+			mLines.push_back({ { pos.x() + size.x(),    pos.y()               }, { 0.0f, 0.0f }, color });
+			mLines.push_back({ { mLines.back().pos.x(), pos.y() + size.y()    }, { 0.0f, 0.0f }, color });
 		}
 	}
-
-	mLineColors.reserve(mLines.size());
-	Renderer::buildGLColorArray((GLubyte*)mLineColors.data(), mSeparatorColor, (unsigned int)mLines.size());
 }
 
 void ComponentGrid::onSizeChanged()
@@ -373,20 +370,8 @@ void ComponentGrid::render(const Transform4x4f& parentTrans)
 	if(mLines.size())
 	{
 		Renderer::setMatrix(trans);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);
-
-		glVertexPointer(2, GL_FLOAT, 0, &mLines[0].x);
-		glColorPointer(4, GL_UNSIGNED_BYTE, 0, mLineColors.data());
-
-		glDrawArrays(GL_LINES, 0, (GLsizei)mLines.size());
-
-		glDisable(GL_BLEND);
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
+		Renderer::bindTexture(0);
+		Renderer::drawLines(&mLines[0], mLines.size());
 	}
 }
 

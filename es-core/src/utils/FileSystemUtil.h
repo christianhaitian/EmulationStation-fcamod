@@ -9,18 +9,8 @@ namespace Utils
 {
 	namespace FileSystem
 	{
-		struct FileInfo
-		{
-		public:
-			std::string path;
-			bool hidden;
-			bool directory;
-		};
-
 		typedef std::list<std::string> stringList;
-		typedef std::list<FileInfo> fileList;
 
-		fileList  getDirInfo(const std::string& _path/*, const bool _recursive = false*/);
 		stringList  getDirContent      (const std::string& _path, const bool _recursive = false, const bool includeHidden = true);
 		stringList  getPathList        (const std::string& _path);
 		void        setHomePath        (const std::string& _path);
@@ -51,11 +41,22 @@ namespace Utils
 		bool        isDirectory        (const std::string& _path);
 		bool        isSymlink          (const std::string& _path);
 		bool        isHidden           (const std::string& _path);
-
-		void		setHomePath		   (std::string path);
-		bool		copyFile		   (const std::string src, const std::string dst);
 	
+		// FCA
+		struct FileInfo
+		{
+		public:
+			std::string path;
+			bool hidden;
+			bool directory;
+		};
+
+		typedef std::list<FileInfo> fileList;
+
+		fileList  getDirInfo(const std::string& _path/*, const bool _recursive = false*/);
+
 		void		writeAllText	   (const std::string fileName, const std::string text);
+		bool		copyFile(const std::string src, const std::string dst);
 	} // FileSystem::
 
 

@@ -1,16 +1,14 @@
 #include "resources/TextureData.h"
 
 #include "math/Misc.h"
+#include "renderers/Renderer.h" 
 #include "resources/ResourceManager.h"
 #include "ImageIO.h"
 #include "Log.h"
-#include "platform.h"
-#include GLHEADER
 #include <nanosvg/nanosvg.h>
 #include <nanosvg/nanosvgrast.h>
 #include <assert.h>
 #include <string.h>
-#include "Renderer.h"
 
 #define DPI 96
 
@@ -232,10 +230,6 @@ bool TextureData::load()
 	// Need to load. See if there is a file
 	if (!mPath.empty())
 	{
-#ifdef WIN32	
-		 TRACE("TextureData::load(" << mPath << ", " << (mMaxSize.empty() ? "" : "(hasMaxSize)") << ")")
-#endif
-
 		std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
 
 		const ResourceData& data = rm->getFileData(mPath);
@@ -269,7 +263,7 @@ bool TextureData::uploadAndBind()
 	std::unique_lock<std::mutex> lock(mMutex);
 	if (mTextureID != 0)
 	{
-		glBindTexture(GL_TEXTURE_2D, mTextureID);
+		Renderer::bindTexture(mTextureID);
 	}
 	else
 	{
@@ -282,19 +276,7 @@ bool TextureData::uploadAndBind()
 		if ((mWidth == 0) || (mHeight == 0) || (mDataRGBA == nullptr))
 			return false;
 
-		glGetError();
-		//now for the openGL texture stuff
-		glGenTextures(1, &mTextureID);
-		glBindTexture(GL_TEXTURE_2D, mTextureID);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)mWidth, (GLsizei)mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, mDataRGBA);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-		const GLint wrapMode = mTile ? GL_REPEAT : GL_CLAMP_TO_EDGE;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+		mTextureID = Renderer::createTexture(Renderer::Texture::RGBA, true, mTile, mWidth, mHeight, mDataRGBA);
 	}
 
 	return true;
@@ -305,7 +287,7 @@ void TextureData::releaseVRAM()
 	std::unique_lock<std::mutex> lock(mMutex);
 	if (mTextureID != 0)
 	{
-		glDeleteTextures(1, &mTextureID);
+		Renderer::destroyTexture(mTextureID);
 		mTextureID = 0;
 	}
 }

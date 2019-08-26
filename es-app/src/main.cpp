@@ -33,24 +33,24 @@ bool scrape_cmdline = false;
 
 bool parseArgs(int argc, char* argv[])
 {
+	Utils::FileSystem::setExePath(argv[0]);
+
+	// We need to process --home before any call to Settings::getInstance(), because settings are loaded from homepath
 	for (int i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "--home") == 0)
 		{
-			if (i == argc - 1)
-				continue;
-
-			std::string arg = argv[i + 1];
-			if (arg.find("-") == 0)
-				continue;
+			if (i >= argc - 1)
+			{
+				std::cerr << "Invalid home path supplied.";
+				return false;
+			}
 
 			Utils::FileSystem::setHomePath(argv[i + 1]);
-			i++; // skip vsync value			
+			break;
 		}
 	}
-
-	Settings::getInstance()->setString("ExePath", argv[0]);
-
+	   
 	for(int i = 1; i < argc; i++)
 	{
 		if (strcmp(argv[i], "--monitor") == 0)
@@ -401,10 +401,6 @@ int main(int argc, char* argv[])
 			LOG(LogError) << "Window failed to initialize!";
 			return 1;
 		}
-
-		std::string glExts = (const char*)glGetString(GL_EXTENSIONS);
-		LOG(LogInfo) << "Checking available OpenGL extensions...";
-		LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "ok" : "MISSING");
 
 		if (splashScreen)
 			window.renderLoadingScreen(_("Loading..."));

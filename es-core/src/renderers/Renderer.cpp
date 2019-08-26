@@ -13,6 +13,8 @@
 namespace Renderer
 {
 	static std::stack<Rect> clipStack;
+	static std::stack<Rect> nativeClipStack;
+
 	static SDL_Window*      sdlWindow          = nullptr;
 	static int              windowWidth        = 0;
 	static int              windowHeight       = 0;
@@ -111,6 +113,12 @@ namespace Renderer
 		SDL_Quit();
 
 	} // destroyWindow
+
+	void activateWindow()
+	{
+		SDL_RaiseWindow(sdlWindow);
+		SDL_SetWindowInputFocus(sdlWindow);
+	}
 
 	bool init()
 	{
@@ -216,6 +224,7 @@ namespace Renderer
 		if(box.h < 0) box.h = 0;
 
 		clipStack.push(box);
+		nativeClipStack.push(Rect(_pos.x(), _pos.y(), _size.x(), _size.y()));
 
 		setScissor(box);
 
@@ -230,11 +239,54 @@ namespace Renderer
 		}
 
 		clipStack.pop();
+		nativeClipStack.pop();
 
 		if(clipStack.empty()) setScissor(Rect(0, 0, 0, 0));
 		else                  setScissor(clipStack.top());
 
 	} // popClipRect
+
+	bool isClippingEnabled() { return !clipStack.empty(); }
+
+	bool valueInRange(int value, int min, int max)
+	{
+		return (value >= min) && (value <= max);
+	}
+
+	bool rectOverlap(Rect &A, Rect &B)
+	{
+		bool xOverlap = valueInRange(A.x, B.x, B.x + B.w) ||
+			valueInRange(B.x, A.x, A.x + A.w);
+
+		bool yOverlap = valueInRange(A.y, B.y, B.y + B.h) ||
+			valueInRange(B.y, A.y, A.y + A.h);
+
+		return xOverlap && yOverlap;
+	}
+
+	bool isVisibleOnScreen(float x, float y, float w, float h)
+	{
+		Rect screen = Rect(0, 0, Renderer::getWindowWidth(), Renderer::getWindowHeight());
+		Rect box = Rect(x, y, w, h);
+
+		if (w > 0 && x + w <= 0)
+			return false;
+
+		if (h > 0 && y + h <= 0)
+			return false;
+
+		if (x == screen.w || y == screen.h)
+			return false;
+
+		if (!rectOverlap(box, screen))
+			return false;
+
+		if (clipStack.empty())
+			return true;
+
+		screen = nativeClipStack.top();
+		return rectOverlap(screen, box);
+	}
 
 	void drawRect(const float _x, const float _y, const float _w, const float _h, const unsigned int _color, const Blend::Factor _srcBlendFactor, const Blend::Factor _dstBlendFactor)
 	{
@@ -256,6 +308,44 @@ namespace Renderer
 		drawTriangleStrips(vertices, 4, _srcBlendFactor, _dstBlendFactor);
 
 	} // drawRect
+
+	void drawGradientRect(int _x, int _y, int _w, int _h, unsigned int _color, unsigned int _colorBottom, bool _horz, const Blend::Factor _srcBlendFactor, const Blend::Factor _dstBlendFactor)
+	{
+		const unsigned int color = convertColor(_color);
+		const unsigned int colorBottom = convertColor(_colorBottom);
+
+		Vertex             vertices[4];
+
+		vertices[0] = { { (float)(_x), (float)(_y) }, { 0.0f, 0.0f }, _horz ? colorBottom : color };
+		vertices[1] = { { (float)(_x), (float)(_y + _h) }, { 0.0f, 0.0f }, colorBottom };
+		vertices[2] = { { (float)(_x + _w), (float)(_y) }, { 0.0f, 0.0f }, color };
+		vertices[3] = { { (float)(_x + _w), (float)(_y + _h) }, { 0.0f, 0.0f }, _horz ? color : colorBottom };
+
+		bindTexture(0);
+		drawTriangleStrips(vertices, 4, _srcBlendFactor, _dstBlendFactor);
+		/*
+			   		 	  
+		glEnable(GL_BLEND);
+		glBlendFunc(blend_sfactor, blend_dfactor);
+
+		glBegin(GL_QUADS);
+
+		glColor4f(MAKEQUAD(horz ? colorBottom : color));
+		glVertex2f(x, y);
+
+		glColor4f(MAKEQUAD(color));
+		glVertex2f(x + w, y);
+
+		glColor4f(MAKEQUAD(horz ? color : colorBottom));
+		glVertex2f(x + w, y + h);
+
+		glColor4f(MAKEQUAD(colorBottom));
+		glVertex2f(x, y + h);
+
+		glEnd();
+
+		glDisable(GL_BLEND);*/
+	}
 
 	SDL_Window* getSDLWindow()     { return sdlWindow; }
 	int         getWindowWidth()   { return windowWidth; }

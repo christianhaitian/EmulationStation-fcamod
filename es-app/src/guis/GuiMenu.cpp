@@ -22,6 +22,7 @@
 #include "resources/TextureData.h"
 #include "animations/LambdaAnimation.h"
 #include "GuiGamelistOptions.h" // grid sizes
+#include "platform.h"
 
 GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {

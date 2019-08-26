@@ -195,12 +195,6 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 			if ((*it) == tex)
 				continue;
 
-
-#if _DEBUG
-			if ((*it)->isLoaded())
-				TRACE("Unloading " << (*it)->mPath);
-#endif
-
 			(*it)->releaseVRAM();
 			(*it)->releaseRAM();
 

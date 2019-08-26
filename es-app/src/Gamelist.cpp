@@ -270,6 +270,8 @@ void updateGamelist(SystemData* system)
 			if (!(*fit)->metadata.wasChanged())
 				continue;
 
+			bool removed = false;
+
 			// check if the file already exists in the XML
 			// if it does, remove it before adding
 			for(pugi::xml_node fileNode = root.child(tag); fileNode; fileNode = fileNode.next_sibling(tag))
@@ -286,7 +288,8 @@ void updateGamelist(SystemData* system)
 				if(nodePath == gamePath)
 				{
 					// found it
-					root.remove_child(fileNode);
+					removed = true;
+					root.remove_child(fileNode);					
 					break;
 				}
 			}
@@ -294,6 +297,8 @@ void updateGamelist(SystemData* system)
 			// it was either removed or never existed to begin with; either way, we can add it now
 			if (addFileDataNode(root, *fit, tag, system))
 				++numUpdated; // Only if really added
+			else if (removed)
+				++numUpdated; // Only if really removed
 		}
 
 		//now write the file

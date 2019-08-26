@@ -1,10 +1,10 @@
 #include "components/VideoVlcComponent.h"
 
+#include "renderers/Renderer.h" 
 #include "resources/TextureResource.h"
 #include "utils/StringUtil.h"
 #include "utils/FileSystemUtil.h"
 #include "PowerSaver.h"
-#include "Renderer.h"
 #include "Settings.h"
 #include <vlc/vlc.h>
 #include <SDL_mutex.h>
@@ -159,6 +159,24 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	Transform4x4f trans = parentTrans * getTransform();
 	Renderer::setMatrix(trans);
 
+
+	const unsigned int fadeIn = t; //(unsigned int)(Math::clamp(0.0f, mFadeIn, 1.0f) * 255.0f);
+	const unsigned int color = Renderer::convertColor((fadeIn << 24) | (fadeIn << 16) | (fadeIn << 8) | 255);
+	Renderer::Vertex   vertices[4];
+
+	vertices[0] = { { 0.0f     , 0.0f      }, { 0.0f, 0.0f }, color };
+	vertices[1] = { { 0.0f     , mSize.y() }, { 0.0f, 1.0f }, color };
+	vertices[2] = { { mSize.x(), 0.0f      }, { 1.0f, 0.0f }, color };
+	vertices[3] = { { mSize.x(), mSize.y() }, { 1.0f, 1.0f }, color };
+
+	// Build a texture for the video frame
+	mTexture->initFromPixels((unsigned char*)mContext.surface->pixels, mContext.surface->w, mContext.surface->h);
+	mTexture->bind();
+
+	// Render it
+	Renderer::drawTriangleStrips(&vertices[0], 4);
+
+	/*
 	// <font color = "#ff0000">red text< / font>
 	//<font size = "16px" color = "white">phrase< / font>
 
@@ -194,7 +212,7 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);	
+	glDisable(GL_BLEND);	*/
 }
 
 void VideoVlcComponent::setupContext()

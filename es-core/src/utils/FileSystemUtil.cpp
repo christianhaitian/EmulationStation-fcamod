@@ -30,9 +30,13 @@ namespace Utils
 {
 	namespace FileSystem
 	{
+		static std::string homePath;
+		static std::string exePath;
+
 #if defined(_WIN32)
-		std::mutex mFileMutex;
+		static std::mutex mFileMutex;
 #endif
+
 		bool compareFileInfo(const FileInfo& first, const FileInfo& second)
 		{
 			unsigned int i = 0;
@@ -239,65 +243,46 @@ namespace Utils
 
 		} // getPathList
 
-		std::string mCustomHomePath = "";
-
-		void setHomePath(std::string path)
+		void setHomePath(const std::string& _path)
 		{
-			mCustomHomePath = path;
+			homePath = getGenericPath(_path);
 		}
 
 		std::string getHomePath()
 		{
-			if (!mCustomHomePath.empty())
-				return mCustomHomePath;
-
-
-			static std::string path;
-
 			// only construct the homepath once
-			if (!path.length())
-			{
-#if defined(_WIN32)
-				char buffer[MAX_PATH];
-				DWORD size = MAX_PATH;
-				DWORD result = GetModuleFileNameA(NULL, buffer, size);
-				if (result)
-				{
-					// verify if .emulationstation/es_systems.cfg is under exe's path to make app portable
+			if (homePath.length())
+				return homePath;
 
-					std::string ret = buffer;
-					std::string portableDir = getGenericPath(getParent(ret)) + "/.emulationstation/es_systems.cfg";
-					if (Utils::FileSystem::exists(portableDir))
-					{
-						path = getExePath();
-						return path;
-					}
-				}
-#endif
-				
-				// this should give us something like "/home/YOUR_USERNAME" on Linux and "C:/Users/YOUR_USERNAME/" on Windows
+			// check if "getExePath()/.emulationstation/es_systems.cfg" exists
+			if (Utils::FileSystem::exists(getExePath() + "/.emulationstation/es_systems.cfg"))
+				homePath = getExePath();
+
+			// check for HOME environment variable
+			if (!homePath.length())
+			{
 				char* envHome = getenv("HOME");
 				if (envHome)
-					path = getGenericPath(envHome);
-
-#if defined(_WIN32)
-				// but does not seem to work for Windows XP or Vista, so try something else
-				if(!path.length())
-				{
-					char* envHomeDrive = getenv("HOMEDRIVE");
-					char* envHomePath  = getenv("HOMEPATH");
-					if(envHomeDrive && envHomePath)
-						path = getGenericPath(std::string(envHomeDrive) + "/" + envHomePath);
-				}
-#endif // _WIN32
-
-				// no homepath found, fall back to current working directory
-				if(!path.length())
-					path = getCWDPath();
+					homePath = getGenericPath(envHome);
 			}
 
+#if defined(_WIN32)
+			// on Windows we need to check HOMEDRIVE and HOMEPATH
+			if (!homePath.length())
+			{
+				char* envHomeDrive = getenv("HOMEDRIVE");
+				char* envHomePath = getenv("HOMEPATH");
+				if (envHomeDrive && envHomePath)
+					homePath = getGenericPath(std::string(envHomeDrive) + "/" + envHomePath);
+			}
+#endif // _WIN32
+
+			// no homepath found, fall back to current working directory
+			if (!homePath.length())
+				homePath = getCWDPath();
+
 			// return constructed homepath
-			return path;
+			return homePath;
 
 		} // getHomePath
 
@@ -307,31 +292,19 @@ namespace Utils
 			return (getcwd(temp, 512) ? getGenericPath(temp) : "");
 		} // getCWDPath
 
+		void setExePath(const std::string& _path)
+		{
+			exePath = getCanonicalPath(_path);
+
+			if (isRegularFile(exePath))
+				exePath = getParent(exePath);
+
+		} // setExePath
+
 		std::string getExePath()
 		{
-			static std::string path;
-
-			// only construct the exepath once
-			if (!path.length())
-			{
-#if defined(_WIN32)
-				char buffer[MAX_PATH];
-				DWORD size = MAX_PATH;
-				DWORD result = GetModuleFileNameA(NULL, buffer, size);
-				if (result)
-				{
-					std::string ret = buffer;
-					path = getGenericPath(getParent(ret));
-					return path;
-				}
-#endif
-				path = getCanonicalPath(Settings::getInstance()->getString("ExePath"));
-				if (isRegularFile(path))
-					path = getParent(path);
-			}
-
 			// return constructed exepath
-			return path;
+			return exePath;
 
 		} // getExePath
 

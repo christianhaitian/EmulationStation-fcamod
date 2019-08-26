@@ -254,26 +254,6 @@ float MetaDataList::getFloat(const std::string& key) const
 	return (float)atof(get(key).c_str());
 }
 
-bool MetaDataList::isDefault()
-{
-	if (!mName.empty())
-		return false;
-
-	const std::vector<MetaDataDecl>& mdd = getMDD();
-	
-	for (auto iter = mdd.cbegin(); iter != mdd.cend(); iter++)
-	{		
-		auto it = mMap.find(iter->id);
-		if (it == mMap.end())
-			continue;
-
-		if (it->second != iter->defaultValue)
-			return false;
-	}
-
-	return true;
-}
-
 bool MetaDataList::wasChanged() const
 {
 	return mWasChanged;

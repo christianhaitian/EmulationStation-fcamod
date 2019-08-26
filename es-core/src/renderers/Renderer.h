@@ -97,6 +97,12 @@ namespace Renderer
 	void         setSwapInterval   ();
 	void         swapBuffers       ();
 
+	// FCA methods
+	bool         isClippingEnabled();
+	bool         isVisibleOnScreen(float x, float y, float w, float h);
+	void		 activateWindow();
+	void drawGradientRect(int _x, int _y, int _w, int _h, unsigned int _color, unsigned int _colorBottom, bool _horz = false, const Blend::Factor _srcBlendFactor = Blend::SRC_ALPHA, const Blend::Factor _dstBlendFactor = Blend::ONE_MINUS_SRC_ALPHA);
+
 } // Renderer::
 
 #endif // ES_CORE_RENDERER_RENDERER_H

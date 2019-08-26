@@ -393,8 +393,6 @@ void GridGameListView::updateInfoPanel()
 {
 	FileData* file = (mGrid.size() == 0 || mGrid.isScrolling()) ? NULL : mGrid.getSelected();
 
-	TRACE("GridGameListView::updateInfoPanel " << (file ? "null" : "ok"));
-
 	bool fadingOut;
 	if (file == NULL)
 	{

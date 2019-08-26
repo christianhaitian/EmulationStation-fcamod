@@ -2,7 +2,7 @@
 
 #include "resources/TextureResource.h"
 #include "Log.h"
-#include "Renderer.h"
+#include "renderers/Renderer.h"
 #include "Settings.h"
 #include "ThemeData.h"
 
@@ -284,6 +284,37 @@ void ImageComponent::updateVertices()
 
 	// we go through this mess to make sure everything is properly rounded
 	// if we just round vertices at the end, edge cases occur near sizes of 0.5
+	const Vector2f     size = { Math::round(mSize.x()), Math::round(mSize.y()) };
+	const Vector2f     topLeft = { size * mTopLeftCrop };
+	const Vector2f     bottomRight = { size * mBottomRightCrop };
+	const float        px = mTexture->isTiled() ? mSize.x() / getTextureSize().x() : 1.0f;
+	const float        py = mTexture->isTiled() ? mSize.y() / getTextureSize().y() : 1.0f;
+	const unsigned int color = Renderer::convertColor(mColorShift);
+
+	mVertices[0] = { { topLeft.x(),     topLeft.y()     }, { mTopLeftCrop.x(),          py - mTopLeftCrop.y()     }, color };
+	mVertices[1] = { { topLeft.x(),     bottomRight.y() }, { mTopLeftCrop.x(),          1.0f - mBottomRightCrop.y() }, color };
+	mVertices[2] = { { bottomRight.x(), topLeft.y()     }, { mBottomRightCrop.x() * px, py - mTopLeftCrop.y()     }, color };
+	mVertices[3] = { { bottomRight.x(), bottomRight.y() }, { mBottomRightCrop.x() * px, 1.0f - mBottomRightCrop.y() }, color };
+
+	if (mFlipX)
+	{
+		for (int i = 0; i < 4; i++)
+			mVertices[i].tex[0] = px - mVertices[i].tex[0];
+	}
+	if (mFlipY)
+	{
+		for (int i = 0; i < 4; i++)
+			mVertices[i].tex[1] = py - mVertices[i].tex[1];
+	}
+}
+/*
+void ImageComponent::updateVerticesFca()
+{
+	if (!mTexture || !mTexture->isInitialized())
+		return;
+
+	// we go through this mess to make sure everything is properly rounded
+	// if we just round vertices at the end, edge cases occur near sizes of 0.5
 	Vector2f size(Math::round(mSize.x()), Math::round(mSize.y()));
 	Vector2f topLeft(size * mTopLeftCrop);
 	Vector2f bottomRight(size * mBottomRightCrop);
@@ -292,17 +323,6 @@ void ImageComponent::updateVertices()
 	mVertices[1].pos = Vector2f(topLeft.x(), bottomRight.y());
 	mVertices[2].pos = Vector2f(bottomRight.x(), bottomRight.y());
 	mVertices[3].pos = Vector2f(bottomRight.x(), topLeft.y());
-	
-	/*
-	mVertices[0].pos = Vector2f(topLeft.x(), topLeft.y());
-	mVertices[1].pos = Vector2f(topLeft.x(), bottomRight.y());
-
-	mVertices[2].pos = Vector2f(bottomRight.x(), topLeft.y());
-
-	mVertices[3].pos = Vector2f(bottomRight.x(), topLeft.y());
-	mVertices[4].pos = Vector2f(topLeft.x(), bottomRight.y());
-	mVertices[5].pos = Vector2f(bottomRight.x(), bottomRight.y());
-	*/
 
 	float px, py;
 	if (mTexture->isTiled())
@@ -322,15 +342,6 @@ void ImageComponent::updateVertices()
 	mVertices[2].tex = Vector2f(px * mBottomRightCrop.x(), 1 - mBottomRightCrop.y());
 	mVertices[3].tex = Vector2f(px * mBottomRightCrop.x(), py - mTopLeftCrop.y());
 
-	/*
-	mVertices[0].tex = Vector2f(mTopLeftCrop.x(), py - mTopLeftCrop.y());
-	mVertices[1].tex = Vector2f(mTopLeftCrop.x(), 1 - mBottomRightCrop.y());
-	mVertices[2].tex = Vector2f(px * mBottomRightCrop.x(), py - mTopLeftCrop.y());
-
-	mVertices[3].tex = Vector2f(px * mBottomRightCrop.x(), py - mTopLeftCrop.y());
-	mVertices[4].tex = Vector2f(mTopLeftCrop.x(), 1 - mBottomRightCrop.y());
-	mVertices[5].tex = Vector2f(px * mBottomRightCrop.x(), 1 - mBottomRightCrop.y());
-	*/
 
 	if (mFlipX)
 	{
@@ -344,7 +355,7 @@ void ImageComponent::updateVertices()
 			mVertices[i].tex[1] = py - mVertices[i].tex[1];
 	}
 }
-
+*/
 void ImageComponent::render(const Transform4x4f& parentTrans)
 {
 	if (!mVisible)
@@ -375,82 +386,48 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			// when it finally loads
 			fadeIn(mTexture->bind());
 
-		//	if (mColorShift & 0xff)
+			const unsigned int color = Renderer::convertColor(mColorShift);
+
+			for (int i = 0; i < 4; ++i)
+				mVertices[i].col = color;
+
+			Renderer::drawTriangleStrips(&mVertices[0], 4);
+
+			if (mMirror.x() != 0 || mMirror.y() != 0)
 			{
-				glEnable(GL_TEXTURE_2D);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				float alpha = ((mColorShift & 0x000000ff)) / 255.0;
+				float alpha2 = alpha * mMirror.y();
 
-				/*
-				glEnableClientState(GL_VERTEX_ARRAY);
-				glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-				glEnableClientState(GL_COLOR_ARRAY);
+				alpha *= mMirror.x();
 
-				glVertexPointer(2, GL_FLOAT, sizeof(Vertex), &mVertices[0].pos);
-				glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), &mVertices[0].tex);
-				glColorPointer(4, GL_UNSIGNED_BYTE, 0, mColors);
-				glDrawArrays(GL_TRIANGLES, 0, 6);
+				const unsigned int colorT = Renderer::convertColor((mColorShift & 0xffffff00) + (unsigned char) (255.0*alpha));
+				const unsigned int colorB = Renderer::convertColor((mColorShift & 0xffffff00) + (unsigned char) (255.0*alpha2));
 
-				glDisableClientState(GL_VERTEX_ARRAY);
-				glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-				glDisableClientState(GL_COLOR_ARRAY);
-				*/
+				int h = mVertices[1].pos.y() - mVertices[0].pos.y();
 
-				glBegin(GL_QUADS);
+				Renderer::Vertex mirrorVertices[4];
 
-				GLfloat red = ((mColorShift & 0xff000000) >> 24) / 255.0;
-				GLfloat green = ((mColorShift & 0x00ff0000) >> 16) / 255.0;
-				GLfloat blue = ((mColorShift & 0x0000ff00) >> 8) / 255.0;
-				GLfloat alpha = ((mColorShift & 0x000000ff)) / 255.0;
+				mirrorVertices[0] = { 
+					{ mVertices[0].pos.x(), mVertices[0].pos.y() + h }, 
+					{ mVertices[0].tex.x(), mVertices[1].tex.y() },
+					colorT };
 
-				glColor4f(red, green, blue, alpha);
-				glTexCoord2f(mVertices[0].tex.x(), mVertices[0].tex.y());
-				glVertex2f(mVertices[0].pos.x(), mVertices[0].pos.y());
+				mirrorVertices[1] = { 
+					{ mVertices[1].pos.x(), mVertices[1].pos.y() + h },
+					{ mVertices[1].tex.x(), mVertices[0].tex.y() },
+					colorB };
 
-				glColor4f(red, green, blue, alpha);
-				glTexCoord2f(mVertices[1].tex.x(), mVertices[1].tex.y());
-				glVertex2f(mVertices[1].pos.x(), mVertices[1].pos.y());
+				mirrorVertices[2] = { 
+					{ mVertices[2].pos.x(), mVertices[2].pos.y() + h },
+					{ mVertices[2].tex.x(), mVertices[3].tex.y() },
+					colorT };
 
-				glColor4f(red, green, blue, alpha);
-				glTexCoord2f(mVertices[2].tex.x(), mVertices[2].tex.y());
-				glVertex2f(mVertices[2].pos.x(), mVertices[2].pos.y());
+				mirrorVertices[3] = { 
+					{ mVertices[3].pos.x(), mVertices[3].pos.y() + h },
+					{ mVertices[3].tex.x(), mVertices[2].tex.y() },
+					colorB };
 
-				glColor4f(red, green, blue, alpha);
-				glTexCoord2f(mVertices[3].tex.x(), mVertices[3].tex.y());
-				glVertex2f(mVertices[3].pos.x(), mVertices[3].pos.y());
-
-				glEnd();
-
-				if (mMirror.x() != 0 || mMirror.y() != 0)
-				{
-					glBegin(GL_QUADS);
-
-					int h = mVertices[1].pos.y() - mVertices[0].pos.y();
-
-					GLfloat alpha2 = alpha * mMirror.y();
-					alpha *= mMirror.x();
-
-					glColor4f(red, green, blue, alpha);
-					glTexCoord2f(mVertices[0].tex.x(), mVertices[1].tex.y());
-					glVertex2f(mVertices[0].pos.x(), mVertices[0].pos.y() + h);
-
-					glColor4f(red, green, blue, alpha2);
-					glTexCoord2f(mVertices[1].tex.x(), mVertices[0].tex.y());
-					glVertex2f(mVertices[1].pos.x(), mVertices[1].pos.y() + h);
-
-					glColor4f(red, green, blue, alpha2);
-					glTexCoord2f(mVertices[2].tex.x(), mVertices[3].tex.y());
-					glVertex2f(mVertices[2].pos.x(), mVertices[2].pos.y() + h);
-
-					glColor4f(red, green, blue, alpha);
-					glTexCoord2f(mVertices[3].tex.x(), mVertices[2].tex.y());
-					glVertex2f(mVertices[3].pos.x(), mVertices[3].pos.y() + h);
-
-					glEnd();
-				}
-
-				glDisable(GL_TEXTURE_2D);
-				glDisable(GL_BLEND);
+				Renderer::drawTriangleStrips(&mirrorVertices[0], 4);			
 			}
 		}
 		else

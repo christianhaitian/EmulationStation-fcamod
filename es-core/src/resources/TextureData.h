@@ -2,8 +2,6 @@
 #ifndef ES_CORE_RESOURCES_TEXTURE_DATA_H
 #define ES_CORE_RESOURCES_TEXTURE_DATA_H
 
-#include "platform.h"
-#include GLHEADER
 #include <mutex>
 #include <string>
 
@@ -63,7 +61,7 @@ public:
 	bool isRequiredTextureSizeOk();
 
 	std::string		mPath;
-	GLuint 			mTextureID;
+	unsigned int	mTextureID;
 
 private:
 	std::mutex		mMutex;
