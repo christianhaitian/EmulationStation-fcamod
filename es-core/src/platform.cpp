@@ -14,6 +14,7 @@
 
 #include "GuiComponent.h"
 #include "utils/FileSystemUtil.h"
+#include "utils/StringUtil.h"
 
 int runShutdownCommand()
 {
@@ -33,25 +34,10 @@ int runRestartCommand()
 #endif
 }
 
-std::string trim(const std::string& str)
+void splitCommand(std::string cmd, std::string* executable, std::string* parameters)
 {
-	size_t first = str.find_first_not_of(' ');
-	if (std::string::npos == first)
-	{
-		return str;
-	}
-	size_t last = str.find_last_not_of(' ');
-	return str.substr(first, (last - first + 1));
-}
-
-void split_cmd(std::string cmd,
-	std::string* executable,
-	std::string* parameters)
-{
-	std::string c(cmd);
+	std::string c = Utils::String::trim(cmd);
 	size_t exec_end;
-
-	c = trim(c);
 
 	if (c[0] == '\"')
 	{
@@ -123,7 +109,7 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 	std::string exe;
 	std::string args;
 
-	split_cmd(command, &exe, &args);
+	splitCommand(command, &exe, &args);
 	
 	SHELLEXECUTEINFO lpExecInfo;
 	lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);

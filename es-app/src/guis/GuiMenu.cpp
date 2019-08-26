@@ -23,6 +23,7 @@
 #include "animations/LambdaAnimation.h"
 #include "GuiGamelistOptions.h" // grid sizes
 #include "platform.h"
+#include "renderers/Renderer.h" // setSwapInterval()
 
 GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
@@ -933,21 +934,7 @@ void GuiMenu::openOtherSettings()
 	s->addSaveFunc([vsync] 
 	{ 
 		Settings::getInstance()->setBool("VSync", vsync->getState()); 
-
-		// vsync
-		if (Settings::getInstance()->getBool("VSync"))
-		{
-			// SDL_GL_SetSwapInterval(0) for immediate updates (no vsync, default), 
-			// 1 for updates synchronized with the vertical retrace, 
-			// or -1 for late swap tearing.
-			// SDL_GL_SetSwapInterval returns 0 on success, -1 on error.
-			// if vsync is requested, try normal vsync; if that doesn't work, try late swap tearing
-			// if that doesn't work, report an error
-			if (SDL_GL_SetSwapInterval(1) != 0 && SDL_GL_SetSwapInterval(-1) != 0)
-				LOG(LogWarning) << "Tried to enable vsync, but failed! (" << SDL_GetError() << ")";
-		}
-		else
-			SDL_GL_SetSwapInterval(0);
+		Renderer::setSwapInterval();
 	});
 #endif
 

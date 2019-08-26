@@ -241,7 +241,18 @@ namespace Renderer
 
 	void swapBuffers()
 	{
+#ifdef WIN32		
+		glFlush();
+		glFinish();
+		Sleep(0);
+#endif
+
 		SDL_GL_SwapWindow(getSDLWindow());
+
+#ifdef WIN32		
+		Sleep(0);
+#endif
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	} // swapBuffers

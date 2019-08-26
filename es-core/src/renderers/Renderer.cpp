@@ -25,6 +25,8 @@ namespace Renderer
 	static int              screenRotate       = 0;
 	static bool             initialCursorState = 1;
 
+	static Vector2i			sdlWindowPosition  = Vector2i(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED);
+
 	static void setIcon()
 	{
 		size_t                     width   = 0;
@@ -81,11 +83,46 @@ namespace Renderer
 		screenOffsetY = Settings::getInstance()->getInt("ScreenOffsetY") ? Settings::getInstance()->getInt("ScreenOffsetY") : 0;
 		screenRotate  = Settings::getInstance()->getInt("ScreenRotate")  ? Settings::getInstance()->getInt("ScreenRotate")  : 0;
 
+		int monitorId = Settings::getInstance()->getInt("MonitorID");
+		if (monitorId >= 0 && sdlWindowPosition == Vector2i(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED))
+		{
+			int displays = SDL_GetNumVideoDisplays();
+			if (displays > monitorId)
+			{
+				SDL_Rect rc;
+				SDL_GetDisplayBounds(monitorId, &rc);
+
+				sdlWindowPosition = Vector2i(rc.x, rc.y);
+
+				if (Settings::getInstance()->getBool("Windowed") && (Settings::getInstance()->getInt("WindowWidth") || Settings::getInstance()->getInt("ScreenWidth")))
+				{
+					if (windowWidth != rc.w || windowHeight != rc.h)
+					{
+						sdlWindowPosition = Vector2i(
+							rc.x + (rc.w - windowWidth) / 2,
+							rc.y + (rc.h - windowHeight) / 2
+						);
+					}
+				}
+				else
+				{
+					windowWidth = rc.w;
+					windowHeight = rc.h;
+					screenWidth = rc.w;
+					screenHeight = rc.h;
+				}
+			}
+		}
+
 		setupWindow();
 
 		unsigned int windowFlags = (Settings::getInstance()->getBool("Windowed") ? 0 : (Settings::getInstance()->getBool("FullscreenBorderless") ? SDL_WINDOW_BORDERLESS : SDL_WINDOW_FULLSCREEN)) | getWindowFlags();
 
-		if((sdlWindow = SDL_CreateWindow("EmulationStation", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, windowWidth, windowHeight, windowFlags)) == nullptr)
+		if((sdlWindow = SDL_CreateWindow("EmulationStation", 
+			sdlWindowPosition.x(),
+			sdlWindowPosition.y(), 
+			windowWidth, windowHeight,
+			windowFlags)) == nullptr)
 		{
 			LOG(LogError) << "Error creating SDL window!\n\t" << SDL_GetError();
 			return false;
@@ -103,6 +140,13 @@ namespace Renderer
 
 	static void destroyWindow()
 	{
+		if (Settings::getInstance()->getBool("Windowed") && Settings::getInstance()->getInt("WindowWidth") && Settings::getInstance()->getInt("WindowHeight"))
+		{
+			int x; int y;
+			SDL_GetWindowPosition(sdlWindow, &x, &y);
+			sdlWindowPosition = Vector2i(x, y); // Save position to restore it later
+		}
+
 		destroyContext();
 
 		SDL_DestroyWindow(sdlWindow);
