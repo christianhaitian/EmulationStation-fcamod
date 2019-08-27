@@ -300,6 +300,8 @@ std::string DetailedGameListView::getMetadata(FileData* file, std::string name)
 	return ret;
 }
 
+#include "platform.h"
+
 void DetailedGameListView::updateInfoPanel()
 {
 	FileData* file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
@@ -323,15 +325,14 @@ void DetailedGameListView::updateInfoPanel()
 			if (!mVideo->setVideo(file->getVideoPath()))
 				mVideo->setDefaultVideo();
 
-			mVideo->setImage(imagePath, false, mVideo->getTargetSize());
+			mVideo->setImage(imagePath, false, mVideo->getMaxSizeInfo());
 		}
 	
-		//mSelectedProperties.mImageSizeMode == "minSize"));
 		if (mImage != nullptr)
-			mImage->setImage(imagePath, false, mImage->getSize());
+			mImage->setImage(imagePath, false, mImage->getMaxSizeInfo());
 
 		if (mMarquee != nullptr)
-			mMarquee->setImage(file->getMarqueePath(), false, mMarquee->getSize());
+			mMarquee->setImage(file->getMarqueePath(), false, mMarquee->getMaxSizeInfo());
 
 		mDescription.setText(getMetadata(file, "desc"));
 		mDescContainer.reset();

@@ -88,6 +88,14 @@ public:
 
 	std::shared_ptr<TextureResource> getTexture() { return mTexture; };
 
+	const MaxSizeInfo getMaxSizeInfo() 
+	{
+		if (mTargetSize == Vector2f(0, 0))
+			return MaxSizeInfo(mSize, mTargetIsMax);
+		
+		return MaxSizeInfo(mTargetSize, mTargetIsMax);		
+	};
+
 private:
 	Vector2f mTargetSize;
 

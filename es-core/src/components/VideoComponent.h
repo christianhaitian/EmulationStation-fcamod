@@ -83,12 +83,12 @@ public:
 
 	void onVideoStarted();
 
-	Vector2f						getTargetSize() 
-	{ 
+	const MaxSizeInfo getMaxSizeInfo()
+	{
 		if (mTargetSize == Vector2f(0, 0))
-			return mSize;
+			return MaxSizeInfo(mSize, mTargetIsMax);
 
-		return mTargetSize; 
+		return MaxSizeInfo(mTargetSize, mTargetIsMax);
 	};
 
 private:

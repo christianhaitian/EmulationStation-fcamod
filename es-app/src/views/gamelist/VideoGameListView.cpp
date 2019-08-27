@@ -276,11 +276,11 @@ void VideoGameListView::updateInfoPanel()
 		}
 		mVideoPlaying = true;
 
-		mVideo->setImage(file->getThumbnailPath(), false, mVideo->getTargetSize());
-		mMarquee.setImage(file->getMarqueePath(), false, mMarquee.getSize());
+		mVideo->setImage(file->getThumbnailPath(), false, mVideo->getMaxSizeInfo());
+		mMarquee.setImage(file->getMarqueePath(), false, mMarquee.getMaxSizeInfo());
 
 		if (mImage != nullptr)
-			mImage->setImage(file->getImagePath(), false, mImage->getSize());
+			mImage->setImage(file->getImagePath(), false, mImage->getMaxSizeInfo());
 
 		mDescription.setText(file->metadata.get("desc"));
 		mDescContainer.reset();

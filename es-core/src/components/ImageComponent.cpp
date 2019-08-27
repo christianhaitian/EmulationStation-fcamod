@@ -140,8 +140,8 @@ void ImageComponent::setDefaultImage(std::string path)
 
 void ImageComponent::setImage(std::string path, bool tile, MaxSizeInfo maxSize)
 {
-	if (!maxSize.isExternalZoomKnown() && !maxSize.empty())
-		maxSize = MaxSizeInfo(maxSize.x(), maxSize.y(), !mTargetIsMax);
+//	if (!maxSize.isExternalZoomKnown() && !maxSize.empty())
+//		maxSize = MaxSizeInfo(maxSize.x(), maxSize.y(), !mTargetIsMax);
 
 	if (path.empty() || !ResourceManager::getInstance()->fileExists(path))
 	{
