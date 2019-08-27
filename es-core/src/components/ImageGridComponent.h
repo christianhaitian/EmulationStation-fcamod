@@ -328,7 +328,7 @@ void ImageGridComponent<T>::render(const Transform4x4f& parentTrans)
 		Renderer::setMatrix(parentTrans);
 	}
 
-	Renderer::pushClipRect(pos, size);
+	// Renderer::pushClipRect(pos, size);
 	
 	// Render the selected image background on bottom of the others if needed
 	std::shared_ptr<GridTileComponent> selectedTile = NULL;
@@ -362,7 +362,7 @@ void ImageGridComponent<T>::render(const Transform4x4f& parentTrans)
 			selectedTile->render(tileTrans);
 	}
 
-	Renderer::popClipRect();
+	// Renderer::popClipRect();
 
 	listRenderTitleOverlay(trans);
 
