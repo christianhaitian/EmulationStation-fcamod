@@ -101,8 +101,16 @@ void TextureResource::onTextureLoaded(std::shared_ptr<TextureData> tex)
 void TextureResource::initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height)
 {
 	// This is only valid if we have a local texture data object
-	assert(mTextureData != nullptr);
+	assert(mTextureData != nullptr);	
 	mTextureData->releaseVRAM();
+
+	// FCA optimisation, if streamed image size is already the same, don't free/reallocate memory (which is slow), just copy bytes
+	if (mTextureData->getDataRGBA() != nullptr && mSize.x() == width && mSize.y() == height)
+	{
+		memcpy(mTextureData->getDataRGBA(), dataRGBA, width * height * 4);
+		return;
+	}
+
 	mTextureData->releaseRAM();
 	mTextureData->initFromRGBA(dataRGBA, width, height);
 	// Cache the image dimensions

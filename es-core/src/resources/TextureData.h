@@ -63,6 +63,10 @@ public:
 	std::string		mPath;
 	unsigned int	mTextureID;
 
+	unsigned char* getDataRGBA() {
+		return mDataRGBA;
+	}
+
 private:
 	std::mutex		mMutex;
 	bool			mTile;
