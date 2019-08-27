@@ -160,8 +160,8 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	Renderer::setMatrix(trans);
 
 
-	const unsigned int fadeIn = t; //(unsigned int)(Math::clamp(0.0f, mFadeIn, 1.0f) * 255.0f);
-	const unsigned int color = Renderer::convertColor((fadeIn << 24) | (fadeIn << 16) | (fadeIn << 8) | 255);
+	const unsigned int fadeIn = t * 255.0f;
+	const unsigned int color = Renderer::convertColor(0xFFFFFF00 | fadeIn);
 	Renderer::Vertex   vertices[4];
 
 	vertices[0] = { { 0.0f     , 0.0f      }, { 0.0f, 0.0f }, color };
