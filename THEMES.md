@@ -735,7 +735,7 @@ Can be created as an extra.
 	- Where on the component `pos` refers to.  For example, an origin of `0.5 0.5` and a `pos` of `0.5 0.5` would place the component exactly in the middle of the screen.  If the "POSITION" and "SIZE" attributes are themable, "ORIGIN" is implied.
 * `selectorColor` - type: COLOR.
 	- Color of the "selector bar."
-* `selectorGradientColor` - type: NORMALIZED_PAIR. 
+* `selectorColorEnd` - type: NORMALIZED_PAIR. 
     - NEW : Bottom color for the gradient of the "selector bar."
 * `selectorImagePath` - type: PATH.
 	- Path to image to render in place of "selector bar."
@@ -856,7 +856,7 @@ EmulationStation borrows the concept of "nine patches" from Android (or "9-Slice
 * `color` - type: COLOR.
 	- Controls the color of the carousel background.
 	- Default is FFFFFFD8
-* `colorGradient` - type: COLOR.
+* `colorEnd` - type: COLOR.
 	- NEW : Color for the end of gradient
 * `gradientType` - type: STRING.
 	- NEW : Sets the gradient direction. Accepted values are "horizontal" and "vertical".
@@ -898,6 +898,8 @@ EmulationStation borrows the concept of "nine patches" from Android (or "9-Slice
 	- Default is FFFFFFFF. Color of text for selected menu entry.
 * `selectorColor` - type: COLOR. 
 	- Default is 878787FF. Color of the selector bar.
+* `selectorColorEnd` - type: NORMALIZED_PAIR. 
+    - NEW : Bottom color for the gradient of the "selector bar."
 	
 
 The help system is a special element that displays a context-sensitive list of actions the user can take at any time.  You should try and keep the position constant throughout every screen.  Keep in mind the "default" settings (including position) are used whenever the user opens a menu.
