@@ -1050,9 +1050,48 @@ void GuiMenu::openQuitMenu()
 	mWindow->pushGui(s);
 }
 
+std::string getBuildTime()
+{
+	std::string datestr = __DATE__;
+	std::string timestr = __TIME__;
+
+	std::istringstream iss_date(datestr);
+	std::string str_month;
+	int day;
+	int year;
+	iss_date >> str_month >> day >> year;
+
+	int month;
+	if (str_month == "Jan") month = 1;
+	else if (str_month == "Feb") month = 2;
+	else if (str_month == "Mar") month = 3;
+	else if (str_month == "Apr") month = 4;
+	else if (str_month == "May") month = 5;
+	else if (str_month == "Jun") month = 6;
+	else if (str_month == "Jul") month = 7;
+	else if (str_month == "Aug") month = 8;
+	else if (str_month == "Sep") month = 9;
+	else if (str_month == "Oct") month = 10;
+	else if (str_month == "Nov") month = 11;
+	else if (str_month == "Dec") month = 12;
+	else exit(-1);
+
+	for (std::string::size_type pos = timestr.find(':'); pos != std::string::npos; pos = timestr.find(':', pos))
+		timestr[pos] = ' ';
+
+	std::istringstream iss_time(timestr);
+	int hour, min, sec;
+	iss_time >> hour >> min >> sec;
+
+	char buffer[100];
+	sprintf_s(buffer, "%4d%.2d%.2d%.2d%.2d%.2d\n", year, month, day, hour, min, sec);
+	return buffer;
+}
+
 void GuiMenu::addVersionInfo()
 {
-	std::string  buildDate = (Settings::getInstance()->getBool("Debug") ? std::string( "   (" + Utils::String::toUpper(PROGRAM_BUILT_STRING) + ")") : (""));
+	std::string  buildDate = getBuildTime();
+	//	(Settings::getInstance()->getBool("Debug") ? std::string( "   (" + Utils::String::toUpper(PROGRAM_BUILT_STRING) + ")") : (""));
 
 	auto theme = ThemeData::getMenuTheme();
 //	mVersion.setFont(Font::get(FONT_SIZE_SMALL));
@@ -1061,7 +1100,7 @@ void GuiMenu::addVersionInfo()
 	mVersion.setFont(theme->Footer.font);
 	mVersion.setColor(theme->Footer.color);
 
-	mVersion.setText("EMULATIONSTATION V" + Utils::String::toUpper(PROGRAM_VERSION_STRING) + buildDate);
+	mVersion.setText("EMULATIONSTATION V" + Utils::String::toUpper(PROGRAM_VERSION_STRING) + " BUILD " + buildDate);
 	mVersion.setHorizontalAlignment(ALIGN_CENTER);
 	addChild(&mVersion);
 }
