@@ -47,6 +47,7 @@ public:
 	// Can be set before or after a video is loaded.
 	// Never breaks the aspect ratio. setMaxSize() and setResize() are mutually exclusive.
 	void setMaxSize(float width, float height);
+	void setMinSize(float width, float height);
 
 private:
 	// Calculates the correct mSize from our resizing information (set by setResize/setMaxSize).
@@ -58,6 +59,8 @@ private:
 	virtual void stopVideo();
 	// Handle looping the video. Must be called periodically
 	virtual void handleLooping();
+
+	virtual void onVideoStarted();
 
 	void setupContext();
 	void freeContext();

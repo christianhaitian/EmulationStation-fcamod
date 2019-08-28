@@ -429,6 +429,8 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 
 				Renderer::drawTriangleStrips(&mirrorVertices[0], 4);			
 			}
+
+			Renderer::bindTexture(0);
 		}
 		else
 		{

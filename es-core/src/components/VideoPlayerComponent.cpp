@@ -54,6 +54,17 @@ void VideoPlayerComponent::setMaxSize(float width, float height)
 	onSizeChanged();
 }
 
+void VideoPlayerComponent::setMinSize(float width, float height)
+{
+	setSize(width, height);
+	mTargetSize = Vector2f(width, height);
+	mTargetIsMax = false;
+	mStaticImage.setMinSize(width, height);
+	onSizeChanged();
+
+	// TODO add cropping with  --crop 100,100,300,300
+}
+
 void VideoPlayerComponent::startVideo()
 {
 	if (!mIsPlaying)

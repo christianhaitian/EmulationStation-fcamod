@@ -13,6 +13,8 @@
 #include <codecvt>
 #endif
 
+#include "ImageIO.h"
+
 libvlc_instance_t* VideoVlcComponent::mVLC = NULL;
 
 // VLC prepares to render a video frame.
@@ -63,17 +65,43 @@ VideoVlcComponent::~VideoVlcComponent()
 
 void VideoVlcComponent::setResize(float width, float height)
 {
+	if (mSize.x() != 0 && mSize.y() != 0 && !mTargetIsMax && !mTargetIsMin && mTargetSize.x() == width && mTargetSize.y() == height)
+		return;
+
 	mTargetSize = Vector2f(width, height);
 	mTargetIsMax = false;
+	mTargetIsMin = false;
 	mStaticImage.setResize(width, height);
 	resize();
 }
 
 void VideoVlcComponent::setMaxSize(float width, float height)
 {
+	if (mSize.x() != 0 && mSize.y() != 0 && mTargetIsMax && !mTargetIsMin && mTargetSize.x() == width && mTargetSize.y() == height)
+		return;
+
 	mTargetSize = Vector2f(width, height);
 	mTargetIsMax = true;
+	mTargetIsMin = false;
 	mStaticImage.setMaxSize(width, height);
+	resize();
+}
+
+void VideoVlcComponent::setMinSize(float width, float height)
+{
+	if (mSize.x() != 0 && mSize.y() != 0 && mTargetIsMin && !mTargetIsMax && mTargetSize.x() == width && mTargetSize.y() == height)
+		return;
+
+	mTargetSize = Vector2f(width, height);
+	mTargetIsMax = false;
+	mTargetIsMin = true;
+	mStaticImage.setMinSize(width, height);
+	resize();
+}
+
+void VideoVlcComponent::onVideoStarted()
+{
+	VideoComponent::onVideoStarted();
 	resize();
 }
 
@@ -113,7 +141,33 @@ void VideoVlcComponent::resize()
 			mSize[1] = Math::round(mSize[1]);
 			mSize[0] = (mSize[1] / textureSize.y()) * textureSize.x();
 
-		}else{
+		}
+		else if (mTargetIsMin)
+		{
+			/*mSize = textureSize;
+			
+			Vector2f resizeScale((mTargetSize.x() / mSize.x()), (mTargetSize.y() / mSize.y()));
+
+			if (resizeScale.x() > resizeScale.y())
+			{
+				mSize[0] *= resizeScale.x();
+				mSize[1] *= resizeScale.x();
+
+		//		float cropPercent = (mSize.y() - mTargetSize.y()) / (mSize.y() * 2);
+		//		crop(0, cropPercent, 0, cropPercent);
+			}
+			else {
+				mSize[0] *= resizeScale.y();
+				mSize[1] *= resizeScale.y();
+
+		//		float cropPercent = (mSize.x() - mTargetSize.x()) / (mSize.x() * 2);
+		//		crop(cropPercent, 0, cropPercent, 0);
+			}
+			*/
+			mSize = ImageIO::adjustExternPictureSizef(textureSize, mTargetSize);
+		}
+		else
+		{
 			// if both components are set, we just stretch
 			// if no components are set, we don't resize at all
 			mSize = mTargetSize == Vector2f::Zero() ? textureSize : mTargetSize;
@@ -173,46 +227,22 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	mTexture->initFromPixels((unsigned char*)mContext.surface->pixels, mContext.surface->w, mContext.surface->h);
 	mTexture->bind();
 
+	if (mTargetIsMin)
+	{
+		Vector2f targetPos = (mTargetSize - mSize) * mOrigin * -1;
+
+		Vector2i pos(trans.translation().x() + (int)targetPos.x(), trans.translation().y() + (int)targetPos.y());
+		Vector2i size((int)Math::round(mTargetSize.x()), (int)Math::round(mTargetSize.y()));
+		Renderer::pushClipRect(pos, size);
+	}
+	
 	// Render it
 	Renderer::drawTriangleStrips(&vertices[0], 4);
 
-	/*
-	// <font color = "#ff0000">red text< / font>
-	//<font size = "16px" color = "white">phrase< / font>
+	if (mTargetIsMin)
+		Renderer::popClipRect();
 
-	float x2 = mSize.x();
-	float y2 = mSize.y();
-
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// Build a texture for the video frame
-	mTexture->initFromPixels((unsigned char*)mContext.surface->pixels, mContext.surface->w, mContext.surface->h);
-	mTexture->bind();
-
-	glBegin(GL_QUADS);
-
-	glColor4f(1.0f, 1.0f, 1.0f, t);
-	glTexCoord2f(0, 0);
-	glVertex2f(0, 0);
-
-	glColor4f(1.0f, 1.0f, 1.0f, t);
-	glTexCoord2f(0, 1.0f);
-	glVertex2f(0, y2);
-
-	glColor4f(1.0f, 1.0f, 1.0f, t);
-	glTexCoord2f(1.0f, 1.0f);
-	glVertex2f(x2, y2);
-
-	glColor4f(1.0f, 1.0f, 1.0f, t);
-	glTexCoord2f(1.0f, 0);
-	glVertex2f(x2, 0);
-
-	glEnd();
-
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);	*/
+	Renderer::bindTexture(0);
 }
 
 void VideoVlcComponent::setupContext()

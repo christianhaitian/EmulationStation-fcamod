@@ -217,6 +217,8 @@ void VideoComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 			setResize(elem->get<Vector2f>("size") * scale);
 		else if(elem->has("maxSize"))
 			setMaxSize(elem->get<Vector2f>("maxSize") * scale);
+		else if (elem->has("minSize"))
+			setMinSize(elem->get<Vector2f>("minSize") * scale);
 	}
 
 	// position + size also implies origin

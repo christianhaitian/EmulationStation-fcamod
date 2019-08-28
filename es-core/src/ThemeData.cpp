@@ -164,6 +164,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "pos", NORMALIZED_PAIR },
 		{ "size", NORMALIZED_PAIR },
 		{ "maxSize", NORMALIZED_PAIR },
+		{ "minSize", NORMALIZED_PAIR },
 		{ "origin", NORMALIZED_PAIR },
 		{ "rotation", FLOAT },
 		{ "rotationOrigin", NORMALIZED_PAIR },
@@ -972,11 +973,12 @@ std::vector<GuiComponent*> ThemeData::makeExtras(const std::shared_ptr<ThemeData
 				comp = new NinePatchComponent(window);
 			else if (t == "video")
 			{
+				/*
 #ifdef _RPI_
 				if (Settings::getInstance()->getBool("VideoOmxPlayer"))
 					comp = new VideoPlayerComponent(window, "");
 				else
-#endif
+#endif*/
 					comp = new VideoVlcComponent(window, "");
 			}
 

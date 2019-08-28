@@ -70,13 +70,13 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 	addChild(&mBackground);
 	addChild(&(*mImage));
 	addChild(&mLabel);
-		
+		/*
 	// Create the correct type of video window
 #ifdef _RPI_
 	if (Settings::getInstance()->getBool("VideoOmxPlayer"))
 		mVideo = new VideoPlayerComponent(window, "");
 	else
-#endif
+#endif*/
 		mVideo = new VideoVlcComponent(window, "");
 
 	// video
