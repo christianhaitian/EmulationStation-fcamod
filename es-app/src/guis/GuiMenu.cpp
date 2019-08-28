@@ -33,22 +33,22 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _("MAIN M
 	
 	if (isFullUI)
 	{
-		addEntry(_("UI SETTINGS"), theme->Text.color, true, [this] { openUISettings(); }, theme->MenuIcons.ui);
-		addEntry(_("CONFIGURE INPUT"), theme->Text.color, true, [this] { openConfigInput(); }, theme->MenuIcons.controllers);
+		addEntry(_("UI SETTINGS"), true, [this] { openUISettings(); }, "iconUI");
+		addEntry(_("CONFIGURE INPUT"), true, [this] { openConfigInput(); }, "iconControllers");
 	}
 
-	addEntry(_("SOUND SETTINGS"), theme->Text.color, true, [this] { openSoundSettings(); }, theme->MenuIcons.sound);
+	addEntry(_("SOUND SETTINGS"), true, [this] { openSoundSettings(); }, "iconSound");
 
 	if (isFullUI)
-		addEntry(_("SCRAPER"), theme->Text.color, true, [this] { openScraperSettings(); }, theme->MenuIcons.scraper);
+		addEntry(_("SCRAPER"), true, [this] { openScraperSettings(); }, "iconScraper");
 
 	if (isFullUI)
 	{
-		addEntry(_("GAME COLLECTION SETTINGS"), theme->Text.color, true, [this] { openCollectionSystemSettings(); }, theme->MenuIcons.games);
-		addEntry(_("ADVANCED SETTINGS"), theme->Text.color, true, [this] { openOtherSettings(); }, theme->MenuIcons.advanced);
+		addEntry(_("GAME COLLECTION SETTINGS"), true, [this] { openCollectionSystemSettings(); }, "iconGames");
+		addEntry(_("ADVANCED SETTINGS"), true, [this] { openOtherSettings(); }, "iconAdvanced");
 	}
 	
-	addEntry(_("QUIT"), theme->Text.color, !Settings::getInstance()->getBool("ShowOnlyExit"), [this] {openQuitMenu(); }, theme->MenuIcons.quit);
+	addEntry(_("QUIT"), !Settings::getInstance()->getBool("ShowOnlyExit"), [this] {openQuitMenu(); }, "iconQuit");
 
 	addChild(&mMenu);
 	addVersionInfo();
@@ -103,12 +103,7 @@ void GuiMenu::openScraperSettings()
 	s->addWithLabel(_("SCRAPE RATINGS"), scrape_ratings);
 	s->addSaveFunc([scrape_ratings] { Settings::getInstance()->setBool("ScrapeRatings", scrape_ratings->getState()); });
 
-
-
-
-
-
-
+	// image source
 	std::string imageSourceName = Settings::getInstance()->getString("ScrapperImageSrc");
 	auto imageSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _("PREFERED IMAGE SOURCE"), false);
 	imageSource->add(_("NONE"), "", imageSourceName.empty());
@@ -140,27 +135,19 @@ void GuiMenu::openScraperSettings()
 			Settings::getInstance()->setString("ScrapperThumbSrc", thumbSource->getSelected());
 	});	
 
-
 	// scrape video
 	auto scrape_video = std::make_shared<SwitchComponent>(mWindow);
 	scrape_video->setState(Settings::getInstance()->getBool("ScrapeVideos"));
 	s->addWithLabel(_("SCRAPE VIDEOS"), scrape_video);
 	s->addSaveFunc([scrape_video] { Settings::getInstance()->setBool("ScrapeVideos", scrape_video->getState()); });
 
-
 	// scrape now
 	ComponentListRow row;
 	auto openScrapeNow = [this] { mWindow->pushGui(new GuiScraperStart(mWindow)); };
 	std::function<void()> openAndSave = openScrapeNow;
 	openAndSave = [s, openAndSave] { s->save(); openAndSave(); };
-	row.makeAcceptInputHandler(openAndSave);
-
-	auto scrape_now = std::make_shared<TextComponent>(mWindow, _("SCRAPE NOW"), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color);
-	auto bracket = makeArrow(mWindow);
-	row.addElement(scrape_now, true);
-	row.addElement(bracket, false);
-	s->addRow(row);
-
+	s->addEntry(_("SCRAPE NOW"), true, openAndSave, "iconScraper");
+	
 	s->updatePosition();
 	mWindow->pushGui(s);
 }
@@ -1119,28 +1106,32 @@ void GuiMenu::onSizeChanged()
 	mVersion.setPosition(0, mSize.y() - mVersion.getSize().y());
 }
 
-void GuiMenu::addEntry(std::string name, unsigned int color, bool add_arrow, const std::function<void()>& func, const std::string iconName)
+void GuiMenu::addEntry(std::string name, bool add_arrow, const std::function<void()>& func, const std::string iconName)
 {
 	auto theme = ThemeData::getMenuTheme();
 	std::shared_ptr<Font> font = theme->Text.font;
-	color = theme->Text.color;
+	unsigned int color = theme->Text.color;
 
 	// populate the list
 	ComponentListRow row;
 
 	if (!iconName.empty())
 	{
-		// icon
-		auto icon = std::make_shared<ImageComponent>(mWindow);
-		icon->setImage(iconName);
-		icon->setColorShift(theme->Text.color);
-		icon->setResize(0, theme->Text.font->getLetterHeight() * 1.25f);
-		row.addElement(icon, false);
+		std::string iconPath = theme->getMenuIcon(iconName);
+		if (!iconPath.empty())
+		{
+			// icon
+			auto icon = std::make_shared<ImageComponent>(mWindow);
+			icon->setImage(iconPath);
+			icon->setColorShift(theme->Text.color);
+			icon->setResize(0, theme->Text.font->getLetterHeight() * 1.25f);
+			row.addElement(icon, false);
 
-		// spacer between icon and text
-		auto spacer = std::make_shared<GuiComponent>(mWindow);
-		spacer->setSize(10, 0);
-		row.addElement(spacer, false);
+			// spacer between icon and text
+			auto spacer = std::make_shared<GuiComponent>(mWindow);
+			spacer->setSize(10, 0);
+			row.addElement(spacer, false);
+		}
 	}
 
 	row.addElement(std::make_shared<TextComponent>(mWindow, name, font, color), true);

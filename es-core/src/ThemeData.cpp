@@ -768,21 +768,31 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 	element.extra = root.attribute("extra").as_bool(false);
 	
 	for(pugi::xml_node node = root.first_child(); node; node = node.next_sibling())
-	{
+	{		
+		ElementPropertyType type = STRING;
+
 		auto typeIt = typeMap.find(node.name());
 		if (typeIt == typeMap.cend())
 		{
-			//throw error << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
-			LOG(LogWarning) << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
-			continue;
+			// Exception for menuIcons that can be extended
+			if (element.type == "menuIcons")
+				type = PATH;
+			else
+			{
+				//throw error << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
+				LOG(LogWarning) << "Unknown property type \"" << node.name() << "\" (for element of type " << root.name() << ").";
+				continue;
+			}
 		}
+		else
+			type = typeIt->second;
 
 		if (!overwrite && element.properties.find(node.name()) != element.properties.cend())
 			continue;
 
 		std::string str = resolveSystemVariable(mSystemThemeFolder, resolvePlaceholders(node.text().as_string()));
 
-		switch(typeIt->second)
+		switch(type)
 		{
 		case NORMALIZED_RECT:
 		{
@@ -1144,35 +1154,14 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 		Icons.knob = elem->get<std::string>("path");
 
 	elem = theme->getElement("menu", "menuicons", "menuIcons");
-
 	if (elem) 
 	{
-		if (elem->has("iconSystem") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconSystem")))
-			MenuIcons.system = elem->get<std::string>("iconSystem");
-
-		if (elem->has("iconUpdates") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconUpdates")))
-			MenuIcons.updates = elem->get<std::string>("iconUpdates");
-
-		if (elem->has("iconGames") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconGames")))
-			MenuIcons.games = elem->get<std::string>("iconGames");
-
-		if (elem->has("iconControllers") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconControllers")))
-			MenuIcons.controllers = elem->get<std::string>("iconControllers");
-
-		if (elem->has("iconUI") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconUI")))
-			MenuIcons.ui = elem->get<std::string>("iconUI");
-
-		if (elem->has("iconSound") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconSound")))
-			MenuIcons.sound = elem->get<std::string>("iconSound");
-
-		if (elem->has("iconScraper") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconScraper")))
-			MenuIcons.scraper = elem->get<std::string>("iconScraper");
-
-		if (elem->has("iconAdvanced") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconAdvanced")))
-			MenuIcons.advanced = elem->get<std::string>("iconAdvanced");
-
-		if (elem->has("iconQuit") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("iconQuit")))
-			MenuIcons.quit = elem->get<std::string>("iconQuit");
+		for (auto prop : elem->properties)
+		{
+			std::string path = prop.second.s;
+			if (!path.empty() && ResourceManager::getInstance()->fileExists(path))
+				setMenuIcon(prop.first, path);
+		}	
 	}
 }
 

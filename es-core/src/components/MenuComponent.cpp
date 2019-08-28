@@ -55,13 +55,71 @@ MenuComponent::MenuComponent(Window* window, std::string title, const std::share
 	mGrid.resetCursor();
 }
 
-void MenuComponent::addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp, bool setCursorHere, bool invert_when_selected)
+void MenuComponent::addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp, const std::string iconName, bool setCursorHere, bool invert_when_selected)
 {
 	auto theme = ThemeData::getMenuTheme();
 	
 	ComponentListRow row;
+
+	if (!iconName.empty())
+	{
+		std::string iconPath = theme->getMenuIcon(iconName);
+		if (!iconPath.empty())
+		{
+			// icon
+			auto icon = std::make_shared<ImageComponent>(mWindow);
+			icon->setImage(iconPath);
+			icon->setColorShift(theme->Text.color);
+			icon->setResize(0, theme->Text.font->getLetterHeight() * 1.25f);
+			row.addElement(icon, false);
+
+			// spacer between icon and text
+			auto spacer = std::make_shared<GuiComponent>(mWindow);
+			spacer->setSize(10, 0);
+			row.addElement(spacer, false);
+		}
+	}
+
 	row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), theme->Text.font, theme->Text.color), true);
 	row.addElement(comp, false, invert_when_selected);
+	addRow(row, setCursorHere);
+}
+
+void MenuComponent::addEntry(const std::string name, bool add_arrow, const std::function<void()>& func, const std::string iconName, bool setCursorHere, bool invert_when_selected)
+{
+	auto theme = ThemeData::getMenuTheme();
+	std::shared_ptr<Font> font = theme->Text.font;
+	unsigned int color = theme->Text.color;
+
+	// populate the list
+	ComponentListRow row;
+
+	if (!iconName.empty())
+	{
+		std::string iconPath = theme->getMenuIcon(iconName);
+		if (!iconPath.empty())
+		{
+			// icon
+			auto icon = std::make_shared<ImageComponent>(mWindow);
+			icon->setImage(iconPath);
+			icon->setColorShift(theme->Text.color);
+			icon->setResize(0, theme->Text.font->getLetterHeight() * 1.25f);
+			row.addElement(icon, false);
+
+			// spacer between icon and text
+			auto spacer = std::make_shared<GuiComponent>(mWindow);
+			spacer->setSize(10, 0);
+			row.addElement(spacer, false);
+		}
+	}
+
+	row.addElement(std::make_shared<TextComponent>(mWindow, name, font, color), true, invert_when_selected);
+
+	if (add_arrow)	
+		row.addElement(makeArrow(mWindow), false);
+
+	row.makeAcceptInputHandler(func);
+
 	addRow(row, setCursorHere);
 }
 

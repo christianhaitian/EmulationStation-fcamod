@@ -81,3 +81,4 @@ std::vector<HelpPrompt> GuiSettings::getHelpPrompts()
 
 	return prompts;
 }
+

@@ -5,6 +5,8 @@
 #include "components/MenuComponent.h"
 #include "GuiComponent.h"
 
+class GuiSettings;
+
 class GuiMenu : public GuiComponent
 {
 public:
@@ -16,7 +18,8 @@ public:
 	HelpStyle getHelpStyle() override;
 
 private:
-	void addEntry(std::string name, unsigned int color, bool add_arrow, const std::function<void()>& func, const std::string iconName);
+	void addEntry(std::string name, bool add_arrow, const std::function<void()>& func, const std::string iconName = "");	
+
 	void addVersionInfo();
 	void openCollectionSystemSettings();
 	void openConfigInput();
