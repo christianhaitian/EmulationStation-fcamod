@@ -105,6 +105,8 @@ private:
 	bool mShowing;
 	bool mDisable;
 	bool mScreensaverActive;
+
+	int mLastCursor;
 };
 
 #endif // ES_APP_VIEWS_SYSTEM_VIEW_H

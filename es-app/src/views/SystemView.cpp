@@ -25,6 +25,7 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 	mScreensaverActive = false;
 	mDisable = false;
 	mShowing = false;
+	mLastCursor = 0;
 
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 	populate();
@@ -304,6 +305,13 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 	if(endPos == mCamOffset && endPos == mExtrasCamOffset)
 		return;
 
+
+	if (mLastCursor == mCursor)
+		return;
+
+	int oldCursor = mLastCursor;
+	mLastCursor = mCursor;
+
 	Animation* anim;
 	bool move_carousel = Settings::getInstance()->getBool("MoveCarousel");
 	if(transition_style == "fade")
@@ -366,12 +374,17 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 	}
 	
 	for (int i = 0; i < mEntries.size(); i++)
-		if (i != mCursor)
+		if (i != oldCursor && i != mCursor)
 			activateExtras(i, false);
+
+	activateExtras(mCursor);
 
 	setAnimation(anim, 0, [this]
 	{
-		activateExtras(mCursor);
+		for (int i = 0; i < mEntries.size(); i++)
+			if (i != mCursor)
+				activateExtras(i, false);
+				
 	}, false, 0);
 }
 
