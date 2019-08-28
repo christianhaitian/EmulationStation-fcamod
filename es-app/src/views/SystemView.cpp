@@ -22,6 +22,9 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 	mExtrasCamOffset = 0;
 	mExtrasFadeOpacity = 0.0f;
 	mLastSystem = nullptr;
+	mScreensaverActive = false;
+	mDisable = false;
+	mShowing = false;
 
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 	populate();
@@ -220,6 +223,7 @@ bool SystemView::input(InputConfig* config, Input input)
 void SystemView::update(int deltaTime)
 {
 	listUpdate(deltaTime);
+	updateExtras(deltaTime);
 	GuiComponent::update(deltaTime);
 }
 
@@ -360,9 +364,15 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 			this->mExtrasCamOffset = endPos;
 		}, move_carousel ? 500 : 1);
 	}
+	
+	for (int i = 0; i < mEntries.size(); i++)
+		if (i != mCursor)
+			activateExtras(i, false);
 
-
-	setAnimation(anim, 0, nullptr, false, 0);
+	setAnimation(anim, 0, [this]
+	{
+		activateExtras(mCursor);
+	}, false, 0);
 }
 
 void SystemView::render(const Transform4x4f& parentTrans)
@@ -810,9 +820,60 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 void SystemView::onShow()
 {
 	mShowing = true;
+	activateExtras(mCursor);
 }
 
 void SystemView::onHide()
 {
 	mShowing = false;
+	activateExtras(mCursor);
+}
+
+void SystemView::onScreenSaverActivate()
+{
+	mScreensaverActive = true;
+	activateExtras(mCursor);
+}
+
+void SystemView::onScreenSaverDeactivate()
+{
+	mScreensaverActive = false;
+	activateExtras(mCursor);
+}
+
+void SystemView::topWindow(bool isTop)
+{
+	mDisable = !isTop;
+	activateExtras(mCursor);
+}
+
+void SystemView::activateExtras(int cursor, bool activate)
+{
+	if (cursor < 0 || cursor >= mEntries.size())
+		return;
+
+	bool show = activate && mShowing && !mScreensaverActive && !mDisable;
+
+	SystemViewData data = mEntries.at(cursor).data;
+	for (unsigned int j = 0; j < data.backgroundExtras.size(); j++)
+	{
+		GuiComponent *extra = data.backgroundExtras[j];
+		if (show && activate)
+			extra->onShow();
+		else
+			extra->onHide();
+	}
+}
+
+void SystemView::updateExtras(int deltaTime)
+{
+	if (!mShowing)
+		return;
+
+	for (int i = 0; i < mEntries.size(); i++)
+	{
+		SystemViewData data = mEntries.at(i).data;
+		for (unsigned int j = 0; j < data.backgroundExtras.size(); j++)
+			data.backgroundExtras[j]->update(deltaTime);
+	}
 }

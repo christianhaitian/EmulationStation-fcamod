@@ -74,7 +74,12 @@ private:
 	Vector2f carouselPos();
 	Vector2f carouselSize();
 
-	
+	void	 activateExtras(int cursor, bool activate = true);
+	void	 updateExtras(int deltaTime);
+
+	virtual void onScreenSaverActivate() override;
+	virtual void onScreenSaverDeactivate() override;
+	virtual void topWindow(bool isTop) override;
 
 	void populate();
 	void getViewElements(const std::shared_ptr<ThemeData>& theme);
@@ -98,6 +103,8 @@ private:
 
 	bool mViewNeedsReload;
 	bool mShowing;
+	bool mDisable;
+	bool mScreensaverActive;
 };
 
 #endif // ES_APP_VIEWS_SYSTEM_VIEW_H
