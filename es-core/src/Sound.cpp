@@ -52,6 +52,9 @@ void Sound::init()
 {
 	deinit();
 
+	if (!AudioManager::isInitialized())
+		return;
+
 	if (mPath.empty() || !Utils::FileSystem::exists(mPath))
 		return;
 
@@ -81,6 +84,9 @@ void Sound::deinit()
 void Sound::play()
 {
 	if (mSampleData == nullptr)
+		return;
+
+	if (!AudioManager::isInitialized())
 		return;
 
 	mPlaying = true;

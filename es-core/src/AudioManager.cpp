@@ -29,6 +29,14 @@ std::shared_ptr<AudioManager> & AudioManager::getInstance()
 	return sInstance;
 }
 
+bool AudioManager::isInitialized()
+{
+	if (sInstance == nullptr)
+		return false;
+
+	return sInstance->mInitialized;
+}
+
 void AudioManager::init()
 {
 	if (mInitialized)
@@ -42,13 +50,6 @@ void AudioManager::init()
 		return;
 	}
 
-	// Stop playing all Sounds & reload them 
-	for (unsigned int i = 0; i < sSoundVector.size(); i++)
-	{
-		sSoundVector[i]->stop();
-		sSoundVector[i]->init();
-	}
-
 	//Open the audio device and pause
 	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) < 0)
 		LOG(LogError) << "MUSIC Error - Unable to open SDLMixer audio: " << SDL_GetError() << std::endl;
@@ -56,6 +57,10 @@ void AudioManager::init()
 	{
 		mInitialized = true;
 		LOG(LogInfo) << "SDL AUDIO Initialized";
+
+		// Reload sounds
+		for (unsigned int i = 0; i < sSoundVector.size(); i++)
+			sSoundVector[i]->init();
 	}
 }
 
