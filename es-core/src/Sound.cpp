@@ -23,7 +23,7 @@ std::shared_ptr<Sound> Sound::getFromTheme(const std::shared_ptr<ThemeData>& the
 	LOG(LogInfo) << " req sound [" << view << "." << element << "]";
 
 	const ThemeData::ThemeElement* elem = theme->getElement(view, element, "sound");
-	if(!elem || !elem->has("path"))
+	if(elem == nullptr || !elem->has("path"))
 	{
 		LOG(LogInfo) << "   (missing)";
 		return get("");
@@ -50,10 +50,9 @@ void Sound::loadFile(const std::string & path)
 
 void Sound::init()
 {
-	if (mSampleData != nullptr)
-		deinit();
+	deinit();
 
-	if (mPath.empty())
+	if (mPath.empty() || !Utils::FileSystem::exists(mPath))
 		return;
 
 	if (!Settings::getInstance()->getBool("EnableSounds"))
@@ -72,8 +71,11 @@ void Sound::deinit()
 {
 	mPlaying = false;
 
-	if (mSampleData != nullptr)
-		Mix_FreeChunk(mSampleData);
+	if (mSampleData == nullptr)
+		return;
+	
+	Mix_FreeChunk(mSampleData);
+	mSampleData = nullptr;	
 }
 
 void Sound::play()

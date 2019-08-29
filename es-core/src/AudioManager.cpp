@@ -145,6 +145,9 @@ void AudioManager::findMusic(const std::string &path, std::vector<std::string>& 
 
 void AudioManager::playRandomMusic(bool continueIfPlaying) 
 {
+	if (!mInitialized)
+		return;
+
 	std::vector<std::string> musics;
 
 	// check in Theme music directory
@@ -180,14 +183,16 @@ void AudioManager::playRandomMusic(bool continueIfPlaying)
 
 	playMusic(musics.at(randomIndex));
 	mRunningFromPlaylist = true;
-	Mix_HookMusicFinished(AudioManager::onMusicFinished);
 }
 
 void AudioManager::playMusic(std::string path)
 {
+	if (!mInitialized)
+		return;
+
 	// free the previous music
 	stopMusic();
-
+		
 	// load a new music
 	mCurrentMusic = Mix_LoadMUS(path.c_str());
 	if (mCurrentMusic == NULL)
@@ -227,28 +232,28 @@ void AudioManager::themeChanged(const std::shared_ptr<ThemeData>& theme)
 {
 	mCurrentThemeMusicDirectory = "";
 
-	if (Settings::getInstance()->getBool("audio.bgmusic"))
-	{
-		const ThemeData::ThemeElement* elem = theme->getElement("system", "directory", "sound");
-		if (elem && elem->has("path"))
-			mCurrentThemeMusicDirectory = elem->get<std::string>("path");
+	if (!Settings::getInstance()->getBool("audio.bgmusic"))
+		return;
+	
+	const ThemeData::ThemeElement* elem = theme->getElement("system", "directory", "sound");
+	if (elem && elem->has("path"))
+		mCurrentThemeMusicDirectory = elem->get<std::string>("path");
 
-		std::string bgSound;
+	std::string bgSound;
 
-		elem = theme->getElement("system", "bgsound", "sound");
-		if (elem && elem->has("path") && Utils::FileSystem::exists(elem->get<std::string>("path")))
-			bgSound = elem->get<std::string>("path");
+	elem = theme->getElement("system", "bgsound", "sound");
+	if (elem && elem->has("path") && Utils::FileSystem::exists(elem->get<std::string>("path")))
+		bgSound = elem->get<std::string>("path");
 
-		// Found a music for the system
-		if (!bgSound.empty())
-		{			
-			mRunningFromPlaylist = false;
-			playMusic(bgSound);
-			return;
-		}
-
-		mSystemName = theme->getSystemThemeFolder();
-		if (!mRunningFromPlaylist || Settings::getInstance()->getBool("audio.persystem"))
-			playRandomMusic(false);
+	// Found a music for the system
+	if (!bgSound.empty())
+	{			
+		mRunningFromPlaylist = false;
+		playMusic(bgSound);
+		return;
 	}
+
+	mSystemName = theme->getSystemThemeFolder();
+	if (!mRunningFromPlaylist || Settings::getInstance()->getBool("audio.persystem"))
+		playRandomMusic(false);	
 }

@@ -130,11 +130,6 @@ public:
 			return "";
 		}
 
-		void setMenuIcon(const std::string name, const std::string path)
-		{
-			mMenuIcons[name] = path;
-		}
-
 	private:
 		std::map<std::string, std::string>		mMenuIcons;
 	};

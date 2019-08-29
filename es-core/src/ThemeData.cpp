@@ -1085,7 +1085,6 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	}
 
 	elem = theme->getElement("menu", "menufooter", "menuText");
-
 	if (elem)
 	{
 		if (elem->has("fontPath") || elem->has("fontSize"))
@@ -1095,7 +1094,6 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	}
 
 	elem = theme->getElement("menu", "menutextsmall", "menuTextSmall");
-
 	if (elem)
 	{
 		if (elem->has("fontPath") || elem->has("fontSize"))
@@ -1110,7 +1108,6 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	}
 
 	elem = theme->getElement("menu", "menutext", "menuText");
-
 	if (elem)
 	{
 		if (elem->has("fontPath") || elem->has("fontSize"))
@@ -1129,7 +1126,6 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	}
 
 	elem = theme->getElement("menu", "menubutton", "menuButton");
-
 	if (elem)
 	{
 		if (elem->has("path"))
@@ -1139,7 +1135,6 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	}
 
 	elem = theme->getElement("menu", "menuswitch", "menuSwitch");
-
 	if (elem)
 	{
 		if (elem->has("pathOn") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("pathOn")))
@@ -1149,7 +1144,6 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	}
 
 	elem = theme->getElement("menu", "menuslider", "menuSlider");
-
 	if (elem && elem->has("path") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("path")))
 		Icons.knob = elem->get<std::string>("path");
 
@@ -1160,7 +1154,7 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 		{
 			std::string path = prop.second.s;
 			if (!path.empty() && ResourceManager::getInstance()->fileExists(path))
-				setMenuIcon(prop.first, path);
+				mMenuIcons[prop.first] = path;				
 		}	
 	}
 }
