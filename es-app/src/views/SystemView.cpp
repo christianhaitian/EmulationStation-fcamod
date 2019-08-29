@@ -31,9 +31,27 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 	populate();
 }
 
+SystemView::~SystemView()
+{
+	clearEntries();
+}
+
+void SystemView::clearEntries()
+{
+	for (int i = 0; i < mEntries.size(); i++)
+	{
+		for (auto extra : mEntries[i].data.backgroundExtras)
+			delete extra;
+
+		mEntries[i].data.backgroundExtras.clear();
+	}
+
+	mEntries.clear();
+}
+
 void SystemView::populate()
 {
-	mEntries.clear();
+	clearEntries();
 
 	for (auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
 	{
@@ -224,7 +242,7 @@ bool SystemView::input(InputConfig* config, Input input)
 void SystemView::update(int deltaTime)
 {
 	listUpdate(deltaTime);
-	updateExtras(deltaTime);
+	updateExtras([this, deltaTime](GuiComponent* p) { p->update(deltaTime); });
 	GuiComponent::update(deltaTime);
 }
 
@@ -839,25 +857,38 @@ void SystemView::onShow()
 void SystemView::onHide()
 {
 	mShowing = false;
-	activateExtras(mCursor);
+	updateExtras([this](GuiComponent* p) { p->onHide(); });
 }
 
 void SystemView::onScreenSaverActivate()
 {
 	mScreensaverActive = true;
-	activateExtras(mCursor);
+	updateExtras([this](GuiComponent* p) { p->onScreenSaverActivate(); });
 }
 
 void SystemView::onScreenSaverDeactivate()
 {
 	mScreensaverActive = false;
-	activateExtras(mCursor);
+	updateExtras([this](GuiComponent* p) { p->onScreenSaverDeactivate(); });
 }
 
 void SystemView::topWindow(bool isTop)
 {
 	mDisable = !isTop;
-	activateExtras(mCursor);
+	updateExtras([this, isTop](GuiComponent* p) { p->topWindow(isTop); });
+}
+
+void SystemView::updateExtras(const std::function<void(GuiComponent*)>& func)
+{
+	for (int i = 0; i < mEntries.size(); i++)
+	{
+		SystemViewData data = mEntries.at(i).data;
+		for (unsigned int j = 0; j < data.backgroundExtras.size(); j++)
+		{
+			GuiComponent* extra = data.backgroundExtras[j];
+			func(extra);
+		}
+	}
 }
 
 void SystemView::activateExtras(int cursor, bool activate)
@@ -875,18 +906,5 @@ void SystemView::activateExtras(int cursor, bool activate)
 			extra->onShow();
 		else
 			extra->onHide();
-	}
-}
-
-void SystemView::updateExtras(int deltaTime)
-{
-	if (!mShowing)
-		return;
-
-	for (int i = 0; i < mEntries.size(); i++)
-	{
-		SystemViewData data = mEntries.at(i).data;
-		for (unsigned int j = 0; j < data.backgroundExtras.size(); j++)
-			data.backgroundExtras[j]->update(deltaTime);
 	}
 }

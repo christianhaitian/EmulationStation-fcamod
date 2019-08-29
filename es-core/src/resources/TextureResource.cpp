@@ -260,6 +260,9 @@ Vector2f TextureResource::getSourceImageSize() const
 
 bool TextureResource::isInitialized() const
 {
+	if (mTextureData != nullptr)
+		return mTextureData->isLoaded();
+
 	return true;
 }
 

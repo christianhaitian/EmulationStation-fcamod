@@ -279,7 +279,7 @@ void ImageComponent::setOpacity(unsigned char opacity)
 
 void ImageComponent::updateVertices()
 {
-	if (!mTexture || !mTexture->isInitialized())
+	if (!mTexture)
 		return;
 
 	// we go through this mess to make sure everything is properly rounded
@@ -307,55 +307,7 @@ void ImageComponent::updateVertices()
 			mVertices[i].tex[1] = py - mVertices[i].tex[1];
 	}
 }
-/*
-void ImageComponent::updateVerticesFca()
-{
-	if (!mTexture || !mTexture->isInitialized())
-		return;
 
-	// we go through this mess to make sure everything is properly rounded
-	// if we just round vertices at the end, edge cases occur near sizes of 0.5
-	Vector2f size(Math::round(mSize.x()), Math::round(mSize.y()));
-	Vector2f topLeft(size * mTopLeftCrop);
-	Vector2f bottomRight(size * mBottomRightCrop);
-
-	mVertices[0].pos = Vector2f(topLeft.x(), topLeft.y());
-	mVertices[1].pos = Vector2f(topLeft.x(), bottomRight.y());
-	mVertices[2].pos = Vector2f(bottomRight.x(), bottomRight.y());
-	mVertices[3].pos = Vector2f(bottomRight.x(), topLeft.y());
-
-	float px, py;
-	if (mTexture->isTiled())
-	{
-		px = mSize.x() / getTextureSize().x();
-		py = mSize.y() / getTextureSize().y();
-	}
-	else
-	{
-		px = 1;
-		py = 1;
-	}
-
-	mVertices[0].tex = Vector2f(mTopLeftCrop.x(), py - mTopLeftCrop.y());
-	mVertices[1].tex = Vector2f(mTopLeftCrop.x(), 1 - mBottomRightCrop.y());
-
-	mVertices[2].tex = Vector2f(px * mBottomRightCrop.x(), 1 - mBottomRightCrop.y());
-	mVertices[3].tex = Vector2f(px * mBottomRightCrop.x(), py - mTopLeftCrop.y());
-
-
-	if (mFlipX)
-	{
-		for(int i = 0; i < 4; i++)
-			mVertices[i].tex[0] = px - mVertices[i].tex[0];
-	}
-
-	if (mFlipY)
-	{
-		for(int i = 0; i < 4; i++)
-			mVertices[i].tex[1] = py - mVertices[i].tex[1];
-	}
-}
-*/
 void ImageComponent::render(const Transform4x4f& parentTrans)
 {
 	if (!mVisible)

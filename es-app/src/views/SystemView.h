@@ -7,6 +7,7 @@
 #include "resources/Font.h"
 #include "GuiComponent.h"
 #include <memory>
+#include <functional>
 
 class AnimatedImageComponent;
 class SystemData;
@@ -49,6 +50,7 @@ class SystemView : public IList<SystemViewData, SystemData*>
 {
 public:
 	SystemView(Window* window);
+	~SystemView();
 
 	virtual void onShow() override;
 	virtual void onHide() override;
@@ -74,8 +76,9 @@ private:
 	Vector2f carouselPos();
 	Vector2f carouselSize();
 
-	void	 activateExtras(int cursor, bool activate = true);
-	void	 updateExtras(int deltaTime);
+	void	 activateExtras(int cursor, bool activate = true);	
+	void	 updateExtras(const std::function<void(GuiComponent*)>& func);
+	void	 clearEntries();
 
 	virtual void onScreenSaverActivate() override;
 	virtual void onScreenSaverDeactivate() override;

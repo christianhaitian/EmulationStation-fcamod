@@ -195,8 +195,17 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 {
 	VideoComponent::render(parentTrans);
 
+	bool initFromPixels = true;
+
 	if (!mIsPlaying || !mContext.valid)
-		return;
+	{		
+		// If video is still attached to the path & texture is initialized, we suppose it had just been stopped (onhide, ondisable, screensaver...)
+		// still render the last frame
+		if (mTexture != nullptr && !mVideoPath.empty() && mPlayingVideoPath == mVideoPath && mTexture->isInitialized())
+			initFromPixels = false;
+		else
+			return;
+	}
 
 	float t = mFadeIn;
 	if (mFadeIn < 1.0)
@@ -211,9 +220,17 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 		return;
 	
 	Transform4x4f trans = parentTrans * getTransform();
+
+	Vector2f clipPos(trans.translation().x(), trans.translation().y());
+	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+		return;
+
 	Renderer::setMatrix(trans);
 
-
+	// Build a texture for the video frame
+	if (initFromPixels)
+		mTexture->initFromPixels((unsigned char*)mContext.surface->pixels, mContext.surface->w, mContext.surface->h);
+	
 	const unsigned int fadeIn = t * 255.0f;
 	const unsigned int color = Renderer::convertColor(0xFFFFFF00 | fadeIn);
 	Renderer::Vertex   vertices[4];
@@ -223,8 +240,6 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	vertices[2] = { { mSize.x(), 0.0f      }, { 1.0f, 0.0f }, color };
 	vertices[3] = { { mSize.x(), mSize.y() }, { 1.0f, 1.0f }, color };
 
-	// Build a texture for the video frame
-	mTexture->initFromPixels((unsigned char*)mContext.surface->pixels, mContext.surface->w, mContext.surface->h);
 	mTexture->bind();
 
 	if (mTargetIsMin)
