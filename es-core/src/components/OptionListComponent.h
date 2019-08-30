@@ -166,7 +166,7 @@ public:
 			addChild(&mLeftArrow);
 
 			mRightArrow.setImage(ThemeData::getMenuTheme()->Icons.option_arrow); // ":/option_arrow.svg");
-			mLeftArrow.setColorShift(theme->Text.color);
+			mRightArrow.setColorShift(theme->Text.color);
 			addChild(&mRightArrow);
 		}
 

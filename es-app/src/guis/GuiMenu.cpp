@@ -335,36 +335,13 @@ void GuiMenu::openUISettings()
 				auto themeRegions = ThemeData::sortThemeSubSets(themeSubSets, "region");
 
 				// theme changed without setting options, forcing options to avoid crash/blank theme
-				if (themeRegions.empty())
-					Settings::getInstance()->setString("ThemeRegionName", "");
-				else
-					Settings::getInstance()->setString("ThemeRegionName", themeRegions.begin()->first);
-
-				if (themeColorSets.empty())
-					Settings::getInstance()->setString("ThemeColorSet", "");
-				else
-					Settings::getInstance()->setString("ThemeColorSet", themeColorSets.begin()->first);
-
-				if (themeIconSets.empty())
-					Settings::getInstance()->setString("ThemeIconSet", "");
-				else
-					Settings::getInstance()->setString("ThemeIconSet", themeIconSets.begin()->first);
-
-				if (themeMenus.empty())
-					Settings::getInstance()->setString("ThemeMenu", "");
-				else
-					Settings::getInstance()->setString("ThemeMenu", themeMenus.begin()->first);
-
-				if (themeSystemviewSets.empty())
-					Settings::getInstance()->setString("ThemeSystemView", "");
-				else
-					Settings::getInstance()->setString("ThemeSystemView", themeSystemviewSets.begin()->first);
-
-				if (themeGamelistViewSets.empty())
-					Settings::getInstance()->setString("ThemeGamelistView", "");
-				else
-					Settings::getInstance()->setString("ThemeGamelistView", themeGamelistViewSets.begin()->first);
-
+				Settings::getInstance()->setString("ThemeRegionName", themeRegions.empty() ? "" : themeRegions.begin()->first);
+				Settings::getInstance()->setString("ThemeColorSet", themeColorSets.empty() ? "" : themeColorSets.begin()->first);
+				Settings::getInstance()->setString("ThemeIconSet", themeIconSets.empty() ? "" : themeIconSets.begin()->first);
+				Settings::getInstance()->setString("ThemeMenu", themeMenus.empty() ? "" : themeMenus.begin()->first);
+				Settings::getInstance()->setString("ThemeSystemView", themeSystemviewSets.empty() ? "" : themeSystemviewSets.begin()->first);
+				Settings::getInstance()->setString("ThemeGamelistView", themeGamelistViewSets.empty() ? "" : themeGamelistViewSets.begin()->first);
+				
 				Scripting::fireEvent("theme-changed", theme_set->getSelected(), oldTheme);
 				CollectionSystemManager::get()->updateSystemsList();
 				ViewController::get()->goToStart();
