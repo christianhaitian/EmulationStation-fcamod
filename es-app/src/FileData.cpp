@@ -27,6 +27,8 @@ FileData::FileData(FileType type, const std::string& path, SystemData* system)
 	// metadata needs at least a name field (since that's what getName() will return)
 	if (metadata.get("name").empty())
 		metadata.set("name", getDisplayName());	
+	
+	metadata.resetChangedFlag();
 }
 
 const std::string FileData::getPath() const

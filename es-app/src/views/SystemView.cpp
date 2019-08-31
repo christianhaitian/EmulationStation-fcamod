@@ -712,7 +712,7 @@ void SystemView::renderFade(const Transform4x4f& trans)
 	{
 		unsigned int fadeColor = 0x00000000 | (unsigned char)(mExtrasFadeOpacity * 255);
 		Renderer::setMatrix(trans);
-		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), fadeColor, fadeColor);
+		Renderer::drawRect(mPosition.x(), mPosition.y(), mSize.x(), mSize.y(), fadeColor);
 	}
 }
 
