@@ -532,6 +532,7 @@ void SystemView::renderCarousel(const Transform4x4f& trans)
 	Renderer::pushClipRect(Vector2i((int)clipPos.x(), (int)clipPos.y()), Vector2i((int)carouselSize().x(), (int)carouselSize().y()));
 
 	Renderer::setMatrix(carouselTrans);
+	Renderer::drawRect(0.0, 0.0, mCarousel.size.x(), mCarousel.size.y(), mCarousel.color, mCarousel.colorEnd, mCarousel.colorGradientHorizontal);
 
 	if (mCarousel.colorGradient != 0)
 		Renderer::drawGradientRect(0.0, 0.0, carouselSize().x(), carouselSize().y(), mCarousel.color, mCarousel.colorGradient, mCarousel.colorGradientHorz);
@@ -709,8 +710,9 @@ void SystemView::renderFade(const Transform4x4f& trans)
 	// fade extras if necessary
 	if (mExtrasFadeOpacity)
 	{
+		unsigned int fadeColor = 0x00000000 | (unsigned char)(mExtrasFadeOpacity * 255);
 		Renderer::setMatrix(trans);
-		Renderer::drawRect(mPosition.x(), mPosition.y(), mSize.x(), mSize.y(), 0x00000000 | (unsigned char)(mExtrasFadeOpacity * 255));
+		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), fadeColor, fadeColor);
 	}
 }
 
@@ -727,8 +729,8 @@ void  SystemView::getDefaultElements(void)
 	mCarousel.origin.x() = 0.0f;
 	mCarousel.origin.y() = 0.0f;
 	mCarousel.color = 0xFFFFFFD8;
-	mCarousel.colorGradient = 0;
-	mCarousel.colorGradientHorz = false;
+	mCarousel.colorEnd = 0xFFFFFFD8;
+	mCarousel.colorGradientHorizontal = true;
 	mCarousel.logoScale = 1.2f;
 	mCarousel.logoRotation = 7.5;
 	mCarousel.logoRotationOrigin.x() = -5;
@@ -812,13 +814,14 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 	if (elem->has("origin"))
 		mCarousel.origin = elem->get<Vector2f>("origin");
 	if (elem->has("color"))
+	{
 		mCarousel.color = elem->get<unsigned int>("color");
-
+		mCarousel.colorEnd = mCarousel.color;
+	}
 	if (elem->has("colorEnd"))
-		mCarousel.colorGradient = elem->get<unsigned int>("colorEnd");
-
-	mCarousel.colorGradientHorz = (elem->has("gradientType") && !(elem->get<std::string>("type").compare("horizontal")));
-
+		mCarousel.colorEnd = elem->get<unsigned int>("colorEnd");
+	if (elem->has("gradientType"))
+		mCarousel.colorGradientHorizontal = !(elem->get<std::string>("gradientType").compare("horizontal"));
 	if (elem->has("logoScale"))
 		mCarousel.logoScale = elem->get<float>("logoScale");
 	if (elem->has("logoSize"))

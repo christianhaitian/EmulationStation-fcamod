@@ -152,6 +152,9 @@ void VideoComponent::setOpacity(unsigned char opacity)
 
 void VideoComponent::render(const Transform4x4f& parentTrans)
 {
+	if (!isVisible())
+		return;
+
 	Transform4x4f trans = parentTrans * getTransform();
 	GuiComponent::renderChildren(trans);
 	
@@ -248,6 +251,11 @@ void VideoComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 		setZIndex(elem->get<float>("zIndex"));
 	else
 		setZIndex(getDefaultZIndex());
+
+	if(properties & ThemeFlags::VISIBLE && elem->has("visible"))
+		setVisible(elem->get<bool>("visible"));
+	else
+		setVisible(true);
 
 	if (elem->has("path"))
 		mVideoPath = elem->get<std::string>("path");

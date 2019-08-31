@@ -271,6 +271,21 @@ void ImageComponent::setColorShift(unsigned int color)
 	mOpacity = color & 0xff;	
 }
 
+void ImageComponent::setColorShiftEnd(unsigned int color)
+{
+	mColorShiftEnd = color;
+	// Grab the opacity from the color shift because we may need to apply it if
+	// fading textures in
+	mOpacity = color & 0xff;
+	updateColors();
+}
+
+void ImageComponent::setColorGradientHorizontal(bool horizontal)
+{
+	mColorGradientHorizontal = horizontal;
+	updateColors();
+}
+
 void ImageComponent::setOpacity(unsigned char opacity)
 {
 	mOpacity = opacity;
@@ -488,8 +503,20 @@ void ImageComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 		}
 	}
 
-	if(properties & COLOR && elem->has("color"))
-		setColorShift(elem->get<unsigned int>("color"));
+	if(properties & COLOR)
+	{
+		if(elem->has("color"))
+		{
+			setColorShift(elem->get<unsigned int>("color"));
+			setColorShiftEnd(elem->get<unsigned int>("color"));
+		}
+
+		if (elem->has("colorEnd"))
+			setColorShiftEnd(elem->get<unsigned int>("colorEnd"));
+
+		if (elem->has("gradientType"))
+			setColorGradientHorizontal(!(elem->get<std::string>("gradientType").compare("horizontal")));
+	}
 
 	if (properties & COLOR && elem->has("reflexion"))
 		mMirror = elem->get<Vector2f>("reflexion");
@@ -505,6 +532,11 @@ void ImageComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 		setZIndex(elem->get<float>("zIndex"));
 	else
 		setZIndex(getDefaultZIndex());
+
+	if(properties & ThemeFlags::VISIBLE && elem->has("visible"))
+		setVisible(elem->get<bool>("visible"));
+	else
+		setVisible(true);
 }
 
 std::vector<HelpPrompt> ImageComponent::getHelpPrompts()
