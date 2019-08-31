@@ -269,7 +269,7 @@ void ImageComponent::setColorShift(unsigned int color)
 	mColorShiftEnd = color;
 	// Grab the opacity from the color shift because we may need to apply it if
 	// fading textures in
-	mOpacity = color & 0xff;	
+	//mOpacity = color & 0xff;	
 }
 
 void ImageComponent::setColorShiftEnd(unsigned int color)
@@ -285,7 +285,8 @@ void ImageComponent::setColorGradientHorizontal(bool horizontal)
 void ImageComponent::setOpacity(unsigned char opacity)
 {
 	mOpacity = opacity;
-	mColorShift = (mColorShift >> 8 << 8) | mOpacity;	
+	//mColorShift = (mColorShift >> 8 << 8) | mOpacity;	
+	//mColorShiftEnd = (mColorShiftEnd >> 8 << 8) | mOpacity;
 }
 
 void ImageComponent::updateVertices()
@@ -349,8 +350,10 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			// when it finally loads
 			fadeIn(mTexture->bind());
 
-			const unsigned int color = Renderer::convertColor(mColorShift);
-			const unsigned int colorEnd = Renderer::convertColor(mColorShiftEnd);
+			float opacity = (mOpacity * (mFading ? mFadeOpacity / 255.0 : 1.0)) / 255.0;
+						
+			const unsigned int color = Renderer::convertColor(mColorShift & 0xFFFFFF00 | (unsigned char) ((mColorShift & 0xFF) * opacity));
+			const unsigned int colorEnd = Renderer::convertColor(mColorShiftEnd & 0xFFFFFF00 | (unsigned char)((mColorShiftEnd & 0xFF) * opacity));
 
 			mVertices[0].col = color;
 			mVertices[1].col = mColorGradientHorizontal ? colorEnd : color;
@@ -424,7 +427,8 @@ void ImageComponent::fadeIn(bool textureLoaded)
 				mFadeOpacity = 0;
 				mFading = true;
 				// Set the colours to be translucent
-				mColorShift = (mColorShift >> 8 << 8) | 0;				
+			//	mColorShift = (mColorShift >> 8 << 8) | 0;			
+			//	mColorShiftEnd = (mColorShiftEnd >> 8 << 8) | 0;
 			}
 		}
 		else if (mFading && textureLoaded)
@@ -444,8 +448,9 @@ void ImageComponent::fadeIn(bool textureLoaded)
 				mFadeOpacity = (unsigned char)opacity;
 			}
 			// Apply the combination of the target opacity and current fade
-			float newOpacity = (float)mOpacity * ((float)mFadeOpacity / 255.0f);
-			mColorShift = (mColorShift >> 8 << 8) | (unsigned char)newOpacity;			
+		//	float newOpacity = (float)mOpacity * ((float)mFadeOpacity / 255.0f);
+	//		mColorShift = (mColorShift >> 8 << 8) | (unsigned char)newOpacity;		
+	//		mColorShiftEnd = (mColorShiftEnd >> 8 << 8) | (unsigned char)newOpacity;
 		}
 	}
 }
@@ -505,10 +510,7 @@ void ImageComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 	if(properties & COLOR)
 	{
 		if(elem->has("color"))
-		{
 			setColorShift(elem->get<unsigned int>("color"));
-			setColorShiftEnd(elem->get<unsigned int>("color"));
-		}
 
 		if (elem->has("colorEnd"))
 			setColorShiftEnd(elem->get<unsigned int>("colorEnd"));
