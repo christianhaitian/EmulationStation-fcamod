@@ -334,63 +334,29 @@ namespace Renderer
 
 	void drawRect(const float _x, const float _y, const float _w, const float _h, const unsigned int _color, const Blend::Factor _srcBlendFactor, const Blend::Factor _dstBlendFactor)
 	{
-		drawRect((int)Math::round(_x), (int)Math::round(_y), (int)Math::round(_w), (int)Math::round(_h), _color, _colorEnd, horizontalGradient, _srcBlendFactor, _dstBlendFactor);
-
+		drawRect(_x, _y, _w, _h, _color, _color, true, _srcBlendFactor, _dstBlendFactor);
 	} // drawRect
 
-	void drawRect(const int _x, const int _y, const int _w, const int _h, const unsigned int _color, const unsigned int _colorEnd, bool horizontalGradient, const Blend::Factor _srcBlendFactor, const Blend::Factor _dstBlendFactor)
+	void drawRect(const float _x, const float _y, const float _w, const float _h, const unsigned int _color, const unsigned int _colorEnd, bool horizontalGradient, const Blend::Factor _srcBlendFactor, const Blend::Factor _dstBlendFactor)
 	{
+		int x = Math::round(_x);
+		int y = Math::round(_y);
+		int w = Math::round(_w);
+		int h = Math::round(_h);
+
 		const unsigned int color    = convertColor(_color);
 		const unsigned int colorEnd = convertColor(_colorEnd);
 		Vertex             vertices[4];
 
-		vertices[0] = { { (float)(_x     ), (float)(_y     ) }, { 0.0f, 0.0f }, color };
-		vertices[1] = { { (float)(_x     ), (float)(_y + _h) }, { 0.0f, 0.0f }, horizontalGradient ? colorEnd : color };
-		vertices[2] = { { (float)(_x + _w), (float)(_y     ) }, { 0.0f, 0.0f }, horizontalGradient ? color : colorEnd };
-		vertices[3] = { { (float)(_x + _w), (float)(_y + _h) }, { 0.0f, 0.0f }, colorEnd };
+		vertices[0] = { { (float)(x     ), (float)(y     ) }, { 0.0f, 0.0f }, color };
+		vertices[1] = { { (float)(x     ), (float)(y + h) }, { 0.0f, 0.0f }, horizontalGradient ? colorEnd : color };
+		vertices[2] = { { (float)(x + w), (float)(y     ) }, { 0.0f, 0.0f }, horizontalGradient ? color : colorEnd };
+		vertices[3] = { { (float)(x + w), (float)(y + h) }, { 0.0f, 0.0f }, colorEnd };
 
 		bindTexture(0);
 		drawTriangleStrips(vertices, 4, _srcBlendFactor, _dstBlendFactor);
 
 	} // drawRect
-
-	void drawGradientRect(int _x, int _y, int _w, int _h, unsigned int _color, unsigned int _colorBottom, bool _horz, const Blend::Factor _srcBlendFactor, const Blend::Factor _dstBlendFactor)
-	{
-		const unsigned int color = convertColor(_color);
-		const unsigned int colorBottom = convertColor(_colorBottom);
-
-		Vertex             vertices[4];
-
-		vertices[0] = { { (float)(_x), (float)(_y) }, { 0.0f, 0.0f }, _horz ? colorBottom : color };
-		vertices[1] = { { (float)(_x), (float)(_y + _h) }, { 0.0f, 0.0f }, colorBottom };
-		vertices[2] = { { (float)(_x + _w), (float)(_y) }, { 0.0f, 0.0f }, color };
-		vertices[3] = { { (float)(_x + _w), (float)(_y + _h) }, { 0.0f, 0.0f }, _horz ? color : colorBottom };
-
-		bindTexture(0);
-		drawTriangleStrips(vertices, 4, _srcBlendFactor, _dstBlendFactor);
-		/*
-			   		 	  
-		glEnable(GL_BLEND);
-		glBlendFunc(blend_sfactor, blend_dfactor);
-
-		glBegin(GL_QUADS);
-
-		glColor4f(MAKEQUAD(horz ? colorBottom : color));
-		glVertex2f(x, y);
-
-		glColor4f(MAKEQUAD(color));
-		glVertex2f(x + w, y);
-
-		glColor4f(MAKEQUAD(horz ? color : colorBottom));
-		glVertex2f(x + w, y + h);
-
-		glColor4f(MAKEQUAD(colorBottom));
-		glVertex2f(x, y + h);
-
-		glEnd();
-
-		glDisable(GL_BLEND);*/
-	}
 
 	SDL_Window* getSDLWindow()     { return sdlWindow; }
 	int         getWindowWidth()   { return windowWidth; }

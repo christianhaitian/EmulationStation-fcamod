@@ -22,7 +22,7 @@ Vector2f ImageComponent::getSize() const
 }
 
 ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : GuiComponent(window),
-	mTargetIsMax(false), mTargetIsMin(false), mFlipX(false), mFlipY(false), mTargetSize(0, 0), mColorShift(0xFFFFFFFF),
+	mTargetIsMax(false), mTargetIsMin(false), mFlipX(false), mFlipY(false), mTargetSize(0, 0), mColorShift(0xFFFFFFFF), mColorShiftEnd(0xFFFFFFFF),
 	mForceLoad(forceLoad), mDynamic(dynamic), mFadeOpacity(0), mFading(false), mRotateByTargetSize(false), mVisible(true),
 	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f), mMirror(0.0f, 0.0f), mAllowAsync(false)
 {
@@ -266,6 +266,7 @@ void ImageComponent::setFlipY(bool flip)
 void ImageComponent::setColorShift(unsigned int color)
 {
 	mColorShift = color;
+	mColorShiftEnd = color;
 	// Grab the opacity from the color shift because we may need to apply it if
 	// fading textures in
 	mOpacity = color & 0xff;	
@@ -274,16 +275,11 @@ void ImageComponent::setColorShift(unsigned int color)
 void ImageComponent::setColorShiftEnd(unsigned int color)
 {
 	mColorShiftEnd = color;
-	// Grab the opacity from the color shift because we may need to apply it if
-	// fading textures in
-	mOpacity = color & 0xff;
-	updateColors();
 }
 
 void ImageComponent::setColorGradientHorizontal(bool horizontal)
 {
 	mColorGradientHorizontal = horizontal;
-	updateColors();
 }
 
 void ImageComponent::setOpacity(unsigned char opacity)
@@ -354,9 +350,12 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			fadeIn(mTexture->bind());
 
 			const unsigned int color = Renderer::convertColor(mColorShift);
+			const unsigned int colorEnd = Renderer::convertColor(mColorShiftEnd);
 
-			for (int i = 0; i < 4; ++i)
-				mVertices[i].col = color;
+			mVertices[0].col = color;
+			mVertices[1].col = mColorGradientHorizontal ? colorEnd : color;
+			mVertices[2].col = mColorGradientHorizontal ? color : colorEnd;
+			mVertices[3].col = colorEnd;
 
 			Renderer::drawTriangleStrips(&mVertices[0], 4);
 

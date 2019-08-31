@@ -534,8 +534,8 @@ void SystemView::renderCarousel(const Transform4x4f& trans)
 	Renderer::setMatrix(carouselTrans);
 	Renderer::drawRect(0.0, 0.0, mCarousel.size.x(), mCarousel.size.y(), mCarousel.color, mCarousel.colorEnd, mCarousel.colorGradientHorizontal);
 
-	if (mCarousel.colorGradient != 0)
-		Renderer::drawGradientRect(0.0, 0.0, carouselSize().x(), carouselSize().y(), mCarousel.color, mCarousel.colorGradient, mCarousel.colorGradientHorz);
+	if (mCarousel.colorEnd != 0)
+		Renderer::drawRect(0.0, 0.0, carouselSize().x(), carouselSize().y(), mCarousel.color, mCarousel.colorEnd, mCarousel.colorGradientHorizontal);
 	else
 		Renderer::drawRect(0.0, 0.0, carouselSize().x(), carouselSize().y(), mCarousel.color);
 

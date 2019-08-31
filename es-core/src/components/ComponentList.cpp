@@ -167,6 +167,7 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 	unsigned int bgColor = menuTheme->Background.color;
 	unsigned int separatorColor = menuTheme->Text.separatorColor;
 	unsigned int textColor = menuTheme->Text.color;
+	bool selectorGradientHorz = menuTheme->Text.selectorGradientType;
 
 	Transform4x4f trans = parentTrans * getTransform();
 	trans.round();
@@ -211,21 +212,18 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 		// (1 - dst) + 0x77
 
 		const float selectedRowHeight = getRowHeight(mEntries.at(mCursor).data);
-		
+		/*
+		if ((selectorColor != bgColor) && ((selectorColor & 0xFF) != 0x00)) {
+			Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, Renderer::Blend::ZERO, Renderer::Blend::ONE_MINUS_SRC_COLOR);
+			Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, selectorColor, selectorGradientColor, selectorGradientHorz, Renderer::Blend::ONE, Renderer::Blend::ONE);
+		}
+		*/
 		if ((selectorColor != bgColor) && ((selectorColor & 0xFF) != 0x00)) {
 
-			if (selectorGradientColor != 0)
-			{
-				Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, Renderer::Blend::ZERO, Renderer::Blend::ONE_MINUS_SRC_COLOR);
-				Renderer::drawGradientRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, selectorColor, selectorGradientColor, false, Renderer::Blend::ONE, Renderer::Blend::ONE);
-			}
-			else
-			{
-				Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, Renderer::Blend::ZERO, Renderer::Blend::ONE_MINUS_SRC_COLOR);
-				Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, selectorColor, Renderer::Blend::ONE, Renderer::Blend::ONE);
-			}
+			Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, bgColor, Renderer::Blend::ZERO, Renderer::Blend::ONE_MINUS_SRC_COLOR);
+			Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, selectorColor, selectorGradientColor, selectorGradientHorz, Renderer::Blend::ONE, Renderer::Blend::ONE);
 		}
-		
+
 	//	Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, 0xFFFFFFFF, GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 	//	Renderer::drawRect(0.0f, mSelectorBarOffset, mSize.x(), selectedRowHeight, 0x777777FF, GL_ONE, GL_ONE);
 		

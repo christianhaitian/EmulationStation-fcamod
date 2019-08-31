@@ -207,6 +207,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "separatorColor", COLOR },
 		{ "selectorColor", COLOR },
 		{ "selectorColorEnd", COLOR },
+		{ "selectorGradientType", STRING },
 		{ "selectedColor", COLOR },
 		{ "color", COLOR } } },
 
@@ -1130,9 +1131,14 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 		if (elem->has("selectedColor"))
 			Text.selectedColor = elem->get<unsigned int>("selectedColor");
 		if (elem->has("selectorColor"))
+		{
 			Text.selectorColor = elem->get<unsigned int>("selectorColor");
+			Text.selectorGradientColor = Text.selectorColor;
+		}
 		if (elem->has("selectorColorEnd"))
 			Text.selectorGradientColor = elem->get<unsigned int>("selectorColorEnd");
+		if (elem->has("selectorGradientType"))
+			Text.selectorGradientType = !(elem->get<std::string>("selectorGradientType").compare("horizontal"));
 	}
 
 	elem = theme->getElement("menu", "menubutton", "menuButton");
