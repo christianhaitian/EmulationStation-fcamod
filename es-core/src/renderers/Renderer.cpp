@@ -339,19 +339,19 @@ namespace Renderer
 
 	void drawRect(const float _x, const float _y, const float _w, const float _h, const unsigned int _color, const unsigned int _colorEnd, bool horizontalGradient, const Blend::Factor _srcBlendFactor, const Blend::Factor _dstBlendFactor)
 	{
-		int x = Math::round(_x);
-		int y = Math::round(_y);
-		int w = Math::round(_w);
-		int h = Math::round(_h);
 
 		const unsigned int color    = convertColor(_color);
 		const unsigned int colorEnd = convertColor(_colorEnd);
 		Vertex             vertices[4];
 
-		vertices[0] = { { (float)(x     ), (float)(y     ) }, { 0.0f, 0.0f }, color };
-		vertices[1] = { { (float)(x     ), (float)(y + h) }, { 0.0f, 0.0f }, horizontalGradient ? colorEnd : color };
-		vertices[2] = { { (float)(x + w), (float)(y     ) }, { 0.0f, 0.0f }, horizontalGradient ? color : colorEnd };
-		vertices[3] = { { (float)(x + w), (float)(y + h) }, { 0.0f, 0.0f }, colorEnd };
+		vertices[0] = { { _x     ,_y      }, { 0.0f, 0.0f }, color };
+		vertices[1] = { { _x     ,_y + _h }, { 0.0f, 0.0f }, horizontalGradient ? colorEnd : color };
+		vertices[2] = { { _x + _w,_y      }, { 0.0f, 0.0f }, horizontalGradient ? color : colorEnd };
+		vertices[3] = { { _x + _w,_y + _h }, { 0.0f, 0.0f }, colorEnd };
+
+		// round vertices
+		for(int i = 0; i < 4; ++i)
+			vertices[i].pos.round();
 
 		bindTexture(0);
 		drawTriangleStrips(vertices, 4, _srcBlendFactor, _dstBlendFactor);

@@ -170,7 +170,6 @@ void ComponentList::render(const Transform4x4f& parentTrans)
 	bool selectorGradientHorz = menuTheme->Text.selectorGradientType;
 
 	Transform4x4f trans = parentTrans * getTransform();
-	trans.round();
 
 	// clip everything to be inside our boundsz
 	Vector3f dim(mSize.x(), mSize.y(), 0);

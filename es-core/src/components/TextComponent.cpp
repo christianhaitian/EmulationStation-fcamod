@@ -132,7 +132,7 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 	if (mRenderBackground)
 	{
 		Renderer::setMatrix(trans);
-		Renderer::drawRect(0.f, 0.f, mSize.x(), mSize.y(), mBgColor, mBgColor);
+		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), mBgColor, mBgColor);
 	}
 	
 	if (mTextCache)
@@ -158,7 +158,7 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 		{
 			// draw the "textbox" area, what we are aligned within
 			Renderer::setMatrix(trans);
-			Renderer::drawRect(0.f, 0.f, mSize.x(), mSize.y(), 0xFF000033, 0xFF000033);
+			Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0xFF000033, 0xFF000033);
 		}
 
 		if ((mGlowColor & 0x000000FF) != 0 && mGlowSize > 0)
@@ -204,7 +204,6 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 		}
 
 		trans.translate(off);
-		trans.round();
 		Renderer::setMatrix(trans);
 
 		// draw the text area, where the text actually is going

@@ -228,6 +228,7 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
 		return;
 
+	GuiComponent::renderChildren(trans);
 	Renderer::setMatrix(trans);
 
 	// Build a texture for the video frame
@@ -243,7 +244,11 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	vertices[2] = { { mSize.x(), 0.0f      }, { 1.0f, 0.0f }, color };
 	vertices[3] = { { mSize.x(), mSize.y() }, { 1.0f, 1.0f }, color };
 
-	mTexture->bind();
+		// round vertices
+		for(int i = 0; i < 4; ++i)
+			vertices[i].pos.round();
+	
+		mTexture->bind();
 
 	if (mTargetIsMin)
 	{

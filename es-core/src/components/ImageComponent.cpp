@@ -296,19 +296,23 @@ void ImageComponent::updateVertices()
 
 	// we go through this mess to make sure everything is properly rounded
 	// if we just round vertices at the end, edge cases occur near sizes of 0.5
-	const Vector2f     size = { Math::round(mSize.x()), Math::round(mSize.y()) };
-	const Vector2f     topLeft = { size * mTopLeftCrop };
-	const Vector2f     bottomRight = { size * mBottomRightCrop };
-	const float        px = mTexture->isTiled() ? mSize.x() / getTextureSize().x() : 1.0f;
-	const float        py = mTexture->isTiled() ? mSize.y() / getTextureSize().y() : 1.0f;
-	const unsigned int color = Renderer::convertColor(mColorShift);
+	const Vector2f     topLeft     = { mSize * mTopLeftCrop };
+	const Vector2f     bottomRight = { mSize * mBottomRightCrop };
+	const float        px          = mTexture->isTiled() ? mSize.x() / getTextureSize().x() : 1.0f;
+	const float        py          = mTexture->isTiled() ? mSize.y() / getTextureSize().y() : 1.0f;
+	const unsigned int color       = Renderer::convertColor(mColorShift);
+	const unsigned int colorEnd    = Renderer::convertColor(mColorShiftEnd);
 
 	mVertices[0] = { { topLeft.x(),     topLeft.y()     }, { mTopLeftCrop.x(),          py - mTopLeftCrop.y()     }, color };
 	mVertices[1] = { { topLeft.x(),     bottomRight.y() }, { mTopLeftCrop.x(),          1.0f - mBottomRightCrop.y() }, color };
 	mVertices[2] = { { bottomRight.x(), topLeft.y()     }, { mBottomRightCrop.x() * px, py - mTopLeftCrop.y()     }, color };
 	mVertices[3] = { { bottomRight.x(), bottomRight.y() }, { mBottomRightCrop.x() * px, 1.0f - mBottomRightCrop.y() }, color };
 
-	if (mFlipX)
+	// round vertices
+	for(int i = 0; i < 4; ++i)
+		mVertices[i].pos.round();
+
+	if(mFlipX)
 	{
 		for (int i = 0; i < 4; i++)
 			mVertices[i].tex[0] = px - mVertices[i].tex[0];
