@@ -26,6 +26,7 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 	mDisable = false;
 	mShowing = false;
 	mLastCursor = 0;
+	mStaticBackground = nullptr;
 
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 	populate();
@@ -33,6 +34,12 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 
 SystemView::~SystemView()
 {
+	if (mStaticBackground != nullptr)
+	{
+		delete mStaticBackground;
+		mStaticBackground = nullptr;
+	}
+
 	clearEntries();
 }
 
@@ -440,8 +447,10 @@ void SystemView::render(const Transform4x4f& parentTrans)
 	auto systemInfoZIndex = mSystemInfo.getZIndex();
 	auto minMax = std::minmax(mCarousel.zIndex, systemInfoZIndex);
 
-	if (!Settings::getInstance()->getBool("FixedCarousel"))
-		renderExtras(trans, INT16_MIN, minMax.first);
+	renderExtras(trans, INT16_MIN, minMax.first);
+
+	if (mStaticBackground != nullptr)
+		mStaticBackground->render(trans);
 
 	renderFade(trans);
 
@@ -459,8 +468,7 @@ void SystemView::render(const Transform4x4f& parentTrans)
 		renderInfoBar(trans);
 	}
 
-	if (!Settings::getInstance()->getBool("FixedCarousel"))
-		renderExtras(trans, minMax.second, INT16_MAX);
+	renderExtras(trans, minMax.second, INT16_MAX);
 }
 
 std::vector<HelpPrompt> SystemView::getHelpPrompts()
@@ -511,6 +519,20 @@ void  SystemView::getViewElements(const std::shared_ptr<ThemeData>& theme)
 	const ThemeData::ThemeElement* sysInfoElem = theme->getElement("system", "systemInfo", "text");
 	if (sysInfoElem)
 		mSystemInfo.applyTheme(theme, "system", "systemInfo", ThemeFlags::ALL);
+
+	const ThemeData::ThemeElement* fixedBackgroundElem = theme->getElement("system", "fixedBackground", "image");
+	if (fixedBackgroundElem)
+	{
+		if (mStaticBackground == nullptr)
+			mStaticBackground = new ImageComponent(mWindow, false);
+		
+		mStaticBackground->applyTheme(theme, "system", "staticBackground", ThemeFlags::ALL);
+	}
+	else if (mStaticBackground != nullptr)
+	{
+		delete mStaticBackground;
+		mStaticBackground = nullptr;
+	}	
 
 	mViewNeedsReload = false;
 }
@@ -750,6 +772,12 @@ void  SystemView::getDefaultElements(void)
 	mSystemInfo.setColor(0x000000FF);
 	mSystemInfo.setZIndex(50);
 	mSystemInfo.setDefaultZIndex(50);
+
+	if (mStaticBackground != nullptr)
+	{
+		delete mStaticBackground;
+		mStaticBackground = nullptr;
+	}
 }
 
 void SystemView::onSizeChanged()

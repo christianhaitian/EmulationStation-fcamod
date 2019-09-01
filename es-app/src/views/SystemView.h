@@ -98,6 +98,7 @@ private:
 	SystemViewCarousel	mCarousel;
 	TextComponent		mSystemInfo;
 	SystemData*			mLastSystem;
+	ImageComponent*		mStaticBackground;
 
 	// unit is list index
 	float mCamOffset;
