@@ -244,18 +244,18 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	vertices[2] = { { mSize.x(), 0.0f      }, { 1.0f, 0.0f }, color };
 	vertices[3] = { { mSize.x(), mSize.y() }, { 1.0f, 1.0f }, color };
 
-		// round vertices
-		for(int i = 0; i < 4; ++i)
-			vertices[i].pos.round();
+	// round vertices
+	for(int i = 0; i < 4; ++i)
+		vertices[i].pos.round();
 	
-		mTexture->bind();
+	mTexture->bind();
 
 	if (mTargetIsMin)
 	{
 		Vector2f targetPos = (mTargetSize - mSize) * mOrigin * -1;
-
+		
 		Vector2i pos(trans.translation().x() + (int)targetPos.x(), trans.translation().y() + (int)targetPos.y());
-		Vector2i size((int)Math::round(mTargetSize.x()), (int)Math::round(mTargetSize.y()));
+		Vector2i size((int)mTargetSize.round().x(), (int)mTargetSize.round().y());
 		Renderer::pushClipRect(pos, size);
 	}
 	

@@ -63,6 +63,7 @@ VideoComponent::VideoComponent(Window* window) :
 	mDisable(false),
 	mScreensaverMode(false),
 	mTargetIsMax(false),
+	mTargetIsMin(false),
 	mTargetSize(0, 0)
 {
 	mFadeIn = 0.0f;
