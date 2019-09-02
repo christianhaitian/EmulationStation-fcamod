@@ -3,6 +3,7 @@
 #include "renderers/Renderer.h"
 #include "Log.h"
 #include "Settings.h"
+#include "math/Transform4x4f.h"
 
 #include <GLES/gl.h>
 #include <SDL.h>
