@@ -8,6 +8,12 @@
 #include "utils/FileSystemUtil.h"
 #include "utils/StringUtil.h"
 
+#ifdef WIN32
+#include <time.h>
+#else
+#include <unistd.h>
+#endif
+
 std::vector<std::shared_ptr<Sound>> AudioManager::sSoundVector;
 std::shared_ptr<AudioManager> AudioManager::sInstance;
 
