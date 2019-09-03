@@ -639,6 +639,17 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 
 void ViewController::reloadAll()
 {
+	SystemData* system = nullptr;
+
+	if (mState.viewing == SYSTEM_SELECT)
+	{
+		int idx = mSystemListView->getCursorIndex();
+		if (idx >= 0 && idx < SystemData::sSystemVector.size())
+			system = SystemData::sSystemVector[mSystemListView->getCursorIndex()];
+		else
+			system = mState.getSystem();
+	}
+	
 	// clear all gamelistviews
 	std::map<SystemData*, FileData*> cursorMap;
 	
@@ -671,15 +682,15 @@ void ViewController::reloadAll()
 	if(mState.viewing == GAME_LIST)
 	{
 		mCurrentView = getGameListView(mState.getSystem());
-	}else if(mState.viewing == SYSTEM_SELECT)
-	{
-		SystemData* system = mState.getSystem();
+	}
+	else if(mState.viewing == SYSTEM_SELECT && system != nullptr)
+	{		
 		goToSystemView(SystemData::sSystemVector.front(), false);
 		mSystemListView->goToSystem(system, false);
 		mCurrentView = mSystemListView;
-	}else{
-		goToSystemView(SystemData::sSystemVector.front(), false);
 	}
+	else
+		goToSystemView(SystemData::sSystemVector.front(), false);	
 
 	updateHelpPrompts();
 }

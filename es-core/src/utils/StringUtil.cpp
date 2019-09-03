@@ -11,48 +11,6 @@ namespace Utils
 {
 	namespace String
 	{
-#if defined(_WIN32)
-		const std::string convertFromWideString(const std::wstring wstring)
-		{
-			int numBytes = WideCharToMultiByte(CP_UTF8, 0, wstring.c_str(), (int)wstring.length(), nullptr, 0, nullptr, nullptr);
-
-			std::string string;
-			string.resize(numBytes);
-			WideCharToMultiByte(CP_UTF8, 0, wstring.c_str(), (int)wstring.length(), (char*)string.c_str(), numBytes, nullptr, nullptr);
-
-			return string;
-		}
-	
-		const std::wstring convertToWideString(const std::string string)
-		{
-			int numBytes = MultiByteToWideChar(CP_UTF8, 0, string.c_str(), (int)string.length(), nullptr, 0);
-
-			std::wstring wstring;
-			wstring.resize(numBytes);
-			MultiByteToWideChar(CP_UTF8, 0, string.c_str(), (int)string.length(), (WCHAR*)wstring.c_str(), numBytes);
-
-			return wstring;
-		}
-#endif
-		std::vector<std::string> split(const std::string& s, char seperator)
-		{
-			std::vector<std::string> output;
-
-			std::string::size_type prev_pos = 0, pos = 0;
-			while ((pos = s.find(seperator, pos)) != std::string::npos)
-			{
-				std::string substring(s.substr(prev_pos, pos - prev_pos));
-
-				output.push_back(substring);
-
-				prev_pos = ++pos;
-			}
-
-			output.push_back(s.substr(prev_pos, pos - prev_pos)); // Last word
-
-			return output;
-		}
-
 		unsigned int chars2Unicode(const std::string& _string, size_t& _cursor)
 		{
 			const char&  c      = _string[_cursor];
@@ -350,6 +308,49 @@ namespace Utils
 			return buffer;
 
 		} // scramble	
+
+		std::vector<std::string> split(const std::string& s, char seperator)
+		{
+			std::vector<std::string> output;
+
+			std::string::size_type prev_pos = 0, pos = 0;
+			while ((pos = s.find(seperator, pos)) != std::string::npos)
+			{
+				std::string substring(s.substr(prev_pos, pos - prev_pos));
+
+				output.push_back(substring);
+
+				prev_pos = ++pos;
+			}
+
+			output.push_back(s.substr(prev_pos, pos - prev_pos)); // Last word
+
+			return output;
+		}
+
+#if defined(_WIN32)
+		const std::string convertFromWideString(const std::wstring wstring)
+		{
+			int numBytes = WideCharToMultiByte(CP_UTF8, 0, wstring.c_str(), (int)wstring.length(), nullptr, 0, nullptr, nullptr);
+
+			std::string string;
+			string.resize(numBytes);
+			WideCharToMultiByte(CP_UTF8, 0, wstring.c_str(), (int)wstring.length(), (char*)string.c_str(), numBytes, nullptr, nullptr);
+
+			return string;
+		}
+
+		const std::wstring convertToWideString(const std::string string)
+		{
+			int numBytes = MultiByteToWideChar(CP_UTF8, 0, string.c_str(), (int)string.length(), nullptr, 0);
+
+			std::wstring wstring;
+			wstring.resize(numBytes);
+			MultiByteToWideChar(CP_UTF8, 0, string.c_str(), (int)string.length(), (WCHAR*)wstring.c_str(), numBytes);
+
+			return wstring;
+		}
+#endif
 
 	} // String::
 

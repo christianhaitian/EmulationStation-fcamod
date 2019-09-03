@@ -165,6 +165,11 @@ public:
 		return false;
 	}
 
+	int getCursorIndex()
+	{
+		return mCursor;
+	}
+
 	// entry management
 	void add(const Entry& e)
 	{

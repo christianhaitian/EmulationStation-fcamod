@@ -2,6 +2,7 @@
 
 #include "animations/Animation.h"
 #include "animations/AnimationController.h"
+#include "animations/LambdaAnimation.h"
 #include "Log.h"
 #include "renderers/Renderer.h"
 #include "ThemeData.h"
@@ -132,12 +133,12 @@ void GuiComponent::setRotation(float rotation)
 	mRotation = rotation;
 }
 
-float GuiComponent::getScale() const
+Vector3f GuiComponent::getScale() const
 {
 	return mScale;
 }
 
-void GuiComponent::setScale(float scale)
+void GuiComponent::setScale(Vector3f scale)
 {
 	mScale = scale;
 }
@@ -480,7 +481,15 @@ void GuiComponent::updateHelpPrompts()
 
 HelpStyle GuiComponent::getHelpStyle()
 {
-	return HelpStyle();
+	HelpStyle style = HelpStyle();
+
+	if (ThemeData::getDefaultTheme() != nullptr)
+	{
+		std::shared_ptr<ThemeData> theme = std::shared_ptr<ThemeData>(ThemeData::getDefaultTheme(), [](ThemeData*) {});
+		style.applyTheme(theme, "system");
+	}
+
+	return style;
 }
 
 bool GuiComponent::isProcessing() const
@@ -516,4 +525,62 @@ void GuiComponent::topWindow(bool isTop)
 {
 	for(unsigned int i = 0; i < getChildCount(); i++)
 		getChild(i)->topWindow(isTop);
+}
+
+void GuiComponent::animateTo(Vector2f from, Vector2f to, unsigned int  flags, int delay)
+{
+	if ((flags & AnimateFlags::POSITION) == 0)
+		from = to;
+
+	Vector3f scale = mScale;	
+
+	float x1 = from.x();
+	float x2 = to.x();
+	float y1 = from.y();
+	float y2 = to.y();
+
+	if (Settings::getInstance()->getString("PowerSaverMode") == "instant" || Settings::getInstance()->getString("TransitionStyle") == "instant")
+		setPosition(x2, y2);
+	else
+	{
+		setPosition(x1, y1);
+
+		if ((flags & AnimateFlags::OPACITY) == AnimateFlags::OPACITY)
+			setOpacity(0);
+
+		if ((flags & AnimateFlags::SCALE) == AnimateFlags::SCALE)
+			mScale = Vector3f(0, 0, 1);
+
+		auto fadeFunc = [this, x1, x2, y1, y2, flags, scale](float t) {
+
+			t -= 1; // cubic ease out
+			float pct = Math::lerp(0, 1, t*t*t + 1);
+
+			if ((flags & AnimateFlags::OPACITY) == AnimateFlags::OPACITY)
+				setOpacity(pct*255.0);
+
+			if ((flags & AnimateFlags::SCALE) == AnimateFlags::SCALE)
+				mScale = Vector3f(pct * scale.x(), pct * scale.y(), pct * scale.z());
+
+			float x = (x1 + mSize.x() / 2 - (mSize.x() / 2 * mScale.x())) * (1 - pct) + (x2 + mSize.x() / 2 - (mSize.x() / 2 * mScale.x())) * pct;
+			float y = (y1 + mSize.x() / 2 - (mSize.y() / 2 * mScale.y())) * (1 - pct) + (y2 + mSize.y() / 2 - (mSize.y() / 2 * mScale.y())) * pct;
+
+			if (mScale.x() != 0.0f)
+				setPosition(x, y);
+		};
+
+		setAnimation(new LambdaAnimation(fadeFunc, delay), 0, [this, fadeFunc, x2, y2, flags, scale]
+		{
+			if ((flags & AnimateFlags::SCALE) == AnimateFlags::SCALE)
+				mScale = scale;
+
+			if ((flags & AnimateFlags::OPACITY) == AnimateFlags::OPACITY)
+				setOpacity(255);
+
+			float x = x2 + mSize.x() / 2 - (mSize.x() / 2 * mScale.x());
+			float y = y2 + mSize.y() / 2 - (mSize.y() / 2 * mScale.y());
+
+			setPosition(x, y);
+		});
+	}
 }

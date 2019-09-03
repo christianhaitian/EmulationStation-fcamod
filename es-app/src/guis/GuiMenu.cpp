@@ -54,32 +54,15 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _("MAIN M
 	addVersionInfo();
 
 	setSize(mMenu.getSize());
-	
-	float y1 = Renderer::getScreenHeight();
-	float y2 = (Renderer::getScreenHeight() - mMenu.getSize().y()) / 2;
+	/*
+	setScale(Vector3f(
+		Renderer::getScreenWidth() / mMenu.getSize().x(),
+		Renderer::getScreenHeight() / mMenu.getSize().y(),
+		1.0));*/
 
-	if (Settings::getInstance()->getString("PowerSaverMode") == "instant" || Settings::getInstance()->getString("TransitionStyle") == "instant")
-		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y2);
-	else
-	{
-		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y1);
-
-		auto fadeFunc = [this, y1, y2](float t) {
-
-			t -= 1; // cubic ease out
-			float pct = Math::lerp(0, 1, t*t*t + 1);
-
-			float y = y1 * (1 - pct) + y2 * pct;
-			setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y);
-		};
-
-		setAnimation(new LambdaAnimation(fadeFunc, 350), 0, [this, fadeFunc, y2]
-		{
-			setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y2);
-		});
-
-		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, y2);
-	}
+	animateTo(
+		Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, Renderer::getScreenHeight() * 0.9),
+		Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2));
 }
 
 void GuiMenu::openScraperSettings()
@@ -1064,8 +1047,10 @@ void GuiMenu::addVersionInfo()
 	mVersion.setFont(theme->Footer.font);
 	mVersion.setColor(theme->Footer.color);
 
+	mVersion.setLineSpacing(0);
 	mVersion.setText("EMULATIONSTATION V" + Utils::String::toUpper(PROGRAM_VERSION_STRING) + " BUILD " + buildDate);
-	mVersion.setHorizontalAlignment(ALIGN_CENTER);
+	mVersion.setHorizontalAlignment(ALIGN_CENTER);	
+	mVersion.setVerticalAlignment(ALIGN_CENTER);
 	addChild(&mVersion);
 }
 
@@ -1079,8 +1064,10 @@ void GuiMenu::openCollectionSystemSettings() {
 
 void GuiMenu::onSizeChanged()
 {
-	mVersion.setSize(mSize.x(), 0);
-	mVersion.setPosition(0, mSize.y() - mVersion.getSize().y());
+	float h = mMenu.getButtonGridHeight();
+
+	mVersion.setSize(mSize.x(), h);
+	mVersion.setPosition(0, mSize.y() - h); //  mVersion.getSize().y()
 }
 
 void GuiMenu::addEntry(std::string name, bool add_arrow, const std::function<void()>& func, const std::string iconName)
@@ -1140,7 +1127,15 @@ bool GuiMenu::input(InputConfig* config, Input input)
 HelpStyle GuiMenu::getHelpStyle()
 {
 	HelpStyle style = HelpStyle();
-	style.applyTheme(ViewController::get()->getState().getSystem()->getTheme(), "system");
+
+	if (ThemeData::getDefaultTheme() != nullptr)
+	{
+		std::shared_ptr<ThemeData> theme = std::shared_ptr<ThemeData>(ThemeData::getDefaultTheme(), [](ThemeData*) {});
+		style.applyTheme(theme, "system");
+	}
+	else 
+		style.applyTheme(ViewController::get()->getState().getSystem()->getTheme(), "system");
+
 	return style;
 }
 

@@ -42,6 +42,8 @@ private:
 	std::map<std::string, int> mDefaultIntMap;
 	std::map<std::string, float> mDefaultFloatMap;
 	std::map<std::string, std::string> mDefaultStringMap;
+
+	bool mHasConfigRoot;
 };
 
 #endif // ES_CORE_SETTINGS_H

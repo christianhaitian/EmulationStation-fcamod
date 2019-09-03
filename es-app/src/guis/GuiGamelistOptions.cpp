@@ -258,34 +258,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 
 	// center the menu
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());	
-
-	float x0 = (mSize.x() - mMenu.getSize().x()) / 2;
-
-	float y1 = Renderer::getScreenHeight();
-	float y2 = (mSize.y() - mMenu.getSize().y()) / 2;
-	
-	if (Settings::getInstance()->getString("PowerSaverMode") == "instant" || Settings::getInstance()->getString("TransitionStyle") == "instant")
-		setPosition(x0, y2);
-	else
-	{
-		setPosition(x0, y1);
-
-		auto fadeFunc = [this, x0, y1, y2](float t) {
-
-			t -= 1; // cubic ease out
-			float pct = Math::lerp(0, 1, t*t*t + 1);
-
-			float y = y1 * (1 - pct) + y2 * pct;
-			setPosition(x0, y);
-		};
-
-		setAnimation(new LambdaAnimation(fadeFunc, 350), 0, [this, fadeFunc, x0, y2]
-		{
-			setPosition(x0, y2);
-		});
-
-		setPosition(x0, y2);
-	}
+	mMenu.animateTo(Vector2f((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, (Renderer::getScreenHeight() - mMenu.getSize().y()) / 2));
 }
 
 GuiGamelistOptions::~GuiGamelistOptions()

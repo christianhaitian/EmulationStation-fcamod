@@ -327,7 +327,8 @@ Font::Glyph* Font::getGlyph(unsigned int id)
 {
 	if (id < 255)
 	{
-		// FCA : optimisation : array is always really fastest than a map
+		// FCA ptimisation : array is always really fastest than a map
+		// When computing long descriptions, it can come here size*2 times per frame
 		Glyph* fastCache = mGlyphCacheArray[id];
 		if (fastCache != NULL)
 			return fastCache;

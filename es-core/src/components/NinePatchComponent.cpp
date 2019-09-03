@@ -26,8 +26,10 @@ void NinePatchComponent::updateColors()
 	if (mVertices == nullptr)
 		return;
 
-	const unsigned int edgeColor = Renderer::convertColor(mEdgeColor);
-	const unsigned int centerColor = Renderer::convertColor(mCenterColor);
+	float opacity = mOpacity / 255.0;
+
+	const unsigned int edgeColor = Renderer::convertColor(mEdgeColor & 0xFFFFFF00 | (unsigned char)((mEdgeColor & 0xFF) * opacity));
+	const unsigned int centerColor = Renderer::convertColor(mCenterColor & 0xFFFFFF00 | (unsigned char)((mCenterColor & 0xFF) * opacity));
 
 	for (int i = 0; i < 6 * 9; ++i)
 		mVertices[i].col = edgeColor;

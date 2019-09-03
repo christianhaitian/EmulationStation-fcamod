@@ -18,6 +18,17 @@ class InputConfig;
 class ThemeData;
 class Window;
 
+namespace AnimateFlags
+{
+	enum Flags : unsigned int
+	{
+		POSITION = 1,
+		SCALE = 2,
+		OPACITY = 4,
+		ALL = 0xFFFFFFFF
+	};
+}
+
 class GuiComponent
 {
 public:
@@ -72,8 +83,8 @@ public:
 	void setRotation(float rotation);
 	inline void setRotationDegrees(float rotation) { setRotation((float)ES_DEG_TO_RAD(rotation)); }
 
-	float getScale() const;
-	void setScale(float scale);
+	Vector3f getScale() const;
+	void setScale(Vector3f scale);
 
     float getZIndex() const;
     void setZIndex(float zIndex);
@@ -147,6 +158,9 @@ public:
 	// Returns true if the component is busy doing background processing (e.g. HTTP downloads)
 	bool isProcessing() const;
 
+	void animateTo(Vector2f from, Vector2f to, unsigned int flags = 0xFFFFFFFF, int delay = 350);
+	void animateTo(Vector2f from, unsigned int flags = AnimateFlags::OPACITY | AnimateFlags::SCALE, int delay = 350) { animateTo(from, from, flags, delay); }
+
 protected:
 	void renderChildren(const Transform4x4f& transform) const;
 	void updateSelf(int deltaTime); // updates animations
@@ -166,7 +180,7 @@ protected:
 	Vector2f mSize;
 
 	float mRotation = 0.0;
-	float mScale = 1.0;
+	Vector3f mScale = Vector3f(1.0, 1.0, 1.0);
 
 	float mDefaultZIndex = 0;
 	float mZIndex = 0;

@@ -47,6 +47,7 @@ std::vector<const char*> settings_dont_save {
 
 Settings::Settings()
 {
+	mHasConfigRoot = false;
 	setDefaults();
 	loadFile();
 }
@@ -232,7 +233,7 @@ void Settings::setDefaults()
 }
 
 template <typename K, typename V>
-void saveMap(pugi::xml_document& doc, std::map<K, V>& map, const char* type, std::map<K, V>& defaultMap)
+void saveMap(pugi::xml_node& doc, std::map<K, V>& map, const char* type, std::map<K, V>& defaultMap)
 {
 	for(auto iter = map.cbegin(); iter != map.cend(); iter++)
 	{
@@ -256,10 +257,14 @@ void Settings::saveFile()
 	const std::string path = Utils::FileSystem::getHomePath() + "/.emulationstation/es_settings.cfg";
 
 	pugi::xml_document doc;
+	pugi::xml_node root = doc;
 
-	saveMap<std::string, bool>(doc, mBoolMap, "bool", mDefaultBoolMap);
-	saveMap<std::string, int>(doc, mIntMap, "int", mDefaultIntMap);
-	saveMap<std::string, float>(doc, mFloatMap, "float", mDefaultFloatMap);
+	if (mHasConfigRoot)
+		root = doc.append_child("config"); // batocera, root element
+
+	saveMap<std::string, bool>(root, mBoolMap, "bool", mDefaultBoolMap);
+	saveMap<std::string, int>(root, mIntMap, "int", mDefaultIntMap);
+	saveMap<std::string, float>(root, mFloatMap, "float", mDefaultFloatMap);
 
 	//saveMap<std::string, std::string>(doc, mStringMap, "string");
 	for(auto iter = mStringMap.cbegin(); iter != mStringMap.cend(); iter++)
@@ -301,13 +306,23 @@ void Settings::loadFile()
 		return;
 	}
 
-	for(pugi::xml_node node = doc.child("bool"); node; node = node.next_sibling("bool"))
+	pugi::xml_node root = doc;
+
+	// Batocera has a <config> root element, learn reading them
+	pugi::xml_node config = doc.child("config");
+	if (config)
+	{
+		mHasConfigRoot = true;
+		root = config;
+	}
+
+	for(pugi::xml_node node = root.child("bool"); node; node = node.next_sibling("bool"))
 		setBool(node.attribute("name").as_string(), node.attribute("value").as_bool());
-	for(pugi::xml_node node = doc.child("int"); node; node = node.next_sibling("int"))
+	for(pugi::xml_node node = root.child("int"); node; node = node.next_sibling("int"))
 		setInt(node.attribute("name").as_string(), node.attribute("value").as_int());
-	for(pugi::xml_node node = doc.child("float"); node; node = node.next_sibling("float"))
+	for(pugi::xml_node node = root.child("float"); node; node = node.next_sibling("float"))
 		setFloat(node.attribute("name").as_string(), node.attribute("value").as_float());
-	for(pugi::xml_node node = doc.child("string"); node; node = node.next_sibling("string"))
+	for(pugi::xml_node node = root.child("string"); node; node = node.next_sibling("string"))
 		setString(node.attribute("name").as_string(), node.attribute("value").as_string());
 }
 

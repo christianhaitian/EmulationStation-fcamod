@@ -234,6 +234,8 @@ public:
 	static std::map<std::string, std::string> getThemeSubSets(const std::string& theme);
 
 	static void setDefaultTheme(ThemeData* theme) { mCurrentTheme = theme; };
+	static ThemeData* getDefaultTheme() { return mCurrentTheme; };
+
 	std::string getSystemThemeFolder() {
 		return mSystemThemeFolder;
 	}
