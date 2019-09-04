@@ -265,7 +265,7 @@ void Window::render()
 
 	
 	// GPI skip
-	if (!Renderer::isSmallScreen())
+	if (mGuiStack.size() < 2 || !Renderer::isSmallScreen())
 		if(!mRenderedHelpPrompts)
 			mHelp->render(transform);
 
