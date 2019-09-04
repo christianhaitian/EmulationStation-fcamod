@@ -259,7 +259,12 @@ void VideoComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 		setVisible(true);
 
 	if (elem->has("path"))
-		mVideoPath = elem->get<std::string>("path");
+	{
+		if (Utils::FileSystem::exists(elem->get<std::string>("path")))
+			mVideoPath = elem->get<std::string>("path");
+		else
+			mVideoPath = mConfig.defaultVideoPath;
+	}
 }
 
 std::vector<HelpPrompt> VideoComponent::getHelpPrompts()
@@ -268,7 +273,6 @@ std::vector<HelpPrompt> VideoComponent::getHelpPrompts()
 	ret.push_back(HelpPrompt("a", "SELECTIONNER"));
 	return ret;
 }
-
 
 void VideoComponent::handleLooping()
 {

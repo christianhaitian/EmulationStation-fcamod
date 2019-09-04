@@ -74,8 +74,15 @@ size_t Font::getTotalMemUsage()
 
 Font::Font(int size, const std::string& path) : mSize(size), mPath(path)
 {
+	mSize = size;
+
+	// GPI
+	if (Renderer::isSmallScreen())
+		mSize = size * 1.5;
+	
 	assert(mSize > 0);
 	
+
 	mLoaded = true;
 	mMaxGlyphHeight = 0;
 

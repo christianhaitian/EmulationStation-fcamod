@@ -263,8 +263,11 @@ void Window::render()
 		}
 	}
 
-	if(!mRenderedHelpPrompts)
-		mHelp->render(transform);
+	
+	// GPI skip
+	if (!Renderer::isSmallScreen())
+		if(!mRenderedHelpPrompts)
+			mHelp->render(transform);
 
 	if(Settings::getInstance()->getBool("DrawFramerate") && mFrameDataText)
 	{

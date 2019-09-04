@@ -304,6 +304,7 @@ std::string ThemeData::resolvePlaceholders(const char* in)
 ThemeData::ThemeData()
 {	
 	mHasSubsets = false;
+	mHasGamelistSubsets = false;
 
 	mColorset = Settings::getInstance()->getString("ThemeColorSet");
 	mIconset = Settings::getInstance()->getString("ThemeIconSet");
@@ -423,6 +424,7 @@ bool ThemeData::parseSubset(const pugi::xml_node& node)
 		}
 		if (subsetAttr == "gamelistview" && nameAttr == mGamelistview)
 		{
+			mHasGamelistSubsets = true;
 			parse = true;
 			return parse;
 		}
@@ -1072,6 +1074,8 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	Footer.font = Font::get(FONT_SIZE_SMALL);
 	Text.font = Font::get(FONT_SIZE_MEDIUM);
 	TextSmall.font = Font::get(FONT_SIZE_SMALL);
+
+
 
 	auto elem = theme->getElement("menu", "menubg", "menuBackground");
 	if (elem)

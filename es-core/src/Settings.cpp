@@ -280,7 +280,7 @@ void Settings::saveFile()
 		if (def != mDefaultStringMap.cend() && def->second == iter->second)
 			continue;
 		
-		pugi::xml_node node = doc.append_child("string");
+		pugi::xml_node node = root.append_child("string");
 		node.append_attribute("name").set_value(iter->first.c_str());
 		node.append_attribute("value").set_value(iter->second.c_str());
 	}

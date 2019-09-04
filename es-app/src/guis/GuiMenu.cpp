@@ -58,8 +58,8 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _("MAIN M
 	setScale(Vector3f(
 		Renderer::getScreenWidth() / mMenu.getSize().x(),
 		Renderer::getScreenHeight() / mMenu.getSize().y(),
-		1.0));*/
-
+		1.0));
+		*/
 	animateTo(
 		Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, Renderer::getScreenHeight() * 0.9),
 		Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2));
@@ -302,7 +302,7 @@ void GuiMenu::openUISettings()
 			theme_set->add(it->first, it->first, it == selectedSet);
 		s->addWithLabel(_("THEME"), theme_set);
 
-		s->addSaveFunc([s, theme_set]
+		s->addSaveFunc([s, theme_set, window]
 		{
 			std::string oldTheme = Settings::getInstance()->getString("ThemeSet");
 			if (oldTheme != theme_set->getSelected())
@@ -325,10 +325,14 @@ void GuiMenu::openUISettings()
 				Settings::getInstance()->setString("ThemeSystemView", themeSystemviewSets.empty() ? "" : themeSystemviewSets.begin()->first);
 				Settings::getInstance()->setString("ThemeGamelistView", themeGamelistViewSets.empty() ? "" : themeGamelistViewSets.begin()->first);
 				
+				window->renderLoadingScreen(_("Loading..."));
+
 				Scripting::fireEvent("theme-changed", theme_set->getSelected(), oldTheme);
 				CollectionSystemManager::get()->updateSystemsList();
 				ViewController::get()->goToStart();
 				ViewController::get()->reloadAll(); // TODO - replace this with some sort of signal-based implementation
+
+				window->endRenderLoadingScreen();
 
 				s->enableBeforeCloseFunc(true);
 			}
@@ -351,118 +355,182 @@ void GuiMenu::openUISettings()
 				auto themeGamelistViewSets = ThemeData::sortThemeSubSets(themeSubSets, "gamelistview");
 				auto themeRegions = ThemeData::sortThemeSubSets(themeSubSets, "region");
 
+
 				// colorset
+				std::shared_ptr<OptionListComponent<std::string>> theme_colorset = nullptr;
+				if (themeColorSets.size() > 0)
+				{
+					auto selectedColorSet = themeColorSets.find(Settings::getInstance()->getString("ThemeColorSet"));
+					if (selectedColorSet == themeColorSets.end())
+						selectedColorSet = themeColorSets.begin();
 
-				auto selectedColorSet = themeColorSets.find(Settings::getInstance()->getString("ThemeColorSet"));
-				if (selectedColorSet == themeColorSets.end())
-					selectedColorSet = themeColorSets.begin();
-				auto theme_colorset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME COLORSET"), false);
+					theme_colorset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME COLORSET"), false);
 
-				for (auto it = themeColorSets.begin(); it != themeColorSets.end(); it++)
-					theme_colorset->add(it->first, it->first, it == selectedColorSet);
+					for (auto it = themeColorSets.begin(); it != themeColorSets.end(); it++)
+						theme_colorset->add(it->first, it->first, it == selectedColorSet);
 
-				if (!themeColorSets.empty())
-					themeconfig->addWithLabel(_("THEME COLORSET"), theme_colorset);
+					if (!themeColorSets.empty())
+						themeconfig->addWithLabel(_("THEME COLORSET"), theme_colorset);
+				}
 
 				// iconset
+				std::shared_ptr<OptionListComponent<std::string>> theme_iconset = nullptr;
+				if (themeIconSets.size() > 0)
+				{
+					auto selectedIconSet = themeIconSets.find(Settings::getInstance()->getString("ThemeIconSet"));
+					if (selectedIconSet == themeIconSets.end())
+						selectedIconSet = themeIconSets.begin();
 
-				auto selectedIconSet = themeIconSets.find(Settings::getInstance()->getString("ThemeIconSet"));
-				if (selectedIconSet == themeIconSets.end())
-					selectedIconSet = themeIconSets.begin();
-				auto theme_iconset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME ICONSET"), false);
+					theme_iconset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME ICONSET"), false);
 
-				for (auto it = themeIconSets.begin(); it != themeIconSets.end(); it++)
-					theme_iconset->add(it->first, it->first, it == selectedIconSet);
+					for (auto it = themeIconSets.begin(); it != themeIconSets.end(); it++)
+						theme_iconset->add(it->first, it->first, it == selectedIconSet);
 
-				if (!themeIconSets.empty())
-					themeconfig->addWithLabel(_("THEME ICONSET"), theme_iconset);
+					if (!themeIconSets.empty())
+						themeconfig->addWithLabel(_("THEME ICONSET"), theme_iconset);
+				}
 
 				// menu
+				std::shared_ptr<OptionListComponent<std::string>> theme_menu = nullptr;
+				if (themeMenus.size() > 0)
+				{
+					auto selectedMenu = themeMenus.find(Settings::getInstance()->getString("ThemeMenu"));
+					if (selectedMenu == themeMenus.end())
+						selectedMenu = themeMenus.begin();
 
-				auto selectedMenu = themeMenus.find(Settings::getInstance()->getString("ThemeMenu"));
-				if (selectedMenu == themeMenus.end())
-					selectedMenu = themeMenus.begin();
-				auto theme_menu = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME MENU"), false);
+					theme_menu = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME MENU"), false);
 
-				for (auto it = themeMenus.begin(); it != themeMenus.end(); it++)
-					theme_menu->add(it->first, it->first, it == selectedMenu);
+					for (auto it = themeMenus.begin(); it != themeMenus.end(); it++)
+						theme_menu->add(it->first, it->first, it == selectedMenu);
 
-				if (!themeMenus.empty())
-					themeconfig->addWithLabel(_("THEME MENU"), theme_menu);
+					if (!themeMenus.empty())
+						themeconfig->addWithLabel(_("THEME MENU"), theme_menu);
+				}
 
 				// systemview
 
-				auto selectedSystemviewSet = themeSystemviewSets.find(Settings::getInstance()->getString("ThemeSystemView"));
-				if (selectedSystemviewSet == themeSystemviewSets.end())
-					selectedSystemviewSet = themeSystemviewSets.begin();
+				std::shared_ptr<OptionListComponent<std::string>> theme_systemview = nullptr;
+				if (themeSystemviewSets.size() > 0)
+				{
+					auto selectedSystemviewSet = themeSystemviewSets.find(Settings::getInstance()->getString("ThemeSystemView"));
+					if (selectedSystemviewSet == themeSystemviewSets.end())
+						selectedSystemviewSet = themeSystemviewSets.begin();
 
-				auto theme_systemview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME SYSTEMVIEW"), false);
+					theme_systemview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME SYSTEMVIEW"), false);
 
-				for (auto it = themeSystemviewSets.begin(); it != themeSystemviewSets.end(); it++)
-					theme_systemview->add(it->first, it->first, it == selectedSystemviewSet);
+					for (auto it = themeSystemviewSets.begin(); it != themeSystemviewSets.end(); it++)
+						theme_systemview->add(it->first, it->first, it == selectedSystemviewSet);
 
-				if (!themeSystemviewSets.empty())
-					themeconfig->addWithLabel(_("THEME SYSTEMVIEW"), theme_systemview);
+					if (!themeSystemviewSets.empty())
+						themeconfig->addWithLabel(_("THEME SYSTEMVIEW"), theme_systemview);
+				}
 
 				// gamelistview
 
-				auto selectedGamelistViewSet = themeGamelistViewSets.find(Settings::getInstance()->getString("ThemeGamelistView"));
-				if (selectedGamelistViewSet == themeGamelistViewSets.end())
-					selectedGamelistViewSet = themeGamelistViewSets.begin();
+				std::shared_ptr<OptionListComponent<std::string>> theme_gamelistview = nullptr;
+				if (themeGamelistViewSets.size() > 0)
+				{
+					auto selectedGamelistViewSet = themeGamelistViewSets.find(Settings::getInstance()->getString("ThemeGamelistView"));
+					if (selectedGamelistViewSet == themeGamelistViewSets.end())
+						selectedGamelistViewSet = themeGamelistViewSets.begin();
 
-				auto theme_gamelistview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME GAMELISTVIEW"), false);
+					theme_gamelistview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME GAMELISTVIEW"), false);
 
-				for (auto it = themeGamelistViewSets.begin(); it != themeGamelistViewSets.end(); it++)
-					theme_gamelistview->add(it->first, it->first, it == selectedGamelistViewSet);
+					for (auto it = themeGamelistViewSets.begin(); it != themeGamelistViewSets.end(); it++)
+						theme_gamelistview->add(it->first, it->first, it == selectedGamelistViewSet);
 
-				if (!themeGamelistViewSets.empty())
-					themeconfig->addWithLabel(_("THEME GAMELISTVIEW"), theme_gamelistview);
+					if (!themeGamelistViewSets.empty())
+						themeconfig->addWithLabel(_("THEME GAMELISTVIEW"), theme_gamelistview);
+				}
 
 				// themeregion
-				auto selectedRegion = themeRegions.find(Settings::getInstance()->getString("ThemeRegionName"));
-				if (selectedRegion == themeRegions.end())
-					selectedRegion = themeRegions.begin();
+				std::shared_ptr<OptionListComponent<std::string>> theme_region = nullptr;
+				if (themeRegions.size() > 0)
+				{
+					auto selectedRegion = themeRegions.find(Settings::getInstance()->getString("ThemeRegionName"));
+					if (selectedRegion == themeRegions.end())
+						selectedRegion = themeRegions.begin();
 
-				auto theme_region = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME GAMELISTVIEW"), false);
+					theme_region = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME GAMELISTVIEW"), false);
 
-				for (auto it = themeRegions.begin(); it != themeRegions.end(); it++)
-					theme_region->add(it->first, it->first, it == selectedRegion);
+					for (auto it = themeRegions.begin(); it != themeRegions.end(); it++)
+						theme_region->add(it->first, it->first, it == selectedRegion);
 
-				if (!themeRegions.empty())
-					themeconfig->addWithLabel(_("THEME REGION"), theme_region);
+					if (!themeRegions.empty())
+						themeconfig->addWithLabel(_("THEME REGION"), theme_region);
+				}
+
+				// gamelist_style
+				std::shared_ptr<OptionListComponent<std::string>> gamelist_style = nullptr;
+				// if (theme_gamelistview == nullptr)
+				{
+					gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("FORCE GAMELIST VIEW STYLE"), false);
+
+					std::vector<std::string> styles;
+					styles.push_back("automatic");
+
+					auto system = ViewController::get()->getState().getSystem();
+					if (system != NULL)
+					{
+						auto mViews = system->getTheme()->getViewsOfTheme();
+						for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
+							styles.push_back(*it);
+					}
+					else
+					{
+						styles.push_back("basic");
+						styles.push_back("detailed");
+					}
+
+					auto viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
+					if (!system->getTheme()->hasView(viewPreference))
+						viewPreference = "automatic";
+
+					for (auto it = styles.cbegin(); it != styles.cend(); it++)
+						gamelist_style->add(_(*it), *it, viewPreference == *it);
+
+					themeconfig->addWithLabel(_("FORCE GAMELIST VIEW STYLE"), gamelist_style);
+				}
 				
-				themeconfig->addSaveFunc([this, s, theme_set, theme_colorset, theme_iconset, theme_menu, theme_systemview, theme_gamelistview, theme_region] {
+				themeconfig->addSaveFunc([this, s, theme_set, theme_colorset, theme_iconset, theme_menu, theme_systemview, theme_gamelistview, theme_region, gamelist_style] {
 					bool needReload = false;
-					if (Settings::getInstance()->getString("ThemeColorSet") != theme_colorset->getSelected() && !theme_colorset->getSelected().empty())
+					if (theme_colorset != nullptr && Settings::getInstance()->getString("ThemeColorSet") != theme_colorset->getSelected() && !theme_colorset->getSelected().empty())
 						needReload = true;
-					if (Settings::getInstance()->getString("ThemeIconSet") != theme_iconset->getSelected() && !theme_iconset->getSelected().empty())
+					if (theme_iconset != nullptr && Settings::getInstance()->getString("ThemeIconSet") != theme_iconset->getSelected() && !theme_iconset->getSelected().empty())
 						needReload = true;
-					if (Settings::getInstance()->getString("ThemeMenu") != theme_menu->getSelected() && !theme_menu->getSelected().empty())
+					if (theme_menu != nullptr && Settings::getInstance()->getString("ThemeMenu") != theme_menu->getSelected() && !theme_menu->getSelected().empty())
 						needReload = true;
-					if (Settings::getInstance()->getString("ThemeSystemView") != theme_systemview->getSelected() && !theme_systemview->getSelected().empty())
+					if (theme_systemview != nullptr && Settings::getInstance()->getString("ThemeSystemView") != theme_systemview->getSelected() && !theme_systemview->getSelected().empty())
 						needReload = true;
-					if (Settings::getInstance()->getString("ThemeGamelistView") != theme_gamelistview->getSelected() && !theme_gamelistview->getSelected().empty())
+					if (theme_gamelistview != nullptr && Settings::getInstance()->getString("ThemeGamelistView") != theme_gamelistview->getSelected() && !theme_gamelistview->getSelected().empty())
 						needReload = true;
-					if (Settings::getInstance()->getString("ThemeRegionName") != theme_region->getSelected() && !theme_region->getSelected().empty())
+					if (theme_region != nullptr && Settings::getInstance()->getString("ThemeRegionName") != theme_region->getSelected() && !theme_region->getSelected().empty())
+						needReload = true;
+					if (gamelist_style != nullptr && Settings::getInstance()->getString("GamelistViewStyle") != gamelist_style->getSelected() && !gamelist_style->getSelected().empty())
 						needReload = true;
 
 					if (needReload) {
-						Settings::getInstance()->setString("ThemeSet", theme_set->getSelected());
-						Settings::getInstance()->setString("ThemeColorSet", theme_colorset->getSelected());
-						Settings::getInstance()->setString("ThemeIconSet", theme_iconset->getSelected());
-						Settings::getInstance()->setString("ThemeMenu", theme_menu->getSelected());
-						Settings::getInstance()->setString("ThemeSystemView", theme_systemview->getSelected());
-						Settings::getInstance()->setString("ThemeGamelistView", theme_gamelistview->getSelected());
-						Settings::getInstance()->setString("ThemeRegionName", theme_region->getSelected());
-						//Settings::getInstance()->setBool("ThemeChanged", true);
 
+						Settings::getInstance()->setString("ThemeSet", theme_set == nullptr ? "" : theme_set->getSelected());
+						Settings::getInstance()->setString("ThemeColorSet", theme_colorset == nullptr ? "" : theme_colorset->getSelected());
+						Settings::getInstance()->setString("ThemeIconSet", theme_iconset == nullptr ? "" : theme_iconset->getSelected());
+						Settings::getInstance()->setString("ThemeMenu", theme_menu == nullptr ? "" : theme_menu->getSelected());
+						Settings::getInstance()->setString("ThemeSystemView", theme_systemview == nullptr ? "" : theme_systemview->getSelected());
+						Settings::getInstance()->setString("ThemeGamelistView", theme_gamelistview == nullptr ? "" : theme_gamelistview->getSelected());
+						Settings::getInstance()->setString("ThemeRegionName", theme_region == nullptr ? "" : theme_region->getSelected());
+						Settings::getInstance()->setString("GamelistViewStyle", gamelist_style == nullptr ? "" : gamelist_style->getSelected());						
+
+						mWindow->renderLoadingScreen(_("Loading..."));
+						
 						//reload theme
 						std::string oldTheme = Settings::getInstance()->getString("ThemeSet");
 						Scripting::fireEvent("theme-changed", theme_set->getSelected(), oldTheme);
 						CollectionSystemManager::get()->updateSystemsList();
 						ViewController::get()->goToStart();
-						ViewController::get()->reloadAll(); // TODO - replace this with some sort of signal-based implementation
+						ViewController::get()->reloadAll();
 
+						mWindow->endRenderLoadingScreen();
+						
 						s->enableBeforeCloseFunc(true);
 					}
 				});

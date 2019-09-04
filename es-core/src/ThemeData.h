@@ -228,6 +228,7 @@ public:
 	std::vector<std::string> getViewsOfTheme();
 
 	bool hasSubsets() { return mHasSubsets; }
+	bool hasGameListSubsets() { return mHasGamelistSubsets; }
 
 	static const std::shared_ptr<ThemeData::ThemeMenu>& getMenuTheme();
 	static std::map<std::string, std::string> sortThemeSubSets(const std::map<std::string, std::string>& subsetmap, const std::string& subset);
@@ -281,6 +282,7 @@ private:
 	std::map<std::string, std::string> mVariables;
 
 	bool mHasSubsets;
+	bool mHasGamelistSubsets;
 
 	static std::shared_ptr<ThemeData::ThemeMenu> mMenuTheme;
 	static ThemeData* mCurrentTheme;
