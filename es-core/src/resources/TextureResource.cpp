@@ -4,6 +4,7 @@
 #include "resources/TextureData.h"
 #include "ImageIO.h"
 #include "Settings.h"
+#include <cstring>
 
 TextureDataManager		TextureResource::sTextureDataManager;
 
