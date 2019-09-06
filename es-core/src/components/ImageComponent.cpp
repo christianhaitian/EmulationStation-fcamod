@@ -26,6 +26,7 @@ ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : G
 	mForceLoad(forceLoad), mDynamic(dynamic), mFadeOpacity(0), mFading(false), mRotateByTargetSize(false), mVisible(true),
 	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f), mMirror(0.0f, 0.0f), mAllowAsync(false)
 {
+	mLoadingTexture = nullptr;
 	mAllowFading = true;
 }
 
@@ -140,8 +141,11 @@ void ImageComponent::setDefaultImage(std::string path)
 
 void ImageComponent::setImage(std::string path, bool tile, MaxSizeInfo maxSize)
 {
-//	if (!maxSize.isExternalZoomKnown() && !maxSize.empty())
-//		maxSize = MaxSizeInfo(maxSize.x(), maxSize.y(), !mTargetIsMax);
+	if (mPath == path)
+		return;
+
+	mPath = path;
+	mLoadingTexture = nullptr;
 
 	if (path.empty() || !ResourceManager::getInstance()->fileExists(path))
 	{
@@ -149,10 +153,19 @@ void ImageComponent::setImage(std::string path, bool tile, MaxSizeInfo maxSize)
 			mTexture.reset();
 		else
 			mTexture = TextureResource::get(mDefaultPath, tile, mForceLoad, mDynamic, true, maxSize);
-	} 
-	else 
-		mTexture = TextureResource::get(path, tile, mForceLoad, mDynamic, true, maxSize);
-	
+	}
+	else
+	{
+		std::shared_ptr<TextureResource> texture = TextureResource::get(path, tile, mForceLoad, mDynamic, true, maxSize);
+
+		// TODO probleme de proportions si l'on fait ca, à investiguer...
+		if (!mForceLoad && mDynamic && !mAllowFading && texture != nullptr && !texture->isLoaded())
+			mLoadingTexture = texture;
+		else
+			mTexture = texture;
+	}
+
+	if (mLoadingTexture == nullptr);
 	resize();
 }
 
@@ -329,6 +342,13 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 	if (!mVisible)
 		return;
 
+	if (mLoadingTexture != nullptr && mLoadingTexture->isLoaded())
+	{
+		mTexture = mLoadingTexture;
+		mLoadingTexture = nullptr;
+		resize();
+	}
+
 	Transform4x4f trans = parentTrans * getTransform();
 	
 	Vector2f clipPos(trans.translation().x(), trans.translation().y());
@@ -346,8 +366,8 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000033);			
 		}
 
-		if (mTexture->isInitialized())
-		{
+//		if (mTexture->isInitialized())
+//		{
 			// actually draw the image
 			// The bind() function returns false if the texture is not currently loaded. A blank
 			// texture is bound in this case but we want to handle a fade so it doesn't just 'jump' in
@@ -404,12 +424,12 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 			}
 
 			Renderer::bindTexture(0);
-		}
+	/*	}
 		else
 		{
 			LOG(LogError) << "Image texture is not initialized!";
 			mTexture.reset();
-		}
+		}*/
 	}
 
 	GuiComponent::renderChildren(trans);

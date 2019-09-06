@@ -61,7 +61,7 @@ public:
 
 	virtual ~TextureResource();
 
-	bool isInitialized() const;
+	bool isLoaded() const;
 	bool isTiled() const;
 
 	const Vector2i getSize() const;
