@@ -22,7 +22,7 @@ public:
 	MaxSizeInfo(float x, float y, bool externalZoom) : mSize(Vector2f(x, y)), mExternalZoom(externalZoom), mExternalZoomKnown(true){ }
 	MaxSizeInfo(Vector2f size, bool externalZoom) : mSize(size), mExternalZoom(externalZoom), mExternalZoomKnown(true) { }
 
-	bool empty() { return mSize.x() >= 1 && mSize.y() <= 1; }
+	bool empty() { return mSize.x() <= 1 && mSize.y() <= 1; }
 
 	float x() { return mSize.x(); }
 	float y() { return mSize.y(); }

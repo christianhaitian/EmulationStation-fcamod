@@ -26,7 +26,7 @@ ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : G
 	mForceLoad(forceLoad), mDynamic(dynamic), mFadeOpacity(0), mFading(false), mRotateByTargetSize(false), mVisible(true),
 	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f), mMirror(0.0f, 0.0f), mAllowAsync(false)
 {
-	
+	mAllowFading = true;
 }
 
 ImageComponent::~ImageComponent()
