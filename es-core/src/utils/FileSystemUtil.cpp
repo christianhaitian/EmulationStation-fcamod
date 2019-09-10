@@ -587,7 +587,7 @@ namespace Utils
 			std::string common = isDirectory(_common) ? getGenericPath(_common) : getParent(_common);
 
 			// check if path contains common
-			if(path.find(common) == 0)
+			if(path.find(common) == 0 && path != common)
 			{
 				_contains = true;
 				return path.substr(common.length() + 1);

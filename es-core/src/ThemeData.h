@@ -9,6 +9,7 @@
 
 #include <deque>
 #include <map>
+#include <unordered_map>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -228,11 +229,10 @@ public:
 	std::vector<std::string> getViewsOfTheme();
 
 	bool hasSubsets() { return mHasSubsets; }
-	bool hasGameListSubsets() { return mHasGamelistSubsets; }
 
 	static const std::shared_ptr<ThemeData::ThemeMenu>& getMenuTheme();
-	static std::map<std::string, std::string> sortThemeSubSets(const std::map<std::string, std::string>& subsetmap, const std::string& subset);
-	static std::map<std::string, std::string> getThemeSubSets(const std::string& theme);
+	static std::unordered_map<std::string, std::string> getSubSet(const std::unordered_map<std::string, std::string>& subsetmap, const std::string& subset);
+	static std::unordered_map<std::string, std::string> getThemeSubSets(const std::string& theme);
 
 	static void setDefaultTheme(ThemeData* theme) { mCurrentTheme = theme; };
 	static ThemeData* getDefaultTheme() { return mCurrentTheme; };
@@ -242,8 +242,8 @@ public:
 	}
 
 private:
-	static void crawlIncludes(const pugi::xml_node& root, std::map<std::string, std::string>& sets, std::deque<std::string>& dequepath);
-	static void findRegion(const pugi::xml_document& doc, std::map<std::string, std::string>& sets);
+	static void crawlIncludes(const pugi::xml_node& root, std::unordered_map<std::string, std::string>& sets, std::deque<std::string>& dequepath);
+	static void findRegion(const pugi::xml_document& doc, std::unordered_map<std::string, std::string>& sets);
 
 	static std::map< std::string, std::map<std::string, ElementPropertyType> > sElementMap;
 	static std::vector<std::string> sSupportedFeatures;
@@ -263,7 +263,8 @@ private:
 	void parseElement(const pugi::xml_node& elementNode, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element, bool overwrite=true);
 	bool parseRegion(const pugi::xml_node& node);
 	bool parseSubset(const pugi::xml_node& node);
-	
+	bool isFirstSubset(const pugi::xml_node& node);
+
 	void parseCustomViewBaseClass(const pugi::xml_node& root, ThemeView& view, std::string baseClass);
 
 	std::string resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path);
@@ -281,8 +282,7 @@ private:
 
 	std::map<std::string, std::string> mVariables;
 
-	bool mHasSubsets;
-	bool mHasGamelistSubsets;
+	bool mHasSubsets;	
 
 	static std::shared_ptr<ThemeData::ThemeMenu> mMenuTheme;
 	static ThemeData* mCurrentTheme;
