@@ -4,6 +4,7 @@
 #include "resources/TextureData.h"
 #include "ImageIO.h"
 #include "Settings.h"
+#include <cstring>
 
 TextureDataManager		TextureResource::sTextureDataManager;
 
@@ -245,7 +246,7 @@ void TextureResource::rasterizeAt(float width, float height)
 	else
 		data = sTextureDataManager.get(this);
 
-	mSourceSize = Vector2f((float)width, (float)height);
+	// mSourceSize = Vector2f((float)width, (float)height);
 	data->setSourceSize((float)width, (float)height);
 
 	if (mForceLoad || (mTextureData != nullptr))
@@ -258,10 +259,14 @@ Vector2f TextureResource::getSourceImageSize() const
 	return mSourceSize;
 }
 
-bool TextureResource::isInitialized() const
+bool TextureResource::isLoaded() const
 {
 	if (mTextureData != nullptr)
 		return mTextureData->isLoaded();
+
+	auto data = sTextureDataManager.get(this, false);
+	if (data != nullptr)
+		return data->isLoaded();
 
 	return true;
 }

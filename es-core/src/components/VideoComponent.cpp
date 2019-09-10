@@ -53,7 +53,7 @@ void VideoComponent::setScreensaverMode(bool isScreensaver)
 
 VideoComponent::VideoComponent(Window* window) :
 	GuiComponent(window),
-	mStaticImage(window, true),
+	mStaticImage(window),
 	mVideoHeight(0),
 	mVideoWidth(0),
 	mStartDelayed(false),
@@ -68,6 +68,8 @@ VideoComponent::VideoComponent(Window* window) :
 {
 	mFadeIn = 0.0f;
 	mIsWaitingForVideoToStart = false;
+
+	mStaticImage.setAllowFading(false);
 
 	// Setup the default configuration
 	mConfig.showSnapshotDelay 		= false;
