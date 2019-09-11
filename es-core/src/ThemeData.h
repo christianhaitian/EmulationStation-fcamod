@@ -87,6 +87,18 @@ struct ThemeSet
 	inline std::string getThemePath(const std::string& system) const { return path + "/" + system + "/theme.xml"; }
 };
 
+struct Subset
+{
+	Subset(const std::string set, const std::string nm)
+	{
+		subset = set;
+		name = nm;
+	}
+
+	std::string subset;
+	std::string name;
+};
+
 struct MenuElement {
 	unsigned int color;
 	unsigned int selectedColor;
@@ -231,8 +243,9 @@ public:
 	bool hasSubsets() { return mHasSubsets; }
 
 	static const std::shared_ptr<ThemeData::ThemeMenu>& getMenuTheme();
-	static std::unordered_map<std::string, std::string> getSubSet(const std::unordered_map<std::string, std::string>& subsetmap, const std::string& subset);
-	static std::unordered_map<std::string, std::string> getThemeSubSets(const std::string& theme);
+
+	static std::vector<Subset>		getThemeSubSets(const std::string& theme);
+	static std::vector<std::string> getSubSet(const std::vector<Subset>& subsets, const std::string& subset);
 
 	static void setDefaultTheme(ThemeData* theme) { mCurrentTheme = theme; };
 	static ThemeData* getDefaultTheme() { return mCurrentTheme; };
@@ -242,8 +255,8 @@ public:
 	}
 
 private:
-	static void crawlIncludes(const pugi::xml_node& root, std::unordered_map<std::string, std::string>& sets, std::deque<std::string>& dequepath);
-	static void findRegion(const pugi::xml_document& doc, std::unordered_map<std::string, std::string>& sets);
+	static void findRegion(const pugi::xml_document& doc, std::vector<Subset>& sets);
+	static void crawlIncludes(const pugi::xml_node& root, std::vector<Subset>& sets, std::deque<std::string>& dequepath);
 
 	static std::map< std::string, std::map<std::string, ElementPropertyType> > sElementMap;
 	static std::vector<std::string> sSupportedFeatures;
@@ -254,13 +267,17 @@ private:
 
 	std::string mDefaultView;
 	
-	void parseFeatures(const pugi::xml_node& themeRoot);
-	void parseIncludes(const pugi::xml_node& themeRoot);
+	void parseTheme(const pugi::xml_node& root);
+
+	void parseFeature(const pugi::xml_node& node);
+	void parseInclude(const pugi::xml_node& node);
+	void parseVariable(const pugi::xml_node& node);
 	void parseVariables(const pugi::xml_node& root);
 	void parseViews(const pugi::xml_node& themeRoot);
-	void parseCustomViews(const pugi::xml_node& root);
+	void parseCustomView(const pugi::xml_node& node, const pugi::xml_node& root);
+	void parseViewElement(const pugi::xml_node& node);
 	void parseView(const pugi::xml_node& viewNode, ThemeView& view, bool overwriteElements = true);
-	void parseElement(const pugi::xml_node& elementNode, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element, bool overwrite=true);
+	void parseElement(const pugi::xml_node& elementNode, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element, bool overwrite = true);
 	bool parseRegion(const pugi::xml_node& node);
 	bool parseSubset(const pugi::xml_node& node);
 	bool isFirstSubset(const pugi::xml_node& node);

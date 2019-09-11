@@ -355,10 +355,7 @@ void ThemeData::loadFile(std::string system, std::map<std::string, std::string> 
 		mDefaultView = root.attribute("defaultView").as_string();
 
 	parseVariables(root);
-	parseIncludes(root);
-	parseViews(root);	
-	parseCustomViews(root);
-	parseFeatures(root);
+	parseTheme(root);
 
 	mMenuTheme = nullptr;
 	mCurrentTheme = this;
@@ -437,69 +434,6 @@ bool ThemeData::parseSubset(const pugi::xml_node& node)
 	return false;
 }
 
-void ThemeData::parseIncludes(const pugi::xml_node& root)
-{
-	ThemeException error;
-	error.setFiles(mPaths);
-
-	for(pugi::xml_node node = root.child("include"); node; node = node.next_sibling("include"))
-	{
-		if (!parseSubset(node))
-			continue;
-
-		std::string relPath = resolvePlaceholders(node.text().as_string());
-		std::string path = Utils::FileSystem::resolveRelativePath(relPath, mPaths.back(), true);
-		path = resolveSystemVariable(mSystemThemeFolder, path);
-
-		if (!ResourceManager::getInstance()->fileExists(path))
-		{
-			//throw error << "Included file \"" << relPath << "\" not found! (resolved to \"" << path << "\")";
-			LOG(LogWarning) << "Included file \"" << relPath << "\" not found! (resolved to \"" << path << "\")";
-			continue;			
-		}
-
-		mPaths.push_back(path);
-
-		pugi::xml_document includeDoc;
-		pugi::xml_parse_result result = includeDoc.load_file(path.c_str());
-
-		if(!result)
-			throw error << "Error parsing file: \n    " << result.description();
-
-		pugi::xml_node theme = includeDoc.child("theme");
-		if(!theme)
-			throw error << "Missing <theme> tag!";
-
-		parseVariables(theme);
-		parseIncludes(theme);
-		parseViews(theme);
-		parseCustomViews(theme);
-		parseFeatures(theme);
-
-		mPaths.pop_back();
-	}
-}
-
-void ThemeData::parseFeatures(const pugi::xml_node& root)
-{
-	ThemeException error;
-	error.setFiles(mPaths);
-
-	for(pugi::xml_node node = root.child("feature"); node; node = node.next_sibling("feature"))
-	{
-		if(!node.attribute("supported"))
-			throw error << "Feature missing \"supported\" attribute!";
-
-		const std::string supportedAttr = node.attribute("supported").as_string();
-
-		if (std::find(sSupportedFeatures.cbegin(), sSupportedFeatures.cend(), supportedAttr) != sSupportedFeatures.cend())
-		{
-			parseViews(node);
-			parseCustomViews(node);
-		}
-	}
-}
-
 void ThemeData::parseVariables(const pugi::xml_node& root)
 {
 	ThemeException error;
@@ -516,10 +450,12 @@ void ThemeData::parseVariables(const pugi::xml_node& root)
 		std::string val = it->text().as_string();
 
 		if (!val.empty())
+		{
+			mVariables.erase(key);
 			mVariables.insert(std::pair<std::string, std::string>(key, val));
+		}
 	}
 }
-
 
 void ThemeData::parseViews(const pugi::xml_node& root)
 {
@@ -527,7 +463,7 @@ void ThemeData::parseViews(const pugi::xml_node& root)
 	error.setFiles(mPaths);
 
 	// parse views
-	for (pugi::xml_node node = root.child("view"); node; node = node.next_sibling("view"))
+	for(pugi::xml_node node = root.child("view"); node; node = node.next_sibling("view"))
 	{
 		if (!node.attribute("name"))
 			continue;
@@ -549,19 +485,19 @@ void ThemeData::parseViews(const pugi::xml_node& root)
 		size_t off = nameAttr.find_first_of(delim, prevOff);
 		std::string viewKey;
 
-		while (off != std::string::npos || prevOff != std::string::npos)
+		while(off != std::string::npos || prevOff != std::string::npos)
 		{
 			viewKey = nameAttr.substr(prevOff, off - prevOff);
 			prevOff = nameAttr.find_first_not_of(delim, off);
 			off = nameAttr.find_first_of(delim, prevOff);
 			
 			if (std::find(sSupportedViews.cbegin(), sSupportedViews.cend(), viewKey) != sSupportedViews.cend())
-			{				
+			{
 				ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
 				parseView(node, view);
 
 				for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
-				{			
+				{
 					if (it->second.isCustomView && it->second.baseType == viewKey)
 					{
 						ThemeView& customView = (ThemeView&)it->second;
@@ -625,33 +561,6 @@ void ThemeData::parseCustomViewBaseClass(const pugi::xml_node& root, ThemeView& 
 	}
 }
 
-void ThemeData::parseCustomViews(const pugi::xml_node& root)
-{
-	ThemeException error;
-	error.setFiles(mPaths);
-
-	// parse views
-	for (pugi::xml_node node = root.child("customView"); node; node = node.next_sibling("customView"))
-	{
-		if (!node.attribute("name"))
-			continue;
-
-		std::string viewKey = node.attribute("name").as_string();
-		
-		ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
-		view.isCustomView = true;
-		
-		std::string inherits = node.attribute("inherits").as_string();
-		if (!inherits.empty())
-		{
-			view.baseType = inherits;
-			parseCustomViewBaseClass(root, view, inherits);			
-		}
-		
-		parseView(node, view);
-	}
-}
-
 std::vector<std::string> ThemeData::getViewsOfTheme()
 {
 	std::vector<std::string> ret;
@@ -664,6 +573,84 @@ std::vector<std::string> ThemeData::getViewsOfTheme()
 	}
 
 	return ret;
+}
+
+void ThemeData::parseViewElement(const pugi::xml_node& node)
+{
+	if (!node.attribute("name"))
+	{
+		LOG(LogWarning) << "View missing \"name\" attribute!";
+		return;
+	}
+
+	if (node.attribute("tinyScreen"))
+	{
+		const std::string tinyScreenAttr = node.attribute("tinyScreen").as_string();
+
+		if (!Renderer::isSmallScreen() && tinyScreenAttr == "true")
+			return;
+
+		if (Renderer::isSmallScreen() && tinyScreenAttr == "false")
+			return;
+	}
+
+	const char* delim = " \t\r\n,";
+	const std::string nameAttr = node.attribute("name").as_string();
+	size_t prevOff = nameAttr.find_first_not_of(delim, 0);
+	size_t off = nameAttr.find_first_of(delim, prevOff);
+	std::string viewKey;
+	while (off != std::string::npos || prevOff != std::string::npos)
+	{
+		viewKey = nameAttr.substr(prevOff, off - prevOff);
+		prevOff = nameAttr.find_first_not_of(delim, off);
+		off = nameAttr.find_first_of(delim, prevOff);
+
+		if (std::find(sSupportedViews.cbegin(), sSupportedViews.cend(), viewKey) != sSupportedViews.cend())
+		{
+			ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
+			parseView(node, view);
+
+			for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
+			{
+				if (it->second.isCustomView && it->second.baseType == viewKey)
+				{
+					ThemeView& customView = (ThemeView&)it->second;
+					parseView(node, customView);
+				}
+			}
+		}
+	}
+}
+
+void ThemeData::parseCustomView(const pugi::xml_node& node, const pugi::xml_node& root)
+{
+	if (!node.attribute("name"))
+		return;
+
+	if (node.attribute("tinyScreen"))
+	{
+		const std::string tinyScreenAttr = node.attribute("tinyScreen").as_string();
+
+		if (!Renderer::isSmallScreen() && tinyScreenAttr == "true")
+			return;
+
+		if (Renderer::isSmallScreen() && tinyScreenAttr == "false")
+			return;
+	}
+
+	std::string viewKey = node.attribute("name").as_string();
+
+	ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
+	view.isCustomView = true;
+
+	std::string inherits = node.attribute("inherits").as_string();
+	if (!inherits.empty())
+	{
+		view.baseType = inherits;
+		parseCustomViewBaseClass(root, view, inherits);
+	}
+
+	parseView(node, view);
 }
 
 void ThemeData::parseView(const pugi::xml_node& root, ThemeView& view, bool overwriteElements)
@@ -1146,27 +1133,85 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	}
 }
 
-std::unordered_map<std::string, std::string> ThemeData::getSubSet(const std::unordered_map<std::string, std::string>& subsetmap, const std::string& subset)
+std::vector<Subset> ThemeData::getThemeSubSets(const std::string& theme)
 {
-	std::unordered_map<std::string, std::string> sortedsets;
+	std::vector<Subset> sets;
 
-	for (const auto& it : subsetmap)
+	std::deque<std::string> dequepath;
+
+	static const size_t pathCount = 2;
+	std::string paths[pathCount] =
 	{
-		if (it.second == subset)
-			sortedsets[it.first] = it.first;
+		"/etc/emulationstation/themes",
+		Utils::FileSystem::getHomePath() + "/.emulationstation/themes"		
+	};
+
+	for (size_t i = 0; i < pathCount; i++)
+	{
+		if (!Utils::FileSystem::isDirectory(paths[i]))
+			continue;
+
+		auto dirs = Utils::FileSystem::getDirInfo(paths[i] + "/" + theme);
+		for (auto it = dirs.cbegin(); it != dirs.cend(); ++it)
+		{
+			if (!it->directory || it->hidden)
+				continue;
+
+			std::string path = it->path + "/theme.xml";
+			if (!Utils::FileSystem::exists(path))
+				continue;
+
+			dequepath.push_back(path);
+			pugi::xml_document doc;
+			doc.load_file(path.c_str());
+
+			pugi::xml_node root = doc.child("theme");
+			crawlIncludes(root, sets, dequepath);
+			findRegion(doc, sets);
+			dequepath.pop_back();
+		}
+
+		std::string path = paths[i] + "/" + theme + "/theme.xml";
+		if (!Utils::FileSystem::exists(path))
+			continue;
+
+		dequepath.push_back(path);
+		pugi::xml_document doc;
+		doc.load_file(path.c_str());
+
+		pugi::xml_node root = doc.child("theme");
+		crawlIncludes(root, sets, dequepath);
+		findRegion(doc, sets);
+		dequepath.pop_back();
 	}
-	return sortedsets;
+
+	return sets;
 }
 
+std::vector<std::string> ThemeData::getSubSet(const std::vector<Subset>& subsets, const std::string& subset)
+{
+	std::vector<std::string> ret;
 
-void ThemeData::crawlIncludes(const pugi::xml_node& root, std::unordered_map<std::string, std::string>& sets, std::deque<std::string>& dequepath)
+	for (const auto& it : subsets)
+	{
+		if (it.subset == subset)
+			ret.push_back(it.name);
+	}
+
+	return ret;
+}
+
+void ThemeData::crawlIncludes(const pugi::xml_node& root, std::vector<Subset>& sets, std::deque<std::string>& dequepath)
 {
 	for (pugi::xml_node node = root.child("include"); node; node = node.next_sibling("include"))
 	{
 		std::string name = node.attribute("name").as_string();
 		std::string subset = node.attribute("subset").as_string();
 		if (!subset.empty())
-			sets.insert(std::pair<std::string, std::string>(name, subset));
+		{
+			sets.push_back(Subset(subset, name));
+		}
+		//	sets.insert(std::pair<std::string, std::string>(name, subset));
 
 		const char* relPath = node.text().get();
 		std::string path = Utils::FileSystem::resolveRelativePath(relPath, dequepath.back(), true);
@@ -1182,67 +1227,121 @@ void ThemeData::crawlIncludes(const pugi::xml_node& root, std::unordered_map<std
 	}
 }
 
-void ThemeData::findRegion(const pugi::xml_document& doc, std::unordered_map<std::string, std::string>& sets)
+void ThemeData::findRegion(const pugi::xml_document& doc, std::vector<Subset>& sets)
 {
 	pugi::xpath_node_set regionattr = doc.select_nodes("//@region");
 	for (auto xpath_node : regionattr)
 	{
-		if (xpath_node.attribute() != nullptr)
-			sets[xpath_node.attribute().value()] = "region";
+		if (xpath_node.attribute() == nullptr)
+			continue;
+
+		std::string elemKey = xpath_node.attribute().value();
+		if (elemKey.empty())
+			continue;
+
+		for (auto sb : sets)
+			if (sb.subset == "region" && sb.name == elemKey)
+				return;
+
+		sets.push_back(Subset("region", elemKey));
 	}
 }
 
-std::unordered_map<std::string, std::string> ThemeData::getThemeSubSets(const std::string& theme)
+void ThemeData::parseTheme(const pugi::xml_node& root)
 {
-	std::unordered_map<std::string, std::string> sets;
+	if (root.attribute("defaultView"))
+		mDefaultView = root.attribute("defaultView").as_string();
 
-	std::deque<std::string> dequepath;
-
-	static const size_t pathCount = 2;
-	std::string paths[pathCount] =
+	for (pugi::xml_node node = root.first_child(); node; node = node.next_sibling())
 	{
-		"/etc/emulationstation/themes",
-		Utils::FileSystem::getHomePath() + "/.emulationstation/themes"
-	};
+		std::string name = node.name();
 
-	for (size_t i = 0; i < pathCount; i++)
-	{
-		if (!Utils::FileSystem::isDirectory(paths[i]))
-			continue;
-
-		auto dirs = Utils::FileSystem::getDirInfo(paths[i] + "/" + theme);
-		for (auto it = dirs.cbegin(); it != dirs.cend(); ++it)
-		{
-			if (!it->directory || it->hidden)
-				continue;
-			
-			std::string path = it->path + "/theme.xml";
-			if (!Utils::FileSystem::exists(path))
-				continue;
-
-			dequepath.push_back(path);
-			pugi::xml_document doc;
-			doc.load_file(path.c_str());			
-
-			pugi::xml_node root = doc.child("theme");
-			crawlIncludes(root, sets, dequepath);
-			findRegion(doc, sets);
-			dequepath.pop_back();
-		}
-
-		std::string path = paths[i] + "/" + theme + "/theme.xml";
-		if (!Utils::FileSystem::exists(path))
-			continue;
-
-		dequepath.push_back(path);
-		pugi::xml_document doc;
-		doc.load_file(path.c_str());		
-
-		pugi::xml_node root = doc.child("theme");
-		crawlIncludes(root, sets, dequepath);
-		findRegion(doc, sets);
-		dequepath.pop_back();		
+		if (name == "include")
+			parseInclude(node);
+		else if (name == "view")
+			parseViewElement(node);
+		else if (name == "customView")
+			parseCustomView(node, root);
 	}
-		
-	return sets;
+
+	// Unfortunately, recalbox does not do things in order, features have to be loaded after
+	for (pugi::xml_node node = root.child("feature"); node; node = node.next_sibling("feature"))
+		parseFeature(node);
+}
+
+void ThemeData::parseInclude(const pugi::xml_node& node)
+{
+	if (!parseSubset(node))
+		return;
+
+	if (node.attribute("tinyScreen"))
+	{
+		const std::string tinyScreenAttr = node.attribute("tinyScreen").as_string();
+
+		if (!Renderer::isSmallScreen() && tinyScreenAttr == "true")
+			return;
+
+		if (Renderer::isSmallScreen() && tinyScreenAttr == "false")
+			return;
+	}
+
+	std::string relPath = resolvePlaceholders(node.text().as_string());
+	std::string path = Utils::FileSystem::resolveRelativePath(relPath, mPaths.back(), true);
+	path = resolveSystemVariable(mSystemThemeFolder, path);
+
+	if (!ResourceManager::getInstance()->fileExists(path))
+	{
+		LOG(LogWarning) << "Included file \"" << relPath << "\" not found! (resolved to \"" << path << "\")";
+		return;
+	}
+
+	mPaths.push_back(path);
+
+	pugi::xml_document includeDoc;
+	pugi::xml_parse_result result = includeDoc.load_file(path.c_str());
+	if (!result)
+	{
+		LOG(LogWarning) << "Error parsing file: \n    " << result.description() << "    from included file \"" << relPath << "\":\n    ";
+		return;
+	}
+
+	pugi::xml_node theme = includeDoc.child("theme");
+	if (!theme)
+	{
+		LOG(LogWarning) << "Missing <theme> tag!" << "    from included file \"" << relPath << "\":\n    ";
+		return;
+	}
+
+	parseVariables(theme);
+	parseTheme(theme);
+
+	mPaths.pop_back();
+}
+
+void ThemeData::parseFeature(const pugi::xml_node& node)
+{
+	if (!node.attribute("supported"))
+	{
+		LOG(LogWarning) << "Feature missing \"supported\" attribute!";
+		return;
+	}
+
+	const std::string supportedAttr = node.attribute("supported").as_string();
+
+	if (std::find(sSupportedFeatures.cbegin(), sSupportedFeatures.cend(), supportedAttr) != sSupportedFeatures.cend())
+		parseViews(node);
+}
+
+void ThemeData::parseVariable(const pugi::xml_node& node)
+{
+	std::string key = node.name();
+	if (key.empty())
+		return;
+
+	std::string val = node.text().as_string();
+	if (val.empty())
+		return;
+
+	mVariables.erase(key);
+	mVariables.insert(std::pair<std::string, std::string>(key, val));
 }

@@ -88,7 +88,7 @@ void Settings::setDefaults()
 	mBoolMap["Windowed"] = false;
 	mBoolMap["SplashScreen"] = true;
 	mBoolMap["SplashScreenProgress"] = true;
-	mBoolMap["PreloadUI"] = true;
+	mBoolMap["PreloadUI"] = false;
 	mBoolMap["StartupOnGameList"] = false;
 	mBoolMap["HideSystemView"] = false;
 	
