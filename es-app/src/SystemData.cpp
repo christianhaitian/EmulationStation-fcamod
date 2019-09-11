@@ -363,6 +363,7 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 bool SystemData::loadConfig(Window* window)
 {
 	deleteSystems();
+	ThemeData::setDefaultTheme(nullptr);
 
 	std::string path = getConfigPath(false);
 

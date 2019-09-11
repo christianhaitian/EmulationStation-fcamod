@@ -601,6 +601,9 @@ void ViewController::preload()
 
 void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 {
+	if (reloadTheme)
+		ThemeData::setDefaultTheme(nullptr);
+
 	for(auto it = mGameListViews.cbegin(); it != mGameListViews.cend(); it++)
 	{
 		if(it->second.get() == view)
@@ -632,6 +635,10 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 			break;
 		}
 	}
+
+	if (SystemData::sSystemVector.size() > 0 && reloadTheme)
+		ThemeData::setDefaultTheme(SystemData::sSystemVector.at(0)->getTheme().get());
+	
 	// Redisplay the current view
 	if (mCurrentView)
 		mCurrentView->onShow();
@@ -639,6 +646,8 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 
 void ViewController::reloadAll()
 {
+	ThemeData::setDefaultTheme(nullptr);
+
 	SystemData* system = nullptr;
 
 	if (mState.viewing == SYSTEM_SELECT)
@@ -673,6 +682,9 @@ void ViewController::reloadAll()
 		if (it->second != NULL)
 			getGameListView(it->first)->setCursor(it->second);
 	}
+
+	if (SystemData::sSystemVector.size() > 0)
+		ThemeData::setDefaultTheme(SystemData::sSystemVector.at(0)->getTheme().get());
 
 	// Rebuild SystemListView
 	mSystemListView.reset();
