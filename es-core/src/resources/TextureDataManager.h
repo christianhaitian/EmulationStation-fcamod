@@ -21,7 +21,7 @@ public:
 	~TextureLoader();
 
 	void load(std::shared_ptr<TextureData> textureData);
-	void remove(std::shared_ptr<TextureData> textureData);
+	bool remove(std::shared_ptr<TextureData> textureData);
 	void clearQueue();
 
 	size_t getQueueSize();
@@ -35,7 +35,7 @@ private:
 	std::map<TextureData*, std::list<std::shared_ptr<TextureData> >::const_iterator > 	mTextureDataLookup;
 
 	std::vector<std::thread>	mThreads;	
-	std::mutex					mMutex;
+	std::mutex					mLoaderLock;
 	std::condition_variable		mEvent;
 	bool 						mExit;
 
@@ -68,6 +68,7 @@ public:
 	// be referenced by a smart point so we only need to remove it from our array and it
 	// will be deleted when the other thread has finished with it
 	void remove(const TextureResource* key);
+	void cancelAsync(const TextureResource* key);
 
 	std::shared_ptr<TextureData> get(const TextureResource* key, bool enableLoading = true);
 	bool bind(const TextureResource* key);

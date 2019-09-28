@@ -181,6 +181,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "default", PATH },
 		{ "path", PATH },
 		{ "delay", FLOAT },
+		{ "effect", STRING },
 	 	{ "visible", BOOLEAN },
 	 	{ "zIndex", FLOAT },
 		{ "showSnapshotNoVideo", BOOLEAN },
@@ -469,17 +470,6 @@ void ThemeData::parseViews(const pugi::xml_node& root)
 		if (!node.attribute("name"))
 			continue;
 
-		if (node.attribute("tinyScreen"))
-		{
-			const std::string tinyScreenAttr = node.attribute("tinyScreen").as_string();
-
-			if (!Renderer::isSmallScreen() && tinyScreenAttr == "true")
-				continue;
-
-			if (Renderer::isSmallScreen() && tinyScreenAttr == "false")
-				continue;
-		}
-
 		const char* delim = " \t\r\n,";
 		const std::string nameAttr = node.attribute("name").as_string();	
 		size_t prevOff = nameAttr.find_first_not_of(delim, 0);
@@ -584,17 +574,6 @@ void ThemeData::parseViewElement(const pugi::xml_node& node)
 		return;
 	}
 
-	if (node.attribute("tinyScreen"))
-	{
-		const std::string tinyScreenAttr = node.attribute("tinyScreen").as_string();
-
-		if (!Renderer::isSmallScreen() && tinyScreenAttr == "true")
-			return;
-
-		if (Renderer::isSmallScreen() && tinyScreenAttr == "false")
-			return;
-	}
-
 	const char* delim = " \t\r\n,";
 	const std::string nameAttr = node.attribute("name").as_string();
 	size_t prevOff = nameAttr.find_first_not_of(delim, 0);
@@ -639,6 +618,18 @@ void ThemeData::parseCustomView(const pugi::xml_node& node, const pugi::xml_node
 			return;
 	}
 
+	if (node.attribute("ifHelpPrompts"))
+	{
+		const std::string helpVisibleAttr = node.attribute("ifHelpPrompts").as_string();
+		bool help = Settings::getInstance()->getBool("ShowHelpPrompts");
+
+		if (!help && helpVisibleAttr == "true")
+			return;
+
+		if (help && helpVisibleAttr == "false")
+			return;
+	}
+
 	std::string viewKey = node.attribute("name").as_string();
 
 	ThemeView& view = mViews.insert(std::pair<std::string, ThemeView>(viewKey, ThemeView())).first->second;
@@ -658,6 +649,29 @@ void ThemeData::parseView(const pugi::xml_node& root, ThemeView& view, bool over
 {
 	ThemeException error;
 	error.setFiles(mPaths);
+
+	if (root.attribute("tinyScreen"))
+	{
+		const std::string tinyScreenAttr = root.attribute("tinyScreen").as_string();
+
+		if (!Renderer::isSmallScreen() && tinyScreenAttr == "true")
+			return;
+
+		if (Renderer::isSmallScreen() && tinyScreenAttr == "false")
+			return;
+	}
+
+	if (root.attribute("ifHelpPrompts"))
+	{
+		const std::string helpVisibleAttr = root.attribute("ifHelpPrompts").as_string();
+		bool help = Settings::getInstance()->getBool("ShowHelpPrompts");
+
+		if (!help && helpVisibleAttr == "true")
+			return;
+
+		if (help && helpVisibleAttr == "false")
+			return;
+	}
 
 	for (pugi::xml_node node = root.first_child(); node; node = node.next_sibling())
 	{
@@ -1283,6 +1297,18 @@ void ThemeData::parseInclude(const pugi::xml_node& node)
 			return;
 
 		if (Renderer::isSmallScreen() && tinyScreenAttr == "false")
+			return;
+	}
+
+	if (node.attribute("ifHelpPrompts"))
+	{
+		const std::string helpVisibleAttr = node.attribute("ifHelpPrompts").as_string();
+		bool help = Settings::getInstance()->getBool("ShowHelpPrompts");
+
+		if (!help && helpVisibleAttr == "true")
+			return;
+
+		if (help && helpVisibleAttr == "false")
 			return;
 	}
 

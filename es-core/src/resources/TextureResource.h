@@ -53,6 +53,7 @@ protected:
 public:
 	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true, bool asReloadable = true, MaxSizeInfo maxSize = MaxSizeInfo());
 	void initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height);
+	void initFromExternalPixels(unsigned char* dataRGBA, size_t width, size_t height);
 	virtual void initFromMemory(const char* file, size_t length);
 
 	// For scalable source images in textures we want to set the resolution to rasterize at

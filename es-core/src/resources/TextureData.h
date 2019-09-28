@@ -27,6 +27,7 @@ public:
 	bool initImageFromMemory(const unsigned char* fileData, size_t length);
 	bool initFromRGBA(const unsigned char* dataRGBA, size_t width, size_t height);
 	bool initFromRGBAEx(unsigned char* dataRGBA, size_t width, size_t height);
+	bool initFromExternalRGBA(unsigned char* dataRGBA, size_t width, size_t height);
 
 	// Read the data into memory if necessary
 	bool load();
@@ -81,6 +82,8 @@ private:
 	Vector2i		mPackedSize;
 	Vector2i		mBaseSize;
 	MaxSizeInfo		mMaxSize;
+
+	bool			mIsExternalDataRGBA;
 };
 
 #endif // ES_CORE_RESOURCES_TEXTURE_DATA_H

@@ -61,6 +61,8 @@ public:
 	static const Vector2f UnitX() { return { 1, 0 }; }
 	static const Vector2f UnitY() { return { 0, 1 }; }
 
+	inline bool empty() { return mX == 0.0 && mY == 0.0; }
+
 private:
 
 	float mX;

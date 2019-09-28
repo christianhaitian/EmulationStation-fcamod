@@ -99,6 +99,15 @@ void TextureResource::onTextureLoaded(std::shared_ptr<TextureData> tex)
 	mSourceSize = Vector2f(tex->sourceWidth(), tex->sourceHeight());
 }
 
+void TextureResource::initFromExternalPixels(unsigned char* dataRGBA, size_t width, size_t height)
+{
+	mTextureData->initFromExternalRGBA(dataRGBA, width, height);
+
+	// Cache the image dimensions
+	mSize = Vector2i((int)width, (int)height);
+	mSourceSize = Vector2f(mTextureData->sourceWidth(), mTextureData->sourceHeight());
+}
+
 void TextureResource::initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height)
 {
 	// This is only valid if we have a local texture data object
