@@ -76,11 +76,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	sortAllSystemsSwitch = std::make_shared<SwitchComponent>(mWindow);
 	sortAllSystemsSwitch->setState(Settings::getInstance()->getBool("SortAllSystems"));
 	mMenu.addWithLabel(_("SORT CUSTOM COLLECTIONS AND SYSTEMS"), sortAllSystemsSwitch);
-
-	favoritesFirstSwitch = std::make_shared<SwitchComponent>(mWindow);
-	favoritesFirstSwitch->setState(Settings::getInstance()->getBool("FavoritesFirst"));
-	mMenu.addWithLabel(_("DISPLAY FAVORITES FIRST IN GAMELIST"), favoritesFirstSwitch);
-
+	
 	toggleSystemNameInCollections = std::make_shared<SwitchComponent>(mWindow);
 	toggleSystemNameInCollections->setState(Settings::getInstance()->getBool("CollectionShowSystemInfo"));
 	mMenu.addWithLabel(_("SHOW SYSTEM NAME IN COLLECTIONS"), toggleSystemNameInCollections);
@@ -174,45 +170,28 @@ void GuiCollectionSystemsOptions::addSystemsToMenu()
 
 void GuiCollectionSystemsOptions::applySettings()
 {
-	std::string outAuto = Utils::String::vectorToCommaString(autoOptionList->getSelectedObjects());
-	std::string prevAuto = Settings::getInstance()->getString("CollectionSystemsAuto");
-	std::string outCustom = Utils::String::vectorToCommaString(customOptionList->getSelectedObjects());
-	std::string prevCustom = Settings::getInstance()->getString("CollectionSystemsCustom");
-
-	bool outSort = sortAllSystemsSwitch->getState();
-	bool prevSort = Settings::getInstance()->getBool("SortAllSystems");
-	bool outBundle = bundleCustomCollections->getState();
-	bool prevBundle = Settings::getInstance()->getBool("UseCustomCollectionsSystem");
-
-	bool prevShow = Settings::getInstance()->getBool("CollectionShowSystemInfo");
-	bool outShow = toggleSystemNameInCollections->getState();
-
-	bool outFavoritesFirst = favoritesFirstSwitch->getState();
-	bool prevFavoritesFirst = Settings::getInstance()->getBool("FavoritesFirst");
-	
-	bool needUpdateSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle || outFavoritesFirst != prevFavoritesFirst || prevShow != outShow;
-	if (needUpdateSettings)
-	{
-		updateSettings(outAuto, outCustom);
-	}
-
+	std::string newAutoSettings = Utils::String::vectorToCommaString(autoOptionList->getSelectedObjects());
+	std::string newCustomSettings = Utils::String::vectorToCommaString(customOptionList->getSelectedObjects());
+	updateSettings(newAutoSettings, newCustomSettings);
 	delete this;
 }
 
 void GuiCollectionSystemsOptions::updateSettings(std::string newAutoSettings, std::string newCustomSettings)
 {
-	Settings::getInstance()->setString("CollectionSystemsAuto", newAutoSettings);
-	Settings::getInstance()->setString("CollectionSystemsCustom", newCustomSettings);
-	Settings::getInstance()->setBool("SortAllSystems", sortAllSystemsSwitch->getState());
-	Settings::getInstance()->setBool("UseCustomCollectionsSystem", bundleCustomCollections->getState());
-	Settings::getInstance()->setBool("CollectionShowSystemInfo", toggleSystemNameInCollections->getState());
-	Settings::getInstance()->setBool("FavoritesFirst", favoritesFirstSwitch->getState());
+	bool dirty = Settings::getInstance()->setString("CollectionSystemsAuto", newAutoSettings);
+	dirty |= Settings::getInstance()->setString("CollectionSystemsCustom", newCustomSettings);
+	dirty |= Settings::getInstance()->setBool("SortAllSystems", sortAllSystemsSwitch->getState());
+	dirty |= Settings::getInstance()->setBool("UseCustomCollectionsSystem", bundleCustomCollections->getState());
+	dirty |= Settings::getInstance()->setBool("CollectionShowSystemInfo", toggleSystemNameInCollections->getState());
 
-	Settings::getInstance()->saveFile();
-	CollectionSystemManager::get()->loadEnabledListFromSettings();
-	CollectionSystemManager::get()->updateSystemsList();
-	ViewController::get()->goToStart();
-	ViewController::get()->reloadAll();
+	if (dirty)
+	{
+		Settings::getInstance()->saveFile();
+		CollectionSystemManager::get()->loadEnabledListFromSettings();
+		CollectionSystemManager::get()->updateSystemsList();
+		ViewController::get()->goToStart();
+		ViewController::get()->reloadAll();
+	}
 }
 
 bool GuiCollectionSystemsOptions::input(InputConfig* config, Input input)

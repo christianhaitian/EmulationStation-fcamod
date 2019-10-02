@@ -12,20 +12,19 @@
 
 bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 {
+	LOG(LogDebug) << "ImageIO::loadImageSize " << fn;
+
 	auto ext = Utils::String::toLower(Utils::FileSystem::getExtension(fn));
 	if (ext != ".jpg" && ext != ".png" && ext != ".jpeg" && ext != ".gif")
+	{
+		LOG(LogWarning) << "ImageIO::loadImageSize\tUnknown file type";
 		return false;
-	
+	}
+
 	FILE *f = fopen(fn, "rb");
-	if (f == 0) 
-		return false;
-
-	fseek(f, 0, SEEK_END);
-	long len = ftell(f);
-	fseek(f, 0, SEEK_SET);
-
-	if (len < 24) {
-		fclose(f);
+	if (f == 0)
+	{
+		LOG(LogWarning) << "ImageIO::loadImageSize\tUnable to open file";
 		return false;
 	}
 
@@ -34,15 +33,19 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 	// reading PNG dimensions requires the first 24 bytes of the file
 	// reading JPEG dimensions requires scanning through jpeg chunks
 	// In all formats, the file is at least 24 bytes big, so we'll read that always
-	unsigned char buf[24]; fread(buf, 1, 24, f);
-
+	unsigned char buf[24];
+	if (fread(buf, 1, 24, f) != 24)
+		return false;
 
 	// For JPEGs, we need to read the first 12 bytes of each chunk.
 	// We'll read those 12 bytes at buf+2...buf+14, i.e. overwriting the existing buf.
+	bool jfif = false;
 
 	if ((buf[0] == 0xFF && buf[1] == 0xD8 && buf[2] == 0xFF && buf[3] == 0xE0 && buf[6] == 'J' && buf[7] == 'F' && buf[8] == 'I' && buf[9] == 'F') ||
 		(buf[0] == 0xFF && buf[1] == 0xD8 && buf[2] == 0xFF && buf[3] == 0xE1 && buf[6] == 'E' && buf[7] == 'x' && buf[8] == 'i' && buf[9] == 'f'))
 	{
+		jfif = true;
+
 		long pos = 2;
 		while (buf[2] == 0xFF)
 		{
@@ -50,19 +53,24 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 				break;
 
 			pos += 2 + (buf[4] << 8) + buf[5];
-			if (pos + 12 > len) break;
-			fseek(f, pos, SEEK_SET);
-			fread(buf + 2, 1, 12, f);
+
+			if (fseek(f, pos, SEEK_SET) != 0)
+				break;
+
+			if (fread(buf + 2, 1, 12, f) != 12)
+				break;
 		}
 	}
 
 	fclose(f);
 
 	// JPEG: (first two bytes of buf are first two bytes of the jpeg file; rest of buf is the DCT frame
-	if (buf[0] == 0xFF && buf[1] == 0xD8 && buf[2] == 0xFF)
+	if (jfif && buf[0] == 0xFF && buf[1] == 0xD8 && buf[2] == 0xFF)
 	{
 		*y = (buf[7] << 8) + buf[8];
 		*x = (buf[9] << 8) + buf[10];
+
+		LOG(LogDebug) << "ImageIO::loadImageSize\tJPG size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
 
 		if (*x > 5000) // security ?
 			return false;
@@ -75,6 +83,9 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 	{
 		*x = buf[6] + (buf[7] << 8);
 		*y = buf[8] + (buf[9] << 8);
+
+		LOG(LogDebug) << "ImageIO::loadImageSize\tGIF size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
+
 		return true;
 	}
 
@@ -84,9 +95,12 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 		*x = (buf[16] << 24) + (buf[17] << 16) + (buf[18] << 8) + (buf[19] << 0);
 		*y = (buf[20] << 24) + (buf[21] << 16) + (buf[22] << 8) + (buf[23] << 0);
 
+		LOG(LogDebug) << "ImageIO::loadImageSize\tPNG size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
+
 		return true;
 	}
 
+	LOG(LogWarning) << "ImageIO::loadImageSize\tUnable to extract size";
 	return false;
 }
 

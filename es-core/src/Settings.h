@@ -11,7 +11,7 @@ public:
 	static Settings* getInstance();
 
 	void loadFile();
-	void saveFile();
+	bool saveFile();
 
 	//You will get a warning if you try a get on a key that is not already present.
 	bool getBool(const std::string& name);
@@ -19,10 +19,10 @@ public:
 	float getFloat(const std::string& name);
 	const std::string& getString(const std::string& name);
 
-	void setBool(const std::string& name, bool value);
-	void setInt(const std::string& name, int value);
-	void setFloat(const std::string& name, float value);
-	void setString(const std::string& name, const std::string& value);
+	bool setBool(const std::string& name, bool value);
+	bool setInt(const std::string& name, int value);
+	bool setFloat(const std::string& name, float value);
+	bool setString(const std::string& name, const std::string& value);
 
 private:
 	static Settings* sInstance;
@@ -43,6 +43,7 @@ private:
 	std::map<std::string, float> mDefaultFloatMap;
 	std::map<std::string, std::string> mDefaultStringMap;
 
+	bool mWasChanged;
 	bool mHasConfigRoot;
 };
 

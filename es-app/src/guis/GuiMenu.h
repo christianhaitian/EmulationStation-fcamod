@@ -3,6 +3,7 @@
 #define ES_APP_GUIS_GUI_MENU_H
 
 #include "components/MenuComponent.h"
+#include "components/OptionListComponent.h"
 #include "GuiComponent.h"
 
 class GuiSettings;
@@ -10,7 +11,7 @@ class GuiSettings;
 class GuiMenu : public GuiComponent
 {
 public:
-	GuiMenu(Window* window);
+	GuiMenu(Window* window, bool animate = true);
 
 	bool input(InputConfig* config, Input input) override;
 	void onSizeChanged() override;
@@ -29,6 +30,9 @@ private:
 	void openScreensaverOptions();
 	void openSoundSettings();
 	void openUISettings();
+	void openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListComponent<std::string>> theme_set);
+
+	void createInputTextRow(GuiSettings *gui, std::string title, const char *settingsID, bool password);
 
 	MenuComponent mMenu;
 	TextComponent mVersion;

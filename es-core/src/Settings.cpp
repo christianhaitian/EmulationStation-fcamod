@@ -62,6 +62,8 @@ Settings* Settings::getInstance()
 
 void Settings::setDefaults()
 {
+	mWasChanged = false;
+
 	mBoolMap.clear();
 	mIntMap.clear();
 
@@ -93,6 +95,8 @@ void Settings::setDefaults()
 	mBoolMap["HideSystemView"] = false;
 	
 	mStringMap["StartupSystem"] = "";
+
+	mBoolMap["FlatFolders"] = false;
 
 	mBoolMap["VSync"] = true;
 	mBoolMap["EnableSounds"] = true;
@@ -135,8 +139,7 @@ void Settings::setDefaults()
 	mStringMap["TransitionStyle"] = "slide";
 	mStringMap["Language"] = "en";	
 	mStringMap["ThemeSet"] = "";
-	mStringMap["ScreenSaverBehavior"] = "dim";
-	mStringMap["Scraper"] = "TheGamesDB";
+	mStringMap["ScreenSaverBehavior"] = "dim";	
 	mStringMap["GamelistViewStyle"] = "automatic";
 	mStringMap["DefaultGridSize"] = "";
 
@@ -215,13 +218,16 @@ void Settings::setDefaults()
 	mIntMap["MonitorID"] = -1;	
 	mStringMap["ExePath"] = "";
 
+	mStringMap["Scraper"] = "ScreenScraper";
+	mStringMap["ScrapperImageSrc"] = "ss";
+	mStringMap["ScrapperThumbSrc"] = "box-2D";
 
-	mStringMap["ScrapperImageSrc"] = "box-2D";
-	mStringMap["ScrapperThumbSrc"] = "";
+	mBoolMap["ScrapeMarquee"] = false;
 	mBoolMap["ScrapeVideos"] = false;
 	
 	mBoolMap["audio.bgmusic"] = true;
 	mBoolMap["audio.persystem"] = false;
+	mBoolMap["audio.thememusics"] = true;
 	
 	mStringMap["MusicDirectory"] = "";
 	mStringMap["UserMusicDirectory"] = "";
@@ -251,8 +257,13 @@ void saveMap(pugi::xml_node& doc, std::map<K, V>& map, const char* type, std::ma
 	}
 }
 
-void Settings::saveFile()
+bool Settings::saveFile()
 {
+	if (!mWasChanged)
+		return false;
+
+	mWasChanged = false;
+
 	LOG(LogDebug) << "Settings::saveFile() : Saving Settings to file.";
 	const std::string path = Utils::FileSystem::getHomePath() + "/.emulationstation/es_settings.cfg";
 
@@ -289,6 +300,8 @@ void Settings::saveFile()
 
 	Scripting::fireEvent("config-changed");
 	Scripting::fireEvent("settings-changed");
+
+	return true;
 }
 
 void Settings::loadFile()
@@ -324,6 +337,8 @@ void Settings::loadFile()
 		setFloat(node.attribute("name").as_string(), node.attribute("value").as_float());
 	for(pugi::xml_node node = root.child("string"); node; node = node.next_sibling("string"))
 		setString(node.attribute("name").as_string(), node.attribute("value").as_string());
+
+	mWasChanged = false;
 }
 
 //Print a warning message if the setting we're trying to get doesn't already exist in the map, then return the value in the map.
@@ -336,9 +351,17 @@ void Settings::loadFile()
 	} \
 	return mapName[name]; \
 } \
-void Settings::setMethodName(const std::string& name, type value) \
+bool Settings::setMethodName(const std::string& name, type value) \
 { \
-	mapName[name] = value; \
+	if (mapName.count(name) == 0 || mapName[name] != value) { \
+		mapName[name] = value; \
+\
+		if (std::find(settings_dont_save.cbegin(), settings_dont_save.cend(), name) == settings_dont_save.cend()) \
+			mWasChanged = true; \
+\
+		return true; \
+	} \
+	return false; \
 }
 
 SETTINGS_GETSET(bool, mBoolMap, getBool, setBool, false);

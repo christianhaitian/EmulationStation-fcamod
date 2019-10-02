@@ -5,12 +5,13 @@
 #include <curl/curl.h>
 #include <map>
 #include <sstream>
+#include <fstream>
 
 /* Usage:
  * HttpReq myRequest("www.google.com", "/index.html");
  * //for blocking behavior: while(myRequest.status() == HttpReq::REQ_IN_PROGRESS);
  * //for non-blocking behavior: check if(myRequest.status() != HttpReq::REQ_IN_PROGRESS) in some sort of update method
- *
+ * 
  * //once one of those completes, the request is ready
  * if(myRequest.status() != REQ_SUCCESS)
  * {
@@ -44,10 +45,15 @@ public:
 
 	std::string getErrorMsg();
 
-	std::string getContent() const; // mStatus must be REQ_SUCCESS
+	std::string getContent(); // mStatus must be REQ_SUCCESS
+
+
+	bool saveContent(const std::string filename);
 
 	static std::string urlEncode(const std::string &s);
 	static bool isUrl(const std::string& s);
+
+	int getPercent() { return mPercent; }
 
 private:
 	static size_t write_content(void* buff, size_t size, size_t nmemb, void* req_ptr);
@@ -65,8 +71,13 @@ private:
 
 	Status mStatus;
 
-	std::stringstream mContent;
+	std::string   mStreamPath;
+	std::ofstream mStream;
+
+	//std::stringstream mContent;
 	std::string mErrorMsg;
+
+	int mPercent;
 };
 
 #endif // ES_CORE_HTTP_REQ_H

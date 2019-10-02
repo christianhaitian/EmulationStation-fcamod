@@ -36,6 +36,11 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "gradientType", STRING },
 		{ "visible", BOOLEAN },
 		{ "reflexion", NORMALIZED_PAIR },
+		{ "reflexionOnFrame", BOOLEAN },
+		{ "horizontalAlignment", STRING },
+		{ "verticalAlignment", STRING },
+		{ "flipX", BOOLEAN },
+		{ "flipY", BOOLEAN },
 		{ "zIndex", FLOAT } } },
 	{ "imagegrid", {
 		{ "pos", NORMALIZED_PAIR },
@@ -87,6 +92,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 
 		{ "glowColor", COLOR },
 		{ "glowSize", FLOAT },
+		{ "glowOffset", NORMALIZED_PAIR },
 
 		{ "padding", NORMALIZED_RECT },
 
@@ -169,7 +175,18 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "textColor", COLOR },
 		{ "iconColor", COLOR },
 		{ "fontPath", PATH },
-		{ "fontSize", FLOAT } } },
+		{ "fontSize", FLOAT },
+		{ "iconUpDown", PATH },
+		{ "iconLeftRight", PATH },
+		{ "iconUpDownLeftRight", PATH },
+		{ "iconA", PATH },
+		{ "iconB", PATH },
+		{ "iconX", PATH },
+		{ "iconY", PATH },
+		{ "iconL", PATH },
+		{ "iconR", PATH },
+		{ "iconStart", PATH },
+		{ "iconSelect", PATH } } },
 	{ "video", {
 		{ "pos", NORMALIZED_PAIR },
 		{ "size", NORMALIZED_PAIR },
@@ -201,6 +218,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "logoPos", NORMALIZED_PAIR },
 		{ "logoAlignment", STRING },
 		{ "maxLogoCount", FLOAT },
+		{ "systemInfoDelay", FLOAT },
 		{ "zIndex", FLOAT } } },
 
 	{ "menuText", {
@@ -238,6 +256,10 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 	{ "menuSwitch",{
 		{ "pathOn", PATH },
 		{ "pathOff", PATH } } },
+
+	{ "menuTextEdit",{
+		{ "active", PATH },
+		{ "inactive", PATH } } },
 
 	{ "menuSlider",{
 		{ "path", PATH } } },
@@ -305,8 +327,6 @@ std::string ThemeData::resolvePlaceholders(const char* in)
 
 ThemeData::ThemeData()
 {	
-	mHasSubsets = false;
-
 	mColorset = Settings::getInstance()->getString("ThemeColorSet");
 	mIconset = Settings::getInstance()->getString("ThemeIconSet");
 	mMenu = Settings::getInstance()->getString("ThemeMenu");
@@ -326,7 +346,7 @@ void ThemeData::loadFile(std::string system, std::map<std::string, std::string> 
 	if(!Utils::FileSystem::exists(path))
 		throw error << "File does not exist!";
 
-	mHasSubsets = false;
+	mSubsets.clear();
 	mVersion = 0;
 	mViews.clear();
 
@@ -413,10 +433,22 @@ bool ThemeData::parseSubset(const pugi::xml_node& node)
 	if (!node.attribute("subset"))
 		return true;
 
-	mHasSubsets = true;
-
 	const std::string subsetAttr = node.attribute("subset").as_string();
 	const std::string nameAttr = node.attribute("name").as_string();
+
+	if (!subsetAttr.empty())
+	{
+		bool add = true;
+
+		for (auto sb : mSubsets) {
+			if (sb.subset == subsetAttr && sb.name == nameAttr) {
+				add = false; break;
+			}
+		}
+
+		if (add)
+			mSubsets.push_back(Subset(subsetAttr, nameAttr));
+	}
 
 	if (subsetAttr == "colorset" && (nameAttr == mColorset || (mColorset.empty() && isFirstSubset(node))))
 		return true;
@@ -714,31 +746,43 @@ void ThemeData::parseView(const pugi::xml_node& root, ThemeView& view, bool over
 
 bool ThemeData::parseRegion(const pugi::xml_node& node)
 {
-	bool parse = true;
+	if (!node.attribute("region"))
+		return true;
 
-	if (node.attribute("region"))
+	const std::string nameAttr = node.attribute("region").as_string();
+
+	if (!nameAttr.empty())
 	{
-		std::string regionsetting = Settings::getInstance()->getString("ThemeRegionName");
+		bool add = true;
 
-		parse = false;
-		const char* delim = " \t\r\n,";
-		const std::string nameAttr = node.attribute("region").as_string();
-		size_t prevOff = nameAttr.find_first_not_of(delim, 0);
-		size_t off = nameAttr.find_first_of(delim, prevOff);
-		while (off != std::string::npos || prevOff != std::string::npos)
-		{
-			std::string elemKey = nameAttr.substr(prevOff, off - prevOff);
-			prevOff = nameAttr.find_first_not_of(delim, off);
-			off = nameAttr.find_first_of(delim, prevOff);
-			if (elemKey == regionsetting)
-			{
-				parse = true;
-				return parse;
+		for (auto sb : mSubsets) {
+			if (sb.subset == "region" && sb.name == nameAttr) {
+				add = false; break;
 			}
 		}
 
+		if (add)
+			mSubsets.push_back(Subset("region", nameAttr));
 	}
-	return parse;
+
+	std::string regionsetting = Settings::getInstance()->getString("ThemeRegionName");
+	if (regionsetting.empty())
+		regionsetting = "eu";
+
+	const char* delim = " \t\r\n,";
+
+	size_t prevOff = nameAttr.find_first_not_of(delim, 0);
+	size_t off = nameAttr.find_first_of(delim, prevOff);
+	while (off != std::string::npos || prevOff != std::string::npos)
+	{
+		std::string elemKey = nameAttr.substr(prevOff, off - prevOff);
+		prevOff = nameAttr.find_first_not_of(delim, off);
+		off = nameAttr.find_first_of(delim, prevOff);
+		if (elemKey == regionsetting)
+			return true;
+	}
+
+	return false;
 }
 
 void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element, bool overwrite)
@@ -1111,7 +1155,7 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 		if (elem->has("selectorColorEnd"))
 			Text.selectorGradientColor = elem->get<unsigned int>("selectorColorEnd");
 		if (elem->has("selectorGradientType"))
-			Text.selectorGradientType = !(elem->get<std::string>("selectorGradientType").compare("horizontal"));
+			Text.selectorGradientType = elem->get<std::string>("selectorGradientType").compare("horizontal");
 	}
 
 	elem = theme->getElement("menu", "menubutton", "menuButton");
@@ -1121,6 +1165,15 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 			Icons.button = elem->get<std::string>("path");
 		if (elem->has("filledPath"))
 			Icons.button_filled = elem->get<std::string>("filledPath");
+	}
+
+	elem = theme->getElement("menu", "menutextedit", "menuTextEdit");
+	if (elem)
+	{
+		if (elem->has("active") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("active")))
+			Icons.textinput_ninepatch_active = elem->get<std::string>("active");
+		if (elem->has("inactive") && ResourceManager::getInstance()->fileExists(elem->get<std::string>("inactive")))
+			Icons.textinput_ninepatch = elem->get<std::string>("inactive");
 	}
 
 	elem = theme->getElement("menu", "menuswitch", "menuSwitch");
@@ -1148,61 +1201,6 @@ ThemeData::ThemeMenu::ThemeMenu(ThemeData* theme)
 	}
 }
 
-std::vector<Subset> ThemeData::getThemeSubSets(const std::string& theme)
-{
-	std::vector<Subset> sets;
-
-	std::deque<std::string> dequepath;
-
-	static const size_t pathCount = 2;
-	std::string paths[pathCount] =
-	{
-		"/etc/emulationstation/themes",
-		Utils::FileSystem::getHomePath() + "/.emulationstation/themes"		
-	};
-
-	for (size_t i = 0; i < pathCount; i++)
-	{
-		if (!Utils::FileSystem::isDirectory(paths[i]))
-			continue;
-
-		auto dirs = Utils::FileSystem::getDirInfo(paths[i] + "/" + theme);
-		for (auto it = dirs.cbegin(); it != dirs.cend(); ++it)
-		{
-			if (!it->directory || it->hidden)
-				continue;
-
-			std::string path = it->path + "/theme.xml";
-			if (!Utils::FileSystem::exists(path))
-				continue;
-
-			dequepath.push_back(path);
-			pugi::xml_document doc;
-			doc.load_file(path.c_str());
-
-			pugi::xml_node root = doc.child("theme");
-			crawlIncludes(root, sets, dequepath);
-			findRegion(doc, sets);
-			dequepath.pop_back();
-		}
-
-		std::string path = paths[i] + "/" + theme + "/theme.xml";
-		if (!Utils::FileSystem::exists(path))
-			continue;
-
-		dequepath.push_back(path);
-		pugi::xml_document doc;
-		doc.load_file(path.c_str());
-
-		pugi::xml_node root = doc.child("theme");
-		crawlIncludes(root, sets, dequepath);
-		findRegion(doc, sets);
-		dequepath.pop_back();
-	}
-
-	return sets;
-}
-
 std::vector<std::string> ThemeData::getSubSet(const std::vector<Subset>& subsets, const std::string& subset)
 {
 	std::vector<std::string> ret;
@@ -1214,52 +1212,6 @@ std::vector<std::string> ThemeData::getSubSet(const std::vector<Subset>& subsets
 	}
 
 	return ret;
-}
-
-void ThemeData::crawlIncludes(const pugi::xml_node& root, std::vector<Subset>& sets, std::deque<std::string>& dequepath)
-{
-	for (pugi::xml_node node = root.child("include"); node; node = node.next_sibling("include"))
-	{
-		std::string name = node.attribute("name").as_string();
-		std::string subset = node.attribute("subset").as_string();
-		if (!subset.empty())
-		{
-			sets.push_back(Subset(subset, name));
-		}
-		//	sets.insert(std::pair<std::string, std::string>(name, subset));
-
-		const char* relPath = node.text().get();
-		std::string path = Utils::FileSystem::resolveRelativePath(relPath, dequepath.back(), true);
-
-		dequepath.push_back(path);
-		pugi::xml_document includeDoc;
-		includeDoc.load_file(path.c_str());
-
-		pugi::xml_node root = includeDoc.child("theme");
-		crawlIncludes(root, sets, dequepath);
-		findRegion(includeDoc, sets);
-		dequepath.pop_back();
-	}
-}
-
-void ThemeData::findRegion(const pugi::xml_document& doc, std::vector<Subset>& sets)
-{
-	pugi::xpath_node_set regionattr = doc.select_nodes("//@region");
-	for (auto xpath_node : regionattr)
-	{
-		if (xpath_node.attribute() == nullptr)
-			continue;
-
-		std::string elemKey = xpath_node.attribute().value();
-		if (elemKey.empty())
-			continue;
-
-		for (auto sb : sets)
-			if (sb.subset == "region" && sb.name == elemKey)
-				return;
-
-		sets.push_back(Subset("region", elemKey));
-	}
 }
 
 void ThemeData::parseTheme(const pugi::xml_node& root)

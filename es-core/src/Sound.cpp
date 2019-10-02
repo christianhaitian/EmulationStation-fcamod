@@ -89,6 +89,9 @@ void Sound::play()
 	if (!AudioManager::isInitialized())
 		return;
 
+	if (!Settings::getInstance()->getBool("EnableSounds"))
+		return;
+
 	mPlaying = true;
 	Mix_PlayChannel(-1, mSampleData, 0);
 }

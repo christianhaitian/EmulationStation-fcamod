@@ -8,43 +8,53 @@
 class GuiSettings : public GuiComponent
 {
 public:
-	GuiSettings(Window* window, std::string title);
+	GuiSettings(Window* window, const std::string title);
 	virtual ~GuiSettings(); // just calls save();
-	
-	void updatePosition();
+
+	void close();
+	void save();
+
 	inline void addRow(const ComponentListRow& row) { mMenu.addRow(row); };
-	inline void addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp, const std::string iconName = "") { mMenu.addWithLabel(label, comp, iconName); };
+	inline void addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp) { mMenu.addWithLabel(label, comp); };
 	inline void addSaveFunc(const std::function<void()>& func) { mSaveFuncs.push_back(func); };
-	inline void addEntry(const std::string name, bool add_arrow, const std::function<void()>& func, const std::string iconName = "") { mMenu.addEntry(name, add_arrow, func, iconName); };
+	inline void addEntry(const std::string name, bool add_arrow = false, const std::function<void()>& func = nullptr, const std::string iconName = "") { mMenu.addEntry(name, add_arrow, func, iconName); };
 
-	inline void addSubMenu(const std::string& label, const std::function<void()>& func) {
-		ComponentListRow row;
-		row.makeAcceptInputHandler(func);
+	void addSubMenu(const std::string& label, const std::function<void()>& func);
 
-		auto theme = ThemeData::getMenuTheme();
-
-		auto entryMenu = std::make_shared<TextComponent>(mWindow, label, theme->Text.font, theme->Text.color);
-		row.addElement(entryMenu, true);
-		row.addElement(makeArrow(mWindow), false);
-		mMenu.addRow(row);
-	};
+	inline void setSave(bool sav) { mDoSave = sav; }; // batocera
 
 	bool input(InputConfig* config, Input input) override;
 	std::vector<HelpPrompt> getHelpPrompts() override;
 	HelpStyle getHelpStyle() override;
 
-	inline void setBeforeCloseFunc(const std::function<void()>& func) { mBeforeCloseFunc = func; mEnableBeforeCloseFunc = (mBeforeCloseFunc != nullptr); };
-	void enableBeforeCloseFunc(bool use) { mEnableBeforeCloseFunc = use; }
+	MenuComponent& getMenu() { return mMenu; }
 
-	void save();
+	inline void onFinalize(const std::function<void()>& func) { mOnFinalizeFunc = func; };
+
+	bool getVariable(const std::string name)
+	{
+		if (mVariableMap.find(name) == mVariableMap.cend())
+			return false;
+
+		return mVariableMap[name];
+	}
+
+	void setCloseButton(const std::string name) { mCloseButton = name; }
+	void setVariable(const std::string name, bool value) { mVariableMap[name] = value; }
+	void updatePosition();
+
+protected:
+	MenuComponent mMenu;
 
 private:
-	void saveAndClose();
+	bool mDoSave = true; // batocera
 
-	MenuComponent mMenu;
 	std::vector< std::function<void()> > mSaveFuncs;
-	std::function<void()> mBeforeCloseFunc;
-	bool mEnableBeforeCloseFunc;
+	std::function<void()> mOnFinalizeFunc;
+
+	std::map<std::string, bool> mVariableMap;
+
+	std::string		mCloseButton;
 };
 
 #endif // ES_APP_GUIS_GUI_SETTINGS_H

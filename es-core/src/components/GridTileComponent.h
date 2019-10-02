@@ -6,8 +6,8 @@
 #include "ImageComponent.h"
 #include "TextComponent.h"
 
-
 class VideoComponent;
+
 struct GridTileProperties
 {
 	Vector2f mSize;
@@ -32,10 +32,6 @@ struct GridTileProperties
 	unsigned int	mFontSize;
 
 	Vector2f		mMirror;
-
-	/*
-	<fontPath>. / main / fonts / Dosis - Bold.ttf< / fontPath>
-		<fontSize>0.025< / fontSize>*/
 };
 
 class GridTileComponent : public GuiComponent
@@ -54,14 +50,14 @@ public:
 	Vector2f getSelectedTileSize() const;
 	bool isSelected() const;
 
-	void reset();
+	void resetImages();
 
 	void setLabel(std::string name);
 	void setVideo(const std::string& path, float defaultDelay = -1.0);
 
 	void setImage(const std::string& path);
 	// void setImage(const std::shared_ptr<TextureResource>& texture, std::string name);
-	void setSelected(bool selected, bool allowAnimation = true, Vector3f* pPosition = NULL, bool force=false);
+	void setSelected(bool selected, bool allowAnimation = true, Vector3f* pPosition = NULL, bool force = false);
 	void setVisible(bool visible);
 
 	void forceSize(Vector2f size, float selectedZoom = 1.0);
@@ -80,12 +76,18 @@ public:
 	std::shared_ptr<TextureResource> getTexture();
 
 private:
+	void	resetProperties();
+	void	createVideo();
+
+	void	startVideo();
+	void	stopVideo();
+
 	void resize();
-	const GridTileProperties& getCurrentProperties();
+	GridTileProperties getCurrentProperties();
 
 	std::shared_ptr<ImageComponent> mImage;
 
-	TextComponent mLabel;	
+	TextComponent mLabel;
 
 	bool mLabelVisible;
 	bool mLabelMerged;
@@ -94,7 +96,6 @@ private:
 
 	GridTileProperties mDefaultProperties;
 	GridTileProperties mSelectedProperties;
-	GridTileProperties mMixedProperties;
 
 	std::string mCurrentPath;
 	std::string mVideoPath;

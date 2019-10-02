@@ -158,7 +158,7 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& them
 	if (theme->getElement(getName(), "md_video", "video"))
 	{
 		createVideo();
-		mVideo->applyTheme(theme, getName(), "md_video", POSITION | ThemeFlags::SIZE | ThemeFlags::DELAY | Z_INDEX | ROTATION);
+		mVideo->applyTheme(theme, getName(), "md_video", ALL ^ (PATH));
 	}
 	else if (mVideo != nullptr)
 	{
@@ -170,7 +170,7 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& them
 	if (mVideo == nullptr || theme->getElement(getName(), "md_image", "image"))
 	{
 		createImage();
-		mImage->applyTheme(theme, getName(), "md_image", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);
+		mImage->applyTheme(theme, getName(), "md_image", ALL ^ (PATH));
 	}
 	else if (mImage != nullptr)
 	{
@@ -182,7 +182,7 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& them
 	if (theme->getElement(getName(), "md_marquee", "image"))
 	{
 		createMarquee();
-		mMarquee->applyTheme(theme, getName(), "md_marquee", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);		
+		mMarquee->applyTheme(theme, getName(), "md_marquee", ALL ^ (PATH));
 	}
 	else if (mMarquee != nullptr)
 	{
@@ -384,7 +384,17 @@ void DetailedGameListView::updateInfoPanel()
 			{
 				comp->setOpacity((unsigned char)(Math::lerp(0.0f, 1.0f, t)*255));
 			};
-			comp->setAnimation(new LambdaAnimation(func, 150), 0, nullptr, fadingOut);
+
+			bool isFadeOut = fadingOut;
+			comp->setAnimation(new LambdaAnimation(func, 150), 0, [this, isFadeOut]
+			{
+				if (isFadeOut)
+				{
+					if (mVideo != nullptr) mVideo->setImage("");
+					if (mImage != nullptr) mImage->setImage("");
+					if (mMarquee != nullptr) mMarquee->setImage("");
+				}
+			}, fadingOut);
 		}
 	}
 }

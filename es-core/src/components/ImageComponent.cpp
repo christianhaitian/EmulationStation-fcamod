@@ -24,8 +24,12 @@ Vector2f ImageComponent::getSize() const
 ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : GuiComponent(window),
 	mTargetIsMax(false), mTargetIsMin(false), mFlipX(false), mFlipY(false), mTargetSize(0, 0), mColorShift(0xFFFFFFFF), mColorShiftEnd(0xFFFFFFFF),
 	mForceLoad(forceLoad), mDynamic(dynamic), mFadeOpacity(0), mFading(false), mRotateByTargetSize(false), mVisible(true),
-	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f), mMirror(0.0f, 0.0f), mAllowAsync(false)
+	mTopLeftCrop(0.0f, 0.0f), mBottomRightCrop(1.0f, 1.0f), mMirror(0.0f, 0.0f), mAllowAsync(false),
+	mPadding(Vector4f(0, 0, 0, 0))
 {
+	mHorizontalAlignment = ALIGN_CENTER;
+	mVerticalAlignment = ALIGN_CENTER;
+	mReflectOnBorders = false;
 	mLoadingTexture = nullptr;
 	mAllowFading = true;
 }
@@ -145,7 +149,11 @@ void ImageComponent::setImage(std::string path, bool tile, MaxSizeInfo maxSize)
 		return;
 
 	mPath = path;
-	mLoadingTexture = nullptr;
+
+	// If the previous image is in the async queue, remove it
+	TextureResource::cancelAsync(mLoadingTexture);
+	TextureResource::cancelAsync(mTexture);
+	mLoadingTexture.reset();
 
 	if (path.empty() || !ResourceManager::getInstance()->fileExists(path))
 	{
@@ -158,15 +166,14 @@ void ImageComponent::setImage(std::string path, bool tile, MaxSizeInfo maxSize)
 	{
 		std::shared_ptr<TextureResource> texture = TextureResource::get(path, tile, mForceLoad, mDynamic, true, maxSize);
 
-		// TODO probleme de proportions si l'on fait ca, à investiguer...
 		if (!mForceLoad && mDynamic && !mAllowFading && texture != nullptr && !texture->isLoaded())
 			mLoadingTexture = texture;
 		else
 			mTexture = texture;
 	}
 
-	if (mLoadingTexture == nullptr);
-	resize();
+	if (mLoadingTexture == nullptr)
+		resize();
 }
 
 void ImageComponent::setImage(const char* path, size_t length, bool tile)
@@ -316,10 +323,17 @@ void ImageComponent::updateVertices()
 	const unsigned int color       = Renderer::convertColor(mColorShift);
 	const unsigned int colorEnd    = Renderer::convertColor(mColorShiftEnd);
 
-	mVertices[0] = { { topLeft.x(),     topLeft.y()     }, { mTopLeftCrop.x(),          py - mTopLeftCrop.y()     }, color };
-	mVertices[1] = { { topLeft.x(),     bottomRight.y() }, { mTopLeftCrop.x(),          1.0f - mBottomRightCrop.y() }, color };
-	mVertices[2] = { { bottomRight.x(), topLeft.y()     }, { mBottomRightCrop.x() * px, py - mTopLeftCrop.y()     }, color };
-	mVertices[3] = { { bottomRight.x(), bottomRight.y() }, { mBottomRightCrop.x() * px, 1.0f - mBottomRightCrop.y() }, color };
+	mVertices[0] = { { topLeft.x() + mPadding.x(),     topLeft.y() + mPadding.y()     },
+		{ mTopLeftCrop.x(),          py - mTopLeftCrop.y()     }, color };
+
+	mVertices[1] = { { topLeft.x() + mPadding.x(),     bottomRight.y() - mPadding.w() },
+		{ mTopLeftCrop.x(),          1.0f - mBottomRightCrop.y() }, mColorGradientHorizontal ? colorEnd : color };
+
+	mVertices[2] = { { bottomRight.x() - mPadding.z(), topLeft.y() + mPadding.y()	},
+		{ mBottomRightCrop.x() * px, py - mTopLeftCrop.y()     }, mColorGradientHorizontal ? color : colorEnd };
+
+	mVertices[3] = { { bottomRight.x() - mPadding.z(), bottomRight.y() - mPadding.w() },
+	{ mBottomRightCrop.x() * px, 1.0f - mBottomRightCrop.y() }, color };
 
 	// round vertices
 	for(int i = 0; i < 4; ++i)
@@ -345,7 +359,7 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 	if (mLoadingTexture != nullptr && mLoadingTexture->isLoaded())
 	{
 		mTexture = mLoadingTexture;
-		mLoadingTexture = nullptr;
+		mLoadingTexture.reset();
 		resize();
 	}
 
@@ -357,79 +371,89 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 		
 	Renderer::setMatrix(trans);
 
-	if (mTexture)
+	if (mTexture && mOpacity > 0)
 	{
-		if (Settings::getInstance()->getBool("DebugImage")) 
+		Vector2f targetSizePos = (mTargetSize - mSize) * mOrigin * -1;
+
+		if (Settings::getInstance()->getBool("DebugImage"))
 		{
-			Vector2f targetSizePos = (mTargetSize - mSize) * mOrigin * -1;
 			Renderer::drawRect(targetSizePos.x(), targetSizePos.y(), mTargetSize.x(), mTargetSize.y(), 0xFF000033);
-			Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000033);			
+			Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), 0x00000033);
 		}
 
-//		if (mTexture->isInitialized())
-//		{
-			// actually draw the image
-			// The bind() function returns false if the texture is not currently loaded. A blank
-			// texture is bound in this case but we want to handle a fade so it doesn't just 'jump' in
-			// when it finally loads
-			fadeIn(mTexture->bind());
-
-			float opacity = (mOpacity * (mFading ? mFadeOpacity / 255.0 : 1.0)) / 255.0;
-						
-			const unsigned int color = Renderer::convertColor(mColorShift & 0xFFFFFF00 | (unsigned char) ((mColorShift & 0xFF) * opacity));
-			const unsigned int colorEnd = Renderer::convertColor(mColorShiftEnd & 0xFFFFFF00 | (unsigned char)((mColorShiftEnd & 0xFF) * opacity));
-
-			mVertices[0].col = color;
-			mVertices[1].col = mColorGradientHorizontal ? colorEnd : color;
-			mVertices[2].col = mColorGradientHorizontal ? color : colorEnd;
-			mVertices[3].col = colorEnd;
-
-			Renderer::drawTriangleStrips(&mVertices[0], 4);
-
-			if (mMirror.x() != 0 || mMirror.y() != 0)
-			{
-				float alpha = ((mColorShift & 0x000000ff)) / 255.0;
-				float alpha2 = alpha * mMirror.y();
-
-				alpha *= mMirror.x();
-
-				const unsigned int colorT = Renderer::convertColor((mColorShift & 0xffffff00) + (unsigned char) (255.0*alpha));
-				const unsigned int colorB = Renderer::convertColor((mColorShift & 0xffffff00) + (unsigned char) (255.0*alpha2));
-
-				int h = mVertices[1].pos.y() - mVertices[0].pos.y();
-
-				Renderer::Vertex mirrorVertices[4];
-
-				mirrorVertices[0] = { 
-					{ mVertices[0].pos.x(), mVertices[0].pos.y() + h }, 
-					{ mVertices[0].tex.x(), mVertices[1].tex.y() },
-					colorT };
-
-				mirrorVertices[1] = { 
-					{ mVertices[1].pos.x(), mVertices[1].pos.y() + h },
-					{ mVertices[1].tex.x(), mVertices[0].tex.y() },
-					colorB };
-
-				mirrorVertices[2] = { 
-					{ mVertices[2].pos.x(), mVertices[2].pos.y() + h },
-					{ mVertices[2].tex.x(), mVertices[3].tex.y() },
-					colorT };
-
-				mirrorVertices[3] = { 
-					{ mVertices[3].pos.x(), mVertices[3].pos.y() + h },
-					{ mVertices[3].tex.x(), mVertices[2].tex.y() },
-					colorB };
-
-				Renderer::drawTriangleStrips(&mirrorVertices[0], 4);			
-			}
-
-			Renderer::bindTexture(0);
-	/*	}
-		else
+		if (!mTexture->bind())
 		{
-			LOG(LogError) << "Image texture is not initialized!";
-			mTexture.reset();
-		}*/
+			fadeIn(false);
+			return;
+		}
+
+		if (mVerticalAlignment == ALIGN_TOP)
+			trans.translate(Vector3f(0, targetSizePos.y(), 0.0f));
+		else if (mVerticalAlignment == ALIGN_BOTTOM)
+			trans.translate(Vector3f(targetSizePos.x(), targetSizePos.y() + mTargetSize.y() - mSize.y(), 0.0f));
+
+		if (mHorizontalAlignment == ALIGN_LEFT)
+			trans.translate(Vector3f(targetSizePos.x(), 0, 0.0f));
+		else if (mHorizontalAlignment == ALIGN_BOTTOM)
+			trans.translate(Vector3f(targetSizePos.x(), targetSizePos.y() + mTargetSize.y() - mSize.y(), 0.0f));
+
+		Renderer::setMatrix(trans);
+
+		fadeIn(true);
+
+
+		float opacity = (mOpacity * (mFading ? mFadeOpacity / 255.0 : 1.0)) / 255.0;
+
+		const unsigned int color = Renderer::convertColor(mColorShift & 0xFFFFFF00 | (unsigned char)((mColorShift & 0xFF) * opacity));
+		const unsigned int colorEnd = Renderer::convertColor(mColorShiftEnd & 0xFFFFFF00 | (unsigned char)((mColorShiftEnd & 0xFF) * opacity));
+
+		mVertices[0].col = color;
+		mVertices[1].col = mColorGradientHorizontal ? colorEnd : color;
+		mVertices[2].col = mColorGradientHorizontal ? color : colorEnd;
+		mVertices[3].col = colorEnd;
+
+		Renderer::drawTriangleStrips(&mVertices[0], 4);
+
+		if (mMirror.x() != 0 || mMirror.y() != 0)
+		{
+			float alpha = ((mColorShift & 0x000000ff)) / 255.0;
+			float alpha2 = alpha * mMirror.y();
+
+			alpha *= mMirror.x();
+
+			const unsigned int colorT = Renderer::convertColor((mColorShift & 0xffffff00) + (unsigned char)(255.0*alpha));
+			const unsigned int colorB = Renderer::convertColor((mColorShift & 0xffffff00) + (unsigned char)(255.0*alpha2));
+
+			int h = mVertices[1].pos.y() - mVertices[0].pos.y();
+			if (mReflectOnBorders)
+				h = mTargetSize.y();
+
+			Renderer::Vertex mirrorVertices[4];
+
+			mirrorVertices[0] = {
+				{ mVertices[0].pos.x(), mVertices[0].pos.y() + h },
+				{ mVertices[0].tex.x(), mVertices[1].tex.y() },
+				colorT };
+
+			mirrorVertices[1] = {
+				{ mVertices[1].pos.x(), mVertices[1].pos.y() + h },
+				{ mVertices[1].tex.x(), mVertices[0].tex.y() },
+				colorB };
+
+			mirrorVertices[2] = {
+				{ mVertices[2].pos.x(), mVertices[2].pos.y() + h },
+				{ mVertices[2].tex.x(), mVertices[3].tex.y() },
+				colorT };
+
+			mirrorVertices[3] = {
+				{ mVertices[3].pos.x(), mVertices[3].pos.y() + h },
+				{ mVertices[3].tex.x(), mVertices[2].tex.y() },
+				colorB };
+
+			Renderer::drawTriangleStrips(&mirrorVertices[0], 4);
+		}
+
+		Renderer::bindTexture(0);
 	}
 
 	GuiComponent::renderChildren(trans);
@@ -531,26 +555,63 @@ void ImageComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 		}
 	}
 
-	if(properties & COLOR)
+	if (properties & COLOR)
 	{
-		if(elem->has("color"))
+		if (elem->has("color"))
 			setColorShift(elem->get<unsigned int>("color"));
 
 		if (elem->has("colorEnd"))
 			setColorShiftEnd(elem->get<unsigned int>("colorEnd"));
 
 		if (elem->has("gradientType"))
-			setColorGradientHorizontal(!(elem->get<std::string>("gradientType").compare("horizontal")));
+			setColorGradientHorizontal(elem->get<std::string>("gradientType").compare("horizontal"));
+
+		if (elem->has("reflexion"))
+			mMirror = elem->get<Vector2f>("reflexion");
+		else
+			mMirror = Vector2f::Zero();
+
+		if (elem->has("reflexionOnFrame"))
+			mReflectOnBorders = elem->get<bool>("reflexionOnFrame");
+		else
+			mReflectOnBorders = false;
 	}
 
-	if (properties & COLOR && elem->has("reflexion"))
-		mMirror = elem->get<Vector2f>("reflexion");
-
-	if(properties & ThemeFlags::ROTATION) {
+	if(properties & ThemeFlags::ROTATION) 
+	{
 		if(elem->has("rotation"))
 			setRotationDegrees(elem->get<float>("rotation"));
+
 		if(elem->has("rotationOrigin"))
 			setRotationOrigin(elem->get<Vector2f>("rotationOrigin"));
+
+		if (elem->has("flipX"))
+			setFlipX(elem->get<bool>("flipX"));
+
+		if (elem->has("flipY"))
+			setFlipY(elem->get<bool>("flipY"));
+	}
+
+	if (properties & ALIGNMENT && elem->has("horizontalAlignment"))
+	{
+		std::string str = elem->get<std::string>("horizontalAlignment");
+		if (str == "left")
+			setHorizontalAlignment(ALIGN_LEFT);
+		else if (str == "right")
+			setHorizontalAlignment(ALIGN_RIGHT);
+		else
+			setHorizontalAlignment(ALIGN_CENTER);
+	}
+
+	if (properties & ALIGNMENT && elem->has("verticalAlignment"))
+	{
+		std::string str = elem->get<std::string>("verticalAlignment");
+		if (str == "top")
+			setVerticalAlignment(ALIGN_TOP);
+		else if (str == "bottom")
+			setVerticalAlignment(ALIGN_BOTTOM);
+		else
+			setVerticalAlignment(ALIGN_CENTER);
 	}
 
 	if(properties & ThemeFlags::Z_INDEX && elem->has("zIndex"))

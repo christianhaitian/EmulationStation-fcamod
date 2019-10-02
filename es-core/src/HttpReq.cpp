@@ -4,6 +4,17 @@
 #include "Log.h"
 #include <assert.h>
 
+#include <SDL.h>
+
+#ifdef WIN32
+#include <time.h>
+#else
+#include <unistd.h>
+#endif
+
+#include <mutex>
+static std::mutex mMutex;
+
 CURLM* HttpReq::s_multi_handle = curl_multi_init();
 
 std::map<CURL*, HttpReq*> HttpReq::s_requests;
@@ -33,7 +44,7 @@ std::string HttpReq::urlEncode(const std::string &s)
 bool HttpReq::isUrl(const std::string& str)
 {
 	//the worst guess
-	return (!str.empty() && !Utils::FileSystem::exists(str) &&
+	return (!str.empty() && !Utils::FileSystem::exists(str) && 
 		(str.find("http://") != std::string::npos || str.find("https://") != std::string::npos || str.find("www.") != std::string::npos));
 }
 
@@ -67,7 +78,7 @@ std::string _regGetString(HKEY hKey, const std::string &strPath, const std::stri
 	{
 		char szBuffer[1024];
 		DWORD dwBufferSize = sizeof(szBuffer);
-		
+
 		nRet = ::RegQueryValueExA(hSubKey, strValueName.c_str(), 0, NULL, (LPBYTE)szBuffer, &dwBufferSize);
 		::RegCloseKey(hSubKey);
 
@@ -82,6 +93,7 @@ std::string _regGetString(HKEY hKey, const std::string &strPath, const std::stri
 HttpReq::HttpReq(const std::string& url)
 	: mStatus(REQ_IN_PROGRESS), mHandle(NULL)
 {
+	mPercent = -1;
 	mHandle = curl_easy_init();
 
 	if(mHandle == NULL)
@@ -119,7 +131,7 @@ HttpReq::HttpReq(const std::string& url)
 	}
 
 	//set curl restrict redirect protocols
-	err = curl_easy_setopt(mHandle, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+	err = curl_easy_setopt(mHandle, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS); 
 	if(err != CURLE_OK)
 	{
 		mStatus = REQ_IO_ERROR;
@@ -146,6 +158,7 @@ HttpReq::HttpReq(const std::string& url)
 	}
 
 #ifdef WIN32
+	// Setup system proxy on Windows if required
 	if (_regGetDWORD(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyEnable"))
 	{
 		auto proxyServer = _regGetString(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyServer");
@@ -172,11 +185,43 @@ HttpReq::HttpReq(const std::string& url)
 		}
 	}
 #endif
+	
+	std::unique_lock<std::mutex> lock(mMutex);
+
+#if defined(WIN32)
+	srand(time(NULL) % getpid());
+	std::string TempPath;
+	char lpTempPathBuffer[MAX_PATH];
+	if (GetTempPathA(MAX_PATH, lpTempPathBuffer))
+	{
+
+		TCHAR szTempFileName[MAX_PATH];
+
+		if (GetTempFileName(lpTempPathBuffer, TEXT("httpreq"), 0, szTempFileName))
+			mStreamPath = std::string(szTempFileName);
+		else
+		{
+			do { mStreamPath = std::string(lpTempPathBuffer) + "httpreq" + std::to_string(rand() % 99999) + ".tmp"; } 
+			while (Utils::FileSystem::exists(mStreamPath));	
+		}
+	}
+	
+#else
+	srand(time(NULL) % getpid() + getppid());
+
+	do { mStreamPath = "/tmp/httpreq" + std::to_string(rand() % 99999) + ".tmp"; }
+	while (Utils::FileSystem::exists(mStreamPath));
+#endif
+	
+	mStream.open(mStreamPath, std::ios_base::out | std::ios_base::binary);
 
 	//add the handle to our multi
 	CURLMcode merr = curl_multi_add_handle(s_multi_handle, mHandle);
 	if(merr != CURLM_OK)
 	{
+		if (mStream.is_open())
+			mStream.close();
+
 		mStatus = REQ_IO_ERROR;
 		onError(curl_multi_strerror(merr));
 		return;
@@ -187,6 +232,16 @@ HttpReq::HttpReq(const std::string& url)
 
 HttpReq::~HttpReq()
 {
+	std::unique_lock<std::mutex> lock(mMutex);
+
+	if (mStream.is_open())
+	{
+		mStream.flush();
+		mStream.close();
+	}
+
+	Utils::FileSystem::removeFile(mStreamPath);
+
 	if(mHandle)
 	{
 		s_requests.erase(mHandle);
@@ -202,12 +257,17 @@ HttpReq::~HttpReq()
 
 HttpReq::Status HttpReq::status()
 {
+	std::unique_lock<std::mutex> lock(mMutex);
+
 	if(mStatus == REQ_IN_PROGRESS)
 	{
 		int handle_count;
 		CURLMcode merr = curl_multi_perform(s_multi_handle, &handle_count);
 		if(merr != CURLM_OK && merr != CURLM_CALL_MULTI_PERFORM)
 		{
+			if (mStream.is_open())
+				mStream.close();
+
 			mStatus = REQ_IO_ERROR;
 			onError(curl_multi_strerror(merr));
 			return mStatus;
@@ -219,18 +279,25 @@ HttpReq::Status HttpReq::status()
 		{
 			if(msg->msg == CURLMSG_DONE)
 			{
-				HttpReq* req = s_requests[msg->easy_handle];
-
+				HttpReq* req = s_requests[msg->easy_handle];				
 				if(req == NULL)
 				{
 					LOG(LogError) << "Cannot find easy handle!";
 					continue;
 				}
 
+				if (req->mStream.is_open())
+				{
+					req->mStream.flush();
+					req->mStream.close();
+				}
+
 				if(msg->data.result == CURLE_OK)
 				{
 					req->mStatus = REQ_SUCCESS;
-				}else{
+				}
+				else
+				{
 					req->mStatus = REQ_IO_ERROR;
 					req->onError(curl_easy_strerror(msg->data.result));
 				}
@@ -241,10 +308,24 @@ HttpReq::Status HttpReq::status()
 	return mStatus;
 }
 
-std::string HttpReq::getContent() const
+std::string HttpReq::getContent() 
 {
 	assert(mStatus == REQ_SUCCESS);
-	return mContent.str();
+
+	if (mStream.is_open())
+	{
+		mStream.flush();
+		mStream.close();
+	}
+
+	std::ifstream t(mStreamPath);
+	t.seekg(0, std::ios::end);
+	size_t size = t.tellg();
+	std::string buffer(size, ' ');
+	t.seekg(0);
+	t.read(&buffer[0], size);
+
+	return buffer; // mContent.str();
 }
 
 void HttpReq::onError(const char* msg)
@@ -262,14 +343,56 @@ std::string HttpReq::getErrorMsg()
 //return value is number of elements successfully read
 size_t HttpReq::write_content(void* buff, size_t size, size_t nmemb, void* req_ptr)
 {
-	std::stringstream& ss = ((HttpReq*)req_ptr)->mContent;
+	HttpReq* request = ((HttpReq*)req_ptr);
+		
+	std::ofstream& ss = request->mStream;
 	ss.write((char*)buff, size * nmemb);
+
+	double cl;
+	if (!curl_easy_getinfo(request->mHandle, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl))
+	{		
+		if (cl <= 0)
+			request->mPercent = -1;
+		else
+		{
+			double position = (double)ss.tellp();
+			request->mPercent = (int) (position * 100.0 / cl);
+		}
+	}
 
 	return nmemb;
 }
 
-//used as a curl callback
-/*int HttpReq::update_progress(void* req_ptr, double dlTotal, double dlNow, double ulTotal, double ulNow)
+bool HttpReq::saveContent(const std::string filename)
 {
+	assert(mStatus == REQ_SUCCESS);
 
-}*/
+	if (mStream.is_open())
+	{
+		mStream.flush();
+		mStream.close();
+	}
+
+	if (!Utils::FileSystem::exists(mStreamPath))
+		return false;
+
+	std::ifstream ifs(mStreamPath, std::ios_base::in | std::ios_base::binary);
+	if (ifs.bad())
+		return false;
+
+	if (Utils::FileSystem::exists(filename))
+		Utils::FileSystem::removeFile(filename);
+
+	std::ofstream ofs(filename, std::ios_base::out | std::ios_base::binary);
+	if (ofs.bad())
+		return false;
+
+	ofs << ifs.rdbuf();
+
+	ifs.close();
+	ofs.close();
+	if (ofs.bad())
+		return false;
+		
+	return true;
+}

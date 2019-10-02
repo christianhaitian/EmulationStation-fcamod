@@ -144,7 +144,7 @@ public:
 
 	inline const std::vector<FileData*>& getChildren() const { return mChildren; }
 	const std::vector<FileData*> getChildrenListToDisplay();
-	std::vector<FileData*> getFilesRecursive(unsigned int typeMask, bool displayedOnly = false) const;
+	std::vector<FileData*> getFilesRecursive(unsigned int typeMask, bool displayedOnly = false, SystemData* system = nullptr) const;
 
 	void addChild(FileData* file); // Error if mType != FOLDER
 	void removeChild(FileData* file); //Error if mType != FOLDER
@@ -152,6 +152,8 @@ public:
 	void createChildrenByFilenameMap(std::unordered_map<std::string, FileData*>& map);
 
 private:
+	std::vector<FileData*> FolderData::getFlatGameList(bool displayedOnly, SystemData* system) const;
+
 	std::vector<FileData*> mChildren;
 };
 

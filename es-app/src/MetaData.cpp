@@ -5,14 +5,15 @@
 #include "Log.h"
 #include <pugixml/src/pugixml.hpp>
 #include "SystemData.h"
+#include "Settings.h"
 
 MetaDataDecl gameDecls[] = {
 	// key,         type,                   default,            statistic,  name in GuiMetaDataEd,  prompt in GuiMetaDataEd
 	{ 0,  "name",        MD_STRING,              "",                 false,      "name",                 "enter game name"},
 //	{ 1,  "sortname",    MD_STRING,              "",                 false,      "sortname",             "enter game sort name"},
 	{ 2,  "desc",        MD_MULTILINE_STRING,    "",                 false,      "description",          "enter description"},
-	{ 3,  "emulator",    MD_PLIST,				 "",                 false,      "emulator",				"emulator" },
-	{ 4,  "core",	     MD_PLIST,				 "",                 false,      "core",					"core" },	
+	{ 3,  "emulator",    MD_PLIST,				 "",                 false,      "emulator",			 "emulator" },
+	{ 4,  "core",	     MD_PLIST,				 "",                 false,      "core",				 "core" },	
 	{ 5,  "image",       MD_PATH,                "",                 false,      "image",                "enter path to image"},
 	{ 6,  "video",       MD_PATH     ,           "",                 false,      "video",                "enter path to video"},
 	{ 7,  "marquee",     MD_PATH,                "",                 false,      "marquee",              "enter path to marquee"},
@@ -262,4 +263,44 @@ bool MetaDataList::wasChanged() const
 void MetaDataList::resetChangedFlag()
 {
 	mWasChanged = false;
+}
+
+void MetaDataList::importScrappedMetadata(const MetaDataList& source)
+{
+	int type = MetaDataImportType::Types::ALL;
+
+	if (Settings::getInstance()->getString("Scraper") == "ScreenScraper")
+	{
+		if (Settings::getInstance()->getString("ScrapperImageSrc").empty())
+			type &= ~MetaDataImportType::Types::IMAGE;
+
+		if (!Settings::getInstance()->getString("ScrapperThumbSrc").empty())
+			type &= ~MetaDataImportType::Types::THUMB;
+
+		if (!Settings::getInstance()->getBool("ScrapeVideos"))
+			type &= ~MetaDataImportType::Types::VIDEO;
+
+		if (!Settings::getInstance()->getBool("ScrapeMarquee"))
+			type &= ~MetaDataImportType::Types::MARQUEE;
+	}
+
+	for (auto mdd : getMDD())
+	{
+		if (mdd.key == "favorite" || mdd.key == "playcount" || mdd.key == "lastplayed")
+			continue;
+
+		if (mdd.key == "image" && (type & MetaDataImportType::Types::IMAGE) != MetaDataImportType::Types::IMAGE)
+			continue;
+
+		if (mdd.key == "thumbnail" && (type & MetaDataImportType::Types::THUMB) != MetaDataImportType::Types::THUMB)
+			continue;
+
+		if (mdd.key == "marquee" && (type & MetaDataImportType::Types::MARQUEE) != MetaDataImportType::Types::MARQUEE)
+			continue;
+
+		if (mdd.key == "video" && (type & MetaDataImportType::Types::VIDEO) != MetaDataImportType::Types::VIDEO)
+			continue;
+
+		set(mdd.key, source.get(mdd.key));
+	}
 }

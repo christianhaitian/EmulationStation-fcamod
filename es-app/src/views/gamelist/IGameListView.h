@@ -44,6 +44,8 @@ public:
 
 	virtual void setThemeName(std::string name);
 
+	virtual std::vector<std::string> getEntriesLetters() = 0;
+
 protected:
 	std::string mCustomThemeName;
 

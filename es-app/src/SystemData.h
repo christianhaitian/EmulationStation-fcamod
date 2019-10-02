@@ -110,7 +110,9 @@ public:
 	std::string getThemePath() const;
 
 	unsigned int getGameCount() const;
-	unsigned int getDisplayedGameCount() const;
+	
+	int getDisplayedGameCount();
+	void updateDisplayedGameCount();
 
 	static void deleteSystems();
 	static bool loadConfig(Window* window); //Load the system config file at getConfigPath(). Returns true if no errors were encountered. An example will be written if the file doesn't exist.
@@ -152,10 +154,11 @@ public:
 		if (mFilterIndex != nullptr) mFilterIndex->resetIndex();
 	};
 	
-
 	void setUIModeFilters() {
 		if (mFilterIndex != nullptr) mFilterIndex->setUIModeFilters();
 	}
+
+	void deleteIndex();
 
 	unsigned int getSortId() const { return mSortId; };
 	void setSortId(const unsigned int sortId = 0);
@@ -184,6 +187,7 @@ private:
 	FileFilterIndex* mFilterIndex;
 
 	FolderData* mRootFolder;
+	int			mGameCount;
 };
 
 #endif // ES_APP_SYSTEM_DATA_H

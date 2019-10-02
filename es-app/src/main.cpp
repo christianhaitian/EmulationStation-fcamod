@@ -295,25 +295,13 @@ void onExit()
 	Log::close();
 }
 
-#include "AudioManager.h"
-#include "guis/GuiInfoPopup.h"
-
-static std::vector<std::string> mMessages;
-
 void processAudioTitles(Window* window)
 {
 	if (Settings::getInstance()->getBool("MusicTitles"))
 	{
 		std::string songName = AudioManager::getInstance()->popSongName();
 		if (!songName.empty())
-			mMessages.push_back(/*_("Now playing: ") +*/songName);		
-	}
-
-	if (!mMessages.empty())
-	{
-		std::string message = mMessages.back();
-		mMessages.pop_back();
-		window->setInfoPopup(new GuiInfoPopup(window, message, 4000));
+			window->displayNotificationMessage(_U("\uF028  ") + songName);
 	}
 }
 
@@ -373,8 +361,8 @@ int main(int argc, char* argv[])
 		return 1;
 
 	//start the logger
-	Log::init();
-	Log::open();
+	Log::setupReportingLevel();
+	Log::init();	
 	LOG(LogInfo) << "EmulationStation - v" << PROGRAM_VERSION_STRING << ", built " << PROGRAM_BUILT_STRING;
 
 	//always close the log on exit

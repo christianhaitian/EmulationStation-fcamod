@@ -298,14 +298,18 @@ void ViewController::removeGameListView(SystemData* system)
 	}
 }
 
-std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* system)
+std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* system, bool loadIfnull)
 {
 	//if we already made one, return that one
 	auto exists = mGameListViews.find(system);
 	if(exists != mGameListViews.cend())
 		return exists->second;
 
+	if (!loadIfnull)
+		return nullptr;
+
 	system->setUIModeFilters();
+	system->updateDisplayedGameCount();
 
 	//if we didn't, make it, remember it, and return it
 	std::shared_ptr<IGameListView> view;
@@ -623,6 +627,8 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 				system->loadTheme();
 
 			system->setUIModeFilters();
+			system->updateDisplayedGameCount();
+
 			std::shared_ptr<IGameListView> newView = getGameListView(system);
 
 			// to counter having come from a placeholder
@@ -644,7 +650,7 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 		mCurrentView->onShow();
 }
 
-void ViewController::reloadAll()
+void ViewController::reloadAll(Window* window)
 {
 	ThemeData::setDefaultTheme(nullptr);
 
@@ -673,6 +679,8 @@ void ViewController::reloadAll()
 			cursorMap[(*it)] = NULL;
 	}
 
+	float idx = 0;
+
 	// load themes, create gamelistviews and reset filters
 	for(auto it = cursorMap.cbegin(); it != cursorMap.cend(); it++)
 	{
@@ -681,6 +689,11 @@ void ViewController::reloadAll()
 
 		if (it->second != NULL)
 			getGameListView(it->first)->setCursor(it->second);
+
+		idx++;
+
+		if (window)
+			window->renderLoadingScreen(_("Loading..."), (float)idx / (float)cursorMap.size());
 	}
 
 	if (SystemData::sSystemVector.size() > 0)

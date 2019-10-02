@@ -4,18 +4,18 @@
 #include "Log.h"
 #include "Settings.h"
 
-TextComponent::TextComponent(Window* window) : GuiComponent(window), 
-	mFont(Font::get(FONT_SIZE_MEDIUM)), mUppercase(false), mColor(0x000000FF), mAutoCalcExtent(true, true),
-	mHorizontalAlignment(ALIGN_LEFT), mVerticalAlignment(ALIGN_CENTER), mLineSpacing(1.5f), mBgColor(0),
-	mRenderBackground(false), mGlowColor(0), mGlowSize(2), mPadding(Vector4f(0, 0, 0, 0))
+TextComponent::TextComponent(Window* window) : GuiComponent(window),
+mFont(Font::get(FONT_SIZE_MEDIUM)), mUppercase(false), mColor(0x000000FF), mAutoCalcExtent(true, true),
+mHorizontalAlignment(ALIGN_LEFT), mVerticalAlignment(ALIGN_CENTER), mLineSpacing(1.5f), mBgColor(0),
+mRenderBackground(false), mGlowColor(0), mGlowSize(2), mPadding(Vector4f(0, 0, 0, 0)), mGlowOffset(Vector2f(0, 0))
 {
 }
 
 TextComponent::TextComponent(Window* window, const std::string& text, const std::shared_ptr<Font>& font, unsigned int color, Alignment align,
-	Vector3f pos, Vector2f size, unsigned int bgcolor) : GuiComponent(window), 
-	mFont(NULL), mUppercase(false), mColor(1), mAutoCalcExtent(true, true),
+	Vector3f pos, Vector2f size, unsigned int bgcolor) : GuiComponent(window),
+	mFont(NULL), mUppercase(false), mColor(0x000000FF), mAutoCalcExtent(true, true),
 	mHorizontalAlignment(align), mVerticalAlignment(ALIGN_CENTER), mLineSpacing(1.5f), mBgColor(0),
-	mRenderBackground(false), mGlowColor(0), mGlowSize(2), mPadding(Vector4f(0, 0, 0, 0))
+	mRenderBackground(false), mGlowColor(0), mGlowSize(2), mPadding(Vector4f(0, 0, 0, 0)), mGlowOffset(Vector2f(0, 0))
 {
 	setFont(font);
 	setColor(color);
@@ -33,9 +33,6 @@ void TextComponent::onSizeChanged()
 
 void TextComponent::setFont(const std::shared_ptr<Font>& font)
 {
-	if (mFont == font)
-		return;
-
 	mFont = font;
 	onTextChanged();
 }
@@ -61,18 +58,13 @@ void TextComponent::setColor(unsigned int color)
 		return;
 
 	mColor = color;
-	mColorOpacity = mColor & 0x000000FF;
 	onColorChanged();
 }
 
 //  Set the color of the background box
 void TextComponent::setBackgroundColor(unsigned int color)
 {
-	if (mBgColor == color)
-		return;
-
 	mBgColor = color;
-	mBgColorOpacity = mBgColor & 0x000000FF;
 }
 
 void TextComponent::setRenderBackground(bool render)
@@ -83,24 +75,11 @@ void TextComponent::setRenderBackground(bool render)
 //  Scale the opacity
 void TextComponent::setOpacity(unsigned char opacity)
 {
-	// This method is mostly called to do fading in-out of the Text component element.
-	// Therefore, we assume here that opacity is a fractional value (expressed as an int 0-255),
-	// of the opacity originally set with setColor() or setBackgroundColor().
+	if (opacity == mOpacity)
+		return;
 
-	unsigned char o = (unsigned char)((float)opacity / 255.f * (float) mColorOpacity);
-	mColor = (mColor & 0xFFFFFF00) | (unsigned char) o;
-
-	unsigned char bgo = (unsigned char)((float)opacity / 255.f * (float)mBgColorOpacity);
-	mBgColor = (mBgColor & 0xFFFFFF00) | (unsigned char)bgo;
-
+	mOpacity = opacity;
 	onColorChanged();
-
-	GuiComponent::setOpacity(opacity);
-}
-
-unsigned char TextComponent::getOpacity() const
-{
-	return mColor & 0x000000FF;
 }
 
 void TextComponent::setText(const std::string& text)
@@ -115,46 +94,60 @@ void TextComponent::setUppercase(bool uppercase)
 	onTextChanged();
 }
 
+void TextComponent::renderSingleGlow(const Transform4x4f& parentTrans, float yOff, float x, float y)
+{
+	Vector3f off = Vector3f(mPadding.x() + x + mGlowOffset.x(), mPadding.y() + yOff + y + mGlowOffset.y(), 0);
+	Transform4x4f trans = parentTrans * getTransform();
+
+	trans.translate(off);
+	trans.round();
+
+	Renderer::setMatrix(trans);
+
+	unsigned char alpha = (unsigned char)((mGlowColor & 0xFF) * (mOpacity / 255.0));
+	unsigned int color = (mGlowColor & 0xFFFFFF00) | alpha;
+
+	mTextCache->setColor(color);
+	mFont->renderTextCache(mTextCache.get());
+}
+
 void TextComponent::render(const Transform4x4f& parentTrans)
 {
-	if (mColorOpacity == 0)
-		return;
-
 	if (!isVisible())
 		return;
 
 	Transform4x4f trans = parentTrans * getTransform();
 
-	Vector2f clipPos(trans.translation().x(), trans.translation().y());
-	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+	if (!Renderer::isVisibleOnScreen(trans.translation().x(), trans.translation().y(), mSize.x(), mSize.y()))
 		return;
 
 	if (mRenderBackground)
 	{
 		Renderer::setMatrix(trans);
-		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), mBgColor, mBgColor);
+
+		auto bgColor = mBgColor & 0xFFFFFF00 | (unsigned char)((mBgColor & 0xFF) * (mOpacity / 255.0));
+		Renderer::drawRect(0.0f, 0.0f, mSize.x(), mSize.y(), bgColor, bgColor);
 	}
-	
-	if (mTextCache)
+
+	if (mTextCache && mFont)
 	{
 		const Vector2f& textSize = mTextCache->metrics.size;
 		float yOff = 0;
-		switch(mVerticalAlignment)
+		switch (mVerticalAlignment)
 		{
-			case ALIGN_TOP:
-				yOff = 0;
-				break;
-			case ALIGN_BOTTOM:
-				yOff = (getSize().y() - textSize.y());
-				break;
-			case ALIGN_CENTER:
-				yOff = (int) (getSize().y() - textSize.y()) / 2.0f;
-				break;
+		case ALIGN_TOP:
+			yOff = 0;
+			break;
+		case ALIGN_BOTTOM:
+			yOff = (getSize().y() - textSize.y());
+			break;
+		case ALIGN_CENTER:
+			yOff = (getSize().y() - textSize.y()) / 2.0f;
+			break;
 		}
-
 		Vector3f off(mPadding.x(), mPadding.y() + yOff, 0);
 
-		if(Settings::getInstance()->getBool("DebugText"))
+		if (Settings::getInstance()->getBool("DebugText"))
 		{
 			// draw the "textbox" area, what we are aligned within
 			Renderer::setMatrix(trans);
@@ -163,53 +156,33 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 
 		if ((mGlowColor & 0x000000FF) != 0 && mGlowSize > 0)
 		{
-			auto draw = [this, off, yOff, parentTrans](int margin)
-			{
-				auto func = [this, off, yOff, parentTrans](float x, float y)
-				{
-					Vector3f off = Vector3f(mPadding.x() + x, mPadding.y() + yOff + y, 0);
-					Transform4x4f trans = parentTrans * getTransform();
+			int x = -mGlowSize;
+			int y = -mGlowSize;
+			renderSingleGlow(parentTrans, yOff, x, y);
 
-					trans.translate(off);
-					trans.round();
+			for (int i = 0; i < 2 * mGlowSize; i++)
+				renderSingleGlow(parentTrans, yOff, ++x, y);
 
-					Renderer::setMatrix(trans);
+			for (int i = 0; i < 2 * mGlowSize; i++)
+				renderSingleGlow(parentTrans, yOff, x, ++y);
 
-					unsigned char o = (unsigned char)((float)(mGlowColor & 0x000000FF) / 255.f * (float)(mColor & 0x000000FF));
-					unsigned int color = (mGlowColor & 0xFFFFFF00) | (unsigned char)o;
+			for (int i = 0; i < 2 * mGlowSize; i++)
+				renderSingleGlow(parentTrans, yOff, --x, y);
 
-					mTextCache->setColor(color);
-					mFont->renderTextCache(mTextCache.get());
-					mTextCache->setColor(mColor);
-				};
+			for (int i = 0; i < 2 * mGlowSize; i++)
+				renderSingleGlow(parentTrans, yOff, x, --y);
 
-				int x = -margin;
-				int y = -margin;				
-				func(x, y);
-
-				for (int i = 0; i < 2 * margin; i++)
-					func(++x, y);
-
-				for (int i = 0; i < 2 * margin; i++)
-					func(x, ++y);
-
-				for (int i = 0; i < 2 * margin; i++)
-					func(--x, y);
-
-				for (int i = 0; i < 2 * margin; i++)
-					func(x, --y);
-			};
-
-			draw(mGlowSize);
+			// Restore text color
+			onColorChanged();
 		}
 
 		trans.translate(off);
 		Renderer::setMatrix(trans);
 
 		// draw the text area, where the text actually is going
-		if(Settings::getInstance()->getBool("DebugText"))
+		if (Settings::getInstance()->getBool("DebugText"))
 		{
-			switch(mHorizontalAlignment)
+			switch (mHorizontalAlignment)
 			{
 			case ALIGN_LEFT:
 				Renderer::drawRect(0.0f, 0.0f, mTextCache->metrics.size.x(), mTextCache->metrics.size.y(), 0x00000033, 0x00000033);
@@ -224,18 +197,17 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 		}
 
 		mFont->renderTextCache(mTextCache.get());
-
-
 	}
 }
 
 void TextComponent::calculateExtent()
 {
-	if(mAutoCalcExtent.x())
+	if (mAutoCalcExtent.x())
 	{
 		mSize = mFont->sizeText(mUppercase ? Utils::String::toUpper(mText) : mText, mLineSpacing);
-	}else{
-		if(mAutoCalcExtent.y())
+	}
+	else {
+		if (mAutoCalcExtent.y())
 		{
 			mSize[1] = mFont->sizeWrappedText(mUppercase ? Utils::String::toUpper(mText) : mText, getSize().x(), mLineSpacing).y();
 		}
@@ -246,7 +218,7 @@ void TextComponent::onTextChanged()
 {
 	calculateExtent();
 
-	if(!mFont || mText.empty())
+	if (!mFont || mText.empty())
 	{
 		mTextCache.reset();
 		return;
@@ -261,21 +233,23 @@ void TextComponent::onTextChanged()
 	const bool isMultiline = (mSize.y() == 0 || sy > f->getHeight()*1.2f);
 
 	bool addAbbrev = false;
-	if(!isMultiline)
+	if (!isMultiline)
 	{
 		size_t newline = text.find('\n');
 		text = text.substr(0, newline); // single line of text - stop at the first newline since it'll mess everything up
 		addAbbrev = newline != std::string::npos;
 	}
 
+	auto color = mColor & 0xFFFFFF00 | (unsigned char)((mColor & 0xFF) * (mOpacity / 255.0));
+
 	Vector2f size = f->sizeText(text);
-	if(!isMultiline && sx && text.size() && (size.x() > sx || addAbbrev))
+	if (!isMultiline && sx && text.size() && (size.x() > sx || addAbbrev))
 	{
 		// abbreviate text
 		const std::string abbrev = "...";
 		Vector2f abbrevSize = f->sizeText(abbrev);
 
-		while(text.size() && size.x() + abbrevSize.x() > sx)
+		while (text.size() && size.x() + abbrevSize.x() > sx)
 		{
 			size_t newSize = Utils::String::prevCursor(text, text.size());
 			text.erase(newSize, text.size() - newSize);
@@ -284,17 +258,19 @@ void TextComponent::onTextChanged()
 
 		text.append(abbrev);
 
-		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(text, Vector2f(0, 0), (mColor >> 8 << 8) | mOpacity, sx, mHorizontalAlignment, mLineSpacing));
-	}else{
-		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(f->wrapText(text, sx), Vector2f(0, 0), (mColor >> 8 << 8) | mOpacity, sx, mHorizontalAlignment, mLineSpacing));
+		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(text, Vector2f(0, 0), color, sx, mHorizontalAlignment, mLineSpacing));
+	}
+	else {
+		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(f->wrapText(text, sx), Vector2f(0, 0), color, sx, mHorizontalAlignment, mLineSpacing));
 	}
 }
 
 void TextComponent::onColorChanged()
 {
-	if(mTextCache)
+	if (mTextCache)
 	{
-		mTextCache->setColor(mColor);
+		auto color = mColor & 0xFFFFFF00 | (unsigned char)((mColor & 0xFF) * (mOpacity / 255.0));
+		mTextCache->setColor(color);
 	}
 }
 
@@ -332,11 +308,11 @@ void TextComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const st
 	using namespace ThemeFlags;
 
 	const ThemeData::ThemeElement* elem = theme->getElement(view, element, "text");
-	if(!elem)
+	if (!elem)
 		return;
 
 	if (properties & COLOR && elem->has("color"))
-		setColor(elem->get<unsigned int>("color"));	
+		setColor(elem->get<unsigned int>("color"));
 
 	setRenderBackground(false);
 	if (properties & COLOR && elem->has("backgroundColor")) {
@@ -344,14 +320,14 @@ void TextComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const st
 		setRenderBackground(true);
 	}
 
-	if(properties & ALIGNMENT && elem->has("alignment"))
+	if (properties & ALIGNMENT && elem->has("alignment"))
 	{
 		std::string str = elem->get<std::string>("alignment");
-		if(str == "left")
+		if (str == "left")
 			setHorizontalAlignment(ALIGN_LEFT);
-		else if(str == "center")
+		else if (str == "center")
 			setHorizontalAlignment(ALIGN_CENTER);
-		else if(str == "right")
+		else if (str == "right")
 			setHorizontalAlignment(ALIGN_RIGHT);
 		else
 			LOG(LogError) << "Unknown text alignment string: " << str;
@@ -363,20 +339,23 @@ void TextComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const st
 		mPadding = elem->get<Vector4f>("padding") * Vector4f(scale.x(), scale.y(), scale.x(), scale.y());
 	}
 
-	if(properties & TEXT && elem->has("text"))
+	if (properties & TEXT && elem->has("text"))
 		setText(elem->get<std::string>("text"));
 
-	if(properties & FORCE_UPPERCASE && elem->has("forceUppercase"))
+	if (properties & FORCE_UPPERCASE && elem->has("forceUppercase"))
 		setUppercase(elem->get<bool>("forceUppercase"));
 
-	if(properties & LINE_SPACING && elem->has("lineSpacing"))
+	if (properties & LINE_SPACING && elem->has("lineSpacing"))
 		setLineSpacing(elem->get<float>("lineSpacing"));
 
 	if (properties & COLOR && elem->has("glowColor"))
 		mGlowColor = elem->get<unsigned int>("glowColor");
 
 	if (properties & COLOR && elem->has("glowSize"))
-		mGlowSize = (int) elem->get<float>("glowSize");
+		mGlowSize = (int)elem->get<float>("glowSize");
+
+	if (properties & COLOR && elem->has("glowOffset"))
+		mGlowOffset = elem->get<Vector2f>("glowOffset");
 
 	setFont(Font::getFromTheme(elem, properties, mFont));
 }

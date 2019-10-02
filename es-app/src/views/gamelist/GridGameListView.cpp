@@ -262,7 +262,7 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	if (theme->getElement(getName(), "md_image", "image"))
 	{
 		mImageVisible = true;
-		mImage.applyTheme(theme, getName(), "md_image", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);
+		mImage.applyTheme(theme, getName(), "md_image", ALL ^ (PATH));
 	}
 	else
 		mImageVisible = false;
@@ -270,7 +270,7 @@ void GridGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	if (theme->getElement(getName(), "md_video", "video"))
 	{
 		createVideo();
-		mVideo->applyTheme(theme, getName(), "md_video", POSITION | ThemeFlags::SIZE | ThemeFlags::DELAY | Z_INDEX | ROTATION);		
+		mVideo->applyTheme(theme, getName(), "md_video", ALL ^ (PATH));
 	}
 	else if (mVideo != nullptr)
 	{
@@ -605,4 +605,9 @@ std::vector<HelpPrompt> GridGameListView::getHelpPrompts()
 		prompts.push_back(HelpPrompt("y", prompt));
 	}
 	return prompts;
+}
+
+std::vector<FileData*> GridGameListView::getFileDataEntries()
+{
+	return mGrid.getObjects();
 }

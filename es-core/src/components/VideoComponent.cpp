@@ -53,7 +53,7 @@ void VideoComponent::setScreensaverMode(bool isScreensaver)
 
 VideoComponent::VideoComponent(Window* window) :
 	GuiComponent(window),
-	mStaticImage(window),
+	mStaticImage(window, true),
 	mVideoHeight(0),
 	mVideoWidth(0),
 	mStartDelayed(false),
@@ -272,7 +272,7 @@ void VideoComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 std::vector<HelpPrompt> VideoComponent::getHelpPrompts()
 {
 	std::vector<HelpPrompt> ret;
-	ret.push_back(HelpPrompt("a", "SELECTIONNER"));
+	ret.push_back(HelpPrompt("a", _("SELECT")));
 	return ret;
 }
 

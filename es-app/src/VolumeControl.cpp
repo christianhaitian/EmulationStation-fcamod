@@ -8,12 +8,12 @@
 #endif
 
 #if defined(__linux__)
-    #if defined(_RPI_) || defined(_VERO4K_)
-        const char * VolumeControl::mixerName = "PCM";
-    #else
-    	const char * VolumeControl::mixerName = "Master";
-    #endif
-    const char * VolumeControl::mixerCard = "default";
+#if defined(_RPI_) || defined(_VERO4K_)
+const char * VolumeControl::mixerName = "PCM";
+#else
+const char * VolumeControl::mixerName = "Master";
+#endif
+const char * VolumeControl::mixerCard = "default";
 #endif
 
 std::weak_ptr<VolumeControl> VolumeControl::sInstance;
@@ -22,7 +22,7 @@ std::weak_ptr<VolumeControl> VolumeControl::sInstance;
 VolumeControl::VolumeControl()
 	: originalVolume(0), internalVolume(0)
 #if defined (__APPLE__)
-	#error TODO: Not implemented for MacOS yet!!!
+#error TODO: Not implemented for MacOS yet!!!
 #elif defined(__linux__)
 	, mixerIndex(0), mixerHandle(nullptr), mixerElem(nullptr), mixerSelemId(nullptr)
 #elif defined(WIN32) || defined(_WIN32)
@@ -35,10 +35,10 @@ VolumeControl::VolumeControl()
 	originalVolume = getVolume();
 }
 
-VolumeControl::VolumeControl(const VolumeControl & right):
+VolumeControl::VolumeControl(const VolumeControl & right) :
 	originalVolume(0), internalVolume(0)
 #if defined (__APPLE__)
-	#error TODO: Not implemented for MacOS yet!!!
+#error TODO: Not implemented for MacOS yet!!!
 #elif defined(__linux__)
 	, mixerIndex(0), mixerHandle(nullptr), mixerElem(nullptr), mixerSelemId(nullptr)
 #elif defined(WIN32) || defined(_WIN32)
@@ -81,7 +81,7 @@ void VolumeControl::init()
 {
 	//initialize audio mixer interface
 #if defined (__APPLE__)
-	#error TODO: Not implemented for MacOS yet!!!
+#error TODO: Not implemented for MacOS yet!!!
 #elif defined(__linux__)
 	//try to open mixer device
 	if (mixerHandle == nullptr)
@@ -152,10 +152,10 @@ void VolumeControl::init()
 	}
 #elif defined(WIN32) || defined(_WIN32)
 	//get windows version information
-	OSVERSIONINFOEXA osVer = {sizeof(OSVERSIONINFO)};
+	OSVERSIONINFOEXA osVer = { sizeof(OSVERSIONINFO) };
 	::GetVersionExA(reinterpret_cast<LPOSVERSIONINFOA>(&osVer));
 	//check windows version
-	if(osVer.dwMajorVersion < 6)
+	if (osVer.dwMajorVersion < 6)
 	{
 		//Windows older than Vista. use mixer API. open default mixer
 		if (mixerHandle == nullptr)
@@ -229,7 +229,7 @@ void VolumeControl::deinit()
 {
 	//deinitialize audio mixer interface
 #if defined (__APPLE__)
-	#error TODO: Not implemented for MacOS yet!!!
+#error TODO: Not implemented for MacOS yet!!!
 #elif defined(__linux__)
 	if (mixerHandle != nullptr) {
 		snd_mixer_detach(mixerHandle, mixerCard);
@@ -256,7 +256,7 @@ int VolumeControl::getVolume() const
 	int volume = 0;
 
 #if defined (__APPLE__)
-	#error TODO: Not implemented for MacOS yet!!!
+#error TODO: Not implemented for MacOS yet!!!
 #elif defined(__linux__)
 	if (mixerElem != nullptr)
 	{
@@ -350,7 +350,7 @@ void VolumeControl::setVolume(int volume)
 	//store values in internal variables
 	internalVolume = volume;
 #if defined (__APPLE__)
-	#error TODO: Not implemented for MacOS yet!!!
+#error TODO: Not implemented for MacOS yet!!!
 #elif defined(__linux__)
 	if (mixerElem != nullptr)
 	{

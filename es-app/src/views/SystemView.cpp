@@ -88,7 +88,7 @@ void SystemView::populate()
 				// Remove dynamic flags for png & jpg files : themes can contain oversized images that can't be unloaded by the TextureResource manager
 				ImageComponent* logo = new ImageComponent(mWindow, false, Utils::String::toLower(Utils::FileSystem::getExtension(path)) != ".svg");
 				logo->setMaxSize(carouselLogoSize() * mCarousel.logoScale);
-				logo->applyTheme(theme, "system", "logo", ThemeFlags::PATH | ThemeFlags::SIZE | ThemeFlags::COLOR);
+				logo->applyTheme(theme, "system", "logo", ThemeFlags::PATH | ThemeFlags::SIZE | ThemeFlags::COLOR | ThemeFlags::ALIGNMENT | ThemeFlags::VISIBLE);
 				logo->setRotateByTargetSize(true);
 				e.data.logo = std::shared_ptr<GuiComponent>(logo);
 				e.data.logoIsImage = true;
@@ -285,9 +285,11 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 	cancelAnimation(2);
 
 	std::string transition_style = Settings::getInstance()->getString("TransitionStyle");
-	bool goFast = transition_style == "instant";
-	const float infoStartOpacity = mSystemInfo.getOpacity() / 255.f;
 
+	int systemInfoDelay = mCarousel.systemInfoDelay;
+	bool goFast = transition_style == "instant" || systemInfoDelay == 0;
+
+	const float infoStartOpacity = mSystemInfo.getOpacity() / 255.f;
 
 	Animation* infoFadeOut = new LambdaAnimation(
 		[infoStartOpacity, this] (float t)
@@ -322,7 +324,7 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 // 		ViewController::get()->getGameListView(mEntries.at(mCursor).object); // fake preload
 
 	// wait 600ms to fade in
-	setAnimation(infoFadeIn, goFast ? 0 : 500, [this] {
+	setAnimation(infoFadeIn, systemInfoDelay, [this] {
 		ViewController::get()->getGameListView(mEntries.at(mCursor).object); // fake preload
 	}, false, 2);
 
@@ -518,9 +520,12 @@ void  SystemView::getViewElements(const std::shared_ptr<ThemeData>& theme)
 
 	const ThemeData::ThemeElement* sysInfoElem = theme->getElement("system", "systemInfo", "text");
 	if (sysInfoElem)
+	{
 		mSystemInfo.applyTheme(theme, "system", "systemInfo", ThemeFlags::ALL);
+		mSystemInfo.setOpacity(0);
+	}
 
-	const ThemeData::ThemeElement* fixedBackgroundElem = theme->getElement("system", "fixedBackground", "image");
+	const ThemeData::ThemeElement* fixedBackgroundElem = theme->getElement("system", "staticBackground", "image");
 	if (fixedBackgroundElem)
 	{
 		if (mStaticBackground == nullptr)
@@ -762,6 +767,7 @@ void  SystemView::getDefaultElements(void)
 	mCarousel.logoPos = Vector2f(-1, -1);
 	mCarousel.maxLogoCount = 3;
 	mCarousel.zIndex = 40;
+	mCarousel.systemInfoDelay = 2000;
 
 	// System Info Bar
 	mSystemInfo.setSize(mSize.x(), mSystemInfo.getFont()->getLetterHeight()*2.2f);
@@ -849,7 +855,7 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 	if (elem->has("colorEnd"))
 		mCarousel.colorEnd = elem->get<unsigned int>("colorEnd");
 	if (elem->has("gradientType"))
-		mCarousel.colorGradientHorizontal = !(elem->get<std::string>("gradientType").compare("horizontal"));
+		mCarousel.colorGradientHorizontal = elem->get<std::string>("gradientType").compare("horizontal");
 	if (elem->has("logoScale"))
 		mCarousel.logoScale = elem->get<float>("logoScale");
 	if (elem->has("logoSize"))
@@ -877,6 +883,8 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 		else
 			mCarousel.logoAlignment = ALIGN_CENTER;
 	}
+	if (elem->has("systemInfoDelay"))
+		mCarousel.systemInfoDelay = elem->get<float>("systemInfoDelay");
 }
 
 void SystemView::onShow()

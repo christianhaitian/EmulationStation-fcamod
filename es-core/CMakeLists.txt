@@ -27,6 +27,7 @@ set(CORE_HEADERS
 
 	# GuiComponents
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/AnimatedImageComponent.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/components/AsyncNotificationComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/BusyComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/ButtonComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/ComponentGrid.h
@@ -48,11 +49,12 @@ set(CORE_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/TextEditComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoPlayerComponent.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoVlcComponent.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoVlcComponent.h	
 
 	# Guis
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiDetectDevice.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiInputConfig.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiInfoPopup.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiMsgBox.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiTextEditPopup.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiTextEditPopupKeyboard.h
@@ -107,6 +109,7 @@ set(CORE_SOURCES
 
 	# GuiComponents
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/AnimatedImageComponent.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/components/AsyncNotificationComponent.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/BusyComponent.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/ButtonComponent.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/ComponentGrid.cpp
@@ -130,6 +133,7 @@ set(CORE_SOURCES
 	# Guis
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiDetectDevice.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiInputConfig.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiInfoPopup.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiMsgBox.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiTextEditPopup.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiTextEditPopupKeyboard.cpp

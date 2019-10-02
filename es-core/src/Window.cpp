@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <SDL_events.h>
+#include "guis/GuiInfoPopup.h"
+#include "components/AsyncNotificationComponent.h"
 
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
 	mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false), mInfoPopup(NULL)
@@ -258,6 +260,13 @@ void Window::render()
 		bottom->render(transform);
 		if(bottom != top)
 		{
+			if (top->getValue() == "GuiMsgBox" && mGuiStack.size() > 2)
+			{
+				auto& middle = mGuiStack.at(mGuiStack.size() - 2);
+				if (middle != bottom)
+					middle->render(transform);
+			}
+
 			mBackgroundOverlay->render(transform);
 			top->render(transform);
 		}
@@ -284,9 +293,9 @@ void Window::render()
 	renderScreenSaver();
 
 	if(!mRenderScreenSaver && mInfoPopup)
-	{
 		mInfoPopup->render(transform);
-	}
+
+	renderRegisteredNotificationComponents(transform);
 
 	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
 	{
@@ -320,6 +329,9 @@ void Window::endRenderLoadingScreen()
 {
 	mSplash = NULL;
 	mCustomSplash = "";
+
+	// Window has not way to apply Theme -> As a workaround : endRenderLoadingScreen is always called when theme changes.
+	mBackgroundOverlay->setImage(ThemeData::getMenuTheme()->Background.fadePath);
 }
 
 void Window::renderLoadingScreen(std::string text, float percent, unsigned char opacity)
@@ -567,4 +579,98 @@ void Window::renderScreenSaver()
 {
 	if (mScreenSaver)
 		mScreenSaver->renderScreenSaver();
+}
+
+static std::mutex mNotificationMessagesLock;
+
+void Window::displayNotificationMessage(std::string message, int duration)
+{
+	std::unique_lock<std::mutex> lock(mNotificationMessagesLock);
+
+	if (duration <= 0)
+	{
+		duration = Settings::getInstance()->getInt("audio.display_titles_time");
+		if (duration <= 2 || duration > 120)
+			duration = 10;
+
+		duration *= 1000;
+	}
+
+	NotificationMessage msg;
+	msg.first = message;
+	msg.second = duration;
+	mNotificationMessages.push_back(msg);
+}
+
+void Window::processNotificationMessages()
+{
+	std::unique_lock<std::mutex> lock(mNotificationMessagesLock);
+
+	if (mNotificationMessages.empty())
+		return;
+
+	NotificationMessage msg = mNotificationMessages.back();
+	mNotificationMessages.pop_back();
+
+	LOG(LogDebug) << "Notification message :" << msg.first.c_str();
+
+	if (mInfoPopup)
+		delete mInfoPopup;
+
+	mInfoPopup = new GuiInfoPopup(this, msg.first, msg.second);
+}
+
+void Window::registerNotificationComponent(AsyncNotificationComponent* pc)
+{
+	std::unique_lock<std::mutex> lock(mNotificationMessagesLock);
+
+	if (std::find(mAsyncNotificationComponent.cbegin(), mAsyncNotificationComponent.cend(), pc) != mAsyncNotificationComponent.cend())
+		return;
+
+	mAsyncNotificationComponent.push_back(pc);
+}
+
+void Window::unRegisterNotificationComponent(AsyncNotificationComponent* pc)
+{
+	std::unique_lock<std::mutex> lock(mNotificationMessagesLock);
+
+	auto it = std::find(mAsyncNotificationComponent.cbegin(), mAsyncNotificationComponent.cend(), pc);
+	if (it != mAsyncNotificationComponent.cend())
+		mAsyncNotificationComponent.erase(it);
+}
+
+void Window::renderRegisteredNotificationComponents(const Transform4x4f& trans)
+{
+	std::unique_lock<std::mutex> lock(mNotificationMessagesLock);
+
+#define PADDING_H  (Renderer::getScreenWidth()*0.01)
+
+	float posY = Renderer::getScreenHeight() * 0.02f;
+
+	for (auto child : mAsyncNotificationComponent)
+	{
+		float posX = Renderer::getScreenWidth()*0.99f - child->getSize().x();
+
+		child->setPosition(posX, posY, 0);
+		child->render(trans);
+
+		posY += child->getSize().y() + PADDING_H;
+	}
+}
+
+void Window::postToUiThread(const std::function<void(Window*)>& func)
+{
+	std::unique_lock<std::mutex> lock(mNotificationMessagesLock);
+
+	mFunctions.push_back(func);
+}
+
+void Window::processPostedFunctions()
+{
+	std::unique_lock<std::mutex> lock(mNotificationMessagesLock);
+
+	for (auto func : mFunctions)
+		func(this);
+
+	mFunctions.clear();
 }

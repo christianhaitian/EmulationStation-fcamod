@@ -182,6 +182,24 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 	return IGameListView::input(config, input);
 }
 
+std::vector<std::string> ISimpleGameListView::getEntriesLetters()
+{
+	std::set<std::string> setOfLetters;
+
+	for (auto file : getFileDataEntries())
+		if (file->getType() == GAME)
+			setOfLetters.insert(std::string(1, toupper(file->getName()[0])));
+
+	std::vector<std::string> letters;
+
+	for (const auto letter : setOfLetters)
+		letters.push_back(letter);
+
+	std::sort(letters.begin(), letters.end());
+	return letters;
+}
+
+
 
 
 

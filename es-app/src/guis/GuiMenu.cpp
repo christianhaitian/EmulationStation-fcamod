@@ -24,8 +24,10 @@
 #include "GuiGamelistOptions.h" // grid sizes
 #include "platform.h"
 #include "renderers/Renderer.h" // setSwapInterval()
+#include "guis/GuiTextEditPopupKeyboard.h"
+#include "scrapers/ThreadedScraper.h"
 
-GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
+GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
 	auto theme = ThemeData::getMenuTheme();
 
@@ -40,11 +42,9 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _("MAIN M
 	addEntry(_("SOUND SETTINGS"), true, [this] { openSoundSettings(); }, "iconSound");
 
 	if (isFullUI)
-		addEntry(_("SCRAPER"), true, [this] { openScraperSettings(); }, "iconScraper");
-
-	if (isFullUI)
 	{
 		addEntry(_("GAME COLLECTION SETTINGS"), true, [this] { openCollectionSystemSettings(); }, "iconGames");
+		addEntry(_("SCRAPER"), true, [this] { openScraperSettings(); }, "iconScraper");
 		addEntry(_("ADVANCED SETTINGS"), true, [this] { openOtherSettings(); }, "iconAdvanced");
 	}
 	
@@ -54,84 +54,134 @@ GuiMenu::GuiMenu(Window* window) : GuiComponent(window), mMenu(window, _("MAIN M
 	addVersionInfo();
 
 	setSize(mMenu.getSize());
-	/*
-	setScale(Vector3f(
-		Renderer::getScreenWidth() / mMenu.getSize().x(),
-		Renderer::getScreenHeight() / mMenu.getSize().y(),
-		1.0));
-		*/
-	animateTo(
-		Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, Renderer::getScreenHeight() * 0.9),
-		Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2));
+
+	if (animate)	
+		animateTo(
+			Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, Renderer::getScreenHeight() * 0.9),
+			Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2));
+	else
+		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
 }
 
 void GuiMenu::openScraperSettings()
 {
 	auto s = new GuiSettings(mWindow, _("SCRAPER"));
 
+	std::string scraper = Settings::getInstance()->getString("Scraper");
+
 	// scrape from
 	auto scraper_list = std::make_shared< OptionListComponent< std::string > >(mWindow, _("SCRAPE FROM"), false);
 	std::vector<std::string> scrapers = getScraperList();
 
 	// Select either the first entry of the one read from the settings, just in case the scraper from settings has vanished.
-	for(auto it = scrapers.cbegin(); it != scrapers.cend(); it++)
-		scraper_list->add(*it, *it, *it == Settings::getInstance()->getString("Scraper"));
+	for (auto it = scrapers.cbegin(); it != scrapers.cend(); it++)
+		scraper_list->add(*it, *it, *it == scraper);
 
 	s->addWithLabel(_("SCRAPE FROM"), scraper_list);
 	s->addSaveFunc([scraper_list] { Settings::getInstance()->setString("Scraper", scraper_list->getSelected()); });
 
-	// scrape ratings
-	auto scrape_ratings = std::make_shared<SwitchComponent>(mWindow);
-	scrape_ratings->setState(Settings::getInstance()->getBool("ScrapeRatings"));
-	s->addWithLabel(_("SCRAPE RATINGS"), scrape_ratings);
-	s->addSaveFunc([scrape_ratings] { Settings::getInstance()->setBool("ScrapeRatings", scrape_ratings->getState()); });
 
-	// image source
-	std::string imageSourceName = Settings::getInstance()->getString("ScrapperImageSrc");
-	auto imageSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _("PREFERED IMAGE SOURCE"), false);
-	imageSource->add(_("NONE"), "", imageSourceName.empty());
-	imageSource->add(_("SCREENSHOT"), "ss", imageSourceName == "ss");
-	imageSource->add(_("BOX 2D"), "box-2D", imageSourceName == "box-2D");
-	imageSource->add(_("BOX 3D"), "box-3D", imageSourceName == "box-3D");
-	imageSource->add(_("MIX"), "mixrbv1", imageSourceName == "mixrbv1");
-	imageSource->add(_("WHEEL"), "wheel", imageSourceName == "wheel");	
-	s->addWithLabel("PREFERED IMAGE SOURCE", imageSource);
-	
-	s->addSaveFunc([imageSource] {
-		if (Settings::getInstance()->getString("ScrapperImageSrc") != imageSource->getSelected())
-			Settings::getInstance()->setString("ScrapperImageSrc", imageSource->getSelected());
-	});
+	if (scraper == "ScreenScraper")
+	{
+		// image source
+		std::string imageSourceName = Settings::getInstance()->getString("ScrapperImageSrc");
+		auto imageSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _("PREFERED IMAGE SOURCE"), false);
+		imageSource->add(_("NONE"), "", imageSourceName.empty());
+		imageSource->add(_("SCREENSHOT"), "ss", imageSourceName == "ss");
+		imageSource->add(_("TITLE SCREENSHOT"), "sstitle", imageSourceName == "sstitle");
+		imageSource->add(_("BOX 2D"), "box-2D", imageSourceName == "box-2D");
+		imageSource->add(_("BOX 3D"), "box-3D", imageSourceName == "box-3D");
+		imageSource->add(_("MIX"), "mixrbv1", imageSourceName == "mixrbv1");
+		imageSource->add(_("WHEEL"), "wheel", imageSourceName == "wheel");
+		s->addWithLabel(_("PREFERED IMAGE SOURCE"), imageSource);
+
+		s->addSaveFunc([imageSource] {
+			if (Settings::getInstance()->getString("ScrapperImageSrc") != imageSource->getSelected())
+				Settings::getInstance()->setString("ScrapperImageSrc", imageSource->getSelected());
+		});
 
 
-	std::string thumbSourceName = Settings::getInstance()->getString("ScrapperThumbSrc");
-	auto thumbSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _("PREFERED THUMBNAIL SOURCE"), false);
-	thumbSource->add(_("NONE"), "", thumbSourceName.empty());
-	thumbSource->add(_("SCREENSHOT"), "ss", thumbSourceName == "ss");
-	thumbSource->add(_("BOX 2D"), "box-2D", thumbSourceName == "box-2D");
-	thumbSource->add(_("BOX 3D"), "box-3D", thumbSourceName == "box-3D");
-	thumbSource->add(_("MIX"), "mixrbv1", thumbSourceName == "mixrbv1");
-	thumbSource->add(_("WHEEL"), "wheel", thumbSourceName == "wheel");
-	s->addWithLabel("PREFERED THUMBNAIL SOURCE", thumbSource);
+		std::string thumbSourceName = Settings::getInstance()->getString("ScrapperThumbSrc");
+		auto thumbSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _("PREFERED THUMBNAIL SOURCE"), false);
+		thumbSource->add(_("NONE"), "", thumbSourceName.empty());
+		thumbSource->add(_("SCREENSHOT"), "ss", thumbSourceName == "ss");
+		thumbSource->add(_("TITLE SCREENSHOT"), "sstitle", thumbSourceName == "sstitle");
+		thumbSource->add(_("BOX 2D"), "box-2D", thumbSourceName == "box-2D");
+		thumbSource->add(_("BOX 3D"), "box-3D", thumbSourceName == "box-3D");
+		thumbSource->add(_("MIX"), "mixrbv1", thumbSourceName == "mixrbv1");
+		thumbSource->add(_("WHEEL"), "wheel", thumbSourceName == "wheel");
+		s->addWithLabel(_("PREFERED THUMBNAIL SOURCE"), thumbSource);
 
-	s->addSaveFunc([thumbSource] {
-		if (Settings::getInstance()->getString("ScrapperThumbSrc") != thumbSource->getSelected())
-			Settings::getInstance()->setString("ScrapperThumbSrc", thumbSource->getSelected());
-	});	
+		s->addSaveFunc([thumbSource] {
+			if (Settings::getInstance()->getString("ScrapperThumbSrc") != thumbSource->getSelected())
+				Settings::getInstance()->setString("ScrapperThumbSrc", thumbSource->getSelected());
+		});
 
-	// scrape video
-	auto scrape_video = std::make_shared<SwitchComponent>(mWindow);
-	scrape_video->setState(Settings::getInstance()->getBool("ScrapeVideos"));
-	s->addWithLabel(_("SCRAPE VIDEOS"), scrape_video);
-	s->addSaveFunc([scrape_video] { Settings::getInstance()->setBool("ScrapeVideos", scrape_video->getState()); });
+		// scrape ratings
+		auto scrape_ratings = std::make_shared<SwitchComponent>(mWindow);
+		scrape_ratings->setState(Settings::getInstance()->getBool("ScrapeRatings"));
+		s->addWithLabel(_("SCRAPE RATINGS"), scrape_ratings);
+		s->addSaveFunc([scrape_ratings] { Settings::getInstance()->setBool("ScrapeRatings", scrape_ratings->getState()); });
+
+		// scrape marquee
+		auto scrape_marquee = std::make_shared<SwitchComponent>(mWindow);
+		scrape_marquee->setState(Settings::getInstance()->getBool("ScrapeMarquee"));
+		s->addWithLabel(_("SCRAPE MARQUEE"), scrape_marquee);
+		s->addSaveFunc([scrape_marquee] { Settings::getInstance()->setBool("ScrapeMarquee", scrape_marquee->getState()); });
+
+		// scrape video
+		auto scrape_video = std::make_shared<SwitchComponent>(mWindow);
+		scrape_video->setState(Settings::getInstance()->getBool("ScrapeVideos"));
+		s->addWithLabel(_("SCRAPE VIDEOS"), scrape_video);
+		s->addSaveFunc([scrape_video] { Settings::getInstance()->setBool("ScrapeVideos", scrape_video->getState()); });
+
+		// Account
+		createInputTextRow(s, _("USERNAME"), "ScreenScraperUser", false);
+		createInputTextRow(s, _("PASSWORD"), "ScreenScraperPass", true);
+	}
+	else
+	{
+		// scrape ratings
+		auto scrape_ratings = std::make_shared<SwitchComponent>(mWindow);
+		scrape_ratings->setState(Settings::getInstance()->getBool("ScrapeRatings"));
+		s->addWithLabel(_("SCRAPE RATINGS"), scrape_ratings); // batocera
+		s->addSaveFunc([scrape_ratings] { Settings::getInstance()->setBool("ScrapeRatings", scrape_ratings->getState()); });
+	}
 
 	// scrape now
 	ComponentListRow row;
-	auto openScrapeNow = [this] { mWindow->pushGui(new GuiScraperStart(mWindow)); };
+	auto openScrapeNow = [this] 
+	{ 
+		if (ThreadedScraper::isRunning())
+		{
+			Window* window = mWindow;
+
+			mWindow->pushGui(new GuiMsgBox(mWindow, _("SCRAPING IS RUNNING. DO YOU WANT TO STOP IT ?"), _("YES"), [this, window]
+			{
+				ThreadedScraper::stop();
+			}, _("NO"), nullptr));
+
+			return;
+		}
+
+		mWindow->pushGui(new GuiScraperStart(mWindow)); 
+	};
 	std::function<void()> openAndSave = openScrapeNow;
 	openAndSave = [s, openAndSave] { s->save(); openAndSave(); };
 	s->addEntry(_("SCRAPE NOW"), true, openAndSave, "iconScraper");
-	
+
 	s->updatePosition();
+
+	scraper_list->setSelectedChangedCallback([this, s, scraper, scraper_list](std::string value)
+	{
+		if (value != scraper && (scraper == "ScreenScraper" || value == "ScreenScraper"))
+		{
+			Settings::getInstance()->setString("Scraper", value);
+			delete s;
+			openScraperSettings();
+		}
+	});
+
 	mWindow->pushGui(s);
 }
 
@@ -142,8 +192,9 @@ void GuiMenu::openSoundSettings()
 	// volume
 	auto volume = std::make_shared<SliderComponent>(mWindow, 0.f, 100.f, 1.f, "%");
 	volume->setValue((float)VolumeControl::getInstance()->getVolume());
+	volume->setOnValueChanged([](const float &newVal) { VolumeControl::getInstance()->setVolume((int)Math::round(newVal)); });
 	s->addWithLabel(_("SYSTEM VOLUME"), volume);
-	s->addSaveFunc([volume] { VolumeControl::getInstance()->setVolume((int)Math::round(volume->getValue())); });
+	//s->addSaveFunc([volume] { VolumeControl::getInstance()->setVolume((int)Math::round(volume->getValue())); });
 
 	if (UIModeController::getInstance()->isUIModeFull())
 	{
@@ -227,6 +278,15 @@ void GuiMenu::openSoundSettings()
 			Settings::getInstance()->setBool("audio.persystem", music_per_system->getState());
 		});
 		
+		// batocera - music per system
+		auto enableThemeMusics = std::make_shared<SwitchComponent>(mWindow);
+		enableThemeMusics->setState(Settings::getInstance()->getBool("audio.thememusics"));
+		s->addWithLabel(_("PLAY THEME MUSICS"), enableThemeMusics);
+		s->addSaveFunc([enableThemeMusics] {
+			if (Settings::getInstance()->setBool("audio.thememusics", enableThemeMusics->getState()))
+				AudioManager::getInstance()->themeChanged(ViewController::get()->getState().getSystem()->getTheme(), true);
+		});
+
 		// disable sounds
 		auto sounds_enabled = std::make_shared<SwitchComponent>(mWindow);
 		sounds_enabled->setState(Settings::getInstance()->getBool("EnableSounds"));
@@ -277,14 +337,251 @@ void GuiMenu::openSoundSettings()
 
 }
 
+void GuiMenu::openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListComponent<std::string>> theme_set)
+{
+	if (Settings::getInstance()->getString("ThemeSet") != theme_set->getSelected())
+	{
+		mWindow->pushGui(new GuiMsgBox(mWindow, _("YOU MUST APPLY THE THEME BEFORE EDIT CONFIGURATION"), _("OK")));
+		return;
+	}
+
+	Window* window = mWindow;
+
+	auto system = ViewController::get()->getState().getSystem();
+	auto theme = system->getTheme();
+
+	auto themeconfig = new GuiSettings(mWindow, _("THEME CONFIGURATION").c_str());
+
+	auto themeSubSets = theme->getSubSets();
+	auto themeColorSets = ThemeData::getSubSet(themeSubSets, "colorset");
+	auto themeIconSets = ThemeData::getSubSet(themeSubSets, "iconset");
+	auto themeMenus = ThemeData::getSubSet(themeSubSets, "menu");
+	auto themeSystemviewSets = ThemeData::getSubSet(themeSubSets, "systemview");
+	auto themeGamelistViewSets = ThemeData::getSubSet(themeSubSets, "gamelistview");
+	auto themeRegions = ThemeData::getSubSet(themeSubSets, "region");
+
+	// colorset
+	std::shared_ptr<OptionListComponent<std::string>> theme_colorset = nullptr;
+	if (themeColorSets.size() > 0)
+	{
+		auto selectedColorSet = std::find(themeColorSets.cbegin(), themeColorSets.cend(), Settings::getInstance()->getString("ThemeColorSet"));
+		if (selectedColorSet == themeColorSets.end())
+			selectedColorSet = themeColorSets.begin();
+
+		theme_colorset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME COLORSET"), false);
+
+		for (auto it = themeColorSets.begin(); it != themeColorSets.end(); it++)
+			theme_colorset->add(*it, *it, it == selectedColorSet);
+
+		if (!themeColorSets.empty())
+			themeconfig->addWithLabel(_("THEME COLORSET"), theme_colorset);
+	}
+
+	// iconset
+	std::shared_ptr<OptionListComponent<std::string>> theme_iconset = nullptr;
+	if (themeIconSets.size() > 0)
+	{
+		auto selectedIconSet = std::find(themeIconSets.cbegin(), themeIconSets.cend(), Settings::getInstance()->getString("ThemeIconSet"));
+		if (selectedIconSet == themeIconSets.end())
+			selectedIconSet = themeIconSets.begin();
+
+		theme_iconset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME ICONSET"), false);
+
+		for (auto it = themeIconSets.begin(); it != themeIconSets.end(); it++)
+			theme_iconset->add(*it, *it, it == selectedIconSet);
+
+		if (!themeIconSets.empty())
+			themeconfig->addWithLabel(_("THEME ICONSET"), theme_iconset);
+	}
+
+	// menu
+	std::shared_ptr<OptionListComponent<std::string>> theme_menu = nullptr;
+	if (themeMenus.size() > 0)
+	{
+		auto selectedMenu = std::find(themeMenus.cbegin(), themeMenus.cend(), Settings::getInstance()->getString("ThemeMenu"));
+		if (selectedMenu == themeMenus.end())
+			selectedMenu = themeMenus.begin();
+
+		theme_menu = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME MENU"), false);
+
+		for (auto it = themeMenus.begin(); it != themeMenus.end(); it++)
+			theme_menu->add(*it, *it, it == selectedMenu);
+
+		if (!themeMenus.empty())
+			themeconfig->addWithLabel(_("THEME MENU"), theme_menu);
+	}
+
+	// systemview
+	std::shared_ptr<OptionListComponent<std::string>> theme_systemview = nullptr;
+	if (themeSystemviewSets.size() > 0)
+	{
+		auto selectedSystemviewSet = std::find(themeSystemviewSets.cbegin(), themeSystemviewSets.cend(), Settings::getInstance()->getString("ThemeSystemView"));
+		if (selectedSystemviewSet == themeSystemviewSets.end())
+			selectedSystemviewSet = themeSystemviewSets.begin();
+
+		theme_systemview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME SYSTEMVIEW"), false);
+
+		for (auto it = themeSystemviewSets.begin(); it != themeSystemviewSets.end(); it++)
+			theme_systemview->add(*it, *it, it == selectedSystemviewSet);
+
+		if (!themeSystemviewSets.empty())
+			themeconfig->addWithLabel(_("THEME SYSTEMVIEW"), theme_systemview);
+	}
+
+	// gamelistview
+	std::shared_ptr<OptionListComponent<std::string>> theme_gamelistview = nullptr;
+	if (themeGamelistViewSets.size() > 0)
+	{
+		auto selectedGamelistViewSet = std::find(themeGamelistViewSets.cbegin(), themeGamelistViewSets.cend(), Settings::getInstance()->getString("ThemeGamelistView"));
+		if (selectedGamelistViewSet == themeGamelistViewSets.end())
+			selectedGamelistViewSet = themeGamelistViewSets.begin();
+
+		theme_gamelistview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME GAMELISTVIEW"), false);
+
+		for (auto it = themeGamelistViewSets.begin(); it != themeGamelistViewSets.end(); it++)
+			theme_gamelistview->add(*it, *it, it == selectedGamelistViewSet);
+
+		if (!themeGamelistViewSets.empty())
+			themeconfig->addWithLabel(_("THEME GAMELISTVIEW"), theme_gamelistview);
+	}
+
+	// themeregion
+	std::shared_ptr<OptionListComponent<std::string>> theme_region = nullptr;
+	if (themeRegions.size() > 0)
+	{
+		auto selectedRegion = std::find(themeRegions.cbegin(), themeRegions.cend(), Settings::getInstance()->getString("ThemeRegionName"));
+		if (selectedRegion == themeRegions.end())
+			selectedRegion = themeRegions.begin();
+
+		theme_region = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME REGION"), false);
+
+		for (auto it = themeRegions.begin(); it != themeRegions.end(); it++)
+			theme_region->add(*it, *it, it == selectedRegion);
+
+		if (!themeRegions.empty())
+			themeconfig->addWithLabel(_("THEME REGION"), theme_region);
+	}
+
+	// gamelist_style
+	std::shared_ptr<OptionListComponent<std::string>> gamelist_style = nullptr;
+	//if (theme_gamelistview == nullptr)
+	{
+		gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
+
+		std::vector<std::string> styles;
+		styles.push_back("automatic");
+
+		if (system != NULL)
+		{
+			auto mViews = theme->getViewsOfTheme();
+			for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
+				styles.push_back(*it);
+		}
+		else
+		{
+			styles.push_back("basic");
+			styles.push_back("detailed");
+		}
+
+		auto viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
+		if (!theme->hasView(viewPreference))
+			viewPreference = "automatic";
+
+		for (auto it = styles.cbegin(); it != styles.cend(); it++)
+			gamelist_style->add(_(it->c_str()), *it, viewPreference == *it);
+
+		themeconfig->addWithLabel(_("GAMELIST VIEW STYLE"), gamelist_style);
+	}
+
+	// Default grid size
+	std::shared_ptr<OptionListComponent<std::string>> mGridSize = nullptr;
+	if (system != NULL && theme->hasView("grid"))
+	{
+		Vector2f gridOverride = Vector2f::parseString(Settings::getInstance()->getString("DefaultGridSize"));
+		auto ovv = std::to_string((int)gridOverride.x()) + "x" + std::to_string((int)gridOverride.y());
+
+		mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _("DEFAULT GRID SIZE"), false);
+
+		bool found = false;
+		for (auto it = GuiGamelistOptions::gridSizes.cbegin(); it != GuiGamelistOptions::gridSizes.cend(); it++)
+		{
+			bool sel = (gridOverride == Vector2f(0, 0) && *it == "automatic") || ovv == *it;
+			if (sel)
+				found = true;
+
+			mGridSize->add(_(it->c_str()), *it, sel);
+		}
+
+		if (!found)
+			mGridSize->selectFirstItem();
+
+		themeconfig->addWithLabel(_("DEFAULT GRID SIZE"), mGridSize);
+	}
+
+
+	themeconfig->addEntry(_("RESET GAMELIST CUSTOMISATIONS"), false, [s, themeconfig, window]
+	{
+		Settings::getInstance()->setString("GamelistViewStyle", "");
+		Settings::getInstance()->setString("DefaultGridSize", "");
+
+		for (auto sysIt = SystemData::sSystemVector.cbegin(); sysIt != SystemData::sSystemVector.cend(); sysIt++)
+			(*sysIt)->setSystemViewMode("automatic", Vector2f(0, 0));
+
+		themeconfig->setVariable("reloadAll", true);
+		themeconfig->close();
+	});
+
+	themeconfig->addSaveFunc([this, themeconfig, theme_set, theme_colorset, theme_iconset, theme_menu, theme_systemview, theme_gamelistview, theme_region, gamelist_style, mGridSize, window]
+	{
+		bool reloadAll = Settings::getInstance()->setString("ThemeSet", theme_set == nullptr ? "" : theme_set->getSelected());
+		reloadAll |= Settings::getInstance()->setString("ThemeColorSet", theme_colorset == nullptr ? "" : theme_colorset->getSelected());
+		reloadAll |= Settings::getInstance()->setString("ThemeIconSet", theme_iconset == nullptr ? "" : theme_iconset->getSelected());
+		reloadAll |= Settings::getInstance()->setString("ThemeMenu", theme_menu == nullptr ? "" : theme_menu->getSelected());
+		reloadAll |= Settings::getInstance()->setString("ThemeSystemView", theme_systemview == nullptr ? "" : theme_systemview->getSelected());
+		reloadAll |= Settings::getInstance()->setString("ThemeGamelistView", theme_gamelistview == nullptr ? "" : theme_gamelistview->getSelected());
+		reloadAll |= Settings::getInstance()->setString("ThemeRegionName", theme_region == nullptr ? "" : theme_region->getSelected());
+		reloadAll |= Settings::getInstance()->setString("GamelistViewStyle", gamelist_style == nullptr ? "" : gamelist_style->getSelected());
+
+		if (mGridSize != nullptr)
+		{
+			std::string str = mGridSize->getSelected();
+			std::string value = "";
+
+			size_t divider = str.find('x');
+			if (divider != std::string::npos)
+			{
+				std::string first = str.substr(0, divider);
+				std::string second = str.substr(divider + 1, std::string::npos);
+
+				Vector2f gridSizeOverride = Vector2f((float)atof(first.c_str()), (float)atof(second.c_str()));
+				value = Utils::String::replace(Utils::String::replace(gridSizeOverride.toString(), ".000000", ""), "0 0", "");
+			}
+
+			reloadAll |= Settings::getInstance()->setString("DefaultGridSize", value);
+		}
+		else
+			reloadAll |= Settings::getInstance()->setString("DefaultGridSize", "");
+
+		if (reloadAll || themeconfig->getVariable("reloadAll"))
+		{
+			CollectionSystemManager::get()->updateSystemsList();
+			ViewController::get()->reloadAll(window);
+			window->endRenderLoadingScreen();
+
+			std::string oldTheme = Settings::getInstance()->getString("ThemeSet");
+			Scripting::fireEvent("theme-changed", theme_set->getSelected(), oldTheme);
+		}
+	});
+
+	mWindow->pushGui(themeconfig);
+}
+
 void GuiMenu::openUISettings()
 {	
 	auto pthis = this;
 	Window* window = mWindow;
 
 	auto s = new GuiSettings(mWindow, _("UI SETTINGS"));
-	s->setBeforeCloseFunc([window, pthis] { delete pthis; window->pushGui(new GuiMenu(window)); });
-	s->enableBeforeCloseFunc(false);
 	
 	// theme set
 	auto theme = ThemeData::getMenuTheme();
@@ -300,8 +597,8 @@ void GuiMenu::openUISettings()
 		auto theme_set = std::make_shared< OptionListComponent<std::string> >(mWindow, "THEME", false);
 		for (auto it = themeSets.cbegin(); it != themeSets.cend(); it++)
 			theme_set->add(it->first, it->first, it == selectedSet);
-		s->addWithLabel(_("THEME"), theme_set);
 
+		s->addWithLabel(_("THEME"), theme_set);
 		s->addSaveFunc([s, theme_set, window]
 		{
 			std::string oldTheme = Settings::getInstance()->getString("ThemeSet");
@@ -309,325 +606,69 @@ void GuiMenu::openUISettings()
 			{
 				Settings::getInstance()->setString("ThemeSet", theme_set->getSelected());
 
-				auto themeSubSets = ThemeData::getThemeSubSets(theme_set->getSelected());
-				auto themeColorSets = ThemeData::getSubSet(themeSubSets, "colorset");
-				auto themeIconSets = ThemeData::getSubSet(themeSubSets, "iconset");
-				auto themeMenus = ThemeData::getSubSet(themeSubSets, "menu");
-				auto themeSystemviewSets = ThemeData::getSubSet(themeSubSets, "systemview");
-				auto themeGamelistViewSets = ThemeData::getSubSet(themeSubSets, "gamelistview");
-				auto themeRegions = ThemeData::getSubSet(themeSubSets, "region");
-
 				// theme changed without setting options, forcing options to avoid crash/blank theme
-				Settings::getInstance()->setString("ThemeRegionName", themeRegions.empty() ? "" : themeRegions[0]);
-				Settings::getInstance()->setString("ThemeColorSet", themeColorSets.empty() ? "" : themeColorSets[0]);
-				Settings::getInstance()->setString("ThemeIconSet", themeIconSets.empty() ? "" : themeIconSets[0]);
-				Settings::getInstance()->setString("ThemeMenu", themeMenus.empty() ? "" : themeMenus[0]);
-				Settings::getInstance()->setString("ThemeSystemView", themeSystemviewSets.empty() ? "" : themeSystemviewSets[0]);
-				Settings::getInstance()->setString("ThemeGamelistView", themeGamelistViewSets.empty() ? "" : themeGamelistViewSets[0]);
+				Settings::getInstance()->setString("ThemeRegionName", "");
+				Settings::getInstance()->setString("ThemeColorSet", "");
+				Settings::getInstance()->setString("ThemeIconSet", "");
+				Settings::getInstance()->setString("ThemeMenu", "");
+				Settings::getInstance()->setString("ThemeSystemView", "");
+				Settings::getInstance()->setString("ThemeGamelistView", "");
+				Settings::getInstance()->setString("GamelistViewStyle", "");
+				Settings::getInstance()->setString("DefaultGridSize", "");
 				
-				window->renderLoadingScreen(_("Loading..."));
+				for (auto sysIt = SystemData::sSystemVector.cbegin(); sysIt != SystemData::sSystemVector.cend(); sysIt++)
+					(*sysIt)->setSystemViewMode("automatic", Vector2f(0, 0));
+
+				s->setVariable("reloadCollections", true);
+				s->setVariable("reloadAll", true);
+				s->setVariable("reloadGuiMenu", true);
 
 				Scripting::fireEvent("theme-changed", theme_set->getSelected(), oldTheme);
-				CollectionSystemManager::get()->updateSystemsList();
-				ViewController::get()->goToStart();
-				ViewController::get()->reloadAll(); // TODO - replace this with some sort of signal-based implementation
-
-				window->endRenderLoadingScreen();
-
-				s->enableBeforeCloseFunc(true);
 			}
 		});
 	
-		if (system != NULL && system->getTheme()->hasSubsets())
+		bool showThemeConfiguration = system->getTheme()->hasSubsets() || system->getTheme()->hasView("grid");
+		if (showThemeConfiguration)
 		{
-
-			// theme config
-			std::function<void()> openGui = [this, theme_set, s, window] {
-				auto themeconfig = new GuiSettings(mWindow, _("THEME CONFIGURATION").c_str());
-
-				auto SelectedTheme = theme_set->getSelected();
-
-				auto themeSubSets = ThemeData::getThemeSubSets(SelectedTheme);
-				auto themeColorSets = ThemeData::getSubSet(themeSubSets, "colorset");
-				auto themeIconSets = ThemeData::getSubSet(themeSubSets, "iconset");
-				auto themeMenus = ThemeData::getSubSet(themeSubSets, "menu");
-				auto themeSystemviewSets = ThemeData::getSubSet(themeSubSets, "systemview");
-				auto themeGamelistViewSets = ThemeData::getSubSet(themeSubSets, "gamelistview");
-				auto themeRegions = ThemeData::getSubSet(themeSubSets, "region");
-
-
-				// colorset
-				std::shared_ptr<OptionListComponent<std::string>> theme_colorset = nullptr;
-				if (themeColorSets.size() > 0)
-				{
-					auto selectedColorSet = std::find(themeColorSets.cbegin(), themeColorSets.cend(), Settings::getInstance()->getString("ThemeColorSet"));
-					if (selectedColorSet == themeColorSets.end())
-						selectedColorSet = themeColorSets.begin();
-
-					theme_colorset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME COLORSET"), false);
-
-					for (auto it = themeColorSets.begin(); it != themeColorSets.end(); it++)
-						theme_colorset->add(*it, *it, it == selectedColorSet);
-
-					if (!themeColorSets.empty())
-						themeconfig->addWithLabel(_("THEME COLORSET"), theme_colorset);
-				}
-
-				// iconset
-				std::shared_ptr<OptionListComponent<std::string>> theme_iconset = nullptr;
-				if (themeIconSets.size() > 0)
-				{
-					auto selectedIconSet = std::find(themeIconSets.cbegin(), themeIconSets.cend(), Settings::getInstance()->getString("ThemeIconSet"));
-					if (selectedIconSet == themeIconSets.end())
-						selectedIconSet = themeIconSets.begin();
-
-					theme_iconset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME ICONSET"), false);
-
-					for (auto it = themeIconSets.begin(); it != themeIconSets.end(); it++)
-						theme_iconset->add(*it, *it, it == selectedIconSet);
-
-					if (!themeIconSets.empty())
-						themeconfig->addWithLabel(_("THEME ICONSET"), theme_iconset);
-				}
-
-				// menu
-				std::shared_ptr<OptionListComponent<std::string>> theme_menu = nullptr;
-				if (themeMenus.size() > 0)
-				{
-					auto selectedMenu = std::find(themeMenus.cbegin(), themeMenus.cend(), Settings::getInstance()->getString("ThemeMenu"));
-					if (selectedMenu == themeMenus.end())
-						selectedMenu = themeMenus.begin();
-
-					theme_menu = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME MENU"), false);
-
-					for (auto it = themeMenus.begin(); it != themeMenus.end(); it++)
-						theme_menu->add(*it, *it, it == selectedMenu);
-
-					if (!themeMenus.empty())
-						themeconfig->addWithLabel(_("THEME MENU"), theme_menu);
-				}
-
-				// systemview
-				std::shared_ptr<OptionListComponent<std::string>> theme_systemview = nullptr;
-				if (themeSystemviewSets.size() > 0)
-				{
-					auto selectedSystemviewSet = std::find(themeSystemviewSets.cbegin(), themeSystemviewSets.cend(), Settings::getInstance()->getString("ThemeSystemView"));
-					if (selectedSystemviewSet == themeSystemviewSets.end())
-						selectedSystemviewSet = themeSystemviewSets.begin();
-
-					theme_systemview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME SYSTEMVIEW"), false);
-
-					for (auto it = themeSystemviewSets.begin(); it != themeSystemviewSets.end(); it++)
-						theme_systemview->add(*it, *it, it == selectedSystemviewSet);
-
-					if (!themeSystemviewSets.empty())
-						themeconfig->addWithLabel(_("THEME SYSTEMVIEW"), theme_systemview);
-				}
-
-				// gamelistview
-				std::shared_ptr<OptionListComponent<std::string>> theme_gamelistview = nullptr;
-				if (themeGamelistViewSets.size() > 0)
-				{
-					auto selectedGamelistViewSet = std::find(themeGamelistViewSets.cbegin(), themeGamelistViewSets.cend(), Settings::getInstance()->getString("ThemeGamelistView"));
-					if (selectedGamelistViewSet == themeGamelistViewSets.end())
-						selectedGamelistViewSet = themeGamelistViewSets.begin();
-
-					theme_gamelistview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME GAMELISTVIEW"), false);
-
-					for (auto it = themeGamelistViewSets.begin(); it != themeGamelistViewSets.end(); it++)
-						theme_gamelistview->add(*it, *it, it == selectedGamelistViewSet);
-
-					if (!themeGamelistViewSets.empty())
-						themeconfig->addWithLabel(_("THEME GAMELISTVIEW"), theme_gamelistview);
-				}
-
-				// themeregion
-				std::shared_ptr<OptionListComponent<std::string>> theme_region = nullptr;
-				if (themeRegions.size() > 0)
-				{
-					auto selectedRegion = std::find(themeRegions.cbegin(), themeRegions.cend(), Settings::getInstance()->getString("ThemeRegionName"));
-					if (selectedRegion == themeRegions.end())
-						selectedRegion = themeRegions.begin();
-
-					theme_region = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME REGION"), false);
-
-					for (auto it = themeRegions.begin(); it != themeRegions.end(); it++)
-						theme_region->add(*it, *it, it == selectedRegion);
-
-					if (!themeRegions.empty())
-						themeconfig->addWithLabel(_("THEME REGION"), theme_region);
-				}
-
-				// gamelist_style
-				std::shared_ptr<OptionListComponent<std::string>> gamelist_style = nullptr;
-				// if (theme_gamelistview == nullptr)
-				{
-					gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("FORCE GAMELIST VIEW STYLE"), false);
-
-					std::vector<std::string> styles;
-					styles.push_back("automatic");
-
-					auto system = ViewController::get()->getState().getSystem();
-					if (system != NULL)
-					{
-						auto mViews = system->getTheme()->getViewsOfTheme();
-						for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
-							styles.push_back(*it);
-					}
-					else
-					{
-						styles.push_back("basic");
-						styles.push_back("detailed");
-					}
-
-					auto viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
-					if (!system->getTheme()->hasView(viewPreference))
-						viewPreference = "automatic";
-
-					for (auto it = styles.cbegin(); it != styles.cend(); it++)
-						gamelist_style->add(_(*it), *it, viewPreference == *it);
-
-					themeconfig->addWithLabel(_("FORCE GAMELIST VIEW STYLE"), gamelist_style);
-				}
-				
-				themeconfig->addSaveFunc([this, s, theme_set, theme_colorset, theme_iconset, theme_menu, theme_systemview, theme_gamelistview, theme_region, gamelist_style] {
-					bool needReload = false;
-					if (theme_colorset != nullptr && Settings::getInstance()->getString("ThemeColorSet") != theme_colorset->getSelected() && !theme_colorset->getSelected().empty())
-						needReload = true;
-					if (theme_iconset != nullptr && Settings::getInstance()->getString("ThemeIconSet") != theme_iconset->getSelected() && !theme_iconset->getSelected().empty())
-						needReload = true;
-					if (theme_menu != nullptr && Settings::getInstance()->getString("ThemeMenu") != theme_menu->getSelected() && !theme_menu->getSelected().empty())
-						needReload = true;
-					if (theme_systemview != nullptr && Settings::getInstance()->getString("ThemeSystemView") != theme_systemview->getSelected() && !theme_systemview->getSelected().empty())
-						needReload = true;
-					if (theme_gamelistview != nullptr && Settings::getInstance()->getString("ThemeGamelistView") != theme_gamelistview->getSelected() && !theme_gamelistview->getSelected().empty())
-						needReload = true;
-					if (theme_region != nullptr && Settings::getInstance()->getString("ThemeRegionName") != theme_region->getSelected() && !theme_region->getSelected().empty())
-						needReload = true;
-					if (gamelist_style != nullptr && Settings::getInstance()->getString("GamelistViewStyle") != gamelist_style->getSelected() && !gamelist_style->getSelected().empty())
-						needReload = true;
-
-					if (needReload) {
-
-						Settings::getInstance()->setString("ThemeSet", theme_set == nullptr ? "" : theme_set->getSelected());
-						Settings::getInstance()->setString("ThemeColorSet", theme_colorset == nullptr ? "" : theme_colorset->getSelected());
-						Settings::getInstance()->setString("ThemeIconSet", theme_iconset == nullptr ? "" : theme_iconset->getSelected());
-						Settings::getInstance()->setString("ThemeMenu", theme_menu == nullptr ? "" : theme_menu->getSelected());
-						Settings::getInstance()->setString("ThemeSystemView", theme_systemview == nullptr ? "" : theme_systemview->getSelected());
-						Settings::getInstance()->setString("ThemeGamelistView", theme_gamelistview == nullptr ? "" : theme_gamelistview->getSelected());
-						Settings::getInstance()->setString("ThemeRegionName", theme_region == nullptr ? "" : theme_region->getSelected());
-						Settings::getInstance()->setString("GamelistViewStyle", gamelist_style == nullptr ? "" : gamelist_style->getSelected());						
-
-						mWindow->renderLoadingScreen(_("Loading..."));
-						
-						//reload theme
-						std::string oldTheme = Settings::getInstance()->getString("ThemeSet");
-						Scripting::fireEvent("theme-changed", theme_set->getSelected(), oldTheme);
-						CollectionSystemManager::get()->updateSystemsList();
-						ViewController::get()->goToStart();
-						ViewController::get()->reloadAll();
-
-						mWindow->endRenderLoadingScreen();
-						
-						s->enableBeforeCloseFunc(true);
-					}
-				});
-				if (!themeRegions.empty() || !themeGamelistViewSets.empty() || !themeSystemviewSets.empty() || !themeIconSets.empty() || !themeMenus.empty() || !themeColorSets.empty())
-				{
-					themeconfig->updatePosition();
-					mWindow->pushGui(themeconfig);
-				}
-				else
-					mWindow->pushGui(new GuiMsgBox(window, _("THIS THEME HAS NO OPTION"), _("OK")));
-			};
-
-			s->addSubMenu(_("THEME CONFIGURATION"), openGui);
+			s->addSubMenu(_("THEME CONFIGURATION"), [this, s, theme_set]() { openThemeConfiguration(s, theme_set); });
 		}
-	}
-
-	// GameList view style
-	if (system != NULL && !system->getTheme()->hasSubsets())
-	{
-		auto gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
-		std::vector<std::string> styles;
-		styles.push_back("automatic");
-
-		auto system = ViewController::get()->getState().getSystem();
-		if (system != NULL)
+		else // GameList view style only, acts like Retropie for simple themes
 		{
-			auto mViews = system->getTheme()->getViewsOfTheme();
-			for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
-				styles.push_back(*it);
-		}
-		else
-		{
-			styles.push_back("basic");
-			styles.push_back("detailed");
-			styles.push_back("video");
-			styles.push_back("grid");
-		}
+			auto gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
+			std::vector<std::string> styles;
+			styles.push_back("automatic");
 
-		auto viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
-		if (!system->getTheme()->hasView(viewPreference))
-			viewPreference = "automatic";
-
-		for (auto it = styles.cbegin(); it != styles.cend(); it++)
-			gamelist_style->add(_(*it), *it, viewPreference == *it);
-
-		s->addWithLabel(_("GAMELIST VIEW STYLE"), gamelist_style);
-		s->addSaveFunc([gamelist_style, viewPreference] {
-			bool needReload = false;
-			if (viewPreference != gamelist_style->getSelected())
-				needReload = true;
-			Settings::getInstance()->setString("GamelistViewStyle", gamelist_style->getSelected());
-			if (needReload)
-				ViewController::get()->reloadAll();
-		});
-	}
-	
-	// Default grid size
-	if (system != NULL && system->getTheme()->hasView("grid"))
-	{
-		Vector2f gridOverride = Vector2f::parseString(Settings::getInstance()->getString("DefaultGridSize"));
-		auto ovv = std::to_string((int)gridOverride.x()) + "x" + std::to_string((int)gridOverride.y());
-
-		auto mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _("DEFAULT GRID SIZE"), false);
-
-		bool found = false;
-		for (auto it = GuiGamelistOptions::gridSizes.cbegin(); it != GuiGamelistOptions::gridSizes.cend(); it++)
-		{
-			bool sel = (gridOverride == Vector2f(0, 0) && *it == "automatic") || ovv == *it;
-			if (sel)
-				found = true;
-
-			mGridSize->add(_(*it), *it, sel);
-		}
-
-		if (!found)
-			mGridSize->selectFirstItem();
-
-		s->addWithLabel(_("DEFAULT GRID SIZE"), mGridSize);
-		s->addSaveFunc([mGridSize]
-		{
-			std::string str = mGridSize->getSelected();
-			std::string value = "";
-
-			size_t divider = str.find('x');
-			if (divider != std::string::npos)
+			auto system = ViewController::get()->getState().getSystem();
+			if (system != NULL)
 			{
-				std::string first = str.substr(0, divider);
-				std::string second = str.substr(divider + 1, std::string::npos);
-
-				Vector2f gridSizeOverride = Vector2f((float)atof(first.c_str()), (float)atof(second.c_str()));
-				value = Utils::String::replace(Utils::String::replace(gridSizeOverride.toString(), ".000000", ""), "0 0", "");
+				auto mViews = system->getTheme()->getViewsOfTheme();
+				for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
+					styles.push_back(*it);
 			}
-			
-			if (value != Settings::getInstance()->getString("DefaultGridSize"))
+			else
 			{
-				Settings::getInstance()->setString("DefaultGridSize", value);
-				ViewController::get()->reloadAll();
+				styles.push_back("basic");
+				styles.push_back("detailed");
+				styles.push_back("video");
+				styles.push_back("grid");
 			}
-		});
+
+			auto viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
+			if (!system->getTheme()->hasView(viewPreference))
+				viewPreference = "automatic";
+
+			for (auto it = styles.cbegin(); it != styles.cend(); it++)
+				gamelist_style->add(_(it->c_str()), *it, viewPreference == *it);
+
+			s->addWithLabel(_("GAMELIST VIEW STYLE"), gamelist_style);
+			s->addSaveFunc([s, gamelist_style, window] {
+				if (Settings::getInstance()->setString("GamelistViewStyle", gamelist_style->getSelected()))
+				{
+					s->setVariable("reloadAll", true);
+					s->setVariable("reloadGuiMenu", true);
+				}
+			});
+		}
 	}
 
 	//#ifndef WIN32
@@ -694,13 +735,12 @@ void GuiMenu::openUISettings()
 				language->add(*it, *it, Settings::getInstance()->getString("Language") == *it);
 
 			s->addWithLabel(_("LANGUAGE"), language);
-			s->addSaveFunc([language, window, pthis] {
+			s->addSaveFunc([language, window, pthis, s] {
 				
 				if (language->getSelected() != Settings::getInstance()->getString("Language"))
 				{
-					Settings::getInstance()->setString("Language", language->getSelected());
-					delete pthis;
-					window->pushGui(new GuiMenu(window));
+					if (Settings::getInstance()->setString("Language", language->getSelected()))
+						s->setVariable("reloadGuiMenu", true);
 				}
 			});
 		}
@@ -727,8 +767,7 @@ void GuiMenu::openUISettings()
 		Settings::getInstance()->setString("TransitionStyle", transition_style->getSelected());
 		GuiComponent::ALLOWANIMATIONS = Settings::getInstance()->getString("TransitionStyle") != "instant";
 	});
-
-
+	
 	auto transitionOfGames_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAME LAUNCH TRANSITION"), false);
 	std::vector<std::string> gameTransitions;
 	gameTransitions.push_back("fade");
@@ -818,16 +857,20 @@ void GuiMenu::openUISettings()
 	auto show_help = std::make_shared<SwitchComponent>(mWindow);
 	show_help->setState(Settings::getInstance()->getBool("ShowHelpPrompts"));
 	s->addWithLabel(_("ON-SCREEN HELP"), show_help);
-	s->addSaveFunc([show_help] { Settings::getInstance()->setBool("ShowHelpPrompts", show_help->getState()); });
+	s->addSaveFunc([s, show_help]
+	{
+		if (Settings::getInstance()->setBool("ShowHelpPrompts", show_help->getState()))
+			s->setVariable("reloadAll", true);
+	});
 
 	// enable filters (ForceDisableFilters)
 	auto enable_filter = std::make_shared<SwitchComponent>(mWindow);
 	enable_filter->setState(!Settings::getInstance()->getBool("ForceDisableFilters"));
 	s->addWithLabel(_("ENABLE FILTERS"), enable_filter);
-	s->addSaveFunc([enable_filter] { 
+	s->addSaveFunc([enable_filter, s] { 
 		bool filter_is_enabled = !Settings::getInstance()->getBool("ForceDisableFilters");
-		Settings::getInstance()->setBool("ForceDisableFilters", !enable_filter->getState()); 
-		if (enable_filter->getState() != filter_is_enabled) ViewController::get()->ReloadAndGoToStart();
+		if (Settings::getInstance()->setBool("ForceDisableFilters", !enable_filter->getState()))
+			s->setVariable("reloadAll", true);		
 	});
 
 
@@ -839,6 +882,23 @@ void GuiMenu::openUISettings()
 	screensaver_row.makeAcceptInputHandler(std::bind(&GuiMenu::openScreensaverOptions, this));
 	s->addRow(screensaver_row);
 
+	s->onFinalize([s, pthis, window]
+	{
+		if (s->getVariable("reloadCollections"))
+			CollectionSystemManager::get()->updateSystemsList();
+
+		if (s->getVariable("reloadAll"))
+		{
+			ViewController::get()->reloadAll(window);
+			window->endRenderLoadingScreen();
+		}
+
+		if (s->getVariable("reloadGuiMenu"))
+		{
+			delete pthis;
+			window->pushGui(new GuiMenu(window, false));
+		}
+	});
 
 	s->updatePosition();
 	mWindow->pushGui(s);
@@ -849,7 +909,7 @@ void GuiMenu::openOtherSettings()
 	auto s = new GuiSettings(mWindow, _("ADVANCED SETTINGS"));
 
 	// maximum vram
-	auto max_vram = std::make_shared<SliderComponent>(mWindow, 0.f, 2000.f, 10.f, "Mb");
+	auto max_vram = std::make_shared<SliderComponent>(mWindow, 40.f, 1000.f, 10.f, "Mb");
 	max_vram->setValue((float)(Settings::getInstance()->getInt("MaxVRAM")));
 	s->addWithLabel(_("VRAM LIMIT"), max_vram);
 	s->addSaveFunc([max_vram] { Settings::getInstance()->setInt("MaxVRAM", (int)Math::round(max_vram->getValue())); });
@@ -862,7 +922,7 @@ void GuiMenu::openOtherSettings()
 	modes.push_back("enhanced");
 	modes.push_back("instant");
 	for (auto it = modes.cbegin(); it != modes.cend(); it++)
-		power_saver->add(*it, *it, Settings::getInstance()->getString("PowerSaverMode") == *it);
+		power_saver->add(_(it->c_str()), *it, Settings::getInstance()->getString("PowerSaverMode") == *it);
 
 	s->addWithLabel(_("POWER SAVER MODES"), power_saver);
 	s->addSaveFunc([this, power_saver] {
@@ -896,12 +956,6 @@ void GuiMenu::openOtherSettings()
 	s->addWithLabel(_("SEARCH FOR LOCAL ART"), local_art);
 	s->addSaveFunc([local_art] { Settings::getInstance()->setBool("LocalArt", local_art->getState()); });
 #endif
-
-	// hidden files
-	auto hidden_files = std::make_shared<SwitchComponent>(mWindow);
-	hidden_files->setState(Settings::getInstance()->getBool("ShowHiddenFiles"));
-	s->addWithLabel(_("SHOW HIDDEN FILES"), hidden_files);
-	s->addSaveFunc([hidden_files] { Settings::getInstance()->setBool("ShowHiddenFiles", hidden_files->getState()); });
 
 #ifdef _RPI_
 	// Video Player - VideoOmxPlayer
@@ -970,6 +1024,32 @@ void GuiMenu::openOtherSettings()
 	s->addWithLabel(_("COMPLETE QUIT MENU"), fullExitMenu);
 	s->addSaveFunc([fullExitMenu] { Settings::getInstance()->setBool("ShowOnlyExit", !fullExitMenu->getState()); });
 #endif
+
+	// log level
+	auto logLevel = std::make_shared< OptionListComponent<std::string> >(mWindow, _("LOG LEVEL"), false);
+	std::vector<std::string> levels;
+	levels.push_back("default");
+	levels.push_back("disabled");
+	levels.push_back("warning");
+	levels.push_back("error");
+	levels.push_back("debug");
+
+	auto level = Settings::getInstance()->getString("LogLevel");
+	if (level.empty())
+		level = "default";
+
+	for (auto it = levels.cbegin(); it != levels.cend(); it++)
+		logLevel->add(_(it->c_str()), *it, level == *it);
+
+	s->addWithLabel(_("LOG LEVEL"), logLevel);
+	s->addSaveFunc([this, logLevel]
+	{
+		if (Settings::getInstance()->setString("LogLevel", logLevel->getSelected() == "default" ? "" : logLevel->getSelected()))
+		{
+			Log::setupReportingLevel();
+			Log::init();
+		}
+	});
 
 	s->updatePosition();
 	mWindow->pushGui(s);
@@ -1212,4 +1292,52 @@ std::vector<HelpPrompt> GuiMenu::getHelpPrompts()
 	prompts.push_back(HelpPrompt("a", _("SELECT")));
 	prompts.push_back(HelpPrompt("start", _("CLOSE")));
 	return prompts;
+}
+
+void GuiMenu::createInputTextRow(GuiSettings *gui, std::string title, const char *settingsID, bool password)
+{
+	auto theme = ThemeData::getMenuTheme();
+	std::shared_ptr<Font> font = theme->Text.font;
+	unsigned int color = theme->Text.color;
+
+	// LABEL
+	Window *window = mWindow;
+	ComponentListRow row;
+
+	auto lbl = std::make_shared<TextComponent>(window, title, font, color);
+	row.addElement(lbl, true); // label
+
+	std::shared_ptr<GuiComponent> ed;
+
+	std::string value = Settings::getInstance()->getString(settingsID);
+
+	ed = std::make_shared<TextComponent>(window, ((password && value != "") ? "*********" : value), font, color, ALIGN_RIGHT); // Font::get(FONT_SIZE_MEDIUM, FONT_PATH_LIGHT)
+	row.addElement(ed, true);
+
+	auto spacer = std::make_shared<GuiComponent>(mWindow);
+	spacer->setSize(Renderer::getScreenWidth() * 0.005f, 0);
+	row.addElement(spacer, false);
+
+	auto bracket = std::make_shared<ImageComponent>(mWindow);
+	bracket->setImage(theme->Icons.arrow);
+	bracket->setResize(Vector2f(0, lbl->getFont()->getLetterHeight()));
+	row.addElement(bracket, false);
+
+	auto updateVal = [ed, settingsID, password](const std::string &newVal) {
+		if (!password)
+			ed->setValue(newVal);
+		else {
+			ed->setValue("*********");
+		}
+
+		Settings::getInstance()->setString(settingsID, newVal);
+	}; // ok callback (apply new value to ed)
+
+	row.makeAcceptInputHandler([this, title, updateVal, settingsID]
+	{
+		std::string data = Settings::getInstance()->getString(settingsID);
+		mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, title, data, updateVal, false));
+	});
+
+	gui->addRow(row);
 }

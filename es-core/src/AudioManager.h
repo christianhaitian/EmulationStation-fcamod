@@ -29,7 +29,7 @@ public:
 
 	void playRandomMusic(bool continueIfPlaying = true);
 	void stopMusic();
-	void themeChanged(const std::shared_ptr<ThemeData>& theme);
+	void themeChanged(const std::shared_ptr<ThemeData>& theme, bool force=false);
 
 	void setSystemName(std::string name) {
 		mSystemName = name;

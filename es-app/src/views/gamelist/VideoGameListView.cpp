@@ -135,12 +135,12 @@ void VideoGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	BasicGameListView::onThemeChanged(theme);
 
 	using namespace ThemeFlags;
-	mMarquee.applyTheme(theme, getName(), "md_marquee", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);
+	mMarquee.applyTheme(theme, getName(), "md_marquee", ALL ^ (PATH));
 
 	if (theme->getElement(getName(), "md_image", "image"))
 	{
 		createImage();
-		mImage->applyTheme(theme, getName(), "md_image", POSITION | ThemeFlags::SIZE | Z_INDEX | ROTATION);
+		mImage->applyTheme(theme, getName(), "md_image", ALL ^ (PATH));
 	}
 	else if (mImage != nullptr)
 	{
@@ -149,7 +149,7 @@ void VideoGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 		mImage = nullptr;
 	}
 
-	mVideo->applyTheme(theme, getName(), "md_video", POSITION | ThemeFlags::SIZE | ThemeFlags::DELAY | Z_INDEX | ROTATION);
+	mVideo->applyTheme(theme, getName(), "md_video", ALL ^ (PATH));
 	mName.applyTheme(theme, getName(), "md_name", ALL);
 
 	initMDLabels();

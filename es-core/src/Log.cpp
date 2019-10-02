@@ -3,9 +3,18 @@
 #include "utils/FileSystemUtil.h"
 #include "platform.h"
 #include <iostream>
+#include <mutex>
+#include "Settings.h"
+
+#if WIN32
+#include <Windows.h>
+#endif
+
+static std::mutex mLogLock;
 
 LogLevel Log::reportingLevel = LogInfo;
-FILE* Log::file = NULL; //fopen(getLogPath().c_str(), "w");
+bool Log::dirty = false;
+FILE* Log::file = NULL;
 
 LogLevel Log::getReportingLevel()
 {
@@ -25,20 +34,44 @@ void Log::setReportingLevel(LogLevel level)
 
 void Log::init()
 {
+	std::unique_lock<std::mutex> lock(mLogLock);
+
+	if (file != NULL)
+		close();
+
+	if (Settings::getInstance()->getString("LogLevel") == "disabled")
+	{
+		remove(getLogPath().c_str());
+		return;
+	}
+
 	remove((getLogPath() + ".bak").c_str());
+
 	// rename previous log file
 	rename(getLogPath().c_str(), (getLogPath() + ".bak").c_str());
-	return;
-}
 
-void Log::open()
-{
 	file = fopen(getLogPath().c_str(), "w");
+	dirty = false;
 }
 
 std::ostringstream& Log::get(LogLevel level)
 {
-	os << "lvl" << level << ": \t";
+	switch (level)
+	{
+	case LogError:
+		os << "ERROR\t";
+		break;
+	case LogWarning:
+		os << "WARNING\t";
+		break;
+	case LogDebug:
+		os << "DEBUG\t";
+		break;
+	default:
+		os << "INFO\t";
+		break;
+	}
+
 	messageLevel = level;
 
 	return os;
@@ -46,36 +79,68 @@ std::ostringstream& Log::get(LogLevel level)
 
 void Log::flush()
 {
-	fflush(getOutput());
+	if (!dirty)
+		return;
+
+	if (file != nullptr)
+		fflush(file);
+
+	dirty = false;
 }
 
 void Log::close()
 {
-	fclose(file);
-	file = NULL;
-}
+	if (file != NULL)
+	{
+		fflush(file);
+		fclose(file);
+	}
 
-FILE* Log::getOutput()
-{
-	return file;
+	dirty = false;
+	file = NULL;
 }
 
 Log::~Log()
 {
-	os << std::endl;
+	std::unique_lock<std::mutex> lock(mLogLock);
 
-	if(getOutput() == NULL)
+	if (file != NULL)
 	{
-		// not open yet, print to stdout
-		std::cerr << "ERROR - tried to write to log file before it was open! The following won't be logged:\n";
-		std::cerr << os.str();
-		return;
+		os << std::endl;
+		fprintf(file, "%s", os.str().c_str());
+		dirty = true;
 	}
 
-	fprintf(getOutput(), "%s", os.str().c_str());
-
-	//if it's an error, also print to console
-	//print all messages if using --debug
-	if(messageLevel == LogError || reportingLevel >= LogDebug)
+	// If it's an error, also print to console
+	// print all messages if using --debug
+	if (messageLevel == LogError || reportingLevel >= LogDebug)
+	{
+#if WIN32
+		OutputDebugStringA(os.str().c_str());
+#else
 		fprintf(stderr, "%s", os.str().c_str());
+#endif
+	}
+}
+
+void Log::setupReportingLevel()
+{
+	LogLevel lvl = LogInfo;
+
+	if (Settings::getInstance()->getBool("Debug"))
+		lvl = LogDebug;
+	else
+	{
+		auto level = Settings::getInstance()->getString("LogLevel");
+		if (level == "debug")
+			lvl = LogDebug;
+		else if (level == "information")
+			lvl = LogInfo;
+		else if (level == "warning")
+			lvl = LogWarning;
+		else if (level == "error")
+			lvl = LogError;
+	}
+
+	setReportingLevel(lvl);
 }

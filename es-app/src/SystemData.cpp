@@ -23,7 +23,9 @@ std::vector<SystemData*> SystemData::sSystemVector;
 SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem) :
 	mName(name), mFullName(fullName), mEnvData(envData), mThemeFolder(themeFolder), mIsCollectionSystem(CollectionSystem), mIsGameSystem(true)
 {
-	mSortId = 0;
+	mGameCount = -1;
+	mSortId = Settings::getInstance()->getInt(getName() + ".sort"),
+
 	mGridSizeOverride = Vector2f(0, 0);
 	mViewModeChanged = false;
 	mFilterIndex = nullptr;// new FileFilterIndex();
@@ -48,8 +50,10 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 			
 		refactorGameFolders(this);
 
-		//StopWatch ws("sort " + mName);
-		mRootFolder->sort(FileSorts::SortTypes.at(0));
+		if (mSortId >= 0 && mSortId < FileSorts::SortTypes.size())
+			mRootFolder->sort(FileSorts::SortTypes.at(mSortId));
+		else
+			mRootFolder->sort(FileSorts::SortTypes.at(0));
 
 		//indexAllGameFilters(mRootFolder);
 	}
@@ -62,8 +66,6 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 	auto defaultView = Settings::getInstance()->getString(getName() + ".defaultView");
 	auto gridSizeOverride = Vector2f::parseString(Settings::getInstance()->getString(getName() + ".gridSize"));
 	setSystemViewMode(defaultView, gridSizeOverride, false);
-
-	mSortId = Settings::getInstance()->getInt(getName() + ".sort"),
 
 	setIsGameSystemStatus();
 	loadTheme();
@@ -700,9 +702,17 @@ FileData* SystemData::getRandomGame()
 	return list.at(target);
 }
 
-unsigned int SystemData::getDisplayedGameCount() const
+int SystemData::getDisplayedGameCount() 
 {
-	return (unsigned int)mRootFolder->getFilesRecursive(GAME, true).size();
+	if (mGameCount < 0)
+		mGameCount = mRootFolder->getFilesRecursive(GAME, true).size();
+
+	return mGameCount;
+}
+
+void SystemData::updateDisplayedGameCount()
+{
+	mGameCount =-1;
 }
 
 void SystemData::loadTheme()
@@ -736,4 +746,13 @@ void SystemData::setSortId(const unsigned int sortId)
 {
 	mSortId = sortId;
 	Settings::getInstance()->setInt(getName() + ".sort", mSortId);
+}
+
+void SystemData::deleteIndex()
+{
+	if (mFilterIndex != nullptr)
+	{
+		delete mFilterIndex;
+		mFilterIndex = nullptr;
+	}
 }

@@ -36,7 +36,8 @@ private:
 		OptionListComponent<T>* mParent;
 
 	public:
-		OptionListPopup(Window* window, OptionListComponent<T>* parent, const std::string& title) : GuiComponent(window),
+		OptionListPopup(Window* window, OptionListComponent<T>* parent, const std::string& title, 
+			const std::function<void(T& data, ComponentListRow& row)> callback = nullptr) : GuiComponent(window),
 			mMenu(window, title.c_str()), mParent(parent)
 		{
 			auto menuTheme = ThemeData::getMenuTheme();
@@ -51,39 +52,67 @@ private:
 			for(auto it = mParent->mEntries.begin(); it != mParent->mEntries.end(); it++)
 			{
 				row.elements.clear();
-				row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(it->name), font, color), true);
 
 				OptionListData& e = *it;
 
-				if(mParent->mMultiSelect)
+				if (callback != nullptr)
 				{
-					// add checkbox
-					auto checkbox = std::make_shared<ImageComponent>(mWindow);
-					checkbox->setImage(it->selected ? CHECKED_PATH : UNCHECKED_PATH);
-					checkbox->setResize(0, font->getLetterHeight());
-					row.addElement(checkbox, false);
+					callback(e.object, row);
 
-					// input handler
-					// update checkbox state & selected value
-					row.makeAcceptInputHandler([this, &e, checkbox]
+					if (!mParent->mMultiSelect)
 					{
-						e.selected = !e.selected;
-						checkbox->setImage(e.selected ? CHECKED_PATH : UNCHECKED_PATH);
-						mParent->onSelectedChanged();
-					});
+						row.makeAcceptInputHandler([this, &e]
+						{
+							e.selected = !e.selected;
+							mParent->onSelectedChanged();
+						});
+					}
+					else
+					{
+						row.makeAcceptInputHandler([this, &e]
+						{
+							mParent->mEntries.at(mParent->getSelectedId()).selected = false;
+							e.selected = true;
+							mParent->onSelectedChanged();
+							delete this;
+						});
+					}
+				}
+				else
+				{
+					row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(it->name), font, color), true);
 
-					// for select all/none
-					checkboxes.push_back(checkbox.get());
-				}else{
-					// input handler for non-multiselect
-					// update selected value and close
-					row.makeAcceptInputHandler([this, &e]
+					if (mParent->mMultiSelect)
 					{
-						mParent->mEntries.at(mParent->getSelectedId()).selected = false;
-						e.selected = true;
-						mParent->onSelectedChanged();
-						delete this;
-					});
+						// add checkbox
+						auto checkbox = std::make_shared<ImageComponent>(mWindow);
+						checkbox->setImage(it->selected ? CHECKED_PATH : UNCHECKED_PATH);
+						checkbox->setResize(0, font->getLetterHeight());
+						row.addElement(checkbox, false);
+
+						// input handler
+						// update checkbox state & selected value
+						row.makeAcceptInputHandler([this, &e, checkbox]
+						{
+							e.selected = !e.selected;
+							checkbox->setImage(e.selected ? CHECKED_PATH : UNCHECKED_PATH);
+							mParent->onSelectedChanged();
+						});
+
+						// for select all/none
+						checkboxes.push_back(checkbox.get());
+					}
+					else {
+						// input handler for non-multiselect
+						// update selected value and close
+						row.makeAcceptInputHandler([this, &e]
+						{
+							mParent->mEntries.at(mParent->getSelectedId()).selected = false;
+							e.selected = true;
+							mParent->onSelectedChanged();
+							delete this;
+						});
+					}
 				}
 
 				// also set cursor to this row if we're not multi-select and this row is selected
@@ -145,9 +174,10 @@ public:
 	{
 		auto theme = ThemeData::getMenuTheme();
 		
-	//	auto font = Font::get(FONT_SIZE_MEDIUM, FONT_PATH_LIGHT);
-		mText.setFont(theme->Text.font); // font
-		mText.setColor(theme->Text.color); // 0x777777FF
+		mAddRowCallback = nullptr;
+
+		mText.setFont(theme->Text.font);
+		mText.setColor(theme->Text.color);
 		mText.setHorizontalAlignment(ALIGN_CENTER);
 		addChild(&mText);
 
@@ -314,8 +344,19 @@ public:
 		mSelectedChangedCallback = callback;
 	}
 
+	void setRowTemplate(std::function<void(T& data, ComponentListRow& row)> callback)
+	{
+		mAddRowCallback = callback;
+	}
 
 private:
+	std::function<void(T& data, ComponentListRow& row)> mAddRowCallback;
+
+	void open()
+	{
+		mWindow->pushGui(new OptionListPopup(mWindow, this, mName, mAddRowCallback));
+	}
+
 	unsigned int getSelectedId()
 	{
 		assert(mMultiSelect == false);
@@ -328,12 +369,6 @@ private:
 		LOG(LogWarning) << "OptionListComponent::getSelectedId() - no selected element found, defaulting to 0";
 		return 0;
 	}
-
-	void open()
-	{
-		mWindow->pushGui(new OptionListPopup(mWindow, this, mName));
-	}
-
 
 	void onSelectedChanged()
 	{

@@ -758,7 +758,7 @@ void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowA
 		if (updateSelectedState)
 			tile->setSelected(false, allowAnimation);
 
-		tile->reset();
+		tile->resetImages();
 		tile->setVisible(false);
 	}
 	else
@@ -871,8 +871,7 @@ void ImageGridComponent<T>::buildTiles()
 			//	X--;
 
 			tile->setPosition(X * tileDistance.x() + startPosition.x(), Y * tileDistance.y() + startPosition.y());
-			tile->setOrigin(0.5f, 0.5f);
-			tile->reset();
+			tile->setOrigin(0.5f, 0.5f);			
 
 			if (mTheme)
 				tile->applyTheme(mTheme, mName, "gridtile", ThemeFlags::ALL);

@@ -33,6 +33,8 @@ public:
 	virtual void onShow() override;
 
 protected:
+	virtual std::vector<FileData*> getFileDataEntries() override;
+
 	virtual std::string getQuickSystemSelectRightButton() override;
 	virtual std::string getQuickSystemSelectLeftButton() override;
 	virtual void populateList(const std::vector<FileData*>& files) override;

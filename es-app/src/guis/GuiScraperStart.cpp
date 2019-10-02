@@ -7,31 +7,66 @@
 #include "views/ViewController.h"
 #include "FileData.h"
 #include "SystemData.h"
+#include "scrapers/ThreadedScraper.h"
 
 GuiScraperStart::GuiScraperStart(Window* window) : GuiComponent(window),
 	mMenu(window, _("SCRAPE NOW"))
 {
+	mOverwriteMedias = true;
+
 	addChild(&mMenu);
 
 	// add filters (with first one selected)
 	mFilters = std::make_shared< OptionListComponent<GameFilterFunc> >(mWindow, _("SCRAPE THESE GAMES"), false);
 	mFilters->add(_("All Games"),
 		[](SystemData*, FileData*) -> bool { return true; }, false);
-	mFilters->add(_("Only missing image"),
-		[](SystemData*, FileData* g) -> bool { return g->metadata.get("image").empty(); }, true);
+
+	mFilters->add(_("Only missing medias"), [this](SystemData*, FileData* g) -> bool 
+	{ 
+		mOverwriteMedias = false;
+
+		if (Settings::getInstance()->getString("Scraper") == "ScreenScraper")
+		{
+			if (!Settings::getInstance()->getString("ScrapperImageSrc").empty() && g->metadata.get("image").empty())
+				return true;
+
+			if (Settings::getInstance()->getString("ScrapperThumbSrc").empty() && g->metadata.get("thumbnail").empty())
+				return true;
+
+			if (Settings::getInstance()->getBool("ScrapeVideos") && g->metadata.get("video").empty())
+				return true;
+
+			if (Settings::getInstance()->getBool("ScrapeMarquee") && g->metadata.get("marquee").empty())
+				return true;
+
+			return false;
+		}
+		else
+			return g->metadata.get("image").empty();
+
+	}, true);
+
 	mMenu.addWithLabel(_("FILTER"), mFilters);
+
+	std::string currentSystem;
+
+	if (ViewController::get()->getState().viewing == ViewController::GAME_LIST)
+		currentSystem = ViewController::get()->getState().getSystem()->getName();
 
 	//add systems (all with a platformid specified selected)
 	mSystems = std::make_shared< OptionListComponent<SystemData*> >(mWindow, _("SCRAPE THESE SYSTEMS"), true);
 	for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
 	{
-		if(!(*it)->hasPlatformId(PlatformIds::PLATFORM_IGNORE))
-			mSystems->add((*it)->getFullName(), *it, !(*it)->getPlatformIds().empty());
+		if (!(*it)->hasPlatformId(PlatformIds::PLATFORM_IGNORE))
+			mSystems->add((*it)->getFullName(), *it,
+				currentSystem.empty() ?
+				!(*it)->getPlatformIds().empty() :
+				(*it)->getName() == currentSystem && !(*it)->getPlatformIds().empty());
 	}
 	mMenu.addWithLabel(_("SYSTEMS"), mSystems);
 
 	mApproveResults = std::make_shared<SwitchComponent>(mWindow);
-	mApproveResults->setState(true);
+	mApproveResults->setState(false);
 	mMenu.addWithLabel(_("USER DECIDES ON CONFLICTS"), mApproveResults);
 
 	mMenu.addButton(_("START"), _("START"), std::bind(&GuiScraperStart::pressedStart, this));
@@ -68,8 +103,26 @@ void GuiScraperStart::start()
 	}
 	else
 	{
-		GuiScraperMulti* gsm = new GuiScraperMulti(mWindow, searches, mApproveResults->getState());
-		mWindow->pushGui(gsm);
+		if (ThreadedScraper::isRunning())
+		{
+			Window* window = mWindow;
+
+			mWindow->pushGui(new GuiMsgBox(mWindow, _("SCRAPING IS RUNNING. DO YOU WANT TO STOP IT ?"), _("YES"), [this, window]
+			{
+				ThreadedScraper::stop();
+			}, _("NO"), nullptr));
+
+			return;
+		}
+
+		if (mApproveResults->getState())
+		{
+			GuiScraperMulti* gsm = new GuiScraperMulti(mWindow, searches, mApproveResults->getState());
+			mWindow->pushGui(gsm);
+		}
+		else
+			ThreadedScraper::start(mWindow, searches);
+
 		delete this;
 	}
 }
@@ -87,7 +140,8 @@ std::queue<ScraperSearchParams> GuiScraperStart::getSearches(std::vector<SystemD
 				ScraperSearchParams search;
 				search.game = *game;
 				search.system = *sys;
-				
+				search.overWriteMedias = mOverwriteMedias;
+
 				queue.push(search);
 			}
 		}

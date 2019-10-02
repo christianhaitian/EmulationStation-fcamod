@@ -226,3 +226,8 @@ std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()
 	}
 	return prompts;
 }
+
+std::vector<FileData*> BasicGameListView::getFileDataEntries()
+{
+	return mList.getObjects();
+}

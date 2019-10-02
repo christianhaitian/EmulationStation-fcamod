@@ -34,9 +34,8 @@ public:
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 
-	void startEditing();
-	void stopEditing();
-
+	void startEditing(); // batocera
+	void stopEditing(); // batocera
 private:
 
 	void onTextChanged();
@@ -63,6 +62,8 @@ private:
 
 	std::shared_ptr<Font> mFont;
 	std::unique_ptr<TextCache> mTextCache;
+
+	int mBlinkTime;
 };
 
 #endif // ES_CORE_COMPONENTS_TEXT_EDIT_COMPONENT_H

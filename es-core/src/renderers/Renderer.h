@@ -105,6 +105,8 @@ namespace Renderer
 
 	// GPI Case
 	bool         isSmallScreen();
+
+	unsigned int mixColors(unsigned int first, unsigned int second, float percent);
 } // Renderer::
 
 #endif // ES_CORE_RENDERER_RENDERER_H

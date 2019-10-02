@@ -34,9 +34,6 @@ public:
 	void setEdgeColor(unsigned int edgeColor); // Apply a color shift to the "edge" parts of the ninepatch.
 	void setCenterColor(unsigned int centerColor); // Apply a color shift to the "center" part of the ninepatch.
 
-	unsigned int getCenterColor() { return mCenterColor; };
-	unsigned int getEdgeColor() { return mEdgeColor; };
-
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties) override;
 
 	const Vector2f& getCornerSize() const;
@@ -53,10 +50,11 @@ private:
 
 	std::string mPath;
 	Vector2f mCornerSize;
-	Vector2f mPreviousSize;
 	unsigned int mEdgeColor;
 	unsigned int mCenterColor;
 	std::shared_ptr<TextureResource> mTexture;
+
+	Vector2f mPreviousSize;
 };
 
 #endif // ES_CORE_COMPONENTS_NINE_PATCH_COMPONENT_H

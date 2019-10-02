@@ -386,6 +386,7 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 {
 	std::vector<FileData*> ret;
 
+	bool flatFolders = Settings::getInstance()->getBool("FlatFolders");
 	bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles");
 	bool filterKidGame = false;
 
@@ -400,42 +401,59 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 
 	auto sys = CollectionSystemManager::get()->getSystemToView(mSystem);
 
-	FileFilterIndex* idx = sys->getIndex();
-	if (idx != nullptr && idx->isFiltered())
+	FileFilterIndex* idx = sys->getIndex(false);
+	if (idx != nullptr && !idx->isFiltered())
+		idx = nullptr;
+
+	std::vector<FileData*>* items = &mChildren;
+
+	std::vector<FileData*> flatGameList;
+	if (flatFolders)
 	{
-		for (auto it = mChildren.cbegin(); it != mChildren.cend(); it++)
-		{
-			if (idx->showFile((*it))) {
-				ret.push_back(*it);
-			}
-		}		
+		flatGameList = getFlatGameList(false, sys);
+		items = &flatGameList;
 	}
-	else
-	{		
-		bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles");
-		if (showHiddenFiles)
-			return mChildren;
-	
-		for (auto it = mChildren.cbegin(); it != mChildren.cend(); it++)
-		{
-			if (!showHiddenFiles && (*it)->getHidden())
-				continue;
 
-			if (filterKidGame && !(*it)->getKidGame())
-				continue;
+	for (auto it = items->cbegin(); it != items->cend(); it++)
+	{
+		if (idx != nullptr && !idx->showFile((*it)))
+			continue;
 
-			ret.push_back(*it);
-		}
+		if (!showHiddenFiles && (*it)->getHidden())
+			continue;
+
+		if (filterKidGame && !(*it)->getKidGame())
+			continue;
+
+		ret.push_back(*it);
 	}
 
 	return ret;
 }
 
-std::vector<FileData*> FolderData::getFilesRecursive(unsigned int typeMask, bool displayedOnly) const
+std::vector<FileData*> FolderData::getFlatGameList(bool displayedOnly, SystemData* system) const
+{
+	std::vector<FileData*> ret = getFilesRecursive(GAME, displayedOnly, system);
+
+	unsigned int currentSortId = system->getSortId();
+	if (currentSortId < 0 || currentSortId >FileSorts::SortTypes.size())
+		currentSortId = 0;
+
+	auto sort = FileSorts::SortTypes.at(currentSortId);
+
+	std::stable_sort(ret.begin(), ret.end(), sort.comparisonFunction);
+
+	if (!sort.ascending)
+		std::reverse(ret.begin(), ret.end());
+
+	return ret;
+}
+
+std::vector<FileData*> FolderData::getFilesRecursive(unsigned int typeMask, bool displayedOnly, SystemData* system) const
 {
 	std::vector<FileData*> out;
 
-	FileFilterIndex* idx = mSystem->getIndex();
+	FileFilterIndex* idx = (system != nullptr ? system : mSystem)->getIndex(false);
 
 	for (auto it = mChildren.cbegin(); it != mChildren.cend(); it++)
 	{
@@ -451,7 +469,7 @@ std::vector<FileData*> FolderData::getFilesRecursive(unsigned int typeMask, bool
 		FolderData* folder = (FolderData*)(*it);
 		if (folder->getChildren().size() > 0)
 		{
-			std::vector<FileData*> subchildren = folder->getFilesRecursive(typeMask, displayedOnly);
+			std::vector<FileData*> subchildren = folder->getFilesRecursive(typeMask, displayedOnly, system);
 			out.insert(out.cend(), subchildren.cbegin(), subchildren.cend());
 		}
 	}

@@ -26,6 +26,18 @@ enum MetaDataType
 	MD_PLIST
 };
 
+namespace MetaDataImportType
+{
+	enum Types : int
+	{
+		IMAGE = 1,
+		THUMB = 2,
+		VIDEO = 4,
+		MARQUEE = 8,
+		ALL = IMAGE | THUMB | VIDEO | MARQUEE
+	};
+}
+
 struct MetaDataDecl
 {
 	unsigned char id;
@@ -66,6 +78,8 @@ public:
 	inline MetaDataListType getType() const { return (MetaDataListType) mType; }
 	inline const std::vector<MetaDataDecl>& getMDD() const { return getMDDByType(getType()); }
 	const std::string& getName() const;
+
+	void importScrappedMetadata(const MetaDataList& source);
 
 private:
 	std::string		mName;

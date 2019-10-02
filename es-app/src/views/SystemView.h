@@ -44,6 +44,7 @@ struct SystemViewCarousel
 	Vector2f logoSize;
 	Vector2f logoPos;
 	float zIndex;
+	float systemInfoDelay;
 };
 
 class SystemView : public IList<SystemViewData, SystemData*>

@@ -7,9 +7,9 @@
 #include "PlatformId.h"
 #include "Settings.h"
 #include "SystemData.h"
-#include "EsLocale.h"
 #include <pugixml/src/pugixml.hpp>
 #include <cstring>
+#include "EsLocale.h"
 
 using namespace PlatformIds;
 
@@ -126,6 +126,7 @@ void screenscraper_generate_scraper_requests(const ScraperSearchParams& params,
 
 	ScreenScraperRequest::ScreenScraperConfig ssConfig;
 
+	// FCA Fix for names override not working on Retropie
 	if (params.nameOverride.length() == 0)
 	{
 		path = ssConfig.getGameSearchUrl(params.game->getFileName());
@@ -172,25 +173,23 @@ void ScreenScraperRequest::process(const std::unique_ptr<HttpReq>& req, std::vec
 {
 	assert(req->status() == HttpReq::REQ_SUCCESS);
 
-	std::string content = req->getContent();
+	auto content = req->getContent();
 
-	pugi::xml_document doc;	
+	pugi::xml_document doc;
 	pugi::xml_parse_result parseResult = doc.load(content.c_str());
 
 	if (!parseResult)
 	{
 		std::stringstream ss;
 		ss << "ScreenScraperRequest - Error parsing XML." << std::endl << parseResult.description() << "";
-
 		std::string err = ss.str();
-		setError(err);
-		LOG(LogError) << err;
+		//setError(err); Don't consider it an error -> Request is a success. Simply : Game is not found		
+		LOG(LogWarning) << err;
 
 		return;
 	}
 
 	processGame(doc, results);
-
 }
 
 pugi::xml_node ScreenScraperRequest::findMedia(pugi::xml_node media_list, std::vector<std::string> mediaNames, std::string region)
@@ -218,7 +217,7 @@ pugi::xml_node ScreenScraperRequest::findMedia(pugi::xml_node media_list, std::s
 
 	if (!results.size())
 		return art;
-	
+
 	// Region fallback: WOR(LD), US, CUS(TOM?), JP, EU
 	for (auto _region : std::vector<std::string>{ region, "wor", "us", "cus", "jp", "eu", "" })
 	{
@@ -243,7 +242,9 @@ std::vector<std::string> ScreenScraperRequest::getRipList(std::string imageSourc
 	std::vector<std::string> ripList;
 
 	if (imageSource == "ss")
-		ripList = { "ss", "mixrbv1", "mixrbv2", "box-2D", "box-3D" };
+		ripList = { "ss", "sstitle", "mixrbv1", "mixrbv2", "box-2D", "box-3D" };
+	else if (imageSource == "sstitle")
+		ripList = { "sstitle", "ss", "mixrbv1", "mixrbv2", "box-2D", "box-3D" };
 	else if (imageSource == "mixrbv1" || imageSource == "mixrbv2" || imageSource == "mixrbv")
 		ripList = { "mixrbv1", "mixrbv2", "ss", "box-3D", "box-2D" };
 	else if (imageSource == "box-2D")
@@ -265,13 +266,22 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 	{
 		ScraperSearchResult result;
 		ScreenScraperRequest::ScreenScraperConfig ssConfig;
-				
-		std::string region = Utils::String::toLower(ssConfig.region);
-		std::string language = Utils::String::toLower(EsLocale::getLanguage());		
-		if (language != "EN")
-			region = "eu";
 
-		// ssConfig.language
+		std::string region = Utils::String::toLower(ssConfig.region);
+
+		std::string language = Utils::String::toLower(EsLocale::getLanguage());
+		if (language.empty())
+			language = "en";
+		else
+		{
+			auto shortNameDivider = language.find("_");
+			if (shortNameDivider != std::string::npos)
+			{
+				region = Utils::String::toLower(language.substr(shortNameDivider + 1));
+				language = Utils::String::toLower(language.substr(0, shortNameDivider));
+			}
+		}
+
 		// Name fallback: US, WOR(LD). ( Xpath: Data/jeu[0]/noms/nom[*] ). 
 		result.mdl.set("name", find_child_by_attribute_list(game.child("noms"), "nom", "region", { region, "wor", "us" , "ss", "eu", "jp" }).text().get());
 
@@ -350,8 +360,8 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 				else
 					LOG(LogDebug) << "Failed to find media XML node for image";
 			}
-			
-			if (!Settings::getInstance()->getString("ScrapperThumbSrc").empty() && 
+
+			if (!Settings::getInstance()->getString("ScrapperThumbSrc").empty() &&
 				Settings::getInstance()->getString("ScrapperThumbSrc") != Settings::getInstance()->getString("ScrapperImageSrc"))
 			{
 				ripList = getRipList(Settings::getInstance()->getString("ScrapperThumbSrc"));
@@ -360,8 +370,6 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 					pugi::xml_node art = findMedia(media_list, ripList, region);
 					if (art)
 					{
-						// Sending a 'softname' containing space will make the image URLs returned by the API also contain the space. 
-						//  Escape any spaces in the URL here
 						// Ask for the same image, but with a smaller size, for the thumbnail displayed during scraping
 						result.thumbnailUrl = Utils::String::replace(art.text().get(), " ", "%20");
 					}
@@ -370,19 +378,24 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 				}
 			}
 
+			if (Settings::getInstance()->getBool("ScrapeMarquee"))
+			{
+				pugi::xml_node art = findMedia(media_list, "marquee", region);
+				if (art)
+					result.marqueeUrl = Utils::String::replace(art.text().get(), " ", "%20");
+				else
+					LOG(LogDebug) << "Failed to find media XML node for video";
+			}
+
 			if (Settings::getInstance()->getBool("ScrapeVideos"))
 			{
 				pugi::xml_node art = findMedia(media_list, "video", region);
 				if (art)
-				{
-					// Sending a 'softname' containing space will make the image URLs returned by the API also contain the space. 
-					//  Escape any spaces in the URL here
-					// Ask for the same image, but with a smaller size, for the thumbnail displayed during scraping
 					result.videoUrl = Utils::String::replace(art.text().get(), " ", "%20");
-				}
 				else
 					LOG(LogDebug) << "Failed to find media XML node for video";
 			}
+
 		}
 
 		out_results.push_back(result);
@@ -423,11 +436,18 @@ void ScreenScraperRequest::processList(const pugi::xml_document& xmldoc, std::ve
 
 std::string ScreenScraperRequest::ScreenScraperConfig::getGameSearchUrl(const std::string gameName) const
 {
-	return API_URL_BASE
+	std::string ret =  API_URL_BASE
 		+ "/jeuInfos.php?devid=" + Utils::String::scramble(API_DEV_U, API_DEV_KEY)
 		+ "&devpassword=" + Utils::String::scramble(API_DEV_P, API_DEV_KEY)
 		+ "&softname=" + HttpReq::urlEncode(API_SOFT_NAME)
 		+ "&output=xml"
 		+ "&romnom=" + HttpReq::urlEncode(gameName);
 
+	std::string user = Settings::getInstance()->getString("ScreenScraperUser");
+	std::string pass = Settings::getInstance()->getString("ScreenScraperPass");
+
+	if (!user.empty() && !pass.empty())
+		ret = ret + "&ssid=" + HttpReq::urlEncode(user) + "&sspassword=" + HttpReq::urlEncode(pass);
+
+	return ret;
 }

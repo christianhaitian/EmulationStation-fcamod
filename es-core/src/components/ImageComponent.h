@@ -6,6 +6,7 @@
 #include "math/Vector2i.h"
 #include "GuiComponent.h"
 #include "resources/TextureResource.h"
+#include "resources/Font.h" 
 
 class ImageComponent : public GuiComponent
 {
@@ -98,6 +99,11 @@ public:
 		return MaxSizeInfo(mTargetSize, mTargetIsMax);		
 	};
 
+	void setPadding(const Vector4f padding) { mPadding = padding; updateVertices(); }
+
+	void setHorizontalAlignment(Alignment align) { mHorizontalAlignment = align; }
+	void setVerticalAlignment(Alignment align) { mVerticalAlignment = align; }
+
 private:
 	Vector2f mTargetSize;
 
@@ -135,9 +141,14 @@ private:
 	Vector2f mBottomRightCrop;	
 
 	Vector2f mMirror;
+	bool     mReflectOnBorders;
 
 	std::string mPath;
 	std::shared_ptr<TextureResource> mLoadingTexture;
+
+	Vector4f	mPadding;
+	Alignment mHorizontalAlignment;
+	Alignment mVerticalAlignment;
 };
 
 #endif // ES_CORE_COMPONENTS_IMAGE_COMPONENT_H

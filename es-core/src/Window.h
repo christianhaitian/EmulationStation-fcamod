@@ -7,6 +7,7 @@
 #include "Settings.h"
 
 #include <memory>
+#include <functional>
 
 class FileData;
 class Font;
@@ -17,6 +18,7 @@ class InputConfig;
 class TextCache;
 class Transform4x4f;
 class TextureResource;
+class AsyncNotificationComponent;
 
 struct HelpStyle;
 
@@ -76,14 +78,31 @@ public:
 	void setHelpPrompts(const std::vector<HelpPrompt>& prompts, const HelpStyle& style);
 
 	void setScreenSaver(ScreenSaver* screenSaver) { mScreenSaver = screenSaver; }
-	void setInfoPopup(InfoPopup* infoPopup) { delete mInfoPopup; mInfoPopup = infoPopup; }
+//	void setInfoPopup(InfoPopup* infoPopup) { delete mInfoPopup; mInfoPopup = infoPopup; }
 	inline void stopInfoPopup() { if (mInfoPopup) mInfoPopup->stop(); };
 
 	void startScreenSaver();
 	bool cancelScreenSaver();
 	void renderScreenSaver();
 
+	void displayNotificationMessage(std::string message, int duration = -1);
+
+	void registerNotificationComponent(AsyncNotificationComponent* pc);
+	void unRegisterNotificationComponent(AsyncNotificationComponent* pc);
+
+	void postToUiThread(const std::function<void(Window*)>& func);
+
 private:
+	void processPostedFunctions();
+
+	void renderRegisteredNotificationComponents(const Transform4x4f& trans);
+	std::vector<AsyncNotificationComponent*> mAsyncNotificationComponent;
+	std::vector<std::function<void(Window*)>> mFunctions;
+
+	typedef std::pair<std::string, int> NotificationMessage;
+	std::vector<NotificationMessage> mNotificationMessages;
+	void processNotificationMessages();
+
 	void onSleep();
 	void onWake();
 

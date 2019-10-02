@@ -5,14 +5,21 @@
 #include "ThemeData.h"
 
 NinePatchComponent::NinePatchComponent(Window* window, const std::string& path, unsigned int edgeColor, unsigned int centerColor) : GuiComponent(window),
-	mCornerSize(16, 16),
-	mEdgeColor(edgeColor), mCenterColor(centerColor),
-	mPath(path),
-	mVertices(NULL)
+mCornerSize(16, 16),
+mEdgeColor(edgeColor), mCenterColor(centerColor),
+mVertices(NULL)
 {
 	mPreviousSize = Vector2f(0, 0);
-	if(!mPath.empty())
-		buildVertices();
+	setImagePath(path);
+}
+
+void NinePatchComponent::setOpacity(unsigned char opacity)
+{
+	if (mOpacity == opacity)
+		return;
+
+	mOpacity = opacity;
+	updateColors();
 }
 
 NinePatchComponent::~NinePatchComponent()
@@ -35,24 +42,16 @@ void NinePatchComponent::updateColors()
 		mVertices[i].col = edgeColor;
 
 	for (int i = 6 * 4; i < 6; ++i)
-		mVertices[(6 * 4) + i].col = mCenterColor;
-}
-
-void NinePatchComponent::setOpacity(unsigned char opacity)
-{
-	if (mOpacity == opacity)
-		return;
-
-	mOpacity = opacity;
-	updateColors();
+		mVertices[(6 * 4) + i].col = centerColor;
 }
 
 void NinePatchComponent::buildVertices()
 {
+	if (mTexture == nullptr)
+		return;
+
 	if (mVertices != NULL)
 		delete[] mVertices;
-
-	mTexture = TextureResource::get(mPath);
 
 	if (mTexture->getSize() == Vector2i::Zero())
 	{
@@ -64,6 +63,8 @@ void NinePatchComponent::buildVertices()
 	mVertices = new Renderer::Vertex[6 * 9];
 
 	const Vector2f texSize = Vector2f((float)mTexture->getSize().x(), (float)mTexture->getSize().y());
+	if (texSize.x() <= 0 || texSize.y() <= 0)
+		return;
 
 	const float imgSizeX[3] = { mCornerSize.x(), mSize.x() - mCornerSize.x() * 2, mCornerSize.x() };
 	const float imgSizeY[3] = { mCornerSize.y(), mSize.y() - mCornerSize.y() * 2, mCornerSize.y() };
@@ -71,10 +72,10 @@ void NinePatchComponent::buildVertices()
 	const float imgPosY[3] = { 0, imgSizeY[0], imgSizeY[0] + imgSizeY[1] };
 
 	//the "1 +" in posY and "-" in sizeY is to deal with texture coordinates having a bottom left corner origin vs. verticies having a top left origin
-	const float texSizeX[3] = {  mCornerSize.x() / texSize.x(),  (texSize.x() - mCornerSize.x() * 2) / texSize.x(),  mCornerSize.x() / texSize.x() };
+	const float texSizeX[3] = { mCornerSize.x() / texSize.x(),  (texSize.x() - mCornerSize.x() * 2) / texSize.x(),  mCornerSize.x() / texSize.x() };
 	const float texSizeY[3] = { -mCornerSize.y() / texSize.y(), -(texSize.y() - mCornerSize.y() * 2) / texSize.y(), -mCornerSize.y() / texSize.y() };
-	const float texPosX[3]  = {  0,     texSizeX[0],     texSizeX[0] + texSizeX[1] };
-	const float texPosY[3]  = {  1, 1 + texSizeY[0], 1 + texSizeY[0] + texSizeY[1] };
+	const float texPosX[3] = { 0,     texSizeX[0],     texSizeX[0] + texSizeX[1] };
+	const float texPosY[3] = { 1, 1 + texSizeY[0], 1 + texSizeY[0] + texSizeY[1] };
 
 	int v = 0;
 	for (int slice = 0; slice < 9; slice++)
@@ -92,7 +93,7 @@ void NinePatchComponent::buildVertices()
 		mVertices[v + 4] = { { imgPos.x() + imgSize.x(), imgPos.y() + imgSize.y() }, { texPos.x() + texSize.x(), texPos.y() + texSize.y() }, 0 };
 
 		// round vertices
-		for(int i = 1; i < 5; ++i)
+		for (int i = 1; i < 5; ++i)
 			mVertices[v + i].pos.round();
 
 		// make duplicates of first and last vertex so this can be rendered as a triangle strip
@@ -107,17 +108,26 @@ void NinePatchComponent::buildVertices()
 
 void NinePatchComponent::render(const Transform4x4f& parentTrans)
 {
-	if (!isVisible())
+	if (!isVisible() || mTexture == nullptr || mVertices == nullptr)
 		return;
 
 	Transform4x4f trans = parentTrans * getTransform();
+	if (!Renderer::isVisibleOnScreen(trans.translation().x(), trans.translation().y(), mSize.x(), mSize.y()))
+		return;
 
-	if (mTexture && mVertices != NULL)
+	if (mCornerSize.x() == 0 && mCornerSize.y() == 0)
+	{
+		float opacity = mOpacity / 255.0;
+		const unsigned int edgeColor = mEdgeColor & 0xFFFFFF00 | (unsigned char)((mEdgeColor & 0xFF) * opacity);
+
+		Renderer::setMatrix(trans);
+		Renderer::drawRect(0.0, 0.0, mSize.x(), mSize.y(), edgeColor, edgeColor);
+	}
+	else if (mTexture->bind())
 	{
 		Renderer::setMatrix(trans);
-
-		mTexture->bind();
 		Renderer::drawTriangleStrips(&mVertices[0], 6 * 9);
+		Renderer::bindTexture(0);
 	}
 
 	renderChildren(trans);
@@ -154,7 +164,7 @@ void NinePatchComponent::fitTo(Vector2f size, Vector3f position, Vector2f paddin
 
 	setSize(size + mCornerSize * 2);
 	setPosition(position.x() + Math::lerp(-mCornerSize.x(), mCornerSize.x(), mOrigin.x()),
-				position.y() + Math::lerp(-mCornerSize.y(), mCornerSize.y(), mOrigin.y()));
+		position.y() + Math::lerp(-mCornerSize.y(), mCornerSize.y(), mOrigin.y()));
 }
 
 void NinePatchComponent::setImagePath(const std::string& path)
@@ -163,7 +173,7 @@ void NinePatchComponent::setImagePath(const std::string& path)
 		return;
 
 	mPath = path;
-	mTexture = nullptr;
+	mTexture = TextureResource::get(mPath);
 	buildVertices();
 }
 
@@ -197,7 +207,7 @@ void NinePatchComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, con
 
 	if (properties & PATH && elem->has("path"))
 		setImagePath(elem->get<std::string>("path"));
-	
+
 	if (properties & COLOR)
 	{
 		if (elem->has("color"))
@@ -205,7 +215,7 @@ void NinePatchComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, con
 			setCenterColor(elem->get<unsigned int>("color"));
 			setEdgeColor(elem->get<unsigned int>("color"));
 		}
-		
+
 		if (elem->has("centerColor"))
 			setCenterColor(elem->get<unsigned int>("centerColor"));
 

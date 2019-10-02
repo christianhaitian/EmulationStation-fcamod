@@ -4,7 +4,6 @@
 
 #include "resources/Font.h"
 #include "GuiComponent.h"
-#include "math/Vector4f.h"
 
 class ThemeData;
 
@@ -21,12 +20,12 @@ public:
 		Vector3f pos = Vector3f::Zero(), Vector2f size = Vector2f::Zero(), unsigned int bgcolor = 0x00000000);
 
 	void setFont(const std::shared_ptr<Font>& font);
+	void setFont(std::string path, int size);
 	void setUppercase(bool uppercase);
 	void onSizeChanged() override;
-
-	std::string getText() { return mText; }
+	const std::string getText() { return mText; }
 	void setText(const std::string& text);
-	virtual void setColor(unsigned int color);
+	void setColor(unsigned int color);
 	void setHorizontalAlignment(Alignment align);
 	void setVerticalAlignment(Alignment align);
 	void setLineSpacing(float spacing);
@@ -38,7 +37,6 @@ public:
 	std::string getValue() const override;
 	void setValue(const std::string& value) override;
 
-	unsigned char getOpacity() const override;
 	void setOpacity(unsigned char opacity) override;
 
 	inline std::shared_ptr<Font> getFont() const { return mFont; }
@@ -47,8 +45,8 @@ public:
 
 	void setGlowColor(unsigned int color) { mGlowColor = color; };
 	void setGlowSize(unsigned int size) { mGlowSize = size; };
-	
-	void setFont(std::string path, int size);
+
+	void setPadding(const Vector4f padding) { mPadding = padding; }
 
 protected:
 	virtual void onTextChanged();
@@ -58,13 +56,13 @@ protected:
 
 private:
 	void calculateExtent();
+	void renderSingleGlow(const Transform4x4f& parentTrans, float yOff, float x, float y);
 
 	void onColorChanged();
 
 	unsigned int mColor;
 	unsigned int mBgColor;
-	unsigned char mColorOpacity;
-	unsigned char mBgColorOpacity;
+
 	bool mRenderBackground;
 
 	bool mUppercase;
@@ -76,6 +74,7 @@ private:
 
 	unsigned int mGlowColor;
 	unsigned int mGlowSize;
+	Vector2f	 mGlowOffset;
 	Vector4f	mPadding;
 };
 
