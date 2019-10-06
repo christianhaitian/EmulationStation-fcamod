@@ -27,6 +27,7 @@ enum ImageSource
 struct ImageGridData
 {
 	std::string texturePath;
+	std::string marqueePath;
 	std::string videoPath;
 };
 
@@ -52,7 +53,7 @@ public:
 
 	ImageGridComponent(Window* window);
 
-	void add(const std::string& name, const std::string& imagePath, const std::string& videoPath, const T& obj);
+	void add(const std::string& name, const std::string& imagePath, const std::string& videoPath, const std::string& marqueePath, const T& obj);
 
 	bool input(InputConfig* config, Input input) override;
 	void update(int deltaTime) override;
@@ -160,13 +161,14 @@ ImageGridComponent<T>::ImageGridComponent(Window* window) : IList<ImageGridData,
 }
 
 template<typename T>
-void ImageGridComponent<T>::add(const std::string& name, const std::string& imagePath, const std::string& videoPath, const T& obj)
+void ImageGridComponent<T>::add(const std::string& name, const std::string& imagePath, const std::string& videoPath, const std::string& marqueePath, const T& obj)
 {
 	typename IList<ImageGridData, T>::Entry entry;
 	entry.name = name;
 	entry.object = obj;
 	entry.data.texturePath = imagePath;
 	entry.data.videoPath = videoPath;
+	entry.data.marqueePath = marqueePath;
 
 	static_cast<IList< ImageGridData, T >*>(this)->add(entry);
 	mEntriesDirty = true;
@@ -691,6 +693,7 @@ void ImageGridComponent<T>::updateTiles(bool allowAnimation, bool updateSelected
 			tile->setSelected(false, allowAnimation);
 			tile->setLabel("");
 			tile->setImage(mDefaultGameTexture);
+			tile->setMarquee("");
 			tile->setVisible(false);
 		}
 		return;
@@ -777,11 +780,20 @@ void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowA
 		else
 			tile->setImage(mDefaultGameTexture);		
 		
+		// Marquee
+		std::string marqueePath = mEntries.at(imgPos).data.marqueePath;
+
+		if (!marqueePath.empty() && ResourceManager::getInstance()->fileExists(marqueePath))
+			tile->setMarquee(marqueePath);
+		else
+			tile->setMarquee("");
+
+		// Video
 		if (mAllowVideo && imgPos == mCursor)
 		{			
 			std::string videoPath = mEntries.at(imgPos).data.videoPath;
 
-			if (ResourceManager::getInstance()->fileExists(videoPath))
+			if (!videoPath.empty() && ResourceManager::getInstance()->fileExists(videoPath))
 				tile->setVideo(videoPath, mVideoDelay);
 			else if (mEntries.at(imgPos).object->getType() == 2)
 				tile->setVideo("");
