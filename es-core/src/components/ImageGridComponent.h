@@ -699,12 +699,12 @@ void ImageGridComponent<T>::updateTiles(bool allowAnimation, bool updateSelected
 		return;
 	}
 
-	// Temporary store previous texture so they can't be unloaded
+	// Temporary store previous texture so they can't be unloaded - avoids flickering & reloading
 	std::vector<std::shared_ptr<TextureResource>> previousTextures;
 	for (int ti = 0; ti < (int)mTiles.size(); ti++)
 	{
-		std::shared_ptr<GridTileComponent> tile = mTiles.at(ti);
-		previousTextures.push_back(tile->getTexture());
+		previousTextures.push_back(mTiles.at(ti)->getTexture(true));
+		previousTextures.push_back(mTiles.at(ti)->getTexture(false));
 	}
 
 	int i = 0;
@@ -717,6 +717,24 @@ void ImageGridComponent<T>::updateTiles(bool allowAnimation, bool updateSelected
 	{
 		updateTileAtPos(i, img, allowAnimation, updateSelectedState);
 		i++; img++;
+	}
+	
+	// Collect new textures
+	std::vector<std::shared_ptr<TextureResource>> newTextures;
+	for (int ti = 0; ti < (int)mTiles.size(); ti++)
+	{
+		newTextures.push_back(mTiles.at(ti)->getTexture(true));
+		newTextures.push_back(mTiles.at(ti)->getTexture(false));
+	}
+
+	// Compare old texture with new textures -> Remove missing from async queue if existing
+	for (auto tex : previousTextures)
+	{
+		if (tex == nullptr)
+			continue;
+
+		if (std::find(newTextures.cbegin(), newTextures.cend(), tex) == newTextures.cend())
+			TextureResource::cancelAsync(tex);
 	}
 
 	if (updateSelectedState)
