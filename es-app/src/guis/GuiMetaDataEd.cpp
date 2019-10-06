@@ -325,6 +325,8 @@ void GuiMetaDataEd::save()
 
 void GuiMetaDataEd::fetch()
 {
+	mScraperParams.nameOverride = mScraperParams.game->getName();
+
 	GuiGameScraper* scr = new GuiGameScraper(mWindow, mScraperParams, std::bind(&GuiMetaDataEd::fetchDone, this, std::placeholders::_1));
 	mWindow->pushGui(scr);
 }
@@ -335,6 +337,11 @@ void GuiMetaDataEd::fetchDone(const ScraperSearchResult& result)
 	{
 		auto val = mEditors.at(i)->getValue();
 		auto key = mEditors.at(i)->getTag();		
+
+		// Don't override favorite & hidden values, as they are not statistics
+		if (key == "favorite" || key == "hidden")
+			continue;
+
 		mEditors.at(i)->setValue(result.mdl.get(key));
 	}
 }
