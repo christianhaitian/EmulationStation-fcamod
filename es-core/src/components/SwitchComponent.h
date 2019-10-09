@@ -25,11 +25,17 @@ public:
 
 	void setColor(unsigned int color);
 
+	inline void setOnChangedCallback(const std::function<void()>& callback) {
+		mOnChangedCallback = callback;
+	}
+
 private:
 	void onStateChanged();
 
 	ImageComponent mImage;
 	bool mState;
+
+	std::function<void()> mOnChangedCallback; // batocera
 };
 
 #endif // ES_CORE_COMPONENTS_SWITCH_COMPONENT_H
