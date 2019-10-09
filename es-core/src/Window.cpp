@@ -108,7 +108,16 @@ bool Window::init(bool initRenderer)
 	return true;
 }
 
-void Window::deinit(bool deinitRenderer)
+void Window::reactivateGui()
+{
+	for (auto i = mGuiStack.cbegin(); i != mGuiStack.cend(); i++)
+		(*i)->onShow();
+
+	if (peekGui())
+		peekGui()->updateHelpPrompts();
+}
+
+void Window::deinit()
 {
 	// Hide all GUI elements on uninitialisation - this disable
 	for(auto i = mGuiStack.cbegin(); i != mGuiStack.cend(); i++)
@@ -142,10 +151,9 @@ void Window::input(InputConfig* config, Input input)
 			{
 				if(config->isMappedLike("right", input) || config->isMappedTo("select", input))
 				{
-					if (input.value != 0) {
-						// handle screensaver control
+					if (input.value != 0) // handle screensaver control
 						mScreenSaver->nextVideo();
-					}
+					
 					return;
 				}
 				else if(config->isMappedTo("start", input) && input.value != 0)

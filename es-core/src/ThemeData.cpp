@@ -60,6 +60,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "folderImage", PATH },
 		{ "showVideoAtDelay", FLOAT },		
 		{ "scrollDirection", STRING },
+		{ "scrollSound", PATH },
 		{ "centerSelection", BOOLEAN },
 		{ "scrollLoop", BOOLEAN } } },
 	{ "gridtile", {
