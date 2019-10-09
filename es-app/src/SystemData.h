@@ -13,6 +13,7 @@
 #include <unordered_map>
 
 #include "FileFilterIndex.h"
+#include "Settings.h"
 
 class FileData;
 class FolderData;
@@ -28,6 +29,8 @@ struct EmulatorData
 
 struct SystemEnvironmentData
 {
+	std::string mSystemName;
+
 	std::string mStartPath;
 	std::vector<std::string> mSearchExtensions;
 	std::string mLaunchCommand;
@@ -52,6 +55,12 @@ struct SystemEnvironmentData
 
 	std::string getDefaultEmulator()
 	{
+		std::string currentEmul = Settings::getInstance()->getString(mSystemName + ".emulator");
+
+		for (auto& emulator : mEmulators)
+			if (currentEmul == emulator.mName)
+				return emulator.mName;
+
 		for (auto& emulator : mEmulators)
 			return emulator.mName;
 
@@ -60,10 +69,16 @@ struct SystemEnvironmentData
 
 	std::string getDefaultCore(std::string emulatorName)
 	{
+		std::string currentCore = Settings::getInstance()->getString(mSystemName + ".core");
+
 		for (auto& emulator : mEmulators)
 		{
 			if (emulatorName == emulator.mName)
 			{
+				for (auto core : emulator.mCores)
+					if (core == currentCore)
+						return core;
+
 				for (auto core : emulator.mCores)
 					return core;
 			}

@@ -5,6 +5,7 @@
 #include "GuiComponent.h"
 #include "Log.h"
 #include "Window.h"
+#include "EsLocale.h"
 
 //Used to display a list of options.
 //Can select one or multiple options.
@@ -375,9 +376,15 @@ private:
 		if(mMultiSelect)
 		{
 			// display # selected
-			std::stringstream ss;
-			ss << getSelectedObjects().size() << " SELECTED";
-			mText.setText(ss.str());
+
+			
+
+			char strbuf[256];
+			int x = getSelectedObjects().size();
+			snprintf(strbuf, 256, EsLocale::nGetText("%i SELECTED", "%i SELECTED", x).c_str(), x);
+			mText.setText(strbuf);
+
+
 			mText.setSize(0, mText.getSize().y());
 			setSize(mText.getSize().x() + mRightArrow.getSize().x() + 24, mText.getSize().y());
 			if(mParent) // hack since theres no "on child size changed" callback atm...

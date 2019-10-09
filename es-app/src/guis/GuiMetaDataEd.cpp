@@ -89,7 +89,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 			else
 				emul_choice->add(_("DEFAULT") + " (" + defaultEmul + ")", "", currentEmul.length() == 0);
 
-			for (auto core : file->getSystemEnvData()->mEmulators)
+			for (auto core : file->getSystem()->getSystemEnvData()->mEmulators)
 				emul_choice->add(core.mName, core.mName, core.mName == currentEmul);
 
 			row.addElement(std::make_shared<TextComponent>(mWindow, _("EMULATOR"), theme->Text.font, theme->Text.color), true);

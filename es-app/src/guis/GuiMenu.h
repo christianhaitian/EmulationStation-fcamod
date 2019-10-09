@@ -7,6 +7,7 @@
 #include "GuiComponent.h"
 
 class GuiSettings;
+class SystemData;
 
 class GuiMenu : public GuiComponent
 {
@@ -31,6 +32,8 @@ private:
 	void openSoundSettings();
 	void openUISettings();
 	void openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListComponent<std::string>> theme_set);
+	void openEmulatorSettings();
+	void openSystemEmulatorSettings(SystemData* system);
 
 	void createInputTextRow(GuiSettings *gui, std::string title, const char *settingsID, bool password);
 

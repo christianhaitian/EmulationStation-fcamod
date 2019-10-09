@@ -11,7 +11,7 @@ GuiVideoScreensaverOptions::GuiVideoScreensaverOptions(Window* window, const cha
 	// timeout to swap videos
 	auto swap = std::make_shared<SliderComponent>(mWindow, 10.f, 1000.f, 1.f, "s");
 	swap->setValue((float)(Settings::getInstance()->getInt("ScreenSaverSwapVideoTimeout") / (1000)));
-	addWithLabel("SWAP VIDEO AFTER (SECS)", swap);
+	addWithLabel(_("SWAP VIDEO AFTER (SECS)"), swap);
 	addSaveFunc([swap] {
 		int playNextTimeout = (int)Math::round(swap->getValue()) * (1000);
 		Settings::getInstance()->setInt("ScreenSaverSwapVideoTimeout", playNextTimeout);
@@ -22,7 +22,7 @@ GuiVideoScreensaverOptions::GuiVideoScreensaverOptions(Window* window, const cha
 #ifdef _RPI_
 	auto ss_omx = std::make_shared<SwitchComponent>(mWindow);
 	ss_omx->setState(Settings::getInstance()->getBool("ScreenSaverOmxPlayer"));
-	addWithLabel("USE OMX PLAYER FOR SCREENSAVER", ss_omx);
+	addWithLabel(_("USE OMX PLAYER FOR SCREENSAVER"), ss_omx);
 	addSaveFunc([ss_omx, this] { Settings::getInstance()->setBool("ScreenSaverOmxPlayer", ss_omx->getState()); });
 
 	ss_omx->setOnChangedCallback([this, ss_omx, window]()
@@ -37,14 +37,14 @@ GuiVideoScreensaverOptions::GuiVideoScreensaverOptions(Window* window, const cha
 #endif
 
 	// Render Video Game Name as subtitles
-	auto ss_info = std::make_shared< OptionListComponent<std::string> >(mWindow, "SHOW GAME INFO", false);
+	auto ss_info = std::make_shared< OptionListComponent<std::string> >(mWindow, _("SHOW GAME INFO"), false);
 	std::vector<std::string> info_type;
 	info_type.push_back("always");
 	info_type.push_back("start & end");
 	info_type.push_back("never");
 	for(auto it = info_type.cbegin(); it != info_type.cend(); it++)
-		ss_info->add(*it, *it, Settings::getInstance()->getString("ScreenSaverGameInfo") == *it);
-	addWithLabel("SHOW GAME INFO ON SCREENSAVER", ss_info);
+		ss_info->add(_(it->c_str()), *it, Settings::getInstance()->getString("ScreenSaverGameInfo") == *it);
+	addWithLabel(_("SHOW GAME INFO"), ss_info);
 	addSaveFunc([ss_info, this] { Settings::getInstance()->setString("ScreenSaverGameInfo", ss_info->getSelected()); });
 
 
@@ -60,11 +60,12 @@ GuiVideoScreensaverOptions::GuiVideoScreensaverOptions(Window* window, const cha
 		marquee_screensaver->setState(Settings::getInstance()->getBool("ScreenSaverMarquee"));
 		addWithLabel(_("USE MARQUEE AS GAME INFO"), marquee_screensaver);
 		addSaveFunc([marquee_screensaver] { Settings::getInstance()->setBool("ScreenSaverMarquee", marquee_screensaver->getState()); });
-
+/*
 		auto decoration_screensaver = std::make_shared<SwitchComponent>(mWindow);
 		decoration_screensaver->setState(Settings::getInstance()->getBool("ScreenSaverDecoration"));
 		addWithLabel(_("USE RANDOM DECORATION"), decoration_screensaver);
 		addSaveFunc([decoration_screensaver] { Settings::getInstance()->setBool("ScreenSaverDecoration", decoration_screensaver->getState()); });
+*/
 	}
 
 	auto stretch_screensaver = std::make_shared<SwitchComponent>(mWindow);

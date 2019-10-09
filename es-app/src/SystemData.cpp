@@ -343,6 +343,7 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 
 	//create the system runtime environment data
 	SystemEnvironmentData* envData = new SystemEnvironmentData;
+	envData->mSystemName = name;
 	envData->mStartPath = path;
 	envData->mSearchExtensions = extensions;
 	envData->mLaunchCommand = cmd;

@@ -671,6 +671,15 @@ void GuiMenu::openUISettings()
 		}
 	}
 
+	// screensaver
+	ComponentListRow screensaver_row;
+	screensaver_row.elements.clear();
+	screensaver_row.addElement(std::make_shared<TextComponent>(mWindow, _("SCREENSAVER SETTINGS"), theme->Text.font, theme->Text.color), true);
+	screensaver_row.addElement(makeArrow(mWindow), false);
+	screensaver_row.makeAcceptInputHandler(std::bind(&GuiMenu::openScreensaverOptions, this));
+	s->addRow(screensaver_row);
+
+
 	//#ifndef WIN32
 		//UI mode
 	auto UImodeSelection = std::make_shared< OptionListComponent<std::string> >(mWindow, _("UI MODE"), false);
@@ -700,7 +709,7 @@ void GuiMenu::openUISettings()
 	//#endif
 
 	// LANGUAGE
-
+	/*
 	std::vector<std::string> langues;
 	langues.push_back("en");
 
@@ -745,7 +754,7 @@ void GuiMenu::openUISettings()
 			});
 		}
 	}
-
+	*/
 	// transition style
 	auto transition_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("TRANSITION STYLE"), false);
 	std::vector<std::string> transitions;
@@ -874,14 +883,6 @@ void GuiMenu::openUISettings()
 	});
 
 
-	// screensaver
-	ComponentListRow screensaver_row;
-	screensaver_row.elements.clear();
-	screensaver_row.addElement(std::make_shared<TextComponent>(mWindow, _("SCREENSAVER SETTINGS"), theme->Text.font, theme->Text.color), true);
-	screensaver_row.addElement(makeArrow(mWindow), false);
-	screensaver_row.makeAcceptInputHandler(std::bind(&GuiMenu::openScreensaverOptions, this));
-	s->addRow(screensaver_row);
-
 	s->onFinalize([s, pthis, window]
 	{
 		if (s->getVariable("reloadCollections"))
@@ -904,15 +905,139 @@ void GuiMenu::openUISettings()
 	mWindow->pushGui(s);
 }
 
+void GuiMenu::openSystemEmulatorSettings(SystemData* system)
+{
+	auto theme = ThemeData::getMenuTheme();
+
+	GuiSettings* s = new GuiSettings(mWindow, system->getFullName().c_str());
+
+	auto emul_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _("EMULATOR"), false);
+	auto core_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _("CORE"), false);
+
+	std::string currentEmul = Settings::getInstance()->getString(system->getName() + ".emulator");
+	std::string defaultEmul = (system->getSystemEnvData()->mEmulators.size() == 0 ? "" : system->getSystemEnvData()->mEmulators[0].mName);
+
+//	if (defaultEmul.length() == 0)
+		emul_choice->add(_("AUTO"), "", false);
+//	else
+//		emul_choice->add(_("AUTO") + " (" + defaultEmul + ")", "", currentEmul.length() == 0);
+
+	bool found = false;
+	for (auto core : system->getSystemEnvData()->mEmulators)
+	{
+		if (core.mName == currentEmul)
+			found = true;
+
+		emul_choice->add(core.mName, core.mName, core.mName == currentEmul);
+	}
+
+	if (!found)
+		emul_choice->selectFirstItem();
+	
+	ComponentListRow row;
+	row.addElement(std::make_shared<TextComponent>(mWindow, _("EMULATOR"), theme->Text.font, theme->Text.color), true);
+	row.addElement(emul_choice, false);
+
+	s->addRow(row);
+
+	emul_choice->setSelectedChangedCallback([this, system, core_choice](std::string emulatorName)
+	{
+		std::string currentCore = Settings::getInstance()->getString(system->getName() + ".core");
+		std::string defaultCore;
+		
+		for (auto& emulator : system->getSystemEnvData()->mEmulators)
+		{
+			if (emulatorName == emulator.mName)
+			{
+				for (auto core : emulator.mCores)
+				{
+					defaultCore = core;
+					break;
+				}
+			}
+		}
+
+		core_choice->clear();
+
+	//	if (defaultCore.length() == 0)
+			core_choice->add(_("AUTO"), "", false);
+	//	else
+	//		core_choice->add(_("AUTO") + " (" + defaultCore + ")", "", false);
+
+		std::vector<std::string> cores = system->getSystemEnvData()->getCores(emulatorName);
+
+		bool found = false;
+
+		for (auto it = cores.begin(); it != cores.end(); it++)
+		{
+			std::string core = *it;
+			core_choice->add(core, core, currentCore == core);
+			if (currentCore == core)
+				found = true;
+		}
+
+		if (!found)
+			core_choice->selectFirstItem();
+		else
+			core_choice->invalidate();
+	});
+
+	row.elements.clear();
+	row.addElement(std::make_shared<TextComponent>(mWindow, "CORE", theme->Text.font, theme->Text.color), true);
+	row.addElement(core_choice, false);
+	s->addRow(row);
+
+	// force change event to load core list
+	emul_choice->invalidate();
+
+
+	s->addSaveFunc([system, emul_choice, core_choice]
+	{		
+		Settings::getInstance()->setString(system->getName() + ".emulator", emul_choice->getSelected());
+		Settings::getInstance()->setString(system->getName() + ".core", core_choice->getSelected());
+	});
+
+	mWindow->pushGui(s);
+}
+
+void GuiMenu::openEmulatorSettings()
+{
+	GuiSettings* configuration = new GuiSettings(mWindow, _("ADVANCED").c_str());
+	Window* window = mWindow;
+	
+	// For each activated system
+	for (auto system : SystemData::sSystemVector)
+	{
+		if (system->isCollection())
+			continue;
+
+		if (system->getSystemEnvData()->mEmulators.size() == 0)
+			continue;
+
+		if (system->getSystemEnvData()->mEmulators.size() == 1 && system->getSystemEnvData()->mEmulators[0].mCores.size() <= 1)
+			continue;
+		
+		configuration->addEntry(system->getFullName(), true, [this, system] { openSystemEmulatorSettings(system); });
+	}
+
+	window->pushGui(configuration);
+}
+
 void GuiMenu::openOtherSettings()
 {
+	Window* window = mWindow;
 	auto s = new GuiSettings(mWindow, _("ADVANCED SETTINGS"));
 
-	// maximum vram
-	auto max_vram = std::make_shared<SliderComponent>(mWindow, 40.f, 1000.f, 10.f, "Mb");
-	max_vram->setValue((float)(Settings::getInstance()->getInt("MaxVRAM")));
-	s->addWithLabel(_("VRAM LIMIT"), max_vram);
-	s->addSaveFunc([max_vram] { Settings::getInstance()->setInt("MaxVRAM", (int)Math::round(max_vram->getValue())); });
+
+	// Emulator settings 
+	for (auto system : SystemData::sSystemVector)
+	{
+		if (system->isCollection() || system->getSystemEnvData()->mEmulators.size() == 0 || (system->getSystemEnvData()->mEmulators.size() == 1 && system->getSystemEnvData()->mEmulators[0].mCores.size() <= 1))
+			continue;
+
+		s->addEntry(_("EMULATOR SETTINGS"), true, [this] { openEmulatorSettings(); });
+		break;
+	}
 
 	// power saver
 	auto power_saver = std::make_shared< OptionListComponent<std::string> >(mWindow, _("POWER SAVER MODES"), false);
@@ -938,6 +1063,61 @@ void GuiMenu::openOtherSettings()
 		Settings::getInstance()->setString("PowerSaverMode", power_saver->getSelected());
 		PowerSaver::init();
 	});
+
+
+	// LANGUAGE
+
+	std::vector<std::string> langues;
+	langues.push_back("en");
+
+	std::string xmlpath = ResourceManager::getInstance()->getResourcePath(":/splash.svg");
+	if (xmlpath.length() > 0)
+	{
+		xmlpath = Utils::FileSystem::getParent(xmlpath) + "/locale/";
+
+		Utils::FileSystem::stringList dirContent = Utils::FileSystem::getDirContent(xmlpath, true);
+		for (Utils::FileSystem::stringList::const_iterator it = dirContent.cbegin(); it != dirContent.cend(); ++it)
+		{
+			if (Utils::FileSystem::isDirectory(*it))
+				continue;
+
+			std::string name = *it;
+
+			if (name.rfind("emulationstation2.po") == std::string::npos)
+				continue;
+
+			name = Utils::FileSystem::getParent(name);
+			name = Utils::FileSystem::getFileName(name);
+
+			if (name != "en")
+				langues.push_back(name);
+		}
+
+		if (langues.size() > 1)
+		{
+			auto language = std::make_shared< OptionListComponent<std::string> >(mWindow, _("LANGUAGE"), false);
+
+			for (auto it = langues.cbegin(); it != langues.cend(); it++)
+				language->add(*it, *it, Settings::getInstance()->getString("Language") == *it);
+
+			s->addWithLabel(_("LANGUAGE"), language);
+			s->addSaveFunc([language, window, s] {
+
+				if (language->getSelected() != Settings::getInstance()->getString("Language"))
+				{
+					if (Settings::getInstance()->setString("Language", language->getSelected()))
+						s->setVariable("reloadGuiMenu", true);
+				}
+			});
+		}
+	}
+
+
+	// maximum vram
+	auto max_vram = std::make_shared<SliderComponent>(mWindow, 40.f, 1000.f, 10.f, "Mb");
+	max_vram->setValue((float)(Settings::getInstance()->getInt("MaxVRAM")));
+	s->addWithLabel(_("VRAM LIMIT"), max_vram);
+	s->addSaveFunc([max_vram] { Settings::getInstance()->setInt("MaxVRAM", (int)Math::round(max_vram->getValue())); });
 
 	// gamelists
 	auto save_gamelists = std::make_shared<SwitchComponent>(mWindow);
@@ -1052,6 +1232,18 @@ void GuiMenu::openOtherSettings()
 	});
 
 	s->updatePosition();
+
+	auto pthis = this;
+
+	s->onFinalize([s, pthis, window]
+	{
+		if (s->getVariable("reloadGuiMenu"))
+		{
+			delete pthis;
+			window->pushGui(new GuiMenu(window, false));
+		}
+	});
+
 	mWindow->pushGui(s);
 
 }

@@ -9,6 +9,164 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #:
+msgid "EMULATOR SETTINGS"
+msgstr "PARAMÈTRES DES EMULATEURS"
+
+#:
+msgid "LOG LEVEL"
+msgstr "NIVEAU DE LOG"
+
+#:
+msgid "PLAY THEME MUSICS"
+msgstr "JOUER LES MUSIQUES DES THEMES"
+
+#:
+msgid "DISPLAY SONG TITLES"
+msgstr "AFFICHER LES NOMS DES MUSIQUES"
+
+#:
+msgid "SHOW FAVORITES ON TOP"
+msgstr "AFFICHER LES FAVORIS EN PREMIER"
+
+#:
+msgid "PREFERED IMAGE SOURCE"
+msgstr "SOURCE D'IMAGE PREFERÉE"
+
+#:
+msgid "PREFERED THUMBNAIL SOURCE"
+msgstr "SOURCE DE MINIATURE PRÉFÉRÉE"
+
+#:
+msgid "SCRAPE MARQUEE"
+msgstr "SCRAPER LES LOGOS DE JEU"
+
+#, c-format
+msgid "%i SELECTED"
+msgid_plural "%i SELECTED"
+msgstr[0] "%i SÉLECTIONNÉ"
+msgstr[1] "%i SÉLECTIONNÉS"
+
+#:
+msgid "VIDEO SCREENSAVER SETTINGS"
+msgstr "PARAMÈTRES ÉCRAN DE VEILLE VIDÉO"
+
+#:
+msgid "SLIDESHOW SCREENSAVER SETTINGS"
+msgstr "PARAMÈTRES ÉCRAN DE VEILLE SLIDESHOW"
+
+#:
+msgid "SCREENSAVER CONTROLS"
+msgstr "CONTRÔLE DE l'ÉCONOMISEUR D'ÉCRAN"
+
+#:
+msgid "All Games"
+msgstr "Tous les jeux"
+
+#:
+msgid "Only missing medias"
+msgstr "Seulement les médias manquants"
+
+#:
+msgid "always"
+msgstr "toujours"
+
+#:
+msgid "start & end"
+msgstr "début et fin"
+
+#:
+msgid "never"
+msgstr "jamais"
+
+#:
+msgid "SCRAPE VIDEOS"
+msgstr "SCRAPER LES VIDÉOS"
+
+#:
+msgid "RESET GAMELIST CUSTOMISATIONS"
+msgstr "RÉINITIALISER LES PERSONNALISATIONS PAR SYSTÈME"
+
+#:
+msgid "RESET"
+msgstr "RÉINITIALISER"
+
+#:
+msgid "SHOW FOLDERS"
+msgstr "AFFICHER LES DOSSIERS"
+
+#:
+msgid "ARE YOU SURE YOU WANT TO CONFIGURE INPUT?"
+msgstr "VOULEZ-VOUS MODIFIER LA CONFIGURATION DES MANETTES ?"
+
+#:
+msgid "disabled"
+msgstr "désactivé"
+
+#:
+msgid "default"
+msgstr "par défaut"
+
+#:
+msgid "warning"
+msgstr "avertissement"
+
+#:
+msgid "error"
+msgstr "erreur"
+
+#:
+msgid "SWAP IMAGE AFTER (SECS)"
+msgstr "CHANGER L'IMAGE APRÈS (SECS)"
+
+#:
+msgid "SHOW GAME NAME"
+msgstr "AFFICHER LE NOM DU JEU"
+
+#:
+msgid "STRETCH IMAGES"
+msgstr "ÉTIRER LES IMAGES"
+
+#:
+msgid "USE CUSTOM IMAGES"
+msgstr "UTILISER DES IMAGES PERSONNALISÉES"
+
+#:
+msgid "CUSTOM IMAGE DIR"
+msgstr "RÉPERTOIRE D'IMAGES PERSONNALISÉES"
+
+#:
+msgid "CUSTOM IMAGE DIR RECURSIVE"
+msgstr "RECHERCHER RÉCURSIVEMENT DANS LE RÉPERTOIRE"
+
+#:
+msgid "CUSTOM IMAGE FILTER"
+msgstr "FILTRE SUR LES IMAGES"
+
+#:
+msgid "SWAP VIDEO AFTER (SECS)"
+msgstr "CHANGER LA VIDÉO APRÈS (SECS)"
+
+#:
+msgid "USE OMX PLAYER FOR SCREENSAVER"
+msgstr "UTILISER OMX POUR L'ÉCRAN DE VEILLE"
+
+#:
+msgid "SHOW GAME INFO"
+msgstr "AFFICHER LES INFORMATIONS DU JEU"
+
+#:
+msgid "SHOW GAME INFO ON SCREENSAVER"
+msgstr "AFFICHER LES INFORMATIONS DU JEU"
+
+#:
+msgid "USE MARQUEE AS GAME INFO"
+msgstr "AFFICHER LE LOGO DU JEU"
+
+#:
+msgid "STRETCH VIDEO ON SCREENSAVER"
+msgstr "ÉTIRER LA VIDÉO DE L'ÉCRAN DE VEILLE"
+
+#:
 msgid "This collection is empty"
 msgstr "Cette collection est vide"
 
@@ -50,11 +208,11 @@ msgstr "Terminer l'édition"
 
 #: 
 msgid "GRID SIZE"
-msgstr "DIMENSIONS DE LA GRILLE"
+msgstr "TAILLE DE LA GRILLE"
 
 #: 
 msgid "DEFAULT GRID SIZE"
-msgstr "DIMENSIONS DE LA GRILLE PAR DÉFAUT"
+msgstr "TAILLE DE LA GRILLE PAR DÉFAUT"
 
 #: 
 msgid "UI MODE"
@@ -583,7 +741,23 @@ msgstr "STYLE DE LA TRANSITION"
 
 #: 
 msgid "SCREENSAVER BEHAVIOR"
-msgstr "COMPORTEMENT DE L'ÉCRAN DE VEILLE"
+msgstr "TYPE D'ÉCRAN DE VEILLE"
+
+#: 
+msgid "random video"
+msgstr "vidéo"
+
+#: 
+msgid "slideshow"
+msgstr "slideshow"
+
+#: 
+msgid "dim"
+msgstr "grisé"
+
+#: 
+msgid "black"
+msgstr "noir"
 
 #: 
 msgid "SHOW FRAMERATE"
@@ -619,7 +793,11 @@ msgstr "MUSIQUE DE FOND"
 
 #: 
 msgid "ONLY PLAY SYSTEM-SPECIFIC MUSIC FOLDER"
-msgstr "JOUER UNIQUEMENT LES MUSIQUES DES SYSTÈMES"
+msgstr "MUSIQUES DES SYSTÈMES UNIQUEMENT"
+
+#: 
+msgid "FILTER GAMES BY TEXT"
+msgstr "RECHERCHE TEXTUELLE"
 
 #: 
 msgid "OUTPUT DEVICE"
@@ -792,8 +970,8 @@ msgid "OPTIONS"
 msgstr "OPTIONS"
 
 #: 
-msgid "JUMP TO LETTER"
-msgstr "ALLER À LA LETTRE"
+msgid "JUMP TO..."
+msgstr "ALLER À..."
 
 #: 
 msgid "SORT GAMES BY"
@@ -1588,7 +1766,7 @@ msgstr "ANIMATION DU BANDEAU"
 
 #: 
 msgid "ENABLE FILTERS"
-msgstr "FILTRES"
+msgstr "ACTIVER LES FILTRES"
 
 #: 
 msgid "THEME CONFIGURATION"
@@ -1992,7 +2170,7 @@ msgstr "Liste vide"
 
 #:
 msgid "COMPLETE QUIT MENU"
-msgstr "AFFICHER TOUTES LES COMMANDES DU MENU QUITTER"
+msgstr "AFFICHER LE MENU QUITTER COMPLET"
 
 #: Retroarch ratio
 msgid "Auto"
