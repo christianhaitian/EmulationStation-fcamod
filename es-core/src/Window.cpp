@@ -117,7 +117,7 @@ void Window::reactivateGui()
 		peekGui()->updateHelpPrompts();
 }
 
-void Window::deinit()
+void Window::deinit(bool deinitRenderer)
 {
 	// Hide all GUI elements on uninitialisation - this disable
 	for(auto i = mGuiStack.cbegin(); i != mGuiStack.cend(); i++)

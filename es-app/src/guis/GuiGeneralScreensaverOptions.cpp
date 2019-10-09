@@ -10,6 +10,8 @@
 
 GuiGeneralScreensaverOptions::GuiGeneralScreensaverOptions(Window* window, std::string title) : GuiScreensaverOptions(window, title)
 {
+	auto theme = ThemeData::getMenuTheme();
+
 	// screensaver time
 	auto screensaver_time = std::make_shared<SliderComponent>(mWindow, 0.f, 120.0f, 1.f, "m");
 	screensaver_time->setValue((float)(Settings::getInstance()->getInt("ScreenSaverTime") / (1000 * 60)));

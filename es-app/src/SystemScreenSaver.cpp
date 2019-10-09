@@ -533,6 +533,7 @@ void GameScreenSaverBase::setGame(FileData* game)
 
 	mViewport = Renderer::Rect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight());
 
+	/*
 #ifdef _RPI_
 	if (!Settings::getInstance()->getBool("ScreenSaverOmxPlayer"))
 #endif
@@ -586,7 +587,7 @@ void GameScreenSaverBase::setGame(FileData* game)
 			mDecoration->setMaxSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 		}
 	}
-
+	*/
 	if (!Settings::getInstance()->getBool("SlideshowScreenSaverGameName"))
 		return;
 
