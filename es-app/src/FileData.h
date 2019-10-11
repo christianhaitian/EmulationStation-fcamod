@@ -152,7 +152,11 @@ public:
 	void createChildrenByFilenameMap(std::unordered_map<std::string, FileData*>& map);
 
 private:
+#ifdef _RPI_
+	std::vector<FileData*> getFlatGameList(bool displayedOnly, SystemData* system) const;
+#else
 	std::vector<FileData*> FolderData::getFlatGameList(bool displayedOnly, SystemData* system) const;
+#endif
 
 	std::vector<FileData*> mChildren;
 };
