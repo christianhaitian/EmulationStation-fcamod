@@ -1369,7 +1369,9 @@ std::string getBuildTime()
 	iss_time >> hour >> min >> sec;
 
 	char buffer[100];
-	sprintf_s(buffer, "%4d%.2d%.2d%.2d%.2d%.2d\n", year, month, day, hour, min, sec);
+	
+	sprintf(buffer, "%4d%.2d%.2d%.2d%.2d%.2d\n", year, month, day, hour, min, sec);
+
 	return buffer;
 }
 
