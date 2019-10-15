@@ -280,6 +280,7 @@ private:
 	void parseView(const pugi::xml_node& viewNode, ThemeView& view, bool overwriteElements = true);
 	void parseElement(const pugi::xml_node& elementNode, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element, bool overwrite = true);
 	bool parseRegion(const pugi::xml_node& node);
+	bool parseLanguage(const pugi::xml_node& node);
 	bool parseSubset(const pugi::xml_node& node);
 	bool isFirstSubset(const pugi::xml_node& node);
 
@@ -295,6 +296,7 @@ private:
 	std::string mMenu;
 	std::string mSystemview;
 	std::string mGamelistview;
+	std::string mLanguage;
 
 	std::string mSystemThemeFolder;
 
