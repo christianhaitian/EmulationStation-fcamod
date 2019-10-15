@@ -334,7 +334,7 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 // 		ViewController::get()->getGameListView(mEntries.at(mCursor).object); // fake preload
 
 	// wait 600ms to fade in
-	setAnimation(infoFadeIn, systemInfoDelay, [this] {
+	setAnimation(infoFadeIn, goFast ? 0 : systemInfoDelay, [this] {
 		ViewController::get()->getGameListView(mEntries.at(mCursor).object); // fake preload
 	}, false, 2);
 
