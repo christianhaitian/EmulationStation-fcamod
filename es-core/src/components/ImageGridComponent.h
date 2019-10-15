@@ -8,6 +8,9 @@
 #include "GridTileComponent.h"
 #include "animations/LambdaAnimation.h"
 #include "Settings.h"
+#ifdef _RPI_
+#include "Sound.h"
+#endif
 
 #define EXTRAITEMS 2
 
