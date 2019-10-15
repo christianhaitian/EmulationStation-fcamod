@@ -19,6 +19,8 @@ class TextCache;
 class Transform4x4f;
 class TextureResource;
 class AsyncNotificationComponent;
+class ThemeData;
+class TextComponent;
 
 struct HelpStyle;
 
@@ -93,6 +95,8 @@ public:
 	void postToUiThread(const std::function<void(Window*)>& func);
 	void reactivateGui();
 
+	void onThemeChanged(const std::shared_ptr<ThemeData>& theme);
+
 private:
 	void processPostedFunctions();
 
@@ -118,10 +122,9 @@ private:
 
 	std::shared_ptr<TextureResource> mSplash;
 	std::string						 mCustomSplash;
-
-	std::shared_ptr<ImageComponent> mImageShader;
-
-	std::vector<GuiComponent*> mGuiStack;	
+	
+	std::vector<GuiComponent*> mScreenExtras;
+	std::vector<GuiComponent*> mGuiStack;
 
 	std::vector< std::shared_ptr<Font> > mDefaultFonts;
 
@@ -130,6 +133,15 @@ private:
 	int mAverageDeltaTime;
 
 	std::unique_ptr<TextCache> mFrameDataText;
+
+	// clock // batocera
+	int mClockElapsed;
+	
+	std::shared_ptr<TextComponent>	mClock;
+
+	// pads // batocera
+	int mplayerPads[MAX_PLAYERS];
+	bool mplayerPadsIsHotkey;
 
 	bool mNormalizeNextUpdate;
 

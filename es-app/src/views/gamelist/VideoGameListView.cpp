@@ -38,6 +38,9 @@ VideoGameListView::VideoGameListView(Window* window, FolderData* root) :
 	mVideo = new VideoVlcComponent(window, "");
 #endif
 
+	// Default is thumbnail in Retropie themes & video view
+	mVideo->setSnapshotSource(THUMBNAIL);
+
 	mList.setPosition(mSize.x() * (0.50f + padding), mList.getPosition().y());
 	mList.setSize(mSize.x() * (0.50f - padding), mList.getSize().y());
 	mList.setAlignment(TextListComponent<FileData*>::ALIGN_LEFT);
@@ -275,12 +278,19 @@ void VideoGameListView::updateInfoPanel()
 			mVideo->setDefaultVideo();
 		}
 		mVideoPlaying = true;
+		
+		std::string snapShot = file->getThumbnailPath();
 
-		mVideo->setImage(file->getThumbnailPath(), false, mVideo->getMaxSizeInfo());
-		mMarquee.setImage(file->getMarqueePath(), false, mMarquee.getMaxSizeInfo());
+		auto src = mVideo->getSnapshotSource();
+		if (src == MARQUEE && !file->getMarqueePath().empty())
+			snapShot = file->getMarqueePath();
+		if (src == IMAGE && !file->getImagePath().empty())
+			snapShot = file->getImagePath();
 
-		if (mImage != nullptr)
-			mImage->setImage(file->getImagePath(), false, mImage->getMaxSizeInfo());
+		mVideo->setImage(snapShot);
+
+		mMarquee.setImage(file->getMarqueePath()/*, false, mMarquee.getMaxSizeInfo()*/); // Too slow on pi
+		mImage.setImage(file->getImagePath(), false, mImage.getMaxSizeInfo());
 
 		mDescription.setText(file->metadata.get("desc"));
 		mDescContainer.reset();

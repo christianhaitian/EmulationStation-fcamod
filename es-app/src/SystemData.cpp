@@ -15,6 +15,7 @@
 #include "utils/ThreadPool.h"
 #include "GuiComponent.h"
 #include "Window.h"
+#include "views/ViewController.h"
 
 using namespace Utils;
 
@@ -493,7 +494,10 @@ bool SystemData::loadConfig(Window* window)
 	}
 
 	if (SystemData::sSystemVector.size() > 0)
-		ThemeData::setDefaultTheme(SystemData::sSystemVector.at(0)->getTheme().get());
+	{
+		auto theme = SystemData::sSystemVector.at(0)->getTheme();
+		ViewController::get()->onThemeChanged(theme);		
+	}
 
 	return true;
 }

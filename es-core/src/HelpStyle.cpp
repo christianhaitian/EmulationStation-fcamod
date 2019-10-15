@@ -8,11 +8,10 @@ HelpStyle::HelpStyle()
 	origin = Vector2f(0.0f, 0.0f);
 	iconColor = 0x777777FF;
 	textColor = 0x777777FF;
+	font = nullptr;
 
-	if(FONT_SIZE_SMALL != 0)
+	if (FONT_SIZE_SMALL != 0)
 		font = Font::get(FONT_SIZE_SMALL);
-	else
-		font = nullptr;
 }
 
 void HelpStyle::applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view)
