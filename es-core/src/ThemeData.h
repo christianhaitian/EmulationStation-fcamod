@@ -5,14 +5,13 @@
 #include "math/Vector2f.h"
 #include "math/Vector4f.h"
 #include "utils/FileSystemUtil.h"
-#include <pugixml/src/pugixml.hpp>
-
 #include <deque>
 #include <map>
 #include <unordered_map>
 #include <memory>
 #include <sstream>
 #include <vector>
+#include <pugixml/src/pugixml.hpp>
 
 namespace pugi { class xml_node; }
 
@@ -60,7 +59,7 @@ public:
 
 	template<typename T>
 	friend ThemeException& operator<<(ThemeException& e, T msg);
-
+	
 	inline void setFiles(const std::deque<std::string>& deque)
 	{
 		*this << "from theme \"" << deque.front() << "\"\n";
@@ -87,6 +86,7 @@ struct ThemeSet
 	inline std::string getThemePath(const std::string& system) const { return path + "/" + system + "/theme.xml"; }
 };
 
+
 struct Subset
 {
 	Subset(const std::string set, const std::string nm)
@@ -99,19 +99,29 @@ struct Subset
 	std::string name;
 };
 
-struct MenuElement {
+struct MenuElement 
+{
 	unsigned int color;
 	unsigned int selectedColor;
-	unsigned int selectorColor;	
+	unsigned int selectorColor;
 	unsigned int separatorColor;
 	unsigned int selectorGradientColor;
 	bool selectorGradientType;
 	std::string path;
-	std::string fadePath;
 	std::shared_ptr<Font> font;
 };
 
-struct IconElement {
+struct MenuBackground
+{
+	unsigned int color;
+	unsigned int centerColor;
+	std::string path;
+	std::string fadePath;	
+	Vector2f cornerSize;	
+};
+
+struct IconElement 
+{
 	std::string button;
 	std::string button_filled;
 	std::string on;
@@ -131,12 +141,12 @@ public:
 	public:
 		ThemeMenu(ThemeData* theme);
 
-		MenuElement Background{ 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, true, ":/frame.png", ":/scroll_gradient.png", nullptr };
-		MenuElement Title{ 0x555555FF, 0x555555FF, 0x555555FF, 0xFFFFFFFF, 0x555555FF, true, "", "", nullptr };
-		MenuElement Text{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, 0x878787FF, true, "", "", nullptr };
-		MenuElement TextSmall{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, 0x878787FF, true, "", "", nullptr };
-		MenuElement Footer{ 0xC6C6C6FF, 0xC6C6C6FF, 0xC6C6C6FF, 0xFFFFFFFF, 0xC6C6C6FF, true, "", "", nullptr };
-		IconElement Icons { ":/button.png", ":/button_filled.png", ":/on.svg", ":/off.svg", ":/option_arrow.svg", ":/arrow.svg", ":/slider_knob.svg", ":/textinput_ninepatch.png", ":/textinput_ninepatch_active.png" };
+		MenuBackground Background{ 0xFFFFFFFF, 0xFFFFFFFF, ":/frame.png", ":/scroll_gradient.png", Vector2f(16, 16) };
+		MenuElement Title{ 0x555555FF, 0x555555FF, 0x555555FF, 0xFFFFFFFF, 0x555555FF, true, "", nullptr };
+		MenuElement Text{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, 0x878787FF, true, "", nullptr };
+		MenuElement TextSmall{ 0x777777FF, 0xFFFFFFFF, 0x878787FF, 0xC6C7C6FF, 0x878787FF, true, "", nullptr };
+		MenuElement Footer{ 0xC6C6C6FF, 0xC6C6C6FF, 0xC6C6C6FF, 0xFFFFFFFF, 0xC6C6C6FF, true, "", nullptr };
+		IconElement Icons{ ":/button.png", ":/button_filled.png", ":/on.svg", ":/off.svg", ":/option_arrow.svg", ":/arrow.svg", ":/slider_knob.svg", ":/textinput_ninepatch.png", ":/textinput_ninepatch_active.png" };
 
 		std::string getMenuIcon(const std::string name)
 		{
@@ -151,7 +161,6 @@ public:
 		std::map<std::string, std::string>		mMenuIcons;
 	};
 
-
 	class ThemeElement
 	{
 	public:
@@ -160,19 +169,19 @@ public:
 
 		struct Property
 		{
-			void operator= (const Vector4f& value) { r = value; v = Vector2f(value.x(), value.y()); }
 			void operator= (const Vector2f& value)     { v = value; }
 			void operator= (const std::string& value)  { s = value; }
 			void operator= (const unsigned int& value) { i = value; }
 			void operator= (const float& value)        { f = value; }
 			void operator= (const bool& value)         { b = value; }
+			void operator= (const Vector4f& value)     { r = value; v = Vector2f(value.x(), value.y()); }
 
-			Vector4f     r;
 			Vector2f     v;
 			std::string  s;
 			unsigned int i;
 			float        f;
 			bool         b;
+			Vector4f     r;
 		};
 
 		std::map< std::string, Property > properties;
@@ -204,13 +213,12 @@ private:
 		bool isCustomView;
 	};
 
-
 public:
 
 	ThemeData();
 
 	// throws ThemeException
-	void loadFile(std::string system, std::map<std::string, std::string> sysDataMap, const std::string& path);
+	void loadFile(const std::string system, std::map<std::string, std::string> sysDataMap, const std::string& path);
 
 	enum ElementPropertyType
 	{
@@ -237,75 +245,70 @@ public:
 
 	static std::map<std::string, ThemeSet> getThemeSets();
 	static std::string getThemeFromCurrentSet(const std::string& system);
-
-	std::string getDefaultView() { return mDefaultView; };
 	
-	std::vector<std::string> getViewsOfTheme();
-
 	bool hasSubsets() { return mSubsets.size() > 0; }
-	std::vector<Subset>		getSubSets() { return mSubsets; }
-	static std::vector<std::string> getSubSet(const std::vector<Subset>& subsets, const std::string& subset);
-
 	static const std::shared_ptr<ThemeData::ThemeMenu>& getMenuTheme();
 
-	static void setDefaultTheme(ThemeData* theme) { mCurrentTheme = theme; };
-	static ThemeData* getDefaultTheme() { return mCurrentTheme; };
+	std::vector<Subset>		    getSubSets() { return mSubsets; }
+	std::vector<std::string>	getSubSetNames();
 
-	std::string getSystemThemeFolder() {
-		return mSystemThemeFolder;
-	}
+	static std::vector<std::string> getSubSet(const std::vector<Subset>& subsets, const std::string& subset);
+
+	static void setDefaultTheme(ThemeData* theme);
+	static ThemeData* getDefaultTheme() { return mDefaultTheme; }
+	
+	std::string getSystemThemeFolder() { return mSystemThemeFolder; }
+	
+	std::vector<std::string> getViewsOfTheme();
+	std::string getDefaultView() { return mDefaultView; };
 
 private:
-	static void findRegion(const pugi::xml_document& doc, std::vector<Subset>& sets);
-	static void crawlIncludes(const pugi::xml_node& root, std::vector<Subset>& sets, std::deque<std::string>& dequepath);
-
 	static std::map< std::string, std::map<std::string, ElementPropertyType> > sElementMap;
 	static std::vector<std::string> sSupportedFeatures;
 	static std::vector<std::string> sSupportedViews;
 
 	std::deque<std::string> mPaths;
 	float mVersion;
-
 	std::string mDefaultView;
-	
+
 	void parseTheme(const pugi::xml_node& root);
 
-	void parseFeature(const pugi::xml_node& node);
-	void parseInclude(const pugi::xml_node& node);
+	void parseFeature(const pugi::xml_node& node);	
+	void parseInclude(const pugi::xml_node& node);	
 	void parseVariable(const pugi::xml_node& node);
 	void parseVariables(const pugi::xml_node& root);
 	void parseViews(const pugi::xml_node& themeRoot);
-	void parseCustomView(const pugi::xml_node& node, const pugi::xml_node& root);
+	void parseCustomView(const pugi::xml_node& node, const pugi::xml_node& root);	
 	void parseViewElement(const pugi::xml_node& node);
 	void parseView(const pugi::xml_node& viewNode, ThemeView& view, bool overwriteElements = true);
 	void parseElement(const pugi::xml_node& elementNode, const std::map<std::string, ElementPropertyType>& typeMap, ThemeElement& element, bool overwrite = true);
 	bool parseRegion(const pugi::xml_node& node);
-	bool parseLanguage(const pugi::xml_node& node);
 	bool parseSubset(const pugi::xml_node& node);
 	bool isFirstSubset(const pugi::xml_node& node);
+	bool parseLanguage(const pugi::xml_node& node);
+	bool parseFilterAttributes(const pugi::xml_node& node);
 
 	void parseCustomViewBaseClass(const pugi::xml_node& root, ThemeView& view, std::string baseClass);
 
 	std::string resolveSystemVariable(const std::string& systemThemeFolder, const std::string& path);
 	std::string resolvePlaceholders(const char* in);
-	
-	std::map<std::string, ThemeView> mViews;
 
 	std::string mColorset;
 	std::string mIconset;
 	std::string mMenu;
 	std::string mSystemview;
 	std::string mGamelistview;
+	std::string mSystemThemeFolder;	
 	std::string mLanguage;
+	std::string mRegion;
 
-	std::string mSystemThemeFolder;
-
-	std::map<std::string, std::string> mVariables;	
-
-	static std::shared_ptr<ThemeData::ThemeMenu> mMenuTheme;
-	static ThemeData* mCurrentTheme;
+	std::map<std::string, std::string> mVariables;
+	std::map<std::string, ThemeView> mViews;
 
 	std::vector<Subset> mSubsets;
+
+	static std::shared_ptr<ThemeData::ThemeMenu> mMenuTheme;
+	static ThemeData* mDefaultTheme;	
 };
 
 #endif // ES_CORE_THEME_DATA_H
