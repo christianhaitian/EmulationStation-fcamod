@@ -232,6 +232,8 @@ void Settings::setDefaults()
 	mStringMap["MusicDirectory"] = "";
 	mStringMap["UserMusicDirectory"] = "";
 
+	mBoolMap["DrawClock"] = true;
+
 	mDefaultBoolMap = mBoolMap;
 	mDefaultIntMap = mIntMap;
 	mDefaultFloatMap = mFloatMap;

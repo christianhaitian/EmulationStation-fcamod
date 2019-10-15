@@ -139,10 +139,6 @@ private:
 	
 	std::shared_ptr<TextComponent>	mClock;
 
-	// pads // batocera
-	int mplayerPads[MAX_PLAYERS];
-	bool mplayerPadsIsHotkey;
-
 	bool mNormalizeNextUpdate;
 
 	bool mAllowSleep;

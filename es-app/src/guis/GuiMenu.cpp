@@ -353,84 +353,10 @@ void GuiMenu::openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListC
 	auto themeconfig = new GuiSettings(mWindow, _("THEME CONFIGURATION").c_str());
 
 	auto themeSubSets = theme->getSubSets();
-	auto themeColorSets = ThemeData::getSubSet(themeSubSets, "colorset");
-	auto themeIconSets = ThemeData::getSubSet(themeSubSets, "iconset");
-	auto themeMenus = ThemeData::getSubSet(themeSubSets, "menu");
-	auto themeSystemviewSets = ThemeData::getSubSet(themeSubSets, "systemview");
-	auto themeGamelistViewSets = ThemeData::getSubSet(themeSubSets, "gamelistview");
-	auto themeRegions = ThemeData::getSubSet(themeSubSets, "region");
 
-	// colorset
-	std::shared_ptr<OptionListComponent<std::string>> theme_colorset = nullptr;
-	if (themeColorSets.size() > 0)
-	{
-		auto selectedColorSet = std::find(themeColorSets.cbegin(), themeColorSets.cend(), Settings::getInstance()->getString("ThemeColorSet"));
-		if (selectedColorSet == themeColorSets.end())
-			selectedColorSet = themeColorSets.begin();
+	std::map<std::string, std::shared_ptr<OptionListComponent<std::string>>> options;
 
-		theme_colorset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME COLORSET"), false);
-
-		for (auto it = themeColorSets.begin(); it != themeColorSets.end(); it++)
-			theme_colorset->add(*it, *it, it == selectedColorSet);
-
-		if (!themeColorSets.empty())
-			themeconfig->addWithLabel(_("THEME COLORSET"), theme_colorset);
-	}
-
-	// iconset
-	std::shared_ptr<OptionListComponent<std::string>> theme_iconset = nullptr;
-	if (themeIconSets.size() > 0)
-	{
-		auto selectedIconSet = std::find(themeIconSets.cbegin(), themeIconSets.cend(), Settings::getInstance()->getString("ThemeIconSet"));
-		if (selectedIconSet == themeIconSets.end())
-			selectedIconSet = themeIconSets.begin();
-
-		theme_iconset = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME ICONSET"), false);
-
-		for (auto it = themeIconSets.begin(); it != themeIconSets.end(); it++)
-			theme_iconset->add(*it, *it, it == selectedIconSet);
-
-		if (!themeIconSets.empty())
-			themeconfig->addWithLabel(_("THEME ICONSET"), theme_iconset);
-	}
-
-	// menu
-	std::shared_ptr<OptionListComponent<std::string>> theme_menu = nullptr;
-	if (themeMenus.size() > 0)
-	{
-		auto selectedMenu = std::find(themeMenus.cbegin(), themeMenus.cend(), Settings::getInstance()->getString("ThemeMenu"));
-		if (selectedMenu == themeMenus.end())
-			selectedMenu = themeMenus.begin();
-
-		theme_menu = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME MENU"), false);
-
-		for (auto it = themeMenus.begin(); it != themeMenus.end(); it++)
-			theme_menu->add(*it, *it, it == selectedMenu);
-
-		if (!themeMenus.empty())
-			themeconfig->addWithLabel(_("THEME MENU"), theme_menu);
-	}
-
-	// systemview
-	std::shared_ptr<OptionListComponent<std::string>> theme_systemview = nullptr;
-	if (themeSystemviewSets.size() > 0)
-	{
-		auto selectedSystemviewSet = std::find(themeSystemviewSets.cbegin(), themeSystemviewSets.cend(), Settings::getInstance()->getString("ThemeSystemView"));
-		if (selectedSystemviewSet == themeSystemviewSets.end())
-			selectedSystemviewSet = themeSystemviewSets.begin();
-
-		theme_systemview = std::make_shared<OptionListComponent<std::string> >(mWindow, _("THEME SYSTEMVIEW"), false);
-
-		for (auto it = themeSystemviewSets.begin(); it != themeSystemviewSets.end(); it++)
-			theme_systemview->add(*it, *it, it == selectedSystemviewSet);
-
-		if (!themeSystemviewSets.empty())
-			themeconfig->addWithLabel(_("THEME SYSTEMVIEW"), theme_systemview);
-	}
-
-	// gamelistview
-	std::shared_ptr<OptionListComponent<std::string>> theme_gamelistview = nullptr;
-	if (themeGamelistViewSets.size() > 0)
+	for (std::string subset : theme->getSubSetNames())
 	{
 		std::string settingName = "subset." + subset;
 
@@ -448,8 +374,8 @@ void GuiMenu::openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListC
 			auto selectedColorSet = std::find(themeColorSets.cbegin(), themeColorSets.cend(), Settings::getInstance()->getString(settingName));
 			if (selectedColorSet == themeColorSets.end())
 				selectedColorSet = themeColorSets.begin();
-			
-			std::shared_ptr<OptionListComponent<std::string>> item = std::make_shared<OptionListComponent<std::string> >(mWindow, _(("THEME "+Utils::String::toUpper(subset)).c_str()), false);
+
+			std::shared_ptr<OptionListComponent<std::string>> item = std::make_shared<OptionListComponent<std::string> >(mWindow, _(("THEME " + Utils::String::toUpper(subset)).c_str()), false);
 			item->setTag(settingName);
 
 			for (auto it = themeColorSets.begin(); it != themeColorSets.end(); it++)
@@ -458,9 +384,9 @@ void GuiMenu::openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListC
 			if (!themeColorSets.empty())
 				themeconfig->addWithLabel(_(("THEME " + Utils::String::toUpper(subset)).c_str()), item);
 
-			options[settingName]  = item;
+			options[settingName] = item;
 		}
-		else 
+		else
 			options[settingName] = nullptr;
 	}
 
@@ -866,6 +792,13 @@ void GuiMenu::openUISettings()
 		}
 		Settings::getInstance()->setBool("MoveCarousel", move_carousel->getState());
 	});
+
+	// clock
+	auto clock = std::make_shared<SwitchComponent>(mWindow);
+	clock->setState(Settings::getInstance()->getBool("DrawClock"));
+	s->addWithLabel(_("SHOW CLOCK"), clock);
+	s->addSaveFunc(
+		[clock] { Settings::getInstance()->setBool("DrawClock", clock->getState()); });
 
 	// show help
 	auto show_help = std::make_shared<SwitchComponent>(mWindow);

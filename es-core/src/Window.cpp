@@ -17,10 +17,6 @@
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
   mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false), mInfoPopup(NULL), mClockElapsed(0) // batocera
 {	
-	mTransiting = nullptr;
-	mTransitionOffset = 0;
-
->>>>>>> e915ef84... Theming View/ Screen : Add <view name="screen" > to manage fixed components that are to be statically displayed ( crt shader, clock )
 	mHelp = new HelpComponent(this);
 	mBackgroundOverlay = new ImageComponent(this);	
 
@@ -152,7 +148,6 @@ void Window::deinit(bool deinitRenderer)
 		InputManager::getInstance()->deinit();
 
 	TextureResource::resetCache();
-	TextureResource::clearQueue();
 
 	ResourceManager::getInstance()->unloadAll();
 
@@ -234,6 +229,9 @@ void Window::input(InputConfig* config, Input input)
 
 void Window::update(int deltaTime)
 {	
+	processPostedFunctions();
+	processNotificationMessages();
+
 	if(mNormalizeNextUpdate)
 	{
 		mNormalizeNextUpdate = false;
@@ -292,16 +290,6 @@ void Window::update(int deltaTime)
 		}
 	}
 	
-	// hide pads // batocera
-	for (int i = 0; i < MAX_PLAYERS; i++) {
-		if (mplayerPads[i] > 0) {
-			mplayerPads[i] -= deltaTime;
-			if (mplayerPads[i] < 0) {
-				mplayerPads[i] = 0;
-			}
-		}
-	}
-
 	mTimeSinceLastInput += deltaTime;
 
 	if(peekGui())
@@ -367,31 +355,6 @@ void Window::render()
 	// pads // batocera
 	Renderer::setMatrix(Transform4x4f::Identity());
 
-	if (Settings::getInstance()->getBool("ShowControllerActivity"))
-	{
-		std::map<int, int> playerJoysticks = InputManager::getInstance()->lastKnownPlayersDeviceIndexes();
-		for (int player = 0; player < MAX_PLAYERS; player++) 
-		{
-			unsigned int padcolor = 0xFFFFFF99;
-
-#ifndef _DEBUG
-			if (playerJoysticks.count(player) != 1)
-				continue;
-
-			int idx = playerJoysticks[player];
-			if (idx < 0 || idx >= MAX_PLAYERS)
-				continue;
-
-			if (mplayerPads[idx] > 0)
-				padcolor = mplayerPadsIsHotkey ? 0x0000FF66 : 0xFF000066;
-#endif
-
-			float sz = Renderer::getScreenHeight() / 100.0f;
-
-			Renderer::drawRect((player*(sz + 4)) + 2, Renderer::getScreenHeight() - sz - 2, sz, sz, padcolor);			
-		}
-	}
-
 	unsigned int screensaverTime = (unsigned int)Settings::getInstance()->getInt("ScreenSaverTime");
 	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
 		startScreenSaver();
@@ -405,8 +368,7 @@ void Window::render()
 	// Always call the screensaver render function regardless of whether the screensaver is active
 	// or not because it may perform a fade on transition
 	renderScreenSaver();
-
-
+	
 	for (auto extra : mScreenExtras)
 		extra->render(transform);
 
