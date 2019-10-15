@@ -10,8 +10,9 @@ GuiTextEditPopup::GuiTextEditPopup(Window* window, const std::string& title, con
 {
 	auto theme = ThemeData::getMenuTheme();
 	mBackground.setImagePath(theme->Background.path); // ":/frame.png"
-	mBackground.setCenterColor(theme->Background.color);
 	mBackground.setEdgeColor(theme->Background.color);
+	mBackground.setCenterColor(theme->Background.centerColor);
+	mBackground.setCornerSize(theme->Background.cornerSize);
 
 	addChild(&mBackground);
 	addChild(&mGrid);

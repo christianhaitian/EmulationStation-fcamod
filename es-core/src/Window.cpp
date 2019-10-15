@@ -144,8 +144,9 @@ void Window::textInput(const char* text)
 void Window::input(InputConfig* config, Input input)
 {
 	if (mScreenSaver) {
-		if(mScreenSaver->isScreenSaverActive() && Settings::getInstance()->getBool("ScreenSaverControls") &&
-		   (Settings::getInstance()->getString("ScreenSaverBehavior") == "random video"))
+		if (mScreenSaver->isScreenSaverActive() && Settings::getInstance()->getBool("ScreenSaverControls") &&
+			((Settings::getInstance()->getString("ScreenSaverBehavior") == "slideshow") || 			
+			(Settings::getInstance()->getString("ScreenSaverBehavior") == "random video")))
 		{
 			if(mScreenSaver->getCurrentGame() != NULL && (config->isMappedLike("right", input) || config->isMappedTo("start", input) || config->isMappedTo("select", input)))
 			{
@@ -296,14 +297,15 @@ void Window::render()
 	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
 		startScreenSaver();
 
-	// Always call the screensaver render function regardless of whether the screensaver is active
-	// or not because it may perform a fade on transition
-	renderScreenSaver();
-
 	if(!mRenderScreenSaver && mInfoPopup)
 		mInfoPopup->render(transform);
 
 	renderRegisteredNotificationComponents(transform);
+	
+
+	// Always call the screensaver render function regardless of whether the screensaver is active
+	// or not because it may perform a fade on transition
+	renderScreenSaver();
 
 	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
 	{
@@ -338,6 +340,21 @@ void Window::endRenderLoadingScreen()
 	mSplash = NULL;
 	mCustomSplash = "";
 
+	if (ThemeData::getMenuTheme()->Background.shaderPath.empty())
+		mImageShader = nullptr;
+	else
+	{
+		if (mImageShader == nullptr)
+			mImageShader = std::make_shared<ImageComponent>(this, true, false);
+		
+		auto theme = ThemeData::getMenuTheme()->Background;
+
+		mImageShader->setImage(theme.shaderPath, theme.shaderTiled);
+		mImageShader->setColorShift(theme.shaderColor);
+		mImageShader->setSize(Renderer::getScreenWidth(), Renderer::getScreenHeight());
+
+	}
+	
 	// Window has not way to apply Theme -> As a workaround : endRenderLoadingScreen is always called when theme changes.
 	mBackgroundOverlay->setImage(ThemeData::getMenuTheme()->Background.fadePath);
 }

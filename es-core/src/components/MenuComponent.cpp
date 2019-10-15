@@ -14,10 +14,10 @@ MenuComponent::MenuComponent(Window* window, std::string title, const std::share
 
 	addChild(&mBackground);
 	addChild(&mGrid);
-	
-	mBackground.setImagePath(theme->Background.path); // ":/frame.png"
-	mBackground.setCenterColor(theme->Background.color);
+	mBackground.setImagePath(theme->Background.path);
 	mBackground.setEdgeColor(theme->Background.color);
+	mBackground.setCenterColor(theme->Background.centerColor);
+	mBackground.setCornerSize(theme->Background.cornerSize);
 
 	// set up title
 	mTitle = std::make_shared<TextComponent>(mWindow);

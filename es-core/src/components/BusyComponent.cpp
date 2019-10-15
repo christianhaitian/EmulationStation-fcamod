@@ -17,10 +17,11 @@ BusyComponent::BusyComponent(Window* window) : GuiComponent(window),
 	mBackground(window, ":/frame.png"), mGrid(window, Vector2i(5, 3))
 {
 	auto theme = ThemeData::getMenuTheme();
-	mBackground.setImagePath(theme->Background.path); // ":/frame.png"
-	mBackground.setCenterColor(theme->Background.color);
+	mBackground.setImagePath(theme->Background.path);
 	mBackground.setEdgeColor(theme->Background.color);
-
+	mBackground.setCenterColor(theme->Background.centerColor);
+	mBackground.setCornerSize(theme->Background.cornerSize);
+    
 	mAnimation = std::make_shared<AnimatedImageComponent>(mWindow);
 	mAnimation->load(&BUSY_ANIMATION_DEF);
 	mText = std::make_shared<TextComponent>(mWindow, _("WORKING..."), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color);

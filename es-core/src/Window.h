@@ -119,6 +119,8 @@ private:
 	std::shared_ptr<TextureResource> mSplash;
 	std::string						 mCustomSplash;
 
+	std::shared_ptr<ImageComponent> mImageShader;
+
 	std::vector<GuiComponent*> mGuiStack;	
 
 	std::vector< std::shared_ptr<Font> > mDefaultFonts;

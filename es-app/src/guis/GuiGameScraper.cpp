@@ -14,9 +14,10 @@ GuiGameScraper::GuiGameScraper(Window* window, ScraperSearchParams params, std::
 	mClose(false)
 {
 	auto theme = ThemeData::getMenuTheme();
-	mBox.setImagePath(theme->Background.path); // ":/frame.png"
-	mBox.setCenterColor(theme->Background.color);
+	mBox.setImagePath(theme->Background.path);
 	mBox.setEdgeColor(theme->Background.color);
+	mBox.setCenterColor(theme->Background.centerColor);
+	mBox.setCornerSize(theme->Background.cornerSize);
 
 	PowerSaver::pause();
 	addChild(&mBox);

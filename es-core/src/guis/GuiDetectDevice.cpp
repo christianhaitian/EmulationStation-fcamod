@@ -14,9 +14,10 @@ GuiDetectDevice::GuiDetectDevice(Window* window, bool firstRun, const std::funct
 	mBackground(window, ":/frame.png"), mGrid(window, Vector2i(1, 5))
 {
 	auto theme = ThemeData::getMenuTheme();
-	mBackground.setImagePath(theme->Background.path); // ":/frame.png"
-	mBackground.setCenterColor(theme->Background.color);
+	mBackground.setImagePath(theme->Background.path);
 	mBackground.setEdgeColor(theme->Background.color);
+	mBackground.setCenterColor(theme->Background.centerColor);
+	mBackground.setCornerSize(theme->Background.cornerSize);
 	mGrid.setSeparatorColor(theme->Text.separatorColor);
 
 	mHoldingConfig = NULL;
