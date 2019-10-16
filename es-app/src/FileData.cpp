@@ -361,27 +361,6 @@ FolderData::SortType getSortTypeFromString(std::string desc) {
 	return FileSorts::SortTypes.at(0);
 }
 
-FileData* FolderData::findUniqueGameForFolder()
-{
-	std::vector<FileData*> children = getChildren();
-
-	if (children.size() == 1 && children.at(0)->getType() == GAME)
-		return children.at(0);
-
-	for (std::vector<FileData*>::const_iterator it = children.cbegin(); it != children.cend(); ++it)
-	{
-		if ((*it)->getType() == GAME)
-			return NULL;
-
-		FolderData* folder = (FolderData*)(*it);
-		FileData* ret = folder->findUniqueGameForFolder();
-		if (ret != NULL)
-			return ret;
-	}
-
-	return NULL;
-}
-
 const std::vector<FileData*> FolderData::getChildrenListToDisplay() 
 {
 	std::vector<FileData*> ret;

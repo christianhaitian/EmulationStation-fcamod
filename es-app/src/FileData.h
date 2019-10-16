@@ -138,8 +138,6 @@ public:
 	void sort(ComparisonFunction& comparator, bool ascending = true);
 	void sort(const SortType& type);
 
-	FileData* findUniqueGameForFolder();
-
 	FileData* FindByPath(const std::string& path);
 
 	inline const std::vector<FileData*>& getChildren() const { return mChildren; }

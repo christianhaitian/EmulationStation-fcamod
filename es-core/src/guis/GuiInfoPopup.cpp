@@ -46,8 +46,8 @@ GuiInfoPopup::GuiInfoPopup(Window* window, std::string message, int duration) :
 	float posY = Renderer::getScreenHeight() * 0.02f;
 
 	// FCA TopRight
-	posX = Renderer::getScreenWidth()*0.98f - mSize.x()*0.98f;
-	posY = Renderer::getScreenHeight() * 0.02f;
+	// posX = Renderer::getScreenWidth()*0.98f - mSize.x()*0.98f;
+	// posY = Renderer::getScreenHeight() * 0.02f;
 
 	setPosition(posX, posY, 0);
 	

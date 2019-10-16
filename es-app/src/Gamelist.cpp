@@ -94,34 +94,6 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 	return NULL;
 }
 
-void refactorGameFolders(SystemData* system)
-{
-	FolderData* root = system->getRootFolder();
-	if (root == nullptr)
-		return;
-
-	auto childs = root->getChildren();
-	for (int i = childs.size() - 1; i >= 0; i--)
-	{
-		FileData* item = childs.at(i);
-		if (item != nullptr && item->getType() == FOLDER)
-		{
-			FolderData* folder = (FolderData*)item;
-			FileData* uniqueGame = folder->findUniqueGameForFolder();
-			if (uniqueGame != nullptr)
-			{
-				childs.erase(childs.begin() + i);
-
-				FileData* newFile = new FileData(GAME, uniqueGame->getPath(), system);
-				newFile->metadata = uniqueGame->metadata;
-				root->addChild(newFile);	
-				
-				delete folder;
-			}
-		}
-	}
-}
-
 void parseGamelist(SystemData* system, std::unordered_map<std::string, FileData*>& fileMap)
 {
 	std::string xmlpath = system->getGamelistPath(false);

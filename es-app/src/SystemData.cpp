@@ -49,14 +49,10 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 		if (!Settings::getInstance()->getBool("IgnoreGamelist"))
 			parseGamelist(this, fileMap);
 			
-		refactorGameFolders(this);
-
 		if (mSortId >= 0 && mSortId < FileSorts::SortTypes.size())
 			mRootFolder->sort(FileSorts::SortTypes.at(mSortId));
 		else
 			mRootFolder->sort(FileSorts::SortTypes.at(0));
-
-		//indexAllGameFilters(mRootFolder);
 	}
 	else
 	{

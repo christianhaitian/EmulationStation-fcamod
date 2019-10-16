@@ -88,13 +88,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			FolderData* folder = NULL;
 
 			if (cursor->getType() == FOLDER)
-			{
 				folder = (FolderData*)cursor;
-
-				FileData* gameOfFolder = folder->findUniqueGameForFolder();
-				if (gameOfFolder != NULL)
-					cursor = gameOfFolder;
-			}
 
 			if (cursor->getType() == GAME)
 			{

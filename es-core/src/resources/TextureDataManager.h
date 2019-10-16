@@ -9,9 +9,7 @@
 #include <mutex>
 #include <vector>
 #include <thread>
-#ifdef _RPI_
 #include <algorithm>
-#endif
 
 class TextureData;
 class TextureResource;
