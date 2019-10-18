@@ -1,0 +1,2192 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: emulationstation\n"
+"Language: ko\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#:
+msgid "EMULATOR SETTINGS"
+msgstr "에뮬레이터 설정"
+
+#:
+msgid "LOG LEVEL"
+msgstr "로그 레벨"
+
+#:
+msgid "PLAY THEME MUSICS"
+msgstr "테마 음악 재생"
+
+#:
+msgid "DISPLAY SONG TITLES"
+msgstr "노래 제목 표시"
+
+#:
+msgid "SHOW FAVORITES ON TOP"
+msgstr "상단에 즐겨찾기 보기"
+
+#:
+msgid "PREFERED IMAGE SOURCE"
+msgstr "선호하는 이미지 소스"
+
+#:
+msgid "PREFERED THUMBNAIL SOURCE"
+msgstr "선호하는 THUMBNAIL 소스"
+
+#:
+msgid "SCRAPE MARQUEE"
+msgstr "스크래치 마퀴"
+
+#, c-format
+msgid "%i SELECTED"
+msgid_plural "%i 선택"
+msgstr[0] "%i 선택"
+msgstr[1] "%i 선택"
+
+#:
+msgid "VIDEO SCREENSAVER SETTINGS"
+msgstr "비디오 스크린세이버 설정"
+
+#:
+msgid "SLIDESHOW SCREENSAVER SETTINGS"
+msgstr "슬라이드 쇼 화면 보호기 설정"
+
+#:
+msgid "SCREENSAVER CONTROLS"
+msgstr "스크린세이버 컨트롤"
+
+#:
+msgid "All Games"
+msgstr "모든 게임"
+
+#:
+msgid "Only missing medias"
+msgstr "누락 된 미디어 만"
+
+#:
+msgid "always"
+msgstr "항상"
+
+#:
+msgid "start & end"
+msgstr "시작 & 끝"
+
+#:
+msgid "never"
+msgstr "결코아님"
+
+#:
+msgid "SCRAPE VIDEOS"
+msgstr "스크랩 비디오"
+
+#:
+msgid "RESET GAMELIST CUSTOMISATIONS"
+msgstr "게임 목록 맞춤 설정 초기화"
+
+#:
+msgid "RESET"
+msgstr "초기화"
+
+#:
+msgid "SHOW FOLDERS"
+msgstr "폴더 표시"
+
+#:
+msgid "ARE YOU SURE YOU WANT TO CONFIGURE INPUT?"
+msgstr "컨트롤러 입력(INPUT)을 구성 하시겠습니까?"
+
+#:
+msgid "disabled"
+msgstr "비활성화"
+
+#:
+msgid "default"
+msgstr "기본"
+
+#:
+msgid "warning"
+msgstr "경고"
+
+#:
+msgid "error"
+msgstr "오류"
+
+#:
+msgid "SWAP IMAGE AFTER (SECS)"
+msgstr "스왑 이미지 후 (SECS)"
+
+#:
+msgid "SHOW GAME NAME"
+msgstr "게임 이름 표시"
+
+#:
+msgid "STRETCH IMAGES"
+msgstr "스트레치 이미지"
+
+#:
+msgid "USE CUSTOM IMAGES"
+msgstr "커스텀 이미지 사용"
+
+#:
+msgid "CUSTOM IMAGE DIR"
+msgstr "커스텀 이미지 디렉토리"
+
+#:
+msgid "CUSTOM IMAGE DIR RECURSIVE"
+msgstr "커스텀 이미지 디렉토리 RECURSIVE"
+
+#:
+msgid "CUSTOM IMAGE FILTER"
+msgstr "커스텀 이미지 필터"
+
+#:
+msgid "SWAP VIDEO AFTER (SECS)"
+msgstr "스왑 비디오 애프터 (SECS)"
+
+#:
+msgid "USE OMX PLAYER FOR SCREENSAVER"
+msgstr "SCREENSAVER에 OMX 플레이어 사용"
+
+#:
+msgid "SHOW GAME INFO"
+msgstr "게임 정보 표시"
+
+#:
+msgid "SHOW GAME INFO ON SCREENSAVER"
+msgstr "게임 정보 표시"
+
+#:
+msgid "USE MARQUEE AS GAME INFO"
+msgstr "게임 정보로 마퀴 사용"
+
+#:
+msgid "STRETCH VIDEO ON SCREENSAVER"
+msgstr "스크린세이버 스트레치 비디오"
+
+#:
+msgid "This collection is empty"
+msgstr "이 컬렉션은 비어 있습니다"
+
+#:
+msgid "None"
+msgstr "없음"
+
+#:
+msgid "Various"
+msgstr "다양한"
+
+#:
+msgid "among other titles."
+msgstr "다른 타이틀 중에서도"
+
+#:
+msgid "This collection contains"
+msgstr "이 컬렉션에는"
+
+#:
+msgid "games, including"
+msgstr "를 포함한 게임"
+
+#: 
+msgid "Loading..."
+msgstr "불러오는 중 ..."
+
+#: 
+msgid "Preloading UI"
+msgstr "사전로드 UI"
+
+#: 
+msgid "ADD/REMOVE GAMES TO THIS GAME COLLECTION"
+msgstr "이 게임 컬렉션에 게임 추가 / 제거"
+
+#:
+msgid "FINISH EDITING"
+msgstr "편집 마무리"
+
+#: 
+msgid "GRID SIZE"
+msgstr "GRID 크기"
+
+#: 
+msgid "DEFAULT GRID SIZE"
+msgstr "기본 GRID 크기"
+
+#: 
+msgid "UI MODE"
+msgstr "UI 모드"
+
+#: 
+msgid "PRELOAD UI"
+msgstr "사전로드 UI"
+
+#: 
+msgid "VSYNC"
+msgstr "VSYNC"
+
+#: 
+msgid "DISPLAY FAVORITES FIRST IN GAMELIST"
+msgstr "상단에 즐겨찾기 보기"
+
+#: 
+msgid "SHOW SYSTEM NAME IN COLLECTIONS"
+msgstr "컬렉션에서 시스템 이름 표시"
+
+#: 
+msgid "OPTIMIZE IMAGES VRAM USE"
+msgstr "이미지 최적화 디스크 사용"
+
+#: 
+msgid "Full"
+msgstr "Full"
+
+#: 
+msgid "Kiosk"
+msgstr "Kiosk"
+
+#: 
+msgid "Kid"
+msgstr "Kid"
+
+#: 
+msgid "GAME COLLECTION SETTINGS"
+msgstr "게임 컬렉션 설정"
+"		"
+#: 
+msgid "CANCEL"
+msgstr "취소"
+
+#: 
+msgid "automatic"
+msgstr "오토매틱"
+
+#: 
+msgid "basic"
+msgstr "기본"
+
+#: 
+msgid "detailed"
+msgstr "상세한"
+
+#: 
+msgid "grid"
+msgstr "그리드"
+
+#: 
+msgid "fade"
+msgstr "Fade"
+
+#: 
+msgid "instant"
+msgstr "즉시"
+
+#: 
+msgid "slide"
+msgstr "slide"
+
+#: 
+msgid "gridex"
+msgstr "그리드"
+
+#: 
+msgid "ENABLE NAVIGATION SOUNDS"
+msgstr "탐색 소리 활성화"
+
+#: 
+msgid "ENABLE VIDEO AUDIO"
+msgstr "비디오 오디오 활성화"
+
+#: 
+msgid "APPLY FILTER"
+msgstr "필터 적용"
+
+#: 
+msgid "AUTOMATIC GAME COLLECTIONS"
+msgstr "자동 게임 컬렉션"
+
+#: 
+msgid "SELECT COLLECTIONS"
+msgstr "컬렉션 선택"
+
+#: 
+msgid "CUSTOM GAME COLLECTIONS"
+msgstr "커스텀 게임 컬렉션"
+
+#: 
+msgid "CREATE NEW CUSTOM COLLECTION FROM THEME"
+msgstr "테마에서 새로운 사용자 정의 컬렉션 만들기"
+
+#: 
+msgid "GAME COLLECTION SETTINGS"
+msgstr "게임 컬렉션 설정"
+
+#: 
+msgid "SELECT THEME FOLDER"
+msgstr "테마 폴더 선택"
+
+#: 
+msgid "CREATE NEW CUSTOM COLLECTION"
+msgstr "새로운 커스텀 컬렉션 생성"
+
+#: 
+msgid "New Collection Name"
+msgstr "새로운 컬렉션 이름"
+
+#: 
+msgid "Loading..."
+msgstr "불러오는 중 ..."
+
+#: 
+msgid "GROUP UNTHEMED CUSTOM COLLECTIONS"
+msgstr "그룹이 생각하지 않은 커스텀 컬렉션"
+
+#: 
+msgid "SORT CUSTOM COLLECTIONS AND SYSTEMS"
+msgstr "정렬 시스템 사용자 정의 및 시스템"
+
+#: 
+msgid "FINISH EDITING COLLECTION"
+msgstr "마무리 편집 모음"
+
+#: 
+msgid "PARSE GAMESLISTS ONLY"
+msgstr "GAMESLISTS ONLY 파싱 목록 구성"
+
+#: 
+msgid "POWER SAVER MODES"
+msgstr "절전 모드"
+
+#: 
+msgid "SAVE METADATA ON EXIT"
+msgstr "종료시 메타 데이터 저장"
+
+#: 
+msgid "SHOW HIDDEN FILES"
+msgstr "숨겨진 파일 표시"
+
+#: 
+msgid "VRAM LIMIT"
+msgstr "VRAM 제한"
+
+#: 
+msgid "RESET ALL FILTERS"
+msgstr "모든 필터 재설정"
+
+#: 
+msgid "GAMELIST VIEW STYLE"
+msgstr "게임리스트 스타일"
+
+#: 
+msgid "GAME LAUNCH TRANSITION"
+msgstr "게임 시작 전환"
+
+#: 
+msgid "THREADED LOADING"
+msgstr "스레드 로딩"
+
+#: 
+msgid "RANDOM"
+msgstr "무작위"
+
+#: 
+msgid "Rating"
+msgstr "평가"
+
+#: 
+msgid "Released"
+msgstr "출시"
+
+#: 
+msgid "Developer"
+msgstr "개발자"
+
+#: 
+msgid "Publisher"
+msgstr "발행자"
+
+#: 
+msgid "Genre"
+msgstr "유형"
+
+#: 
+msgid "Players"
+msgstr "선수"
+
+#: 
+msgid "NO GAMES FOUND - SKIP"
+msgstr "게임을 찾을 수 없음-건너 뛰기"
+
+#: 
+msgid "RETRY"
+msgstr "다시 해 보다"
+
+#: 
+msgid "SKIP"
+msgstr "건너 뛰기"
+
+#: 
+msgid "SEARCH FOR"
+msgstr "검색 FOR"
+
+#: 
+msgid "SEARCH"
+msgstr "검색 FOR"
+
+#: 
+msgid "SCRAPING IN PROGRESS"
+msgstr "진행중인 스크랩"
+
+#: 
+msgid "SYSTEM"
+msgstr "시스템"
+
+#: 
+msgid "subtitle text"
+msgstr "자막 텍스트"
+
+#: 
+msgid "INPUT"
+msgstr "입력"
+
+#: 
+msgid "search"
+msgstr "검색 FOR"
+
+#: 
+msgid "STOP"
+msgstr "중지"
+
+#: 
+msgid "stop (progress saved)"
+msgstr "중지 (진행률 저장)"
+
+#: 
+msgid "GAME %i OF %i"
+msgstr "%i의 게임 %i"
+
+#: 
+msgid "WE CAN'T FIND ANY SYSTEMS!\n"
+"CHECK THAT YOUR PATHS ARE CORRECT IN THE SYSTEMS CONFIGURATION FILE, AND YOUR GAME DIRECTORY HAS AT LEAST ONE GAME WITH THE CORRECT EXTENSION.\n"
+"\n"
+"VISIT EMULATIONSTATION.ORG FOR MORE INFORMATION."
+msgstr "어떤 시스템도 찾을 수 없습니다! \n"
+"시스템 구성 파일에서 경로가 올바른지 확인하고 게임 디렉토리가 올바른 확장 기능을 가진 마지막 게임 중 하나에 있는지 확인하십시오. \n"
+"\n"
+"자세한 내용은 EMULATIONSTATION.ORG를 방문하십시오."
+
+#: 
+msgid "%i GAME SUCCESSFULLY SCRAPED!"
+msgid_plural "%i 게임이 성공적으로 스크랩!"
+msgstr[0] "%i 게임이 성공적으로 스크랩!"
+msgstr[1] "%i 게임이 성공적으로 스크랩!"
+
+#: 
+msgid "%i GAME SKIPPED."
+msgid_plural "%i 게임 건너 뛰기."
+msgstr[0] "%i 게임 건너 뛰기."
+msgstr[1] "%i 게임 건너 뛰기."
+
+#: 
+msgid "OK"
+msgstr "승인"
+
+#: 
+msgid "EDIT METADATA"
+msgstr "메타 데이터 편집"
+
+#: 
+msgid "SCRAPE"
+msgstr "SCRAPE"
+
+#: 
+msgid "SAVE"
+msgstr "저장"
+
+#: 
+msgid "THIS WILL DELETE A FILE!\n"
+"ARE YOU SURE?"
+msgstr "파일을 삭제합니다! \n"
+"확실합니까?"
+
+#: 
+msgid "YES"
+msgstr "예"
+
+#: 
+msgid "NO"
+msgstr "아니요"
+
+#: 
+msgid "DELETE"
+msgstr "지우다"
+
+#: 
+msgid "SAVE CHANGES?"
+msgstr "변경 사항을 저장합니까?"
+
+#: 
+msgid "BACK"
+msgstr "뒤로"
+
+#: 
+msgid "CLOSE"
+msgstr "닫기"
+
+#: 
+msgid "MAIN MENU"
+msgstr "메인 메뉴"
+
+#: 
+msgid "KODI MEDIA CENTER"
+msgstr "코디 미디어 센터"
+
+#: 
+msgid "SYSTEM SETTINGS"
+msgstr "환경 설정"
+
+#: 
+msgid "VERSION"
+msgstr "버전"
+
+#: 
+msgid "DISK USAGE"
+msgstr "디스크 사용량"
+
+#: 
+msgid "STORAGE DEVICE"
+msgstr "저장 장치"
+
+#: 
+msgid "LANGUAGE"
+msgstr "LANGUAGE"
+
+#: 
+msgid "OVERCLOCK"
+msgstr "오버 클럭"
+
+#: 
+msgid "EXTREM (1100Mhz)"
+msgstr "EXTREM (1100MHz)"
+
+#: 
+msgid "TURBO (1000Mhz)"
+msgstr "터보 (1000Mhz)"
+
+#: 
+msgid "HIGH (950Mhz)"
+msgstr "높음 (950Mhz)"
+
+#: 
+msgid "NONE (700Mhz)"
+msgstr "없음 (700Mhz)"
+
+#: 
+msgid "TURBO (1050Mhz)+"
+msgstr "터보 (1050Mhz)+"
+
+#: 
+msgid "HIGH (1050Mhz)"
+msgstr "높음 (1050Mhz)"
+
+#: 
+msgid "NONE (900Mhz)"
+msgstr "없음 (900Mhz)"
+
+#: 
+msgid "NONE (1200Mhz)"
+msgstr "없음 (1200Mhz)"
+
+#: 
+msgid "NONE"
+msgstr "없음"
+
+#. NEW SETTINGS ORGANIZATION
+#: 
+msgid "UPDATES"
+msgstr "업데이트"
+
+#: 
+msgid "AUTO UPDATES"
+msgstr "자동 업데이트"
+
+#: 
+msgid "START UPDATE"
+msgstr "업데이트 시작"
+
+#: 
+msgid "KODI SETTINGS"
+msgstr "코디 설정"
+
+#: 
+msgid "ENABLE KODI"
+msgstr "코디 활성화"
+
+#: 
+msgid "KODI AT START"
+msgstr "시작시 KODI"
+
+#: 
+msgid "START KODI WITH X"
+msgstr "X로 KODI 시작"
+
+#: 
+msgid "SECURITY"
+msgstr "보안"
+
+#: 
+msgid "ENFORCE SECURITY"
+msgstr "보안 강화"
+
+#: 
+msgid "ROOT PASSWORD"
+msgstr "루트 비밀번호"
+
+#: 
+msgid "THE SYSTEM WILL NOW REBOOT"
+msgstr "이제 시스템이 다시 부팅됩니다"
+
+#: 
+msgid "GAMES SETTINGS"
+msgstr "게임 설정"
+
+#: 
+msgid "GAME RATIO"
+msgstr "게임 비율"
+
+#: 
+msgid "SMOOTH GAMES"
+msgstr "부드러운 게임"
+
+#: 
+msgid "REWIND"
+msgstr "되감기"
+
+#: 
+msgid "AUTO SAVE/LOAD"
+msgstr "자동 저장 /로드"
+
+#: 
+msgid "SHADERS SET"
+msgstr "쉐이더 세트"
+
+#: 
+msgid "SCANLINES"
+msgstr "스캔"
+
+#: 
+msgid "RETRO"
+msgstr "레트로"
+
+#: 
+msgid "RETROACHIEVEMENTS SETTINGS"
+msgstr "RETROACHIEVEMENTS 설정"
+
+#: 
+msgid "RETROACHIEVEMENTS"
+msgstr "RETROACHIEVEMENTS"
+
+#: 
+msgid "HARDCORE MODE"
+msgstr "하드 코어 모드"
+
+#: 
+msgid "USERNAME"
+msgstr "사용자 이름"
+
+#: 
+msgid "PASSWORD"
+msgstr "암호"
+
+#: 
+msgid "ADVANCED"
+msgstr "ADVANCED"
+
+#: 
+msgid "REALLY UPDATE GAMES LISTS ?"
+msgstr "REALLY UPDATE GAMES LISTS ?"
+
+#: 
+msgid "UPDATE GAMES LISTS"
+msgstr "게임 목록 업데이트"
+
+#: 
+msgid "CONTROLLERS SETTINGS"
+msgstr "컨트롤러 설정"
+
+#: 
+msgid "UI SETTINGS"
+msgstr "UI 설정"
+
+#: 
+msgid "OVERSCAN"
+msgstr "오버 스캔"
+
+#:
+msgid "LAUNCH SCREENSAVER"
+msgstr "LAUNCH SCREENSAVER"
+
+#: 
+msgid "SCREENSAVER SETTINGS"
+msgstr "LAUNCH SCREENSAVER"
+
+#: 
+msgid "SCREENSAVER AFTER"
+msgstr "스크린 세이버"
+
+#: 
+msgid "TRANSITION STYLE"
+msgstr "전환 스타일"
+
+#: 
+msgid "SCREENSAVER BEHAVIOR"
+msgstr "스크린 세이버 행동"
+
+#: 
+msgid "random video"
+msgstr "랜덤 비디오"
+
+#: 
+msgid "slideshow"
+msgstr "슬라이드 쇼"
+
+#: 
+msgid "dim"
+msgstr "dim"
+
+#: 
+msgid "black"
+msgstr "black"
+
+#: 
+msgid "SHOW FRAMERATE"
+msgstr "FRAMERATE 표시"
+
+#: 
+msgid "ON-SCREEN HELP"
+msgstr "ON-SCREEN HELP"
+
+#: 
+msgid "HIDE WHEN RUNNING GAME"
+msgstr "게임을 실행할 때 숨기기"
+
+#: 
+msgid "QUICK SYSTEM SELECT"
+msgstr "빠른 시스템 선택"
+
+#: 
+msgid "THEME SET"
+msgstr "THEME 설정"
+
+#: 
+msgid "SOUND SETTINGS"
+msgstr "사운드 설정"
+
+#: 
+msgid "SYSTEM VOLUME"
+msgstr "시스템 볼륨"
+
+#: 
+msgid "FRONTEND MUSIC"
+msgstr "프론트 뮤직"
+
+#: 
+msgid "ONLY PLAY SYSTEM-SPECIFIC MUSIC FOLDER"
+msgstr "시스템 특정 음악 폴더 만 재생"
+
+#: 
+msgid "FILTER GAMES BY TEXT"
+msgstr "텍스트 별 필터 게임"
+
+#: 
+msgid "OUTPUT DEVICE"
+msgstr "출력 장치"
+
+#: 
+msgid "HDMI"
+msgstr "HDMI"
+
+#: 
+msgid "JACK"
+msgstr "JACK"
+
+#: 
+msgid "AUTO"
+msgstr "자동"
+
+#: 
+msgid "NETWORK SETTINGS"
+msgstr "네트워크 설정"
+
+#: 
+msgid "CONNECTED"
+msgstr "연결됨"
+
+#: 
+msgid "NOT CONNECTED"
+msgstr "연결되지 않은"
+
+#: 
+msgid "STATUS"
+msgstr "상태"
+
+#: 
+msgid "IP ADDRESS"
+msgstr "IP 주소"
+
+#: 
+msgid "HOSTNAME"
+msgstr "호스트 이름"
+
+#: 
+msgid "ENABLE WIFI"
+msgstr "와이파이 활성화"
+
+#: 
+msgid "WIFI SSID"
+msgstr "와이파이 SSID"
+
+#: 
+msgid "WIFI KEY"
+msgstr "와이파이 키"
+
+#: 
+msgid "WIFI ENABLED"
+msgstr "와이파이 가능"
+
+#: 
+msgid "WIFI CONFIGURATION ERROR"
+msgstr "와이파이 구성 오류"
+
+#: 
+msgid "SCRAPER"
+msgstr "스크랩퍼"
+
+#: 
+msgid "SCRAPE FROM"
+msgstr "스크랩퍼 FROM"
+
+#: 
+msgid "SCRAPE RATINGS"
+msgstr "스크랩퍼 RATINGS"
+
+#: 
+msgid "SCRAPE NOW"
+msgstr "스크랩퍼 NOW"
+
+#: 
+msgid "QUIT"
+msgstr "종료"
+
+#: 
+msgid "QUIT EMULATIONSTATION"
+msgstr "ES 종료"
+
+#: 
+msgid "RESTART EMULATIONSTATION"
+msgstr "ES 재시작"
+
+#: 
+msgid "REALLY QUIT?"
+msgstr "종료합니까?"
+
+#: 
+msgid "REALLY RESTART?"
+msgstr "다시 시작 합니까?"
+
+#: 
+msgid "RESTART SYSTEM"
+msgstr "시스템 재시작"
+
+#: 
+msgid "REALLY SHUTDOWN?"
+msgstr "시스템을 종료합니까?"
+
+#: 
+msgid "SHUTDOWN SYSTEM"
+msgstr "셧다운 시스템"
+
+#: 
+msgid "Emulator"
+msgstr "에뮬레이터"
+
+#: 
+msgid "Core"
+msgstr "Core"
+
+#: 
+msgid "YOU ARE GOING TO CONFIGURE A CONTROLLER. IF YOU HAVE ONLY ONE JOYSTICK, CONFIGURE THE DIRECTIONS KEYS AND SKIP JOYSTICK CONFIG BY HOLDING A BUTTON. IF YOU DO NOT HAVE A SPECIAL KEY FOR HOTKEY, CHOOSE THE SELECT BUTTON. SKIP ALL BUTTONS YOU DO NOT HAVE BY HOLDING A KEY. BUTTONS NAMES ARE BASED ON THE SNES CONTROLLER."
+msgstr "컨트롤러를 구성하려고합니다. 하나의 조이스틱 만있는 경우 버튼을 눌러 방향키와 건너 뛰기 조이스틱 구성을 구성하십시오. 핫키 용 특수 키가없는 경우, 선택 버튼을 선택하십시오. 열쇠를 잡고 있지 않은 모든 단추를 건너 뛰십시오. 버튼 이름은 SNES 컨트롤러를 기반으로합니다."
+
+#. GUIMENU
+#: 
+msgid "CONFIGURE A CONTROLLER"
+msgstr "컨트롤러 구성"
+
+#. Bluetooth
+#: 
+msgid "CONTROLLER PAIRED"
+msgstr "컨트롤러가 페어링됨"
+
+#: 
+msgid "UNABLE TO PAIR CONTROLLER"
+msgstr "컨트롤러 페어링 불가"
+
+#: 
+msgid "AN ERROR OCCURED"
+msgstr "오류가 발생했습니다"
+
+#: 
+msgid "NO CONTROLLERS FOUND"
+msgstr "컨트롤러 없음"
+
+#: 
+msgid "PAIR A BLUETOOTH CONTROLLER"
+msgstr "블루투스 컨트롤러 페어링"
+
+#: 
+msgid "CONTROLLERS LINKS HAVE BEEN DELETED."
+msgstr "컨트롤러 링크가 삭제되었습니다."
+
+#: 
+msgid "FORGET BLUETOOTH CONTROLLERS"
+msgstr "블루투스 컨트롤러 FORGET"
+
+#: 
+msgid "INPUT P%i"
+msgstr "입력 P%i"
+
+#: 
+msgid "CHOOSE"
+msgstr "선택"
+
+#: 
+msgid "SELECT"
+msgstr "선택"
+
+#: 
+msgid "OPTIONS"
+msgstr "옵션"
+
+#: 
+msgid "JUMP TO..."
+msgstr "점프 ..."
+
+#: 
+msgid "SORT GAMES BY"
+msgstr "게임 정렬 방식"
+
+#. FAVORITES
+#: 
+msgid "FAVORITES ONLY"
+msgstr "즐겨찾기 목록만"
+
+#: 
+msgid "EDIT THIS GAME'S METADATA"
+msgstr "게임 메타 데이터 편집"
+
+#: 
+msgid "SCRAPE THESE GAMES"
+msgstr "SCRAPE THESE 게임"
+
+#: 
+msgid "All Games"
+msgstr "모든 게임"
+
+#. MISSING SCRAPPER TRANSLATIONS
+#: 
+msgid "Only missing image"
+msgstr "누락 된 이미지 만"
+
+#: 
+msgid "FILTER"
+msgstr "필터"
+
+#: 
+msgid "SCRAPE THESE SYSTEMS"
+msgstr "스크랩퍼 THESE 시스템"
+
+#: 
+msgid "SYSTEMS"
+msgstr "시스템"
+
+#: 
+msgid "USER DECIDES ON CONFLICTS"
+msgstr "사용자가 충돌에 대해 결정"
+
+#: 
+msgid "START"
+msgstr "시작"
+
+#: 
+msgid "WARNING: SOME OF YOUR SELECTED SYSTEMS DO NOT HAVE A PLATFORM SET. RESULTS MAY BE EVEN MORE INACCURATE THAN USUAL!\n"
+"CONTINUE ANYWAY?"
+msgstr "경고 : 선택한 시스템 중 일부에 플랫폼 세트가 없습니다. 결과가 평소보다 더 정확하지 않을 수 있습니다! \n"
+"계속하시겠습니까?"
+
+#: 
+msgid "NO GAMES FIT THAT CRITERIA."
+msgstr "필터에 맞는 게임은 없습니다."
+
+#: 
+msgid "REALLY UPDATE?"
+msgstr "업데이트 합니까?"
+
+#: 
+msgid "NETWORK CONNECTION NEEDED"
+msgstr "네트워크 연결 필요"
+
+#: 
+msgid "UPDATE DOWNLOADED, THE SYSTEM WILL NOW REBOOT"
+msgstr "업데이트가 다운로드되면 시스템이 다시 부팅됩니다"
+
+#: 
+msgid "UPDATE FAILED, THE SYSTEM WILL NOW REBOOT"
+msgstr "업데이트에 실패했습니다. 이제 시스템이 다시 부팅됩니다"
+
+#: 
+msgid "NO UPDATE AVAILABLE"
+msgstr "사용 가능한 업데이트 없음"
+
+#: 
+msgid "enter emulator"
+msgstr "에뮬레이터를 입력"
+
+#: 
+msgid "enter core"
+msgstr "core를 입력"
+
+#: 
+msgid "Ratio"
+msgstr "비율"
+
+#: 
+msgid "enter ratio"
+msgstr "비율을 입력"
+
+#: 
+msgid "Name"
+msgstr "이름"
+
+#: 
+msgid "enter game name"
+msgstr "게임명을 입력하십시오"
+
+#: 
+msgid "Description"
+msgstr "상세설명"
+
+#: 
+msgid "enter description"
+msgstr "상세설명을 입력"
+
+#: 
+msgid "Image"
+msgstr "이미지"
+
+#: 
+msgid "enter path to image"
+msgstr "이미지 경로를 입력하십시오"
+
+#: 
+msgid "Thumbnail"
+msgstr "썸네일"
+
+#: 
+msgid "enter path to thumbnail"
+msgstr "섬네일 경로를 입력하십시오"
+
+#: 
+msgid "enter rating"
+msgstr "Rating 입력"
+
+#: 
+msgid "Release date"
+msgstr "출시일"
+
+#: 
+msgid "enter release date"
+msgstr "출시일을 입력하십시오"
+
+#: 
+msgid "enter game developer"
+msgstr "게임 개발자를 입력"
+
+#: 
+msgid "enter game publisher"
+msgstr "게임 게시자를 입력"
+
+#: 
+msgid "enter game genre"
+msgstr "게임 장르에 들어가다"
+
+#: 
+msgid "enter number of players"
+msgstr "플레이어 수를 입력하십시오"
+
+#: 
+msgid "Favorite"
+msgstr "즐겨찾기"
+
+#: 
+msgid "enter favorite"
+msgstr "즐겨찾기 등록"
+
+#: 
+msgid "Region"
+msgstr "지역"
+
+#: 
+msgid "enter region"
+msgstr "지역을 입력"
+
+#: 
+msgid "Romtype"
+msgstr "롬 타입"
+
+#: 
+msgid "enter romtype"
+msgstr "롬 타입 입력"
+
+#: 
+msgid "Hidden"
+msgstr "숨겨진"
+
+#: 
+msgid "HIDDEN"
+msgstr "숨겨진"
+
+#: 
+msgid "NAME"
+msgstr "이름"
+
+#: 
+msgid "EMULATOR"
+msgstr "에뮬레이터"
+
+#: 
+msgid "FAVORITE"
+msgstr "즐겨찾기"
+
+#: 
+msgid "set hidden"
+msgstr "숨기기 활성화"
+
+#: 
+msgid "Play count"
+msgstr "플레이 횟수"
+
+#: 
+msgid "enter number of times played"
+msgstr "플레이 횟수를 입력하십시오"
+
+#: 
+msgid "Last played"
+msgstr "마지막 플레이"
+
+#: 
+msgid "enter last played date"
+msgstr "마지막 플레이 날짜를 입력하십시오"
+
+#: 
+msgid "GAMES AVAILABLE"
+msgstr "플레이 가능한 게임"
+
+#:
+msgid "%i GAME AVAILABLE"
+msgid_plural "%i 게임 플레이가능"
+msgstr[0] "%i 게임 플레이가능"
+msgstr[1] "%i 게임 플레이가능"
+
+#: 
+msgid "%i FAVORITE"
+msgid_plural "%i 즐겨찾기"
+msgstr[0] "%i 즐겨찾기"
+msgstr[1] "%i 즐겨찾기"
+
+#:
+msgid "%i GAME SUCCESSFULLY SCRAPED!"
+msgid_plural "%i 게임이 성공적으로 스크랩!"
+msgstr[0] "%i 게임이 성공적으로 스크랩!"
+msgstr[1] "%i 게임이 성공적으로 스크랩!"
+
+#: 
+msgid "SCROLL"
+msgstr "스크롤"
+
+#: 
+msgid "LAUNCH"
+msgstr "실행"
+
+#: 
+msgid "Times played"
+msgstr "플레이 횟수"
+
+#: 
+msgid "MENU"
+msgstr "메뉴"
+
+#: 
+msgid "FILENAME, ASCENDING"
+msgstr "FILENAME, 오름차순"
+
+#: 
+msgid "FILENAME, DESCENDING"
+msgstr "FILENAME, 내림차순"
+
+#: 
+msgid "RATING, ASCENDING"
+msgstr "RATING, 오름차순"
+
+#: 
+msgid "RATING, DESCENDING"
+msgstr "RATING, 결정"
+
+#: 
+msgid "TIMES PLAYED, ASCENDING"
+msgstr "플레이 한 시간, 오름차순"
+
+#: 
+msgid "TIMES PLAYED, DESCENDING"
+msgstr "플레이 한 시간, 내림차순"
+
+#: 
+msgid "LAST PLAYED, ASCENDING"
+msgstr "마지막으로 플레이, 오름차순"
+
+#: 
+msgid "LAST PLAYED, DESCENDING"
+msgstr "마지막 플레이, 결정"
+
+#: 
+msgid "WORKING..."
+msgstr "WORKING..."
+
+#: 
+msgid "CHANGE"
+msgstr "CHANGE"
+
+#: 
+msgid "never"
+msgstr "결코아님"
+
+#: 
+msgid "just now"
+msgstr "just now"
+
+#: 
+msgid "%i sec ago"
+msgid_plural "%i 초 전"
+msgstr[0] "%i 초 전"
+msgstr[1] "%i 초 전"
+
+#: 
+msgid "%i min ago"
+msgid_plural "%i 분 전"
+msgstr[0] "%i 분 전"
+msgstr[1] "%i 분 전"
+
+#: 
+msgid "%i hour ago"
+msgid_plural "%i 시간 전"
+msgstr[0] "%i 시간 전"
+msgstr[1] "%i 시간 전"
+
+#: 
+msgid "%i day ago"
+msgid_plural "%i 일 전"
+msgstr[0] "%i 일 전"
+msgstr[1] "%i 일 전"
+
+#: 
+msgid "unknown"
+msgstr "알 수 없는"
+
+#: 
+msgid "SELECT ALL"
+msgstr "모두 선택"
+
+#: 
+msgid "SELECT NONE"
+msgstr "없음"
+
+#: 
+msgid "%i SELECTED"
+msgid_plural "%i SELECTED"
+msgstr[0] "%i 선택"
+msgstr[1] "%i 선택's"
+
+#: 
+msgid "UP"
+msgstr "위(UP)"
+
+#: 
+msgid "DOWN"
+msgstr "아래(DOWN)"
+
+#: 
+msgid "LEFT"
+msgstr "좌(LEFT)"
+
+#: 
+msgid "RIGHT"
+msgstr "우(RIGHT)"
+
+#: 
+msgid "JOYSTICK 1 UP"
+msgstr "조이스틱 1 위(UP)"
+
+#: 
+msgid "JOYSTICK 1 LEFT"
+msgstr "조이스틱 1 좌(LEFT)"
+
+#: 
+msgid "JOYSTICK 2 UP"
+msgstr "조이스틱 2 위(UP)"
+
+#: 
+msgid "JOYSTICK 2 LEFT"
+msgstr "조이스틱 2 좌(LEFT)"
+
+#: 
+msgid "PAGE UP"
+msgstr "페이지 위로"
+
+#: 
+msgid "PAGE DOWN"
+msgstr "페이지 아래로"
+
+#: 
+msgid "HOTKEY"
+msgstr "핫키"
+
+#: 
+msgid "CONFIGURING"
+msgstr "구성"
+
+#: 
+msgid "KEYBOARD"
+msgstr "키보드"
+
+#: 
+msgid "GAMEPAD %i"
+msgstr "게임패드 %i"
+
+#. Config controllers missing translation
+#: 
+msgid "PRESS ANYTHING"
+msgstr "아무버튼이나 누르십시오"
+
+#: 
+msgid "ALREADY TAKEN"
+msgstr "이미 사용중"
+
+#: 
+msgid "DISCARD CHANGES"
+msgstr "변경 사항을 취소"
+
+#: 
+msgid "WELCOME"
+msgstr "어서 오세요."
+
+#: 
+msgid "CONFIGURE INPUT"
+msgstr "컨트롤러 입력 구성"
+
+#: 
+msgid "%i GAMEPAD DETECTED"
+msgid_plural "%i GAMEPADS DETECTED"
+msgstr[0] "%i 컨트롤러 감지"
+msgstr[1] "%i 여러 컨트롤러 감지"
+
+#: 
+msgid "NO GAMEPADS DETECTED"
+msgstr "컨트롤러 없음"
+
+#: 
+msgid "HOLD A BUTTON ON YOUR DEVICE TO CONFIGURE IT."
+msgstr "장치를 구성하기 위해 A버튼을 꾸욱 누릅니다."
+
+#: 
+msgid "PRESS F4 TO QUIT AT ANY TIME."
+msgstr "언제든지 종료하려면 F4를 누르십시오."
+
+#: 
+msgid "PRESS ESC OR THE HOTKEY TO CANCEL."
+msgstr "ESC 또는 HOTKEY를 눌러 취소하십시오."
+
+#: 
+msgid "DO YOU WANT TO START KODI MEDIA CENTER ?"
+msgstr "KODI 미디어 센터를 시작 하시겠습니까?"
+
+#: 
+msgid "LOADING..."
+msgstr "로딩 중 ..."
+
+#: 
+msgid "PLEASE WAIT..."
+msgstr "기다려주십시오 ..."
+
+#: 
+msgid "REALLY SHUTDOWN WITHOUT SAVING METADATAS?"
+msgstr "메타 데이터를 저장하지 않고 완전히 종료 하시겠습니까?"
+
+#: 
+msgid "FAST SHUTDOWN SYSTEM"
+msgstr "빠른 시스템 종료"
+
+#: 
+msgid "WE CAN'T FIND ANY SYSTEMS!\n"
+"CHECK THAT YOUR PATHS ARE CORRECT IN THE SYSTEMS CONFIGURATION FILE, AND YOUR GAME DIRECTORY HAS AT LEAST ONE GAME WITH THE CORRECT EXTENSION.\n"
+"\n"
+"VISIT EMULATIONSTATION.ORG FOR MORE INFORMATION."
+msgstr "어떤 시스템도 찾을 수 없습니다! \n"
+"\n"
+"자세한 내용은 emulationstation.org를 방문하십시오!"
+
+#: 
+msgid "ON SCREEN KEYBOARD"
+msgstr "ON 스크린 키보드"
+
+#: 
+msgid "SHIFTS FOR UPPER,LOWER, AND SPECIAL"
+msgstr "SHIFTS FOR UPPER,LOWER, AND SPECIAL"
+
+#: 
+msgid "SPACE"
+msgstr "SPACE"
+
+#: 
+msgid "DELETE A CHAR"
+msgstr "DELETE A CHAR"
+
+#: 
+msgid "SHIFT"
+msgstr "SHIFT"
+
+#: 
+msgid "STOP EDITING"
+msgstr "편집 중지"
+
+#: 
+msgid "MOVE CURSOR"
+msgstr "이동 커서"
+
+#: 
+msgid "EDIT"
+msgstr "편집"
+
+#: 
+msgid "ACCEPT RESULT"
+msgstr "수락 결과"
+
+#: 
+msgid "FILENAME"
+msgstr "파일 이름"
+
+#: 
+msgid "RATING"
+msgstr "평가"
+
+#: 
+msgid "TIMES PLAYED"
+msgstr "플레이 한 시간"
+
+#: 
+msgid "LAST PLAYED"
+msgstr "마지막으로 재생"
+
+#: 
+msgid "NUMBER OF PLAYERS"
+msgstr "플레이어 수"
+
+#: 
+msgid "DEVELOPER"
+msgstr "개발자"
+
+#: 
+msgid "GENRE"
+msgstr "유형"
+
+#: 
+msgid "SHOW HIDDEN"
+msgstr "숨겨진 파일 표시"
+
+#: 
+msgid "EXTREM (1400Mhz)"
+msgstr "EXTREM (1400Mhz)"
+
+#: 
+msgid "TURBO (1350Mhz)"
+msgstr "터보 (1350Mhz)"
+
+#: 
+msgid "HIGH (1300Mhz)"
+msgstr "높음 (1300Mhz)"
+
+#: 
+msgid "TURBO AND EXTREM OVERCLOCK PRESETS MAY CAUSE SYSTEM UNSTABILITIES, SO USE THEM AT YOUR OWN RISK.\n"
+"IF YOU CONTINUE, THE SYSTEM WILL REBOOT NOW."
+msgstr "터보 및 극한 오버 클럭 사전 설정으로 인해 시스템이 불안정해질 수 있으므로 자신의 책임하에 사용해야합니다. \n"
+"SI VOUS CONTINUEZ, LE SYSTÈME REDÉMARRERA MAINTENANT."
+
+#: 
+msgid "%i GAME HIDDEN"
+msgid_plural "%i GAMES HIDDEN"
+msgstr[0] "%i 숨겨진 게임"
+msgstr[1] "%i 숨겨진 게임's"
+
+#: 
+msgid "Start kodi media player."
+msgstr "kodi 미디어 플레이어를 시작하십시오."
+
+#: 
+msgid "Show how much space is used on your SHARE partition, located either on the SDCARD or on an external drive. The information shows how much GB are used and how much GB your storage has overall (example 13GB/26GB)."
+msgstr "SDCARD 또는 외부 드라이브에있는 SHARE 파티션에서 사용 된 공간을 표시하십시오. 이 정보는 사용 된 GB 용량과 스토리지의 전체 GB 용량 (예 : 13GB / 26GB)을 보여줍니다."
+
+#: 
+msgid "Configure games display, ratio, filters (shaders), auto save and load and retroachievement account."
+msgstr "게임 표시, 비율, 필터 (쉐이더), 자동 저장 및로드 및 소급 계정을 구성합니다."
+
+#: 
+msgid "The game ratio is the ratio between image width and image height. Use AUTO to let the emulator choose the original game ratio, that will give you the best retrogaming experience."
+msgstr "게임 비율은 이미지 너비와 이미지 높이 간의 비율입니다. AUTO를 사용하여 에뮬레이터가 원래 게임 비율을 선택하도록하여 최상의 레트로 게임 경험을 제공합니다."
+
+#: 
+msgid "Smooth the game image. This option makes the image smoother, using bilinear filtering."
+msgstr "게임 이미지를 부드럽게합니다. 이 옵션은 이중 선형 필터링을 사용하여 이미지를 부드럽게 만듭니다."
+
+#: 
+msgid "This option allows you to rewind the game if you get killed by a monster, or if you make any other mistake. Use the HOTKEY + LEFT command within the game to rewind."
+msgstr "이 옵션을 사용하면 몬스터가 죽거나 다른 실수를 한 경우 게임을 되감습니다. 게임 내에서 HOTKEY + LEFT 명령을 사용하여 되감습니다."
+
+#: 
+msgid "Auto save the state when you quit a game, and auto load last saved state when you start a game."
+msgstr "게임을 종료 할 때 상태를 자동 저장하고 게임을 시작할 때 마지막으로 저장된 상태를 자동로드합니다."
+
+#: 
+msgid "Integer scaling is scaling by a factor of a whole number, such as 2x, 3x, 4x, etc. This option scales the image up to the greatest integer scale below the set resolution. So for instance, if you set your fullscreen resolution to 1920x1080 and enable integer scaling, it will only scale a 320x240 image up to 1280x960, and leave black borders all around. This is to maintain a 1:1 pixel ratio with the original source image, so that pixels are not unevenly duplicated."
+#VALUE!
+
+#: 
+msgid "Shaders are like filters for the game rendering. You can select a shader set here, which is a collection of shaders selected for each system. You can also change the shader within the game with HOTKEY + L2 or HOTKEY + R2."
+msgstr "셰이더는 게임 렌더링을위한 필터와 같습니다. 여기에서 각 시스템에 대해 선택된 쉐이더 모음 인 쉐이더 세트를 선택할 수 있습니다. HOTKEY + L2 또는 HOTKEY + R2를 사용하여 게임 내에서 셰이더를 변경할 수도 있습니다."
+
+#: 
+msgid "Enable or disable RetroAchievements in games."
+msgstr "게임에서 RetroAchievements를 활성화 또는 비활성화합니다."
+
+#: 
+msgid "Hardcore mode disables *all* savestate and rewind functions within the emulator: you will not be able to save and reload at any time. You will have to complete the game and get the achievements first time, just like on the original console. In reward for this, you will earn both the standard and the hardcore achievement, in effect earning double points! A regular game worth 400 points, is now worth 800 if you complete it on hardcore! For example: if you complete the game for 400 points, you then have the opportunity to earn another 400 on hardcore."
+#VALUE!
+
+
+#: 
+msgid "The website retroachievements.org proposes challenges/achievements/trophies on platforms like NES, SNES, GB, GBC, GBA, Genesis/Megadrive, TurboGrafx16/PCEngine and more! Create your account on retroachievements.org and start your quest for achievements!"
+msgstr "retroachievements.org 웹 사이트는 NES, SNES, GB, GBC, GBA, Genesis / Megadrive, TurboGrafx16 / PCEngine 등과 같은 플랫폼에서 도전 / 업적 / 트로피를 제안합니다! retroachievements.org에 계정을 만들고 도전 과제를 시작하십시오!"
+
+#: 
+msgid "Add and configure up to 5 controllers."
+msgstr "최대 5 개의 컨트롤러를 추가하고 구성하십시오."
+
+#: 
+msgid "Start the screensaver after N minutes."
+msgstr "N 분 후 화면 보호기를 시작하십시오."
+
+#: 
+msgid "Set the screensaver behavior. DIM will reduce the screen light, and BLACK will turn the screen black."
+msgstr "화면 보호기 동작을 설정하십시오. DIM은 화면 조명을 줄이고 BLACK은 화면을 검게 만듭니다."
+
+#: 
+msgid "Shows a help at the bottom of the screen which displays commands you can use."
+msgstr "화면 하단에 사용할 수있는 명령을 표시하는 도움말이 표시됩니다."
+
+#: 
+msgid "When enabled, you can switch between systems while browsing a gamelist by pressing LEFT or RIGHT."
+msgstr "활성화되면 LEFT 또는 RIGHT를 눌러 게임 목록을 탐색하는 동안 시스템간에 전환 할 수 있습니다."
+
+#: 
+msgid "Updates the gamelists, if you added games since the last boot."
+msgstr "마지막 부팅 이후 게임을 추가 한 경우 게임 목록을 업데이트합니다."
+
+#: 
+msgid "Set the volume of the sound output for the frontend and the games."
+msgstr "프론트 엔드 및 게임의 사운드 출력 볼륨을 설정하십시오."
+
+#: 
+msgid "Get informations and visual for your games. The scraper downloads metadata and visuals for your games from different servers and enhances the user experience in EmulationStation completely."
+msgstr "게임에 대한 정보와 시각적 정보를 얻으십시오. 스크레이퍼는 다른 서버에서 게임에 대한 메타 데이터와 비주얼을 다운로드하고 EmulationStation의 사용자 경험을 완전히 향상시킵니다."
+
+#: 
+msgid "Select a server to scrape from. The SCREENSCRAPER server is recommended and is based on www.screenscraper.fr and scrapes game data in your language, if available."
+msgstr "스크랩 할 서버를 선택하십시오. SCREENSCRAPER 서버는 권장되며 www.screenscraper.fr을 기반으로하며 사용 가능한 언어로 게임 데이터를 스크랩합니다."
+
+#: 
+msgid "Begin the scrape process with the configuration shown below."
+msgstr "아래 표시된 구성으로 스크랩 프로세스를 시작하십시오."
+
+#: 
+msgid "Scrape and display game ratings."
+msgstr "게임 등급을 긁어 모으고 표시하십시오."
+
+#: 
+msgid "Advanced settings. Please make sure you really know what you're doing, before changing any values in this menu."
+msgstr "고급 설정. 이 메뉴에서 값을 변경하기 전에 현재 수행중인 작업을 알고 있는지 확인하십시오."
+
+#: 
+msgid "Overclock your board to increase the performance.\n"
+
+msgstr "성능을 높이려면 보드를 오버 클로킹하십시오. \n"
+
+
+
+#: 
+msgid "Only show games contained in the gamelist.xml file (located in your roms directories).\n"
+
+msgstr "roms 디렉토리에있는 gamelist.xml 파일에 포함 된 게임 만 표시합니다. \n"
+
+
+#: 
+msgid "This option allows you to set the selected system to fixed mode. With this option activated, the user cannot access other systems."
+msgstr "이 옵션을 사용하면 선택한 시스템을 고정 모드로 설정할 수 있습니다. 이 옵션을 활성화하면 사용자는 다른 시스템에 액세스 할 수 없습니다."
+
+
+#: 
+msgid "Always display the basic gamelist view, even if you have scraped your games."
+msgstr "게임을 폐기 한 경우에도 항상 기본 게임 목록보기를 표시하십시오."
+
+#: 
+msgid "Enable or disable Kodi, customize the Kodi startup, enable the X button to start Kodi"
+msgstr "Kodi 활성화 또는 비활성화, Kodi 시작 사용자 정의, X 버튼을 활성화하여 Kodi 시작"
+
+#: 
+msgid "Enable or disable Kodi. If kodi is disabled, you won't be able to start it with the X button, or start it automatically at boot. The menu entry will be removed as well."
+msgstr "Kodi를 활성화 또는 비활성화합니다. kodi가 비활성화되어 있으면 X 버튼으로 시작하거나 부팅시 자동으로 시작할 수 없습니다. 메뉴 항목도 제거됩니다."
+
+#: 
+msgid "Use the X button to start Kodi."
+msgstr "X 버튼을 사용하여 Kodi를 시작하십시오."
+
+#: 
+msgid "Automatically start into Kodi on boot."
+msgstr "부팅시 Kodi를 자동으로 시작합니다."
+
+#: 
+msgid "Show the framerate in EmulationStation and in game."
+msgstr "EmulationStation 및 게임에서 프레임 속도를 표시하십시오."
+
+#: 
+msgid "Select which emulator to use when you start a game for this system."
+msgstr "이 시스템에서 게임을 시작할 때 사용할 에뮬레이터를 선택하십시오."
+
+#: 
+msgid "Select which core to use for the selected emulator. For example, the LIBRETRO emulator has many cores to run Super Nintendo games. The default core you choose here can also be overridden in game specific settings."
+msgstr "선택한 에뮬레이터에 사용할 코어를 선택하십시오. 예를 들어, LIBRETRO 에뮬레이터에는 Super Nintendo 게임을 실행하기위한 많은 코어가 있습니다. 여기서 선택한 기본 코어는 게임 별 설정에서 재정의 될 수도 있습니다."
+
+#: 
+msgid "USE COMPOSED VISUALS"
+msgstr "USE COMPOSED VISUALS"
+
+#: 
+msgid "CHECK UPDATES"
+msgstr "업데이트 확인"
+
+#: 
+msgid "UPDATE TYPE"
+msgstr "업데이트 유형"
+
+#: 
+msgid "INTEGER SCALE (PIXEL PERFECT)"
+msgstr "INTEGER SCALE (PIXEL PERFECT)"
+
+#: 
+msgid "ADVANCED SETTINGS"
+msgstr "고급 설정"
+
+#: 
+msgid "BOOT SETTINGS"
+msgstr "부팅 설정"
+
+#: 
+msgid "GAMELIST ONLY"
+msgstr "GAMELIST ONLY"
+
+#: 
+msgid "START ON SYSTEM"
+msgstr "START ON SYSTEM"
+
+#: 
+msgid "BOOT ON GAMELIST"
+msgstr "BOOT ON GAMELIST"
+
+#: 
+msgid "HIDE SYSTEM VIEW"
+msgstr "HIDE SYSTEM VIEW"
+
+#: 
+msgid "EMULATOR ADVANCED CONFIGURATION"
+msgstr "에뮬레이터 고급 구성"
+
+#: 
+msgid "ADVANCED EMULATOR CONFIGURATION"
+msgstr "에뮬레이터 고급 구성"
+
+#: 
+msgid "HELP"
+msgstr "도움"
+
+#: 
+msgid "THE SYSTEM IS UP TO DATE"
+msgstr "시스템이 최신입니다"
+
+#: 
+msgid "FORCE BASIC GAMELIST VIEW"
+msgstr "FORCE BASIC GAMELIST VIEW"
+
+#: 
+msgid "DOWNLOADED"
+msgstr "다운로드"
+
+#: 
+msgid "UPDATE VERSION:"
+msgstr "업데이트 버전 :"
+
+#: 
+msgid "UPDATE CHANGELOG:"
+msgstr "업데이트 변경 로그 :"
+
+#: 
+msgid "MORE DETAILS"
+msgstr "자세한 내용은"
+
+#: 
+msgid "CAROUSEL TRANSITIONS"
+msgstr "CAROUSEL TRANSITIONS"
+
+#: 
+msgid "ENABLE FILTERS"
+msgstr "필터 활성화"
+
+#: 
+msgid "THEME CONFIGURATION"
+msgstr "테마 구성"
+
+#: 
+msgid "THEME COLORSET"
+msgstr "테마 색상"
+
+#: 
+msgid "THEME ICONSET"
+msgstr "테마 아이콘"
+
+#: 
+msgid "THEME MENU"
+msgstr "테마 메뉴"
+
+#: 
+msgid "THEME SYSTEMVIEW"
+msgstr "테마 시스템"
+
+#: 
+msgid "THEME GAMELISTVIEW"
+msgstr "테마 게임리스트"
+
+#: 
+msgid "THEME REGION"
+msgstr "테마 지역"
+
+#: 
+msgid "THIS THEME HAS NO OPTION"
+msgstr "이 테마에는 옵션이 없습니다"
+
+#: 
+msgid "MANUAL INPUT"
+msgstr "수동 입력"
+
+#: 
+msgid "AN ERROR OCCURED - DOWNLOADED"
+msgstr "오류가 발생했습니다-다운로드"
+
+#: 
+msgid "START KODI"
+msgstr "KODI 시작"
+
+#: 
+msgid "Shows the current available update version."
+msgstr "사용 가능한 현재 업데이트 버전을 표시합니다."
+
+#: 
+msgid "Shows the current available update changelog."
+msgstr "현재 사용 가능한 업데이트 변경 로그를 표시합니다."
+
+#: 
+msgid "Configure an associated controller. Your controller has to be associated / plugged before."
+msgstr "연결된 컨트롤러를 구성하십시오. 컨트롤러를 연결하고 연결해야합니다."
+
+#: 
+msgid "Choose if carousel will be animated or not during transitions"
+msgstr "전환하는 동안 슬라이드 쇼에 애니메이션을 적용할지 여부를 선택합니다"
+
+#: 
+msgid "Select the type of transition that occurs when you start a game. INSTANT will do nothing, FADE will fade to dark, and SLIDE will zoom on the game cover (or name if there is no scrape information)"
+msgstr "게임을 시작할 때 발생하는 전환 유형을 선택하십시오. INSTANT는 아무 것도하지 않고 FADE는 어두워지고 SLIDE는 게임 커버를 확대합니다 (또는 스크랩 정보가없는 경우 이름)."
+
+#: 
+msgid "Select exisiting colorset options for this theme."
+msgstr "이 테마에 대한 기존 색상 세트 옵션을 선택하십시오."
+
+#: 
+msgid "Select exisiting iconset options for this theme."
+msgstr "이 테마에 대한 기존 아이콘 세트 옵션을 선택하십시오."
+
+#: 
+msgid "Select exisiting menu style options for this theme."
+msgstr "이 테마에 대한 기존 메뉴 스타일 옵션을 선택하십시오."
+
+#: 
+msgid "Select exisiting system view options for this theme."
+msgstr "이 테마에 대한 기존 시스템보기 옵션을 선택하십시오."
+
+#: 
+msgid "Select exisiting gamelist view options for this theme."
+msgstr "이 테마에 대한 기존 게임 목록보기 옵션을 선택하십시오."
+
+#: 
+msgid "Configure theme options if available."
+msgstr "가능한 경우 테마 옵션을 구성하십시오."
+
+#: 
+msgid "Select Region of logos, pictures for system that are different for some countries. E.g. Megadrive in EU / Genesis in US"
+msgstr "일부 국가에서는 다른 시스템의 로고 영역, 그림을 선택하십시오. 예 : EU의 Megadrive / 미국의 Genesis"
+
+#: 
+msgid "Type the name of your SSID if it is hidden or not listed"
+msgstr "SSID가 숨겨져 있거나 나열되지 않은 경우 이름을 입력하십시오."
+
+#: 
+msgid "Select a letter and the listing will go directly on the first game starting with this letter."
+msgstr "문자를 선택하면이 문자로 시작하는 첫 번째 게임에서 목록이 바로 표시됩니다."
+
+#: 
+msgid "Select the way the game list is sortered (alphabetically, by notation...)."
+msgstr "게임 목록을 정렬하는 방법을 선택하십시오 (알파벳, 표기법 ...)."
+
+#: 
+msgid "Switch between seing or not only the favorites games. To add a game in the favorite list, select the game and toggle its state using 'Y'."
+msgstr "즐겨 찾기 게임뿐만 아니라 seing간에 전환 할 수 있습니다. 즐겨 찾기 목록에 게임을 추가하려면 게임을 선택하고 'Y'를 사용하여 상태를 토글하십시오."
+
+#: 
+msgid "Switch between seing or not the hidden games. To hide a game, edit its data and select 'Hide'."
+msgstr "숨겨진 게임 사이를 전환할지 여부를 전환하십시오. 게임을 숨기려면 해당 데이터를 편집하고 '숨기기'를 선택하십시오."
+
+#: 
+msgid "This option display a menu which allows to change game data and many others options."
+msgstr "이 옵션은 게임 데이터 및 기타 여러 옵션을 변경할 수있는 메뉴를 표시합니다."
+
+#: 
+msgid "AVAILABLE UPDATE"
+msgstr "사용 가능한 업데이트"
+
+#: 
+msgid "UPDATE CHANGELOG"
+msgstr "업데이트 변경"
+
+#: 
+msgid "CLOCK IN MENU"
+msgstr "CLOCK IN MENU"
+
+#: 
+msgid "Now playing"
+msgstr "플레이중"
+
+#: 
+msgid "DEFAULT (%1%)"
+msgstr "기본 (%1%)"
+
+#: 
+msgid "INPUT REQUIRED"
+msgstr "INPUT REQUIRED"
+
+#: 
+msgid "(skipped)"
+msgstr "(skipped)"
+
+#: 
+msgid "UP/DOWN TO SKIP"
+msgstr "UP/DOWN TO SKIP"
+
+#: 
+msgid "A TO UNSET"
+msgstr "A TO UNSET"
+
+#: 
+msgid "DOWN TO SKIP AND KEEP [%1%]"
+msgstr "건너 뛰고 유지 [%1%]"
+
+#: 
+msgid "UP/DOWN TO SKIP AND KEEP [%1%]"
+msgstr "건너 뛰기 및 유지로 업 / 다운 [%1%]"
+
+#: 
+msgid "Set duration of help popups, 0 means no popup."
+msgstr "도움말 팝업 기간을 설정합니다. 0은 팝업이 없음을 의미합니다."
+
+#: 
+msgid "HELP POPUP DURATION"
+msgstr "팝업 지속 시간 지원"
+
+#: 
+msgid "Set duration of music popups, 0 means no popup."
+msgstr "음악 팝업 기간을 설정합니다. 0은 팝업이 없음을 의미합니다."
+
+#: 
+msgid "MUSIC POPUP DURATION"
+msgstr "음악 팝업 기간"
+
+#: 
+msgid "POPUP SETTINGS"
+msgstr "팝업 설정"
+
+#: 
+msgid "POPUP POSITION"
+msgstr "팝업 위치"
+
+#: 
+msgid "Select the position of popups on screen."
+msgstr "화면에서 팝업 위치를 선택하십시오."
+
+#: 
+msgid "Set position and duration of popups."
+msgstr "팝업의 위치와 지속 시간을 설정하십시오."
+
+#: 
+msgid "TOP/RIGHT"
+msgstr "맨 위 오른쪽"
+
+#: 
+msgid "BOTTOM/RIGHT"
+msgstr "하단 / 오른쪽"
+
+#: 
+msgid "BOTTOM/LEFT"
+msgstr "하단 / 왼쪽"
+
+#: 
+msgid "TOP/LEFT"
+msgstr "상단 / 왼쪽"
+
+#: 
+msgid "SHOW FOLDERS CONTENT"
+msgstr "폴더 내용 표시"
+
+#: 
+msgid "Switch between seeing the folders structure and seeing all games in a flatten top level."
+msgstr "폴더 구조보기와 평평한 최상위 레벨의 모든 게임보기 사이를 전환하십시오."
+
+#: 
+msgid "NETPLAY"
+msgstr "넷 플레이"
+
+#: 
+msgid "NETPLAY SETTINGS"
+msgstr "네트워크 설정"
+
+#: 
+msgid "NETPLAY LOBBY"
+msgstr "넷 플레이 로비"
+
+#: 
+msgid "Enable or disable Netplay in games."
+msgstr "게임에서 Netplay를 활성화 또는 비활성화합니다."
+
+#: 
+msgid "PORT"
+msgstr "포트"
+
+#: 
+msgid "NICKNAME"
+msgstr "닉네임"
+
+#: 
+msgid "RELAY SERVER"
+msgstr "릴레이 서버"
+
+#: 
+msgid "Enable or disable connections throught relay servers."
+msgstr "릴레이 서버를 통한 연결을 활성화 또는 비활성화합니다."
+
+#: 
+msgid "KODI/NETPLAY"
+msgstr "KODI / NETPLAY"
+
+#: 
+msgid "NO GAMES OR NO CONNECTION"
+msgstr "게임이나 연결이 없습니다"
+
+#: 
+msgid "HASH NOW"
+msgstr "HASH NOW"
+
+#: 
+msgid "HASH THESE SYSTEMS"
+msgstr "HASH THESE SYSTEMS"
+
+#: 
+msgid "Add hash of roms in your gamelists to have more accurate results in Netplay."
+msgstr "Netplay에서보다 정확한 결과를 얻으려면 게임 목록에 롬 해시를 추가하십시오."
+
+#: 
+msgid "HASH ROMS"
+msgstr "HASH ROMS"
+
+#: 
+msgid "Only missing hashs"
+msgstr "Only missing hashs"
+
+#: 
+msgid "Username"
+msgstr "이름"
+
+#: 
+msgid "Country"
+msgstr "국가"
+
+#: 
+msgid "Latency"
+msgstr "지연 시간"
+
+#: 
+msgid "Host arch."
+msgstr "호스트 아치."
+
+#: 
+msgid "Core ver."
+msgstr "핵심 ver."
+
+#: 
+msgid "RA ver."
+msgstr "RA ver."
+
+#: 
+msgid "Can join"
+msgstr "가입 가능"
+
+#: 
+msgid "Rom and core match"
+msgstr "롬과 코어 매치"
+
+#: 
+msgid "Rom found"
+msgstr "롬 발견"
+
+#: 
+msgid "No rom match"
+msgstr "롬 일치 없음"
+
+#: 
+msgid "Match"
+msgstr "시합"
+
+#: 
+msgid "No Match"
+msgstr "일치하지 않습니다"
+
+#: 
+msgid "Rom file"
+msgstr "롬 파일"
+
+#: 
+msgid "Rom hash"
+msgstr "롬 해시"
+
+#: 
+msgid "THIS COULD TAKE A WHILE, CONFIRM?"
+msgstr "이 문제를 해결하는 동안 확인 하시겠습니까?"
+
+#: 
+msgid "good"
+msgstr "좋은"
+
+#: 
+msgid "bad"
+msgstr "나쁜"
+
+#: 
+msgid "medium"
+msgstr "매질"
+
+#: 
+msgid "NETPLAY POPUP DURATION"
+msgstr "넷 플레이 팝업 지속 시간"
+
+#: 
+msgid "Set duration of netplay popups, 0 means no popup."
+msgstr "넷 플레이 팝업 지속 시간을 설정합니다. 0은 팝업이 없음을 의미합니다."
+
+#: 
+msgid "Player"
+msgstr "플레이어"
+
+#: 
+msgid "Game"
+msgstr "Game"
+
+#: 
+msgid "Play online on games running through Retroarch like NES, SNES, FBA, Genesis/Megadrive and more!"
+msgstr "NES, SNES, FBA, Genesis / Megadrive 등과 같은 Retroarch를 통해 실행되는 게임에서 온라인으로 플레이하십시오!"
+
+#: 
+msgid "Rom, hash and core match"
+msgstr "롬, 해시 및 코어 매치"
+
+#: 
+msgid "No core match"
+msgstr "No core match"
+
+#: 
+msgid "Add a clock in the main menu."
+msgstr "메인 메뉴에 시계를 추가"
+
+#:
+msgid "UPGRADING"
+msgstr "업그레이드"
+
+#:
+msgid "PREPARING"
+msgstr "준비"
+
+#:
+msgid "Starting UI"
+msgstr "UI 시작"
+
+#:
+msgid "VERIFYING"
+msgstr "확인"
+
+#:
+msgid "EMPTY LIST"
+msgstr "빈 목록"
+
+#:
+msgid "COMPLETE QUIT MENU"
+msgstr "완전한 종료 메뉴"
+
+#: Retroarch ratio
+msgid "Auto"
+msgstr "오토매틱"
+
+msgid "Square pixel"
+msgstr "정사각형 픽셀"
+
+msgid "Retroarch Config"
+msgstr "레트로 아크 구성"
+
+msgid "Retroarch Custom"
+msgstr "Retroarch Custom"
+
+msgid "Core provided"
+msgstr "핵심 제공"
+
+msgid "Do not set"
+msgstr "설정하지 마십시오"
