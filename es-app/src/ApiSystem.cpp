@@ -1,15 +1,108 @@
 #include "ApiSystem.h"
 #include "HttpReq.h"
 #include "utils/FileSystemUtil.h"
+#include "utils/StringUtil.h"
 #include <thread>
+#include <codecvt> 
+#include <locale> 
+
+#include "Window.h"
+#include "components/AsyncNotificationComponent.h"
+
+UpdateState::State ApiSystem::state = UpdateState::State::NO_UPDATE;
+
+class ThreadedUpdater
+{
+public:
+	ThreadedUpdater(Window* window) : mWindow(window)
+	{
+		ApiSystem::state = UpdateState::State::UPDATER_RUNNING;
+
+		mWndNotification = new AsyncNotificationComponent(window, false);
+		mWndNotification->updateTitle(_U("\uF019 ") + _("EMULATIONSTATION"));
+
+		mWindow->registerNotificationComponent(mWndNotification);
+		mHandle = new std::thread(&ThreadedUpdater::threadUpdate, this);
+	}
+
+	~ThreadedUpdater()
+	{
+		mWindow->unRegisterNotificationComponent(mWndNotification);
+		delete mWndNotification;
+	}
+
+	void threadUpdate()
+	{
+		std::pair<std::string, int> updateStatus = ApiSystem::updateSystem([this](const std::string info)
+		{
+			auto pos = info.find(">>>");
+			if (pos != std::string::npos)
+			{
+				std::string percent(info.substr(pos));
+				percent = Utils::String::replace(percent, ">", "");
+				percent = Utils::String::replace(percent, "%", "");
+				percent = Utils::String::replace(percent, " ", "");
+
+				int value = atoi(percent.c_str());
+
+				std::string text(info.substr(0, pos));
+				text = Utils::String::trim(text);
+
+				mWndNotification->updatePercent(value);
+				mWndNotification->updateText(text);
+			}
+			else
+			{
+				mWndNotification->updatePercent(-1);
+				mWndNotification->updateText(info);
+			}
+		});
+
+		if (updateStatus.second == 0)
+		{
+			ApiSystem::state = UpdateState::State::UPDATE_READY;
+
+			mWndNotification->updateTitle(_U("\uF019 ") + _("UPDATE IS READY"));
+			mWndNotification->updateText(_("RESTART EMULATIONSTATION TO APPLY"));
+
+			std::this_thread::yield();
+			std::this_thread::sleep_for(std::chrono::hours(12));
+		}
+		else
+		{
+			ApiSystem::state = UpdateState::State::NO_UPDATE;
+
+			std::string error = _("AN ERROR OCCURED") + std::string(": ") + updateStatus.first;
+			mWindow->displayNotificationMessage(error);
+		}
+
+		delete this;
+	}
+
+private:
+	std::thread*				mHandle;
+	AsyncNotificationComponent* mWndNotification;
+	Window*						mWindow;
+};
+
+void ApiSystem::startUpdate(Window* c)
+{
+#if WIN32
+	new ThreadedUpdater(c);
+#endif
+}
 
 std::string ApiSystem::checkUpdateVersion()
 {
+#if WIN32
 	std::string localVersion;
 	std::string localVersionFile = Utils::FileSystem::getExePath() + "/version.info";
-	if (Utils::FileSystem::exists(localVersion))
+	if (Utils::FileSystem::exists(localVersionFile))
+	{
 		localVersion = Utils::FileSystem::readAllText(localVersionFile);
-
+		localVersion = Utils::String::replace(Utils::String::replace(localVersion, "\r", ""), "\n", "");
+	}
+	
 	std::shared_ptr<HttpReq> httpreq = std::make_shared<HttpReq>("https://github.com/fabricecaruso/EmulationStation/releases/download/continuous-master/version.info");
 
 	while (httpreq->status() == HttpReq::REQ_IN_PROGRESS)
@@ -18,10 +111,12 @@ std::string ApiSystem::checkUpdateVersion()
 	if (httpreq->status() == HttpReq::REQ_SUCCESS)
 	{
 		std::string serverVersion = httpreq->getContent();
+		serverVersion = Utils::String::replace(Utils::String::replace(serverVersion, "\r", ""), "\n", "");
 		if (!serverVersion.empty() && serverVersion != localVersion)
 			return serverVersion;
 	}
-	
+#endif
+
 	return "";
 }
 
@@ -100,56 +195,104 @@ bool unzipFile(const std::string fileName, const std::string dest)
 	CoUninitialize();
 	return ret;
 }
+
+std::shared_ptr<HttpReq> downloadFile(const std::string url, const std::string label, const std::function<void(const std::string)>& func)
+{
+	if (func != nullptr)
+		func("Downloading " + label);
+
+	std::shared_ptr<HttpReq> httpreq = std::make_shared<HttpReq>(url);
+
+	while (httpreq->status() == HttpReq::REQ_IN_PROGRESS)
+	{
+		if (func != nullptr)
+			func(std::string("Downloading " + label + " >>> " + std::to_string(httpreq->getPercent()) + " %"));
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+	}
+
+	if (httpreq->status() != HttpReq::REQ_SUCCESS)
+		return nullptr;
+
+	return httpreq;
+}
+
+
+void deleteDirectoryFiles(const std::string path)
+{
+	auto files = Utils::FileSystem::getDirContent(path, true, true);
+	std::reverse(std::begin(files), std::end(files));
+	for (auto file : files)
+	{
+		if (Utils::FileSystem::isDirectory(file))
+			::RemoveDirectory(file.c_str());
+		else
+			Utils::FileSystem::removeFile(file);
+	}
+}
 #endif
 
-/*
-// BusyComponent* ui
 std::pair<std::string, int> ApiSystem::updateSystem(const std::function<void(const std::string)>& func)
 {
-#if defined(WIN32) && defined(_DEBUG)
-	for (int i = 0; i < 100; i += 2)
+#if WIN32
+	std::string url = "https://github.com/fabricecaruso/EmulationStation/releases/download/continuous-master/EmulationStation-Win32.zip";
+	auto req = downloadFile(url, "update", func);
+	if (req != nullptr && req->status() == HttpReq::REQ_SUCCESS)
 	{
 		if (func != nullptr)
-			func(std::string("Downloading >>> " + std::to_string(i) + " %"));
+			func(std::string("Extracting update"));
 
-		::Sleep(200);
+		std::string fileName = Utils::FileSystem::getFileName(url);
+		std::string path = Utils::FileSystem::getHomePath() + "\\.emulationstation\\update";
+		path = Utils::String::replace(path, "/", "\\");
+
+		if (!Utils::FileSystem::exists(path))
+			Utils::FileSystem::createDirectory(path);
+		else
+			deleteDirectoryFiles(path);
+
+		std::string zipFile = path + "\\" + fileName;		
+		req->saveContent(zipFile);
+
+		unzipFile(zipFile, path);
+		Utils::FileSystem::removeFile(zipFile);
+
+		auto files = Utils::FileSystem::getDirContent(path, true, true);
+		for (auto file : files)
+		{
+			
+			std::string relative = Utils::FileSystem::createRelativePath(file, path, false);
+			if (Utils::String::startsWith(relative, "./"))
+				relative = relative.substr(2);
+
+			std::string localPath = Utils::FileSystem::getExePath() + "/" + relative;
+
+			if (Utils::FileSystem::isDirectory(file))
+			{
+				if (!Utils::FileSystem::exists(localPath))
+					Utils::FileSystem::createDirectory(localPath);
+			}
+			else
+			{
+				if (Utils::FileSystem::exists(localPath))
+				{
+					Utils::FileSystem::removeFile(localPath + ".old");
+					rename(localPath.c_str(), (localPath + ".old").c_str());
+				}
+
+				if (Utils::FileSystem::copyFile(file, localPath))
+				{
+					Utils::FileSystem::removeFile(localPath + ".old");
+					Utils::FileSystem::removeFile(file);
+				}
+			}
+		}
+
+		deleteDirectoryFiles(path);
+
+		return std::pair<std::string, int>("done.", 0);
 	}
-
-	if (func != nullptr)
-		func(std::string("Extracting files"));
-
-	::Sleep(750);
-
-	return std::pair<std::string, int>("done.", 0);
 #endif
 
-	LOG(LogDebug) << "ApiSystem::updateSystem";
-
-	std::string updatecommand = "batocera-upgrade";
-
-	FILE *pipe = popen(updatecommand.c_str(), "r");
-	if (pipe == nullptr)
-		return std::pair<std::string, int>(std::string("Cannot call update command"), -1);
-
-	char line[1024] = "";
-	FILE *flog = fopen("/userdata/system/logs/batocera-upgrade.log", "w");
-	while (fgets(line, 1024, pipe))
-	{
-		strtok(line, "\n");
-		if (flog != nullptr)
-			fprintf(flog, "%s\n", line);
-
-		if (func != nullptr)
-			func(std::string(line));
-	}
-
-	int exitCode = pclose(pipe);
-
-	if (flog != NULL)
-	{
-		fprintf(flog, "Exit code : %d\n", exitCode);
-		fclose(flog);
-	}
-
-	return std::pair<std::string, int>(std::string(line), exitCode);
-}*/
+	return std::pair<std::string, int>("error.", 1);
+}

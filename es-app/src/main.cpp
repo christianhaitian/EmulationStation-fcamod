@@ -28,6 +28,7 @@
 #include "resources/TextureData.h"
 #include <FreeImage.h>
 #include "AudioManager.h"
+#include "NetworkThread.h"
 
 bool scrape_cmdline = false;
 
@@ -305,6 +306,8 @@ void processAudioTitles(Window* window)
 	}
 }
 
+#include "ApiSystem.h"
+
 int main(int argc, char* argv[])
 {
 	srand((unsigned int)time(NULL));
@@ -317,7 +320,11 @@ int main(int argc, char* argv[])
 
 	if(!parseArgs(argc, argv))
 		return 0;
-
+/*
+	ApiSystem::checkUpdateVersion();
+	ApiSystem::updateSystem(nullptr);
+	return 0;
+	*/
 	// only show the console on Windows if HideConsole is false
 #ifdef WIN32
 	// MSVC has a "SubSystem" option, with two primary options: "WINDOWS" and "CONSOLE".
@@ -421,6 +428,11 @@ int main(int argc, char* argv[])
 	//run the command line scraper then quit
 	if (scrape_cmdline)
 		return run_scraper_cmdline();
+
+#if WIN32
+	if (Settings::getInstance()->getBool("updates.enabled"))
+		NetworkThread* nthread = new NetworkThread(&window);
+#endif
 
 	//dont generate joystick events while we're loading (hopefully fixes "automatically started emulator" bug)
 	SDL_JoystickEventState(SDL_DISABLE);

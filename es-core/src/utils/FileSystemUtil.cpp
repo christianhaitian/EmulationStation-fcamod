@@ -175,8 +175,11 @@ namespace Utils
 							
 						contentList.push_back(fullName);
 
-						if(_recursive && (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
-							contentList.merge(getDirContent(fullName, true, includeHidden));
+						if (_recursive && (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+						{
+							for (auto child : getDirContent(fullName, true, includeHidden))
+								contentList.push_back(child);
+						}
 					}
 					while(FindNextFileW(hFind, &findData));
 
@@ -835,6 +838,7 @@ namespace Utils
 			return false;
 
 		} // isHidden
+
 
 		std::string combine(const std::string& _path, const std::string& filename)
 		{

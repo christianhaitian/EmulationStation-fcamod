@@ -26,6 +26,8 @@
 #include "renderers/Renderer.h" // setSwapInterval()
 #include "guis/GuiTextEditPopupKeyboard.h"
 #include "scrapers/ThreadedScraper.h"
+#include "ApiSystem.h"
+#include "platform.h"
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
@@ -1057,6 +1059,44 @@ void GuiMenu::openOtherSettings()
 	s->addWithLabel(_("VRAM LIMIT"), max_vram);
 	s->addSaveFunc([max_vram] { Settings::getInstance()->setInt("MaxVRAM", (int)Math::round(max_vram->getValue())); });
 
+
+
+#if WIN32
+
+	// Enable updates
+	auto updates_enabled = std::make_shared<SwitchComponent>(mWindow);
+	updates_enabled->setState(Settings::getInstance()->getBool("updates.enabled"));
+	s->addWithLabel(_("AUTO UPDATES"), updates_enabled);
+	s->addSaveFunc([updates_enabled]
+	{
+		Settings::getInstance()->setBool("updates.enabled", updates_enabled->getState());
+	});
+
+	// Start update
+	s->addEntry(ApiSystem::state == UpdateState::State::UPDATE_READY ? _("APPLY UPDATE") : _("START UPDATE"), true, [this]
+	{
+		if (ApiSystem::checkUpdateVersion().empty())
+		{
+			mWindow->pushGui(new GuiMsgBox(mWindow, _("NO UPDATE AVAILABLE")));
+			return;
+		}
+
+		if (ApiSystem::state == UpdateState::State::UPDATE_READY)
+		{
+			if (quitES(QuitMode::QUIT))
+				LOG(LogWarning) << "Reboot terminated with non-zero result!";
+		}
+		else if (ApiSystem::state == UpdateState::State::UPDATER_RUNNING)
+			mWindow->pushGui(new GuiMsgBox(mWindow, _("UPDATE IS ALREADY RUNNING")));
+		else
+			ApiSystem::startUpdate(mWindow);
+	});
+#endif
+
+
+
+
+
 	// gamelists
 	auto save_gamelists = std::make_shared<SwitchComponent>(mWindow);
 	save_gamelists->setState(Settings::getInstance()->getBool("SaveGamelistsOnExit"));
@@ -1168,6 +1208,9 @@ void GuiMenu::openOtherSettings()
 			Log::init();
 		}
 	});
+
+
+
 
 	s->updatePosition();
 

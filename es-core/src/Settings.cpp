@@ -232,6 +232,8 @@ void Settings::setDefaults()
 	mStringMap["MusicDirectory"] = "";
 	mStringMap["UserMusicDirectory"] = "";
 
+	mBoolMap["updates.enabled"] = true;
+	
 	mBoolMap["DrawClock"] = true;
 
 	mDefaultBoolMap = mBoolMap;
