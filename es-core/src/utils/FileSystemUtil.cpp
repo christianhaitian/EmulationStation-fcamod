@@ -49,6 +49,14 @@ namespace Utils
 			return (first.path.length() < second.path.length());			
 		}
 
+		std::string	readAllText(const std::string fileName)
+		{
+			std::ifstream t(fileName);
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+			return buffer.str();
+		}
+
 		void writeAllText(const std::string fileName, const std::string text)
 		{
 			std::fstream fs;

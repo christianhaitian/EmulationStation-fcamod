@@ -55,6 +55,7 @@ namespace Utils
 
 		fileList  getDirInfo(const std::string& _path/*, const bool _recursive = false*/);
 
+		std::string	readAllText(const std::string fileName);
 		void		writeAllText	   (const std::string fileName, const std::string text);
 		bool		copyFile(const std::string src, const std::string dst);
 	} // FileSystem::
