@@ -118,6 +118,9 @@ namespace Renderer
 
 		unsigned int windowFlags = (Settings::getInstance()->getBool("Windowed") ? 0 : (Settings::getInstance()->getBool("FullscreenBorderless") ? SDL_WINDOW_BORDERLESS : SDL_WINDOW_FULLSCREEN)) | getWindowFlags();
 
+		if (Settings::getInstance()->getBool("AlwaysOnTop"))
+			windowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;
+
 		if((sdlWindow = SDL_CreateWindow("EmulationStation", 
 			sdlWindowPosition.x(),
 			sdlWindowPosition.y(), 

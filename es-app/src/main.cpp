@@ -39,6 +39,8 @@ static int gPlayVideoDuration = 0;
 
 void playVideo()
 {
+	Settings::getInstance()->setBool("AlwaysOnTop", true);
+
 	Window window;
 	if (!window.init(true))
 	{
