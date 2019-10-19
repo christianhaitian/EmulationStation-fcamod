@@ -32,6 +32,78 @@
 
 bool scrape_cmdline = false;
 
+#include "components/VideoVlcComponent.h"
+
+static std::string gPlayVideo;
+static int gPlayVideoDuration = 0;
+
+void playVideo()
+{
+	Window window;
+	if (!window.init(true))
+	{
+		LOG(LogError) << "Window failed to initialize!";
+		return;
+	}
+
+	Settings::getInstance()->setBool("VideoAudio", true);
+
+	bool exitLoop = false;
+
+	VideoVlcComponent vid(&window);
+	vid.setVideo(gPlayVideo);
+	vid.setOrigin(0.5f, 0.5f);
+	vid.setPosition(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f);
+	vid.setMaxSize(Renderer::getScreenWidth(), Renderer::getScreenHeight());
+
+	vid.setOnVideoEnded([&exitLoop]()
+	{ 
+		exitLoop = true;
+		return false;
+	});
+
+	window.pushGui(&vid);
+
+	vid.onShow();
+	vid.topWindow(true);
+
+	int lastTime = SDL_GetTicks();	
+	int totalTime = 0;
+
+	while (!exitLoop)
+	{
+		SDL_Event event;
+
+		if (SDL_PollEvent(&event))
+		{
+			do
+			{
+				if (event.type == SDL_QUIT)
+					return;
+			} while (SDL_PollEvent(&event));
+		}
+
+		int curTime = SDL_GetTicks();
+		int deltaTime = curTime - lastTime;
+
+		if (vid.isPlaying())
+		{
+			totalTime += deltaTime;
+
+			if (gPlayVideoDuration > 0 && totalTime > gPlayVideoDuration * 100)
+				break;
+		}
+
+		Transform4x4f transform = Transform4x4f::Identity();
+		vid.update(deltaTime);
+		vid.render(transform);
+
+		Renderer::swapBuffers();
+	}
+
+	window.deinit(true);
+}
+
 bool parseArgs(int argc, char* argv[])
 {
 	Utils::FileSystem::setExePath(argv[0]);
@@ -54,6 +126,18 @@ bool parseArgs(int argc, char* argv[])
 	   
 	for(int i = 1; i < argc; i++)
 	{
+		if (strcmp(argv[i], "--videoduration") == 0)
+		{
+			gPlayVideoDuration = atoi(argv[i + 1]);
+			i++; // skip the argument value
+		}
+		else
+		if (strcmp(argv[i], "--video") == 0)
+		{			
+			gPlayVideo = argv[i + 1];
+			i++; // skip the argument value
+		}
+		else
 		if (strcmp(argv[i], "--monitor") == 0)
 		{
 			if (i >= argc - 1)
@@ -362,6 +446,12 @@ int main(int argc, char* argv[])
 #ifdef FREEIMAGE_LIB
 	FreeImage_Initialise();
 #endif
+
+	if (!gPlayVideo.empty())
+	{
+		playVideo();
+		return 0;
+	}
 
 	//if ~/.emulationstation doesn't exist and cannot be created, bail
 	if(!verifyHomeFolderExists())

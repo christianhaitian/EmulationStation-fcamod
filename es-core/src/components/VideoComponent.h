@@ -106,6 +106,13 @@ public:
 	ImageSource getSnapshotSource() { return mConfig.snapshotSource; };
 	void setSnapshotSource(ImageSource source) { mConfig.snapshotSource = source; };
 
+	inline void setOnVideoEnded(const std::function<bool()>& callback) {
+		mVideoEnded = callback;
+	}
+
+protected:
+	std::function<bool()> mVideoEnded;
+
 private:
 	// Start the video Immediately
 	virtual void startVideo() = 0;
