@@ -1386,7 +1386,20 @@ void GuiMenu::addVersionInfo()
 	mVersion.setColor(theme->Footer.color);
 
 	mVersion.setLineSpacing(0);
-	mVersion.setText("EMULATIONSTATION V" + Utils::String::toUpper(PROGRAM_VERSION_STRING) + " BUILD " + buildDate);
+
+#if WIN32
+	std::string localVersion;
+	std::string localVersionFile = Utils::FileSystem::getExePath() + "/version.info";
+	if (Utils::FileSystem::exists(localVersionFile))
+	{
+		localVersion = Utils::FileSystem::readAllText(localVersionFile);
+		localVersion = Utils::String::replace(Utils::String::replace(localVersion, "\r", ""), "\n", "");	
+		mVersion.setText("EMULATIONSTATION V" + localVersion+" FCAMOD");	
+	}
+	else
+#endif
+		mVersion.setText("EMULATIONSTATION V" + Utils::String::toUpper(PROGRAM_VERSION_STRING) + " BUILD " + buildDate);
+
 	mVersion.setHorizontalAlignment(ALIGN_CENTER);	
 	mVersion.setVerticalAlignment(ALIGN_CENTER);
 	addChild(&mVersion);
