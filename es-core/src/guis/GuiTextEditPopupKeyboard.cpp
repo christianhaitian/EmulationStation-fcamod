@@ -43,6 +43,8 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 	const std::function<void(const std::string&)>& okCallback, bool multiLine, const std::string acceptBtnText)
 	: GuiComponent(window), mBackground(window, ":/frame.png"), mGrid(window, Vector2i(1, 7)), mMultiLine(multiLine)
 {
+	mOkCallback = okCallback;
+
 	auto theme = ThemeData::getMenuTheme();
 	mBackground.setImagePath(theme->Background.path);
 	mBackground.setEdgeColor(theme->Background.color);
@@ -222,14 +224,14 @@ bool GuiTextEditPopupKeyboard::input(InputConfig* config, Input input)
 	}
 
 	// For deleting a chara (Left Top Button)
-	if (config->isMappedTo("PageUp", input) && input.value) {
+	if (config->isMappedTo("pageup", input) && input.value) {
 		mText->startEditing();
 		mText->textInput("\b");
 		mText->stopEditing();
 	}
 
 	// For Adding a space (Right Top Button)
-	if (config->isMappedTo("PageDown", input) && input.value) {
+	if (config->isMappedTo("pagedown", input) && input.value) {
 		mText->startEditing();
 		mText->textInput(" ");
 	}
@@ -242,6 +244,13 @@ bool GuiTextEditPopupKeyboard::input(InputConfig* config, Input input)
 	}
 
 	
+
+	if (config->isMappedTo("x", input) && input.value && mOkCallback != nullptr)
+	{
+		mOkCallback(""); 
+		delete this;
+		return true;
+	}
 
 	return false;
 }
@@ -271,6 +280,10 @@ void GuiTextEditPopupKeyboard::shiftKeys()
 std::vector<HelpPrompt> GuiTextEditPopupKeyboard::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mGrid.getHelpPrompts();
+
+	if (mOkCallback != nullptr)
+		prompts.push_back(HelpPrompt("x", _("RESET")));
+
 	prompts.push_back(HelpPrompt("y", _("SHIFT")));
 	prompts.push_back(HelpPrompt("b", _("BACK")));
 	prompts.push_back(HelpPrompt("r", _("SPACE")));
