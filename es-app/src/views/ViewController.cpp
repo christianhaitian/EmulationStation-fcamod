@@ -472,7 +472,15 @@ bool ViewController::input(InputConfig* config, Input input)
 	if (config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_F5)
 	{
 		mWindow->render();
+
+		ResourceManager::getInstance()->unloadAll();
+		ResourceManager::getInstance()->reloadAll();
+
 		mWindow->renderLoadingScreen(_("Loading..."), -1, 180);
+
+#if WIN32
+			EsLocale::reset();
+#endif
 
 		ViewController::get()->reloadAll();
 		mWindow->endRenderLoadingScreen();

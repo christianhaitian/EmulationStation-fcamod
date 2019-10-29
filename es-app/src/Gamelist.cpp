@@ -198,6 +198,9 @@ void updateGamelist(SystemData* system)
 	if(Settings::getInstance()->getBool("IgnoreGamelist"))
 		return;
 
+	if (system != nullptr && system->getName() == "imageviewer")
+		return;
+		
 	int numUpdated = 0;
 
 	pugi::xml_document doc;
