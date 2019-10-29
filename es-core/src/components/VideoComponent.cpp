@@ -409,6 +409,8 @@ void VideoComponent::manageState()
 	// We will only show if the component is on display and the screensaver
 	// is not active
 	bool show = mShowing && !mScreensaverActive && !mDisable;
+	if (!show)
+		mStartDelayed = false;
 
 	// See if we're already playing
 	if (mIsPlaying || mIsWaitingForVideoToStart)
@@ -417,6 +419,7 @@ void VideoComponent::manageState()
 		if (!show)
 		{
 			mIsWaitingForVideoToStart = false;
+			mStartDelayed = false;
 			stopVideo();
 		}
 		else
@@ -425,6 +428,7 @@ void VideoComponent::manageState()
 			{
 				// Path changed. Stop the video. We will start it again below because
 				// mIsPlaying will be modified by stopVideo to be false
+				mStartDelayed = false;
 				mIsWaitingForVideoToStart = false;
 				stopVideo();
 			}

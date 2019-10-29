@@ -490,6 +490,7 @@ void VideoVlcComponent::startVideo()
 void VideoVlcComponent::stopVideo()
 {
 	mIsPlaying = false;
+	mIsWaitingForVideoToStart = false;
 	mStartDelayed = false;
 
 	// Release the media player so it stops calling back to us
