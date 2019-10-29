@@ -98,8 +98,10 @@ void SystemView::populate()
 					if (Utils::FileSystem::exists(path))
 						logo->setImage(path, (elem->has("tile") && elem->get<bool>("tile")), MaxSizeInfo(carouselLogoSize() * mCarousel.logoScale));
 				}
-				
-				logo->setRotateByTargetSize(true);
+
+				if (mCarousel.size.x() != carouselLogoSize().x() & mCarousel.size.y() != carouselLogoSize().y())
+					logo->setRotateByTargetSize(true);
+					
 				e.data.logo = std::shared_ptr<GuiComponent>(logo);
 				e.data.logoIsImage = true;
 			}

@@ -365,8 +365,8 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 
 	Transform4x4f trans = parentTrans * getTransform();
 	
-	Vector2f clipPos(trans.translation().x(), trans.translation().y());
-	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+	// Don't use soft clip if rotation applied : let renderer do the work
+	if (mRotation == 0 && !Renderer::isVisibleOnScreen(trans.translation().x(), trans.translation().y(), mSize.x(), mSize.y()))
 		return;
 		
 	Renderer::setMatrix(trans);
