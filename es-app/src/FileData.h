@@ -149,6 +149,8 @@ public:
 
 	void createChildrenByFilenameMap(std::unordered_map<std::string, FileData*>& map);
 
+	FileData* findUniqueGameForFolder();
+
 private:
 	std::vector<FileData*> getFlatGameList(bool displayedOnly, SystemData* system) const;
 
