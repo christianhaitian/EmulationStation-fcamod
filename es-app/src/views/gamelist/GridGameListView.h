@@ -52,7 +52,10 @@ protected:
 private:
 	void updateInfoPanel();
 	const std::string getImagePath(FileData* file);
-	
+
+	void createMarquee();
+	void createImage();
+	void createThumbnail();
 	void createVideo();
 
 	void initMDLabels();
@@ -70,9 +73,9 @@ private:
 	TextComponent mPlayCount;
 	TextComponent mName;
 
-	ImageComponent mImage;
-	bool mImageVisible;
-
+	ImageComponent* mImage;
+	ImageComponent* mThumbnail;
+	ImageComponent* mMarquee;
 	VideoComponent* mVideo;
 	bool			mVideoVisible;
 

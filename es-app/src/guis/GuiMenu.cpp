@@ -373,18 +373,30 @@ void GuiMenu::openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListC
 
 		if (themeColorSets.size() > 0)
 		{
-			auto selectedColorSet = std::find(themeColorSets.cbegin(), themeColorSets.cend(), Settings::getInstance()->getString(settingName));
-			if (selectedColorSet == themeColorSets.end())
-				selectedColorSet = themeColorSets.begin();
+			auto selectedColorSet = themeColorSets.end();
+			auto selectedName = Settings::getInstance()->getString(settingName);
+
+			for (auto it = themeColorSets.begin(); it != themeColorSets.end() && selectedColorSet == themeColorSets.end(); it++)
+				if (it->name == selectedName)
+					selectedColorSet = it;
 
 			std::shared_ptr<OptionListComponent<std::string>> item = std::make_shared<OptionListComponent<std::string> >(mWindow, _(("THEME " + Utils::String::toUpper(subset)).c_str()), false);
 			item->setTag(settingName);
 
 			for (auto it = themeColorSets.begin(); it != themeColorSets.end(); it++)
-				item->add(*it, *it, it == selectedColorSet);
+				item->add(it->displayName, it->name, it == selectedColorSet);
+
+			if (selectedColorSet == themeColorSets.end())
+				item->selectFirstItem();
 
 			if (!themeColorSets.empty())
-				themeconfig->addWithLabel(_(("THEME " + Utils::String::toUpper(subset)).c_str()), item);
+			{
+				std::string displayName = theme->getVariable("subset." + subset);
+				if (!displayName.empty())
+					themeconfig->addWithLabel(displayName, item);
+				else
+					themeconfig->addWithLabel(_(("THEME " + Utils::String::toUpper(subset)).c_str()), item);
+			}
 
 			options[settingName] = item;
 		}
@@ -398,19 +410,24 @@ void GuiMenu::openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListC
 	{
 		gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
 
-		std::vector<std::string> styles;
-		styles.push_back("automatic");
+		std::vector<std::pair<std::string, std::string>> styles;
+		styles.push_back(std::pair<std::string, std::string>("automatic", _("automatic")));
 
 		if (system != NULL)
 		{
 			auto mViews = theme->getViewsOfTheme();
 			for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
-				styles.push_back(*it);
+			{
+				if (it->first == "basic" || it->first == "detailed" || it->first == "grid")
+					styles.push_back(std::pair<std::string, std::string>(it->first, _(it->first.c_str())));
+				else
+					styles.push_back(*it);
+			}
 		}
 		else
 		{
-			styles.push_back("basic");
-			styles.push_back("detailed");
+			styles.push_back(std::pair<std::string, std::string>("basic", _("basic")));
+			styles.push_back(std::pair<std::string, std::string>("detailed", _("detailed")));
 		}
 
 		auto viewPreference = Settings::getInstance()->getString("GamelistViewStyle");
@@ -418,7 +435,7 @@ void GuiMenu::openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListC
 			viewPreference = "automatic";
 
 		for (auto it = styles.cbegin(); it != styles.cend(); it++)
-			gamelist_style->add(_(it->c_str()), *it, viewPreference == *it);
+			gamelist_style->add(it->second, it->first, viewPreference == it->first);
 
 		themeconfig->addWithLabel(_("GAMELIST VIEW STYLE"), gamelist_style);
 	}

@@ -365,7 +365,8 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 {
 	std::vector<FileData*> ret;
 
-	bool flatFolders = Settings::getInstance()->getBool("FlatFolders");
+	std::string showFoldersMode = Settings::getInstance()->getString("FolderViewMode");
+	
 	bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles");
 	bool filterKidGame = false;
 
@@ -387,11 +388,13 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 	std::vector<FileData*>* items = &mChildren;
 
 	std::vector<FileData*> flatGameList;
-	if (flatFolders)
+	if (showFoldersMode == "never")
 	{
 		flatGameList = getFlatGameList(false, sys);
 		items = &flatGameList;
 	}
+
+	bool refactorUniqueGameFolders = (showFoldersMode == "having multiple games");
 
 	for (auto it = items->cbegin(); it != items->cend(); it++)
 	{
@@ -404,10 +407,52 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 		if (filterKidGame && !(*it)->getKidGame())
 			continue;
 
+		if ((*it)->getType() == FOLDER && refactorUniqueGameFolders)
+		{
+			FolderData* pFolder = (FolderData*)(*it);
+			auto fd = pFolder->findUniqueGameForFolder();
+			if (fd != nullptr)
+			{
+				if (idx != nullptr && !idx->showFile(fd))
+					continue;
+
+				if (!showHiddenFiles && fd->getHidden())
+					continue;
+
+				if (filterKidGame && !fd->getKidGame())
+					continue;
+
+				ret.push_back(fd);
+
+				continue;
+			}
+		}
+
 		ret.push_back(*it);
 	}
 
 	return ret;
+}
+
+FileData* FolderData::findUniqueGameForFolder()
+{
+	std::vector<FileData*> children = getChildren();
+
+	if (children.size() == 1 && children.at(0)->getType() == GAME)
+		return children.at(0);
+
+	for (std::vector<FileData*>::const_iterator it = children.cbegin(); it != children.cend(); ++it)
+	{
+		if ((*it)->getType() == GAME)
+			return NULL;
+
+		FolderData* folder = (FolderData*)(*it);
+		FileData* ret = folder->findUniqueGameForFolder();
+		if (ret != NULL)
+			return ret;
+	}
+
+	return NULL;
 }
 
 std::vector<FileData*> FolderData::getFlatGameList(bool displayedOnly, SystemData* system) const

@@ -96,7 +96,7 @@ void Settings::setDefaults()
 	
 	mStringMap["StartupSystem"] = "";
 
-	mBoolMap["FlatFolders"] = false;
+	mStringMap["FolderViewMode"] = "never";
 
 	mBoolMap["VSync"] = true;
 	mBoolMap["EnableSounds"] = true;
