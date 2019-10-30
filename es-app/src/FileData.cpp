@@ -115,8 +115,27 @@ const bool FileData::getKidGame()
 	return metadata.get("kidgame") != "false";
 }
 
+static std::shared_ptr<bool> showFilenames;
+
+void FileData::resetSettings()
+{
+	showFilenames = nullptr;
+}
+
 const std::string FileData::getName()
 {
+	if (showFilenames == nullptr)
+		showFilenames = std::make_shared<bool>(Settings::getInstance()->getBool("ShowFilenames"));
+
+	// Faster than accessing map each time
+	if (*showFilenames)
+	{
+		if (mSystem != nullptr && !mSystem->hasPlatformId(PlatformIds::ARCADE) && !mSystem->hasPlatformId(PlatformIds::NEOGEO))
+			return Utils::FileSystem::getStem(getPath());
+		else
+			return getDisplayName();
+	}
+
 	return metadata.getName();
 }
 
@@ -345,22 +364,6 @@ const std::string CollectionFileData::getName()
 	return Utils::String::removeParenthesis(mSourceFileData->metadata.get("name"));
 }
 
-// returns Sort Type based on a string description
-FolderData::SortType getSortTypeFromString(std::string desc) {
-	std::vector<FolderData::SortType> SortTypes = FileSorts::SortTypes;
-	// find it
-	for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++)
-	{
-		const FolderData::SortType& sort = FileSorts::SortTypes.at(i);
-		if(sort.description == desc)
-		{
-			return sort;
-		}
-	}
-	// if not found default to name, ascending
-	return FileSorts::SortTypes.at(0);
-}
-
 const std::vector<FileData*> FolderData::getChildrenListToDisplay() 
 {
 	std::vector<FileData*> ret;
@@ -431,6 +434,16 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 		ret.push_back(*it);
 	}
 
+	unsigned int currentSortId = sys->getSortId();
+	if (currentSortId > FileSorts::getSortTypes().size())
+		currentSortId = 0;
+
+	const FileSorts::SortType& sort = FileSorts::getSortTypes().at(currentSortId);
+	std::sort(ret.begin(), ret.end(), sort.comparisonFunction);
+
+	if (!sort.ascending)
+		std::reverse(ret.begin(), ret.end());
+
 	return ret;
 }
 
@@ -460,10 +473,10 @@ std::vector<FileData*> FolderData::getFlatGameList(bool displayedOnly, SystemDat
 	std::vector<FileData*> ret = getFilesRecursive(GAME, displayedOnly, system);
 
 	unsigned int currentSortId = system->getSortId();
-	if (currentSortId < 0 || currentSortId >FileSorts::SortTypes.size())
+	if (currentSortId < 0 || currentSortId >FileSorts::getSortTypes().size())
 		currentSortId = 0;
 
-	auto sort = FileSorts::SortTypes.at(currentSortId);
+	auto sort = FileSorts::getSortTypes().at(currentSortId);
 
 	std::stable_sort(ret.begin(), ret.end(), sort.comparisonFunction);
 
@@ -530,30 +543,6 @@ void FolderData::removeChild(FileData* file)
 	// File somehow wasn't in our children.
 	assert(false);
 
-}
-
-void FolderData::sort(ComparisonFunction& comparator, bool ascending)
-{
-	std::stable_sort(mChildren.begin(), mChildren.end(), comparator);
-
-	for (auto it = mChildren.cbegin(); it != mChildren.cend(); it++)
-	{
-		if ((*it)->getType() != FOLDER)
-			continue;
-
-		FolderData* folder = (FolderData*)(*it);
-
-		if (folder->getChildren().size() > 0)
-			folder->sort(comparator, ascending);
-	}
-
-	if (!ascending)
-		std::reverse(mChildren.begin(), mChildren.end());
-}
-
-void FolderData::sort(const SortType& type)
-{
-	sort(*type.comparisonFunction, type.ascending);
 }
 
 FileData* FolderData::FindByPath(const std::string& path)

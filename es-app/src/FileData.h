@@ -146,6 +146,4 @@ private:
 	std::vector<FileData*> mChildren;
 };
 
-FolderData::SortType getSortTypeFromString(std::string desc);
-
 #endif // ES_APP_FILE_DATA_H

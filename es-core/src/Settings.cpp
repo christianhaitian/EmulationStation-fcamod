@@ -161,7 +161,9 @@ void Settings::setDefaults()
 	mStringMap["SlideshowScreenSaverImageDir"] = Utils::FileSystem::getHomePath() + "/.emulationstation/slideshow/image";
 	mStringMap["SlideshowScreenSaverImageFilter"] = ".png,.jpg";
 	mBoolMap["SlideshowScreenSaverRecurse"] = false;
-	mBoolMap["SlideshowScreenSaverGameName"] = true;	
+	mBoolMap["SlideshowScreenSaverGameName"] = true;
+	
+	mBoolMap["ShowFilenames"] = false;
 
 	// This setting only applies to raspberry pi but set it for all platforms so
 	// we don't get a warning if we encounter it on a different platform
