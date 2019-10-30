@@ -133,8 +133,12 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 	mListSort = std::make_shared<SortList>(mWindow, _("SORT GAMES BY"), false);
 	for(unsigned int i = 0; i < FileSorts::SortTypes.size(); i++)
 	{
-		const FolderData::SortType& sort = FileSorts::SortTypes.at(i);
-		mListSort->add(_(Utils::String::toUpper(sort.description)), i, i == currentSortId);
+		const FileSorts::SortType& sort = FileSorts::getSortTypes().at(i);
+		mListSort->add(sort.icon + sort.description, sort.id, sort.id == currentSortId); // TODO - actually make the sort type persistent
+	}
+
+	mMenu.addWithLabel(_("SORT GAMES BY"), mListSort); // batocera	
+
 	}
 
 	mMenu.addWithLabel(_("SORT GAMES BY"), mListSort);

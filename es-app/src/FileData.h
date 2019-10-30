@@ -80,6 +80,8 @@ public:
 
 	MetaDataList metadata;
 
+	static void resetSettings();
+
 protected:	
 	FolderData* mParent;
 	std::string mPath;
@@ -124,19 +126,6 @@ public:
 		mChildren.clear();
 	}
 
-	typedef bool ComparisonFunction(const FileData* a, const FileData* b);
-	struct SortType
-	{
-		ComparisonFunction* comparisonFunction;
-		bool ascending;
-		std::string description;
-
-		SortType(ComparisonFunction* sortFunction, bool sortAscending, const std::string & sortDescription)
-			: comparisonFunction(sortFunction), ascending(sortAscending), description(sortDescription) {}
-	};
-
-	void sort(ComparisonFunction& comparator, bool ascending = true);
-	void sort(const SortType& type);
 
 	FileData* FindByPath(const std::string& path);
 

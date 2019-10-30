@@ -73,6 +73,12 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 
 	if (files.size() > 0)
 	{
+		if (mCursorStack.size())
+		{
+			FileData* placeholder = new FileData(PLACEHOLDER, "..", this->mRoot->getSystem());
+			mList.add(". .", placeholder, (placeholder->getType() == PLACEHOLDER));
+		}
+
 		if (favoritesFirst)
 		{
 			for (auto it = files.cbegin(); it != files.cend(); it++)
@@ -82,6 +88,8 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 				
 				if (showFavoriteIcon)
 					mList.add(_U("\uF006 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
+				else if (((*it)->getType() == FOLDER))
+					mList.add(_U("\uF114 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
 				else
 					mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));				
 			}
@@ -100,8 +108,11 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 					continue;
 				}
 			}
-				
-			mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+
+			if (((*it)->getType() == FOLDER))
+				mList.add(_U("\uF114 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
+			else
+				mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
 		}
 	}
 	else

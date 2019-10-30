@@ -208,6 +208,12 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 
 	if (files.size() > 0)
 	{
+		if (mCursorStack.size())
+		{
+			FileData* placeholder = new FileData(PLACEHOLDER, "..", this->mRoot->getSystem());
+			mGrid.add(". .", "", "", "", placeholder);
+		}
+
 		std::string systemName = mRoot->getSystem()->getFullName();
 
 		bool favoritesFirst = Settings::getInstance()->getBool("FavoritesFirst");

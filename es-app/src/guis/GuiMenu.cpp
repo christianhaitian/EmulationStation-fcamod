@@ -829,6 +829,20 @@ void GuiMenu::openUISettings()
 			s->setVariable("reloadAll", true);
 	});
 
+	// filenames
+	auto hidden_files = std::make_shared<SwitchComponent>(mWindow);
+	hidden_files->setState(Settings::getInstance()->getBool("ShowFilenames"));
+	s->addWithLabel(_("SHOW FILENAMES IN LISTS"), hidden_files);
+	s->addSaveFunc([hidden_files, s] 
+	{ 
+		if (Settings::getInstance()->setBool("ShowFilenames", hidden_files->getState()))
+		{
+			FileData::resetSettings();
+			s->setVariable("reloadCollections", true);
+			s->setVariable("reloadAll", true);
+		}
+	});
+
 	// enable filters (ForceDisableFilters)
 	auto enable_filter = std::make_shared<SwitchComponent>(mWindow);
 	enable_filter->setState(!Settings::getInstance()->getBool("ForceDisableFilters"));
