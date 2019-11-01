@@ -160,6 +160,15 @@ HttpReq::HttpReq(const std::string& url)
 		return;
 	}
 
+	// Set fake user agent
+	err = curl_easy_setopt(mHandle, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0");
+	if (err != CURLE_OK)
+	{
+		mStatus = REQ_IO_ERROR;
+		onError(curl_easy_strerror(err));
+		return;
+	}
+
 #ifdef WIN32
 	// Setup system proxy on Windows if required
 	if (_regGetDWORD(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "ProxyEnable"))
@@ -306,6 +315,8 @@ HttpReq::Status HttpReq::status()
 							req->mStatus = REQ_404_NOTFOUND;
 						else if (http_status_code == 429)
 							req->mStatus = REQ_429_TOOMANYREQUESTS;
+						else if (http_status_code == 426)
+							req->mStatus = REQ_426_BLACKLISTED;
 						else
 							req->mStatus = REQ_IO_ERROR;
 
