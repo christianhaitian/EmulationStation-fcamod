@@ -400,6 +400,9 @@ int main(int argc, char* argv[])
 
 #if WIN32
 	std::locale::global(std::locale("en-US"));
+	setlocale(LC_NUMERIC, "C");
+	setlocale(LC_TIME, "C");
+	setlocale(LC_MONETARY, "C");
 #else
 	std::locale::global(std::locale("C"));
 #endif
