@@ -30,13 +30,13 @@ GuiScraperStart::GuiScraperStart(Window* window) : GuiComponent(window),
 			if (!Settings::getInstance()->getString("ScrapperImageSrc").empty() && !Utils::FileSystem::exists(g->metadata.get("image")))
 				return true;
 
-			if (Settings::getInstance()->getString("ScrapperThumbSrc").empty() && !Utils::FileSystem::exists(g->metadata.get("thumbnail")))
+			if (!Settings::getInstance()->getString("ScrapperThumbSrc").empty() && !Utils::FileSystem::exists(g->metadata.get("thumbnail")))
+				return true;
+
+			if (!Settings::getInstance()->getString("ScrapperLogoSrc").empty() && !Utils::FileSystem::exists(g->metadata.get("marquee")))
 				return true;
 
 			if (Settings::getInstance()->getBool("ScrapeVideos") && !Utils::FileSystem::exists(g->metadata.get("video")))
-				return true;
-
-			if (Settings::getInstance()->getString("ScrapperLogoSrc").empty() && !Utils::FileSystem::exists(g->metadata.get("marquee")))
 				return true;
 
 			return false;
