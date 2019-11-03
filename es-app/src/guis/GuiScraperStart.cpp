@@ -36,7 +36,7 @@ GuiScraperStart::GuiScraperStart(Window* window) : GuiComponent(window),
 			if (Settings::getInstance()->getBool("ScrapeVideos") && !Utils::FileSystem::exists(g->metadata.get("video")))
 				return true;
 
-			if (Settings::getInstance()->getBool("ScrapeMarquee") && !Utils::FileSystem::exists(g->metadata.get("marquee")))
+			if (Settings::getInstance()->getString("ScrapperLogoSrc").empty() && !Utils::FileSystem::exists(g->metadata.get("marquee")))
 				return true;
 
 			return false;
