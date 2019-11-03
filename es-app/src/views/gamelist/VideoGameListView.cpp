@@ -292,7 +292,7 @@ void VideoGameListView::updateInfoPanel()
 		mMarquee.setImage(file->getMarqueePath()/*, false, mMarquee.getMaxSizeInfo()*/); // Too slow on pi
 
 		if (mImage != nullptr)
-			mImage->setImage(file->getImagePath());
+			mImage->setImage(file->getThumbnailPath());
 
 		mDescription.setText(file->metadata.get("desc"));
 		mDescContainer.reset();
