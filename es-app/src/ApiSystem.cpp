@@ -225,7 +225,7 @@ void deleteDirectoryFiles(const std::string path)
 	for (auto file : files)
 	{
 		if (Utils::FileSystem::isDirectory(file))
-			::RemoveDirectory(file.c_str());
+			::RemoveDirectoryA(file.c_str());
 		else
 			Utils::FileSystem::removeFile(file);
 	}
