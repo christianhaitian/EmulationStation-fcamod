@@ -52,6 +52,7 @@ void ImageComponent::resize()
 
 	if (mTexture->isTiled())
 	{
+		uncrop();
 		mSize = mTargetSize;
 	}
 	else
@@ -64,6 +65,7 @@ void ImageComponent::resize()
 
 		if(mTargetIsMax)
 		{
+			uncrop();
 			mSize = textureSize;
 
 			Vector2f resizeScale((mTargetSize.x() / mSize.x()), (mTargetSize.y() / mSize.y()));
@@ -106,7 +108,10 @@ void ImageComponent::resize()
 			mSize[1] = Math::max(Math::round(mSize[1]), mTargetSize.y());
 			mSize[0] = Math::max((mSize[1] / textureSize.y()) * textureSize.x(), mTargetSize.x());
 
-		}else{
+		}
+		else
+		{
+			uncrop();
 			// if both components are set, we just stretch
 			// if no components are set, we don't resize at all
 			mSize = mTargetSize == Vector2f::Zero() ? textureSize : mTargetSize;
