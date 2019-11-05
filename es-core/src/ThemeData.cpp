@@ -391,12 +391,15 @@ void ThemeData::loadFile(const std::string system, std::map<std::string, std::st
 
 const std::shared_ptr<ThemeData::ThemeMenu>& ThemeData::getMenuTheme()
 {
-	if (mMenuTheme == nullptr && mDefaultTheme != nullptr)
-		mMenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(mDefaultTheme));
-	else if (mMenuTheme == nullptr)
+	if (mMenuTheme == nullptr)
 	{
-		auto emptyData = ThemeData();
-		return std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(&emptyData));
+		if (mDefaultTheme != nullptr)
+			mMenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(mDefaultTheme));
+		else
+		{
+			auto emptyData = ThemeData();
+			mMenuTheme = std::shared_ptr<ThemeData::ThemeMenu>(new ThemeMenu(&emptyData));
+		}
 	}
 
 	return mMenuTheme;
