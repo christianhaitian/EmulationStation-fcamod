@@ -296,7 +296,7 @@ void DetailedGameListView::initMDValues()
 
 std::string DetailedGameListView::getMetadata(FileData* file, std::string name)
 {
-	std::string ret = file->metadata.get(name);
+	std::string ret = file->getMetadata().get(name);
 	if (ret == "unknown")
 		return _(ret);
 
