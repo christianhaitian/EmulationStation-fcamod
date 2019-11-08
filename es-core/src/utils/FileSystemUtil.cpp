@@ -79,7 +79,11 @@ namespace Utils
 
 				WIN32_FIND_DATAW findData;
 				std::string      wildcard = path + "/*";
-				HANDLE           hFind = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
+			//	HANDLE           hFind = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
+
+				HANDLE hFind = FindFirstFileExW(std::wstring(wildcard.begin(), wildcard.end()).c_str(),
+					FINDEX_INFO_LEVELS::FindExInfoStandard, &findData, FINDEX_SEARCH_OPS::FindExSearchNameMatch
+					, NULL, FIND_FIRST_EX_LARGE_FETCH);
 
 				if (hFind != INVALID_HANDLE_VALUE)
 				{
@@ -156,7 +160,13 @@ namespace Utils
 
 				WIN32_FIND_DATAW findData;
 				std::string      wildcard = path + "/*";
-				HANDLE           hFind    = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
+			//	HANDLE           hFind    = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
+				
+				HANDLE hFind = FindFirstFileExW(std::wstring(wildcard.begin(), wildcard.end()).c_str(),
+					FINDEX_INFO_LEVELS::FindExInfoStandard, &findData, FINDEX_SEARCH_OPS::FindExSearchNameMatch
+					, NULL, FIND_FIRST_EX_LARGE_FETCH);
+
+				//handle = FindFirstFileEx(search, 0, &FindFileData, 2, NULL, 0);
 
 				if(hFind != INVALID_HANDLE_VALUE)
 				{
