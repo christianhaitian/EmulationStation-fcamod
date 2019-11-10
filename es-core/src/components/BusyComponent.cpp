@@ -22,6 +22,8 @@ BusyComponent::BusyComponent(Window* window) : GuiComponent(window),
 	mBackground.setCenterColor(theme->Background.centerColor);
 	mBackground.setCornerSize(theme->Background.cornerSize);
     
+	mutex = SDL_CreateMutex();
+
 	mAnimation = std::make_shared<AnimatedImageComponent>(mWindow);
 	mAnimation->load(&BUSY_ANIMATION_DEF);
 	mText = std::make_shared<TextComponent>(mWindow, _("WORKING..."), ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color);
@@ -32,6 +34,40 @@ BusyComponent::BusyComponent(Window* window) : GuiComponent(window),
 
 	addChild(&mBackground);
 	addChild(&mGrid);
+}
+
+BusyComponent::~BusyComponent()
+{
+	SDL_DestroyMutex(mutex);
+}
+
+void BusyComponent::setText(std::string txt)
+{
+	if (SDL_LockMutex(mutex) == 0)
+	{
+		if (threadMessage != txt)
+		{
+			threadMessage = txt;
+			threadMessagechanged = true;
+		}
+
+		SDL_UnlockMutex(mutex);
+	}
+}
+
+void BusyComponent::render(const Transform4x4f& parentTrans)
+{
+	if (SDL_LockMutex(mutex) == 0)
+	{
+		if (threadMessagechanged)
+		{
+			threadMessagechanged = false;
+			mText->setText(threadMessage);
+			onSizeChanged();
+		}
+		SDL_UnlockMutex(mutex);
+	}
+	GuiComponent::render(parentTrans);
 }
 
 void BusyComponent::onSizeChanged()

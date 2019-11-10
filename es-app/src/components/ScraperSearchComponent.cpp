@@ -388,8 +388,25 @@ void ScraperSearchComponent::update(int deltaTime)
 {
 	GuiComponent::update(deltaTime);
 
-	if(mBlockAccept)
+	if (mBlockAccept)
 	{
+		if (mMDResolveHandle && mMDResolveHandle->status() == ASYNC_IN_PROGRESS)
+		{
+			if (mSearchType == ALWAYS_ACCEPT_FIRST_RESULT && !mResultThumbnail->hasImage())
+			{
+				ScraperSearchResult result = mMDResolveHandle->getResult();
+
+				if (!result.mdl.get("thumbnail").empty())
+					mResultThumbnail->setImage(result.mdl.get("thumbnail"));
+				else if (!result.mdl.get("image").empty())
+					mResultThumbnail->setImage(result.mdl.get("image"));
+			}
+
+			mBusyAnim.setText(_("DOWNLOADING") + " " + Utils::String::toUpper(mMDResolveHandle->getCurrentItem()));
+		}
+		else if (mSearchHandle && mSearchHandle->status() == ASYNC_IN_PROGRESS)
+			mBusyAnim.setText(_("SEARCHING"));
+
 		mBusyAnim.update(deltaTime);
 	}
 
