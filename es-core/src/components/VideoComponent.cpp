@@ -67,6 +67,7 @@ VideoComponent::VideoComponent(Window* window) :
 	mTargetIsMin(false),
 	mTargetSize(0, 0)
 {
+	mRoundCorners = 0.0f;
 	mFadeIn = 0.0f;
 	mIsWaitingForVideoToStart = false;
 

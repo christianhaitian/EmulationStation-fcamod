@@ -34,6 +34,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "reflexionOnFrame", BOOLEAN },
 		{ "horizontalAlignment", STRING },		
 		{ "verticalAlignment", STRING },
+		{ "roundCorners", FLOAT },
 		{ "flipX", BOOLEAN },
 		{ "flipY", BOOLEAN },
 		{ "zIndex", FLOAT } } },
@@ -201,6 +202,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "delay", FLOAT },
 		{ "effect", STRING },
 	 	{ "visible", BOOLEAN },
+		{ "roundCorners", FLOAT },
 	 	{ "zIndex", FLOAT },		
 		{ "snapshotSource", STRING }, // image, thumbnail, marquee
 		{ "showSnapshotNoVideo", BOOLEAN },

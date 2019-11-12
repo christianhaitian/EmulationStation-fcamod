@@ -240,7 +240,7 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 		if (mCursorStack.size())
 		{
 			FileData* placeholder = new FileData(PLACEHOLDER, "..", this->mRoot->getSystem());
-			mGrid.add(". .", "", "", "", placeholder);
+			mGrid.add(". .", "", "", "", false, placeholder);
 		}
 
 		std::string systemName = mRoot->getSystem()->getFullName();
@@ -257,10 +257,7 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 				if (!(*it)->getFavorite())
 					continue;
 				
-				if (showFavoriteIcon)
-					mGrid.add(_U("\uF006 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), *it);
-				else
-					mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), *it);
+				mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), showFavoriteIcon, *it);
 			}
 		}
 
@@ -273,15 +270,15 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 
 				if (showFavoriteIcon)
 				{
-					mGrid.add(_U("\uF006 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), *it);
+					mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), true, *it);
 					continue;
 				}
 			}
 
 			if (((*it)->getType() == FOLDER) && Utils::FileSystem::exists(getImagePath(*it)))
-				mGrid.add(_U("\uF114 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), *it);
+				mGrid.add(_U("\uF114 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), (*it)->getFavorite(), *it);
 			else
-				mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), *it);
+				mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), (*it)->getFavorite(), *it);
 		}
 	}
 	else
@@ -617,8 +614,8 @@ void GridGameListView::updateInfoPanel()
 void GridGameListView::addPlaceholder()
 {
 	// empty grid - add a placeholder
-	FileData* placeholder = new FileData(PLACEHOLDER, "<No Entries Found>", this->mRoot->getSystem());
-	mGrid.add(placeholder->getName(), "", "", "", placeholder);
+	FileData* placeholder = new FileData(PLACEHOLDER, "<" + _("No Entries Found") + ">", this->mRoot->getSystem());
+	mGrid.add(placeholder->getName(), "", "", "", false, placeholder);
 }
 
 void GridGameListView::launch(FileData* game)

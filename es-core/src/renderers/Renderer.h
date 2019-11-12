@@ -107,6 +107,11 @@ namespace Renderer
 	bool         isSmallScreen();
 
 	unsigned int mixColors(unsigned int first, unsigned int second, float percent);
+
+
+	void enableRoundCornerStencil(int x, int y, int size_x, int size_y, int radius);
+	void disableStencil();
+
 } // Renderer::
 
 #endif // ES_CORE_RENDERER_RENDERER_H

@@ -104,6 +104,8 @@ public:
 	void setHorizontalAlignment(Alignment align) { mHorizontalAlignment = align; }
 	void setVerticalAlignment(Alignment align) { mVerticalAlignment = align; }
 
+	float getRoundCorners() { return mRoundCorners; }
+
 private:
 	Vector2f mTargetSize;
 
@@ -136,6 +138,7 @@ private:
 	bool					mVisible;
 	bool					mAllowFading;
 	bool					mAllowAsync;
+	float					mRoundCorners;
 
 	Vector2f mTopLeftCrop;
 	Vector2f mBottomRightCrop;	

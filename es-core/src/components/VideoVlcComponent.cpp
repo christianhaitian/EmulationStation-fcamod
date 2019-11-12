@@ -291,17 +291,41 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 
 	if (mTexture->bind())
 	{
-		if (mTargetIsMin)
-		{
-			Vector2f targetPos = (mTargetSize - mSize) * mOrigin * -1;
+		Vector2f targetSizePos = (mTargetSize - mSize) * mOrigin * -1;
 
-			Vector2i pos(trans.translation().x() + (int)targetPos.x(), trans.translation().y() + (int)targetPos.y());
+		if (mTargetIsMin)
+		{			
+			Vector2i pos(trans.translation().x() + (int)targetSizePos.x(), trans.translation().y() + (int)targetSizePos.y());
 			Vector2i size((int)mTargetSize.round().x(), (int)mTargetSize.round().y());
 			Renderer::pushClipRect(pos, size);
 		}
 
+		if (mRoundCorners > 0)
+		{
+			int x = 0;
+			int y = 0;
+			int size_x = mSize.x();
+			int size_y = mSize.y();
+			int radius = Math::max(size_x, size_y) * mRoundCorners;
+
+			if (mTargetIsMin)
+			{
+				x = targetSizePos.x();
+				y = targetSizePos.y();
+				size_x = mTargetSize.x();
+				size_y = mTargetSize.y();
+			}
+
+			Renderer::enableRoundCornerStencil(x, y, size_x, size_y, radius);
+
+			mTexture->bind();
+		}
+
 		// Render it
 		Renderer::drawTriangleStrips(&vertices[0], 4);
+
+		if (mRoundCorners > 0)
+			Renderer::disableStencil();
 
 		if (mTargetIsMin)
 			Renderer::popClipRect();
@@ -526,6 +550,9 @@ void VideoVlcComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 		else
 			mEffect = VideoVlcFlags::VideoVlcEffect::NONE;
 	}
+
+	if (elem && elem->has("roundCorners"))
+		mRoundCorners = elem->get<float>("roundCorners");
 }
 
 void VideoVlcComponent::update(int deltaTime)

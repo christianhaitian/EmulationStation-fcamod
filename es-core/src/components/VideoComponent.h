@@ -110,6 +110,9 @@ public:
 		mVideoEnded = callback;
 	}
 
+	float getRoundCorners() { return mRoundCorners; }
+	void setRoundCorners(float value) { mRoundCorners = value; }
+
 protected:
 	std::function<bool()> mVideoEnded;
 
@@ -155,6 +158,8 @@ protected:
 	bool							mTargetIsMin;
 
 	bool							mIsWaitingForVideoToStart;
+
+	float							mRoundCorners;
 
 	Configuration					mConfig;
 };

@@ -25,6 +25,7 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 	mAnimPosition = Vector3f(0, 0);
 	mVideo = nullptr;
 	mMarquee = nullptr;
+	mFavorite = nullptr;
 	mIsDefaultImage = false;
 
 	mLabelVisible = false;
@@ -32,7 +33,7 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 
 	resetProperties();
 
-	mImage = std::make_shared<ImageComponent>(mWindow);
+	mImage = new ImageComponent(mWindow);
 	mImage->setOrigin(0.5f, 0.5f);
 
 	addChild(&mBackground);
@@ -93,9 +94,21 @@ void GridTileComponent::forceSize(Vector2f size, float selectedZoom)
 
 GridTileComponent::~GridTileComponent()
 {
+	if (mImage != nullptr)
+		delete mImage;
+
+	if (mFavorite != nullptr)
+		delete mFavorite;
+
+	if (mMarquee != nullptr)
+		delete mMarquee;
+
 	if (mVideo != nullptr)
 		delete mVideo;
 
+	mFavorite = nullptr;
+	mMarquee = nullptr;
+	mImage = nullptr;
 	mVideo = nullptr;
 }
 
@@ -160,18 +173,16 @@ void GridTileComponent::resize()
 	float imageWidth = size.x() - paddingX * 2.0;
 	float imageHeight = size.y() - topPadding - bottomPadding;
 
-	if (mMarquee != nullptr)
-	{		
-		mMarquee->setPosition(
-			currentProperties.mMarqueePos.x() * size.x(),
-			currentProperties.mMarqueePos.y() * size.y());
-
-		mMarquee->setMaxSize(
-			currentProperties.mMarqueeSize.x() * size.x(), 
-			currentProperties.mMarqueeSize.y() * size.y());
-	}
 	
-	if (mImage != nullptr)
+	if (currentProperties.Favorite.Loaded)
+		currentProperties.Favorite.updateImageComponent(mFavorite, Vector2f(size.x(), (size.y() - height)), false);
+
+	if (currentProperties.Marquee.Loaded)
+		currentProperties.Marquee.updateImageComponent(mMarquee, Vector2f(size.x(), (size.y() - height)), true);
+
+	if (currentProperties.Image.Loaded)
+		currentProperties.Image.updateImageComponent(mImage, Vector2f(size.x(), (size.y() - height)), false);
+	else if (mImage != nullptr)
 	{
 		mImage->setPosition(size.x() / 2.0f, (size.y() - height) / 2.0f);
 		mImage->setColorShift(currentProperties.mImageColor);
@@ -216,6 +227,9 @@ void GridTileComponent::resize()
 
 		if (currentProperties.mImageSizeMode == "minSize")
 		{
+			if (mImage != nullptr)
+				mVideo->setRoundCorners(mImage->getRoundCorners());
+
 			auto vs = mVideo->getVideoSize();
 			if (vs == Vector2f(0, 0))
 				vs = Vector2f(640, 480);
@@ -350,6 +364,9 @@ void GridTileComponent::renderContent(const Transform4x4f& parentTrans)
 	else if (!mLabelVisible && mIsDefaultImage)
 		mLabel.render(trans);
 
+	if (mFavorite != nullptr && mFavorite->hasImage() && mFavorite->isVisible())
+		mFavorite->render(trans);
+
 	if (mLabelMerged && isMinSize)
 		Renderer::popClipRect();
 }
@@ -372,6 +389,19 @@ void GridTileComponent::createMarquee()
 	mMarquee->setOrigin(0.5f, 0.5f);
 	mMarquee->setDefaultZIndex(35);
 	addChild(mMarquee);
+}
+
+void GridTileComponent::createFavorite()
+{
+	if (mFavorite != nullptr)
+		return;
+
+	mFavorite = new ImageComponent(mWindow);
+	mFavorite->setOrigin(0.5f, 0.5f);
+	mFavorite->setDefaultZIndex(35);
+	mFavorite->setVisible(false);
+	
+	addChild(mFavorite);
 }
 
 void GridTileComponent::createVideo()
@@ -457,30 +487,74 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 		}
 	}
 	
+	elem = theme->getElement(view, "gridtile.image", "image");
+	if (elem)
+	{
+		mImage->applyTheme(theme, view, "gridtile.image", ThemeFlags::ALL ^ (ThemeFlags::PATH));
+
+		mDefaultProperties.Image.color = mDefaultProperties.mImageColor;
+		mDefaultProperties.Image.colorEnd = mDefaultProperties.mImageColor;
+
+		mSelectedProperties.Image.color = mSelectedProperties.mImageColor;
+		mSelectedProperties.Image.colorEnd = mSelectedProperties.mImageColor;
+
+		if (mDefaultProperties.mImageSizeMode == "minSize")
+			mDefaultProperties.Image.sizeMode = 1;
+		else if (mDefaultProperties.mImageSizeMode == "maxSize")
+			mDefaultProperties.Image.sizeMode = 2;
+		else 
+			mDefaultProperties.Image.sizeMode = 0;
+
+		mSelectedProperties.Image.sizeMode = mDefaultProperties.Image.sizeMode;
+
+		mDefaultProperties.Image.loadElement(elem);
+		mSelectedProperties.Image.loadElement(elem);
+
+		elem = theme->getElement(view, "gridtile.image:selected", "image");
+		if (elem)
+			mSelectedProperties.Image.loadElement(elem);
+	}
+
+
 	elem = theme->getElement(view, "gridtile.marquee", "image");
 	if (elem)
 	{
 		createMarquee();
 		mMarquee->applyTheme(theme, view, "gridtile.marquee", ThemeFlags::ALL ^ (ThemeFlags::PATH));
 
-		if (elem->has("pos"))
-			mDefaultProperties.mMarqueePos = elem->get<Vector2f>("pos");
-		else 
-			mDefaultProperties.mMarqueeSize = Vector2f(0, 0);
+		mDefaultProperties.Marquee.loadElement(elem);
+		mSelectedProperties.Marquee = mDefaultProperties.Marquee;
 
-		if (elem->has("pos"))
-			mDefaultProperties.mMarqueeSize = elem->get<Vector2f>("size");
-		else
-			mDefaultProperties.mMarqueeSize = Vector2f(1, 1);
-
-		mSelectedProperties.mMarqueePos = mDefaultProperties.mMarqueePos;
-		mSelectedProperties.mMarqueeSize = mDefaultProperties.mMarqueeSize;
+		elem = theme->getElement(view, "gridtile.marquee:selected", "image");
+		if (elem)
+			mSelectedProperties.Marquee.loadElement(elem);
 	}
 	else if (mMarquee != nullptr)
 	{
 		removeChild(mMarquee);
 		delete mMarquee;
 		mMarquee = nullptr;
+	}
+
+	elem = theme->getElement(view, "gridtile.favorite", "image");
+	if (elem)
+	{
+		createFavorite();
+		mFavorite->applyTheme(theme, view, "gridtile.favorite", ThemeFlags::ALL);
+
+		mDefaultProperties.Favorite.sizeMode = 0;
+		mDefaultProperties.Favorite.loadElement(elem);
+		mSelectedProperties.Favorite = mDefaultProperties.Favorite;
+
+		elem = theme->getElement(view, "gridtile.favorite:selected", "image");
+		if (elem)
+			mSelectedProperties.Favorite.loadElement(elem);
+	}
+	else if (mFavorite != nullptr)
+	{
+		removeChild(mFavorite);
+		delete mFavorite;
+		mFavorite = nullptr;
 	}
 
 		// Apply theme to the selected gridtile
@@ -590,6 +664,9 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 		mLabel.applyTheme(theme, view, element, properties);
 
 		elem = theme->getElement(view, "gridtile_selected", "text");
+		if (elem == nullptr)
+			elem = theme->getElement(view, "gridtile:selected", "text");
+
 		if (elem != NULL)
 		{
 			if (elem->has("pos") && mDefaultProperties.mLabelPos.x() >= 0)
@@ -671,6 +748,15 @@ void GridTileComponent::setMarquee(const std::string& path)
 	else
 		mMarquee->setImage(path, false, MaxSizeInfo(mSize));
 
+	resize();
+}
+
+void GridTileComponent::setFavorite(bool favorite)
+{
+	if (mFavorite == nullptr)
+		return;
+
+	mFavorite->setVisible(favorite);
 	resize();
 }
 
@@ -838,63 +924,78 @@ void GridTileComponent::setVisible(bool visible)
 	mVisible = visible;
 }
 
+Vector2f GridTileComponent::mixVectors(const Vector2f& def, const Vector2f& sel, float percent)
+{
+	if (def == sel)
+		return def;
+		
+	float x = def.x() * (1.0 - percent) + sel.x() * percent;
+	float y = def.y() * (1.0 - percent) + sel.y() * percent;
+	return Vector2f(x, y);	
+}
+
+unsigned int GridTileComponent::mixUnsigned(const unsigned int def, const unsigned int sel, float percent)
+{
+	if (def == sel)
+		return def;
+
+	return def * (1.0 - percent) + sel * percent;
+}
+
 GridTileProperties GridTileComponent::getCurrentProperties()
 {
+	using namespace Renderer;
+
 	GridTileProperties mMixedProperties;
 
 	if (mSelectedZoomPercent == 0.0f || mSelectedZoomPercent == 1.0f)
 		return mSelected ? mSelectedProperties : mDefaultProperties;
 
-	auto def = mSelected ? mSelectedProperties : mDefaultProperties;
-
 	mMixedProperties = mSelected ? mSelectedProperties : mDefaultProperties;
 
-	if (mDefaultProperties.mSize != mSelectedProperties.mSize)
+	mMixedProperties.mSize				= mixVectors(mDefaultProperties.mSize, mSelectedProperties.mSize, mSelectedZoomPercent);
+	mMixedProperties.mPadding			= mixVectors(mDefaultProperties.mPadding, mSelectedProperties.mPadding, mSelectedZoomPercent);
+	
+	mMixedProperties.mLabelPos		    = mixVectors(mDefaultProperties.mLabelPos, mSelectedProperties.mLabelPos, mSelectedZoomPercent);
+	mMixedProperties.mLabelSize			= mixVectors(mDefaultProperties.mLabelSize, mSelectedProperties.mLabelSize, mSelectedZoomPercent);
+	mMixedProperties.mLabelColor		= mixColors(mDefaultProperties.mLabelColor, mSelectedProperties.mLabelColor, mSelectedZoomPercent);
+	mMixedProperties.mLabelBackColor	= mixColors(mDefaultProperties.mLabelBackColor, mSelectedProperties.mLabelBackColor, mSelectedZoomPercent);
+	mMixedProperties.mLabelGlowColor	= mixColors(mDefaultProperties.mLabelGlowColor, mSelectedProperties.mLabelGlowColor, mSelectedZoomPercent);
+	mMixedProperties.mLabelGlowSize		= mixUnsigned(mDefaultProperties.mLabelGlowSize, mSelectedProperties.mLabelGlowSize, mSelectedZoomPercent);	
+
+	mMixedProperties.mImageColor		= mixColors(mDefaultProperties.mImageColor, mSelectedProperties.mImageColor, mSelectedZoomPercent);
+	mMixedProperties.mMirror			= mixVectors(mDefaultProperties.mMirror, mSelectedProperties.mMirror, mSelectedZoomPercent);
+
+	if (mDefaultProperties.Image.Loaded)
 	{
-		float x = mDefaultProperties.mSize.x() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mSize.x() * mSelectedZoomPercent;
-		float y = mDefaultProperties.mSize.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mSize.y() * mSelectedZoomPercent;
-		mMixedProperties.mSize = Vector2f(x, y);
+		mMixedProperties.Image.pos = mixVectors(mDefaultProperties.Image.pos, mSelectedProperties.Image.pos, mSelectedZoomPercent);
+		mMixedProperties.Image.size = mixVectors(mDefaultProperties.Image.size, mSelectedProperties.Image.size, mSelectedZoomPercent);
+		mMixedProperties.Image.origin = mixVectors(mDefaultProperties.Image.origin, mSelectedProperties.Image.origin, mSelectedZoomPercent);
+		mMixedProperties.Image.color = mixColors(mDefaultProperties.Image.color, mSelectedProperties.Image.color, mSelectedZoomPercent);
+		mMixedProperties.Image.colorEnd = mixColors(mDefaultProperties.Image.colorEnd, mSelectedProperties.Image.colorEnd, mSelectedZoomPercent);
+		mMixedProperties.Image.reflexion = mixVectors(mDefaultProperties.Image.reflexion, mSelectedProperties.Image.reflexion, mSelectedZoomPercent);
 	}
 
-	if (mDefaultProperties.mPadding != mSelectedProperties.mPadding)
+	if (mDefaultProperties.Marquee.Loaded)
 	{
-		float x = mDefaultProperties.mPadding.x() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mPadding.x() * mSelectedZoomPercent;
-		float y = mDefaultProperties.mPadding.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mPadding.y() * mSelectedZoomPercent;
-		mMixedProperties.mPadding = Vector2f(x, y);
+		mMixedProperties.Marquee.pos		= mixVectors(mDefaultProperties.Marquee.pos, mSelectedProperties.Marquee.pos, mSelectedZoomPercent);
+		mMixedProperties.Marquee.size		= mixVectors(mDefaultProperties.Marquee.size, mSelectedProperties.Marquee.size, mSelectedZoomPercent);
+		mMixedProperties.Marquee.origin		= mixVectors(mDefaultProperties.Marquee.origin, mSelectedProperties.Marquee.origin, mSelectedZoomPercent);
+		mMixedProperties.Marquee.color		= mixColors(mDefaultProperties.Marquee.color, mSelectedProperties.Marquee.color, mSelectedZoomPercent);
+		mMixedProperties.Marquee.colorEnd	= mixColors(mDefaultProperties.Marquee.colorEnd, mSelectedProperties.Marquee.colorEnd, mSelectedZoomPercent);
+		mMixedProperties.Marquee.reflexion	= mixVectors(mDefaultProperties.Marquee.reflexion, mSelectedProperties.Marquee.reflexion, mSelectedZoomPercent);
 	}
 
-	if (mDefaultProperties.mImageColor != mSelectedProperties.mImageColor)
+	if (mDefaultProperties.Favorite.Loaded)
 	{
-		mMixedProperties.mImageColor = Renderer::mixColors(mDefaultProperties.mImageColor, mSelectedProperties.mImageColor, mSelectedZoomPercent);
+		mMixedProperties.Favorite.pos = mixVectors(mDefaultProperties.Favorite.pos, mSelectedProperties.Favorite.pos, mSelectedZoomPercent);
+		mMixedProperties.Favorite.size = mixVectors(mDefaultProperties.Favorite.size, mSelectedProperties.Favorite.size, mSelectedZoomPercent);
+		mMixedProperties.Favorite.origin = mixVectors(mDefaultProperties.Favorite.origin, mSelectedProperties.Favorite.origin, mSelectedZoomPercent);
+		mMixedProperties.Favorite.color = mixColors(mDefaultProperties.Favorite.color, mSelectedProperties.Favorite.color, mSelectedZoomPercent);
+		mMixedProperties.Favorite.colorEnd = mixColors(mDefaultProperties.Favorite.colorEnd, mSelectedProperties.Favorite.colorEnd, mSelectedZoomPercent);
+		mMixedProperties.Favorite.reflexion = mixVectors(mDefaultProperties.Favorite.reflexion, mSelectedProperties.Favorite.reflexion, mSelectedZoomPercent);
 	}
-
-	if (mDefaultProperties.mLabelSize != mSelectedProperties.mLabelSize)
-		mMixedProperties.mLabelSize = Vector2f(mDefaultProperties.mLabelSize.x(),
-			mDefaultProperties.mLabelSize.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mLabelSize.y() * mSelectedZoomPercent);
-
-	if (mDefaultProperties.mLabelColor != mSelectedProperties.mLabelColor)
-		mMixedProperties.mLabelColor = Renderer::mixColors(mDefaultProperties.mLabelColor, mSelectedProperties.mLabelColor, mSelectedZoomPercent);
-
-	if (mDefaultProperties.mLabelBackColor != mSelectedProperties.mLabelBackColor)
-		mMixedProperties.mLabelBackColor = Renderer::mixColors(mDefaultProperties.mLabelBackColor, mSelectedProperties.mLabelBackColor, mSelectedZoomPercent);
-
-	if (mDefaultProperties.mLabelGlowColor != mSelectedProperties.mLabelGlowColor)
-		mMixedProperties.mLabelGlowColor = Renderer::mixColors(mDefaultProperties.mLabelGlowColor, mSelectedProperties.mLabelGlowColor, mSelectedZoomPercent);
-
-	if (mDefaultProperties.mLabelGlowSize != mSelectedProperties.mLabelGlowSize)
-		mMixedProperties.mLabelGlowSize = mDefaultProperties.mLabelGlowSize * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mLabelGlowSize * mSelectedZoomPercent;
-
-	if (mDefaultProperties.mMirror != mSelectedProperties.mMirror)
-	{
-		float x = mDefaultProperties.mMirror.x() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mMirror.x() * mSelectedZoomPercent;
-		float y = mDefaultProperties.mMirror.y() * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mMirror.y() * mSelectedZoomPercent;
-		mMixedProperties.mMirror = Vector2f(x, y);
-	}
-
-	//  Avoid to multiply font sizes in mem + it create strange sizings
-	//	if (mDefaultProperties.mFontSize != mSelectedProperties.mFontSize)
-		//	mMixedProperties.mFontSize = mDefaultProperties.mFontSize * (1.0 - mSelectedZoomPercent) + mSelectedProperties.mFontSize * mSelectedZoomPercent;
-
+	
 	return mMixedProperties;
 }
 

@@ -62,6 +62,8 @@ namespace Renderer
 
 	void setupWindow()
 	{
+		SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 1);
+
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     8);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   8);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    8);
@@ -267,6 +269,65 @@ namespace Renderer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	} // swapBuffers
+
+	#define N_ROUNDING_PIECES 10
+
+	void drawGLRoundedCorner(int x, int y, double sa, double arc, float r)
+	{
+		// centre of the arc, for clockwise sense
+		float cent_x = x + r * cos(sa + ES_PI / 2);
+		float cent_y = y + r * sin(sa + ES_PI / 2);
+
+		// build up piecemeal including end of the arc
+		int n = ceil(N_ROUNDING_PIECES * arc / ES_PI * 2);
+		for (int i = 0; i <= n; i++)
+		{
+			double ang = sa + arc * (double)i / (double)n;
+
+			// compute the next point
+			float next_x = cent_x + r * sin(ang);
+			float next_y = cent_y - r * cos(ang);
+
+			glColor3f(1.0f, 1.0f, 1.0f);
+			glVertex2f(next_x, next_y);
+		}
+	}
+
+	void enableRoundCornerStencil(int x, int y, int size_x, int size_y, int radius)
+	{
+		Renderer::bindTexture(0);
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_STENCIL_TEST);
+		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+		glDepthMask(GL_FALSE);
+		glStencilFunc(GL_NEVER, 1, 0xFF);
+		glStencilOp(GL_REPLACE, GL_KEEP, GL_KEEP);
+
+		glStencilMask(0xFF);
+		glClear(GL_STENCIL_BUFFER_BIT);	
+
+		glBegin(GL_POLYGON);
+		drawGLRoundedCorner(x, y + radius, 3 * ES_PI / 2, ES_PI / 2, radius);
+		drawGLRoundedCorner(x + size_x - radius, y, 0.0, ES_PI / 2, radius);
+		drawGLRoundedCorner(x + size_x, y + size_y - radius, ES_PI / 2, ES_PI / 2, radius);
+		drawGLRoundedCorner(x + radius, y + size_y, ES_PI, ES_PI / 2, radius);
+		glEnd();
+
+		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+		glDepthMask(GL_TRUE);
+		glStencilMask(0x00);
+		glStencilFunc(GL_EQUAL, 0, 0xFF);
+		glStencilFunc(GL_EQUAL, 1, 0xFF);
+	}
+
+	void disableStencil()
+	{
+		glDisable(GL_STENCIL_TEST);
+	}
+
+
+
 
 } // Renderer::
 
