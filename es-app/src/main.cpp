@@ -21,8 +21,11 @@
 #include <SDL_timer.h>
 #include <iostream>
 #include <time.h>
-#ifdef WIN32
+
+#if defined(_WIN32)
 #include <Windows.h>
+#elif defined(__linux__)
+#include <unistd.h>
 #endif
 
 #include "resources/TextureData.h"
@@ -109,8 +112,17 @@ void playVideo()
 
 bool parseArgs(int argc, char* argv[])
 {
-	Utils::FileSystem::setExePath(argv[0]);
-
+#if defined(__linux__)
+    char* result = new char[PATH_MAX];
+    ssize_t len = readlink("/proc/self/exe", result, PATH_MAX);
+    if (len != -1) {
+        result[len] = 0;
+        Utils::FileSystem::setExePath(result);
+    }
+    delete [] result;
+#else
+ 	Utils::FileSystem::setExePath(argv[0]);
+#endif
 	// We need to process --home before any call to Settings::getInstance(), because settings are loaded from homepath
 	for (int i = 1; i < argc; i++)
 	{
