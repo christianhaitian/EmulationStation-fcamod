@@ -25,7 +25,6 @@
 #if defined(_WIN32)
 #include <Windows.h>
 #elif defined(__linux__)
-#include <libgen.h>
 #include <unistd.h>
 #endif
 
