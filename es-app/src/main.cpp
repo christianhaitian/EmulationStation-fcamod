@@ -117,7 +117,7 @@ bool parseArgs(int argc, char* argv[])
     ssize_t len = readlink("/proc/self/exe", result, PATH_MAX);
     if (len != -1) {
         result[len] = 0;
-        Utils::FileSystem::setExePath(dirname(result));
+        Utils::FileSystem::setExePath(result);
     }
     delete [] result;
 #else
