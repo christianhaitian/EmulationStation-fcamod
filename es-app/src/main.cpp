@@ -29,6 +29,7 @@
 #include <FreeImage.h>
 #include "AudioManager.h"
 #include "NetworkThread.h"
+#include "scrapers/ThreadedScraper.h"
 
 bool scrape_cmdline = false;
 
@@ -659,6 +660,8 @@ int main(int argc, char* argv[])
 #endif
 */
 	}
+
+	ThreadedScraper::stop();
 
 	while(window.peekGui() != ViewController::get())
 		delete window.peekGui();

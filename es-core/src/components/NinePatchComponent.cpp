@@ -115,13 +115,23 @@ void NinePatchComponent::render(const Transform4x4f& parentTrans)
 	if (!Renderer::isVisibleOnScreen(trans.translation().x(), trans.translation().y(), mSize.x(), mSize.y()))
 		return;
 
-	if (mCornerSize.x() == 0 && mCornerSize.y() == 0)
+	if (mCornerSize.x() <= 1 && mCornerSize.y() <= 1 && mCornerSize.x() == mCornerSize.y())
 	{
 		float opacity = mOpacity / 255.0;
 		const unsigned int edgeColor = mEdgeColor & 0xFFFFFF00 | (unsigned char)((mEdgeColor & 0xFF) * opacity);
 
 		Renderer::setMatrix(trans);
+
+		if (mCornerSize.x() > 0)
+		{
+			int radius = Math::max(mSize.x(), mSize.y()) * mCornerSize.x();			
+			Renderer::enableRoundCornerStencil(0, 0, mSize.x(), mSize.y(), radius);
+		}
+
 		Renderer::drawRect(0.0, 0.0, mSize.x(), mSize.y(), edgeColor, edgeColor);
+
+		if (mCornerSize.x() > 0)
+			Renderer::disableStencil();
 	}
 	else if (mTexture->bind())
 	{
@@ -147,7 +157,7 @@ const Vector2f& NinePatchComponent::getCornerSize() const
 	return mCornerSize;
 }
 
-void NinePatchComponent::setCornerSize(int sizeX, int sizeY)
+void NinePatchComponent::setCornerSize(float sizeX, float sizeY)
 {
 	if (mCornerSize.x() == sizeX && mCornerSize.y() == sizeY)
 		return;

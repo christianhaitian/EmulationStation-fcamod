@@ -268,13 +268,13 @@ namespace Renderer
 
 	} // swapBuffers
 
-#define N_ROUNDING_PIECES 10
+	#define N_ROUNDING_PIECES 8.0f
 
-	void drawGLRoundedCorner(int x, int y, double sa, double arc, float r)
+	void drawGLRoundedCorner(float x, float y, float sa, float arc, float r)
 	{
 		// centre of the arc, for clockwise sense
-		float cent_x = x + r * cos(sa + ES_PI / 2);
-		float cent_y = y + r * sin(sa + ES_PI / 2);
+		float cent_x = x + r * Math::cosf(sa + ES_PI / 2);
+		float cent_y = y + r * Math::sinf(sa + ES_PI / 2);
 
 		// build up piecemeal including end of the arc
 		int n = ceil(N_ROUNDING_PIECES * arc / ES_PI * 2);
@@ -283,15 +283,15 @@ namespace Renderer
 			double ang = sa + arc * (double)i / (double)n;
 
 			// compute the next point
-			float next_x = cent_x + r * sin(ang);
-			float next_y = cent_y - r * cos(ang);
+			float next_x = cent_x + r * Math::sinf(ang);
+			float next_y = cent_y - r * Math::cosf(ang);
 
 			glColor3f(1.0f, 1.0f, 1.0f);
 			glVertex2f(next_x, next_y);
 		}
 	}
 
-	void enableRoundCornerStencil(int x, int y, int size_x, int size_y, int radius)
+	void enableRoundCornerStencil(float x, float y, float width, float height, float radius)
 	{
 		Renderer::bindTexture(0);
 

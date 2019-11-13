@@ -270,30 +270,30 @@ namespace Renderer
 
 	} // swapBuffers
 
-	#define N_ROUNDING_PIECES 10
+	#define ROUNDING_PIECES 8.0f
 
-	void drawGLRoundedCorner(int x, int y, double sa, double arc, float r)
+	void drawGLRoundedCorner(float x, float y, double sa, double arc, float r)
 	{
 		// centre of the arc, for clockwise sense
-		float cent_x = x + r * cos(sa + ES_PI / 2);
-		float cent_y = y + r * sin(sa + ES_PI / 2);
+		float cent_x = x + r * Math::cosf(sa + ES_PI / 2.0f);
+		float cent_y = y + r * Math::sinf(sa + ES_PI / 2.0f);
 
 		// build up piecemeal including end of the arc
-		int n = ceil(N_ROUNDING_PIECES * arc / ES_PI * 2);
+		int n = ceil(ROUNDING_PIECES * arc / ES_PI * 2.0f);
 		for (int i = 0; i <= n; i++)
 		{
-			double ang = sa + arc * (double)i / (double)n;
+			float ang = sa + arc * (double)i / (double)n;
 
 			// compute the next point
-			float next_x = cent_x + r * sin(ang);
-			float next_y = cent_y - r * cos(ang);
+			float next_x = cent_x + r * Math::sinf(ang);
+			float next_y = cent_y - r * Math::cosf(ang);
 
 			glColor3f(1.0f, 1.0f, 1.0f);
 			glVertex2f(next_x, next_y);
 		}
 	}
-
-	void enableRoundCornerStencil(int x, int y, int size_x, int size_y, int radius)
+	
+	void enableRoundCornerStencil(float x, float y, float width, float height, float radius)
 	{
 		Renderer::bindTexture(0);
 
@@ -308,12 +308,12 @@ namespace Renderer
 		glClear(GL_STENCIL_BUFFER_BIT);	
 
 		glBegin(GL_POLYGON);
-		drawGLRoundedCorner(x, y + radius, 3 * ES_PI / 2, ES_PI / 2, radius);
-		drawGLRoundedCorner(x + size_x - radius, y, 0.0, ES_PI / 2, radius);
-		drawGLRoundedCorner(x + size_x, y + size_y - radius, ES_PI / 2, ES_PI / 2, radius);
-		drawGLRoundedCorner(x + radius, y + size_y, ES_PI, ES_PI / 2, radius);
+		drawGLRoundedCorner(x, y + radius, 3.0f * ES_PI / 2.0f, ES_PI / 2.0f, radius);		
+		drawGLRoundedCorner(x + width - radius, y, 0.0, ES_PI / 2.0f, radius);
+		drawGLRoundedCorner(x + width, y + height - radius, ES_PI / 2.0f, ES_PI / 2.0f, radius);
+		drawGLRoundedCorner(x + radius, y + height, ES_PI, ES_PI / 2.0f, radius);
 		glEnd();
-
+		
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		glDepthMask(GL_TRUE);
 		glStencilMask(0x00);

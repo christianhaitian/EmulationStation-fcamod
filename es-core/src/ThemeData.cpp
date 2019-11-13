@@ -958,7 +958,14 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 			size_t divider = str.find(' ');
 			if(divider == std::string::npos) 
 			{			
-				LOG(LogWarning) << "invalid normalized pair (property \"" << node.name() << "\", value \"" << str.c_str() << "\")";
+				if (str.empty())
+				{
+					LOG(LogWarning) << "invalid normalized pair (property \"" << node.name() << "\", value \"" << str.c_str() << "\")";
+					break;
+				}
+
+				Vector2f val((float)atof(str.c_str()), (float)atof(str.c_str()));
+				element.properties[node.name()] = val;
 				break;
 			}			
 

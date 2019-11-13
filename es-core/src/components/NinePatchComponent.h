@@ -37,7 +37,7 @@ public:
 	virtual void applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties) override;
 
 	const Vector2f& getCornerSize() const;
-	void setCornerSize(int sizeX, int sizeY);
+	void setCornerSize(float sizeX, float sizeY);
 	inline void setCornerSize(const Vector2f& size) { setCornerSize(size.x(), size.y()); }
 
 	virtual void setOpacity(unsigned char opacity);

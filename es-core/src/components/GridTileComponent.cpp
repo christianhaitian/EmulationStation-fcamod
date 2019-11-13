@@ -26,9 +26,9 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 	mVideo = nullptr;
 	mMarquee = nullptr;
 	mFavorite = nullptr;
+	mImageOverlay = nullptr;
 	mIsDefaultImage = false;
-
-	mLabelVisible = false;
+	
 	mLabelMerged = false;
 
 	resetProperties();
@@ -48,42 +48,26 @@ void GridTileComponent::resetProperties()
 {
 	mDefaultProperties.mSize = getDefaultTileSize();
 	mDefaultProperties.mPadding = Vector2f(16.0f, 16.0f);
-	mDefaultProperties.mImageColor = 0xFFFFFFDD; // 0xAAAAAABB;
+
+	mSelectedProperties.mSize = getSelectedTileSize();
+	mSelectedProperties.mPadding = mDefaultProperties.mPadding;
+
 	mDefaultProperties.mBackgroundImage = ":/frame.png";
 	mDefaultProperties.mBackgroundCornerSize = Vector2f(16, 16);
 	mDefaultProperties.mBackgroundCenterColor = 0xAAAAEEFF;
 	mDefaultProperties.mBackgroundEdgeColor = 0xAAAAEEFF;
 
-	mSelectedProperties.mSize = getSelectedTileSize();
-	mSelectedProperties.mPadding = mDefaultProperties.mPadding;
-	mSelectedProperties.mImageColor = 0xFFFFFFFF;
 	mSelectedProperties.mBackgroundImage = mDefaultProperties.mBackgroundImage;
 	mSelectedProperties.mBackgroundCornerSize = mDefaultProperties.mBackgroundCornerSize;
 	mSelectedProperties.mBackgroundCenterColor = 0xFFFFFFFF;
 	mSelectedProperties.mBackgroundEdgeColor = 0xFFFFFFFF;
 
-	mDefaultProperties.mLabelPos = Vector2f(-1, -1);
-	mDefaultProperties.mLabelSize = Vector2f(1.0, 0.30);
-	mDefaultProperties.mLabelColor = 0xFFFFFFFF;
-	mDefaultProperties.mLabelBackColor = 0;
-	mDefaultProperties.mLabelGlowColor = 0;
-	mDefaultProperties.mLabelGlowSize = 2;
+	mDefaultProperties.Label = mSelectedProperties.Label = GridTextProperties();	
+	mDefaultProperties.Image = mSelectedProperties.Image = GridImageProperties();	
+	mDefaultProperties.Marquee = mSelectedProperties.Marquee = GridImageProperties();
+	mDefaultProperties.Favorite = mSelectedProperties.Favorite = GridImageProperties();
 
-	mDefaultProperties.mFontPath = "";
-	mDefaultProperties.mFontSize = 0;
-
-	mSelectedProperties.mLabelPos = Vector2f(-1, -1);
-	mSelectedProperties.mLabelSize = Vector2f(1.0, 0.30);
-	mSelectedProperties.mLabelColor = 0xFFFFFFFF;
-	mSelectedProperties.mLabelBackColor = 0;
-	mSelectedProperties.mLabelGlowColor = 0;
-	mSelectedProperties.mLabelGlowSize = 2;
-
-	mSelectedProperties.mFontPath = "";
-	mSelectedProperties.mFontSize = 0;
-
-	mDefaultProperties.mMirror = Vector2f(0, 0);
-	mSelectedProperties.mMirror = Vector2f(0, 0);
+	mDefaultProperties.Image.color = mDefaultProperties.Image.colorEnd = 0xFFFFFFDD;
 }
 
 void GridTileComponent::forceSize(Vector2f size, float selectedZoom)
@@ -96,6 +80,9 @@ GridTileComponent::~GridTileComponent()
 {
 	if (mImage != nullptr)
 		delete mImage;
+
+	if (mImageOverlay != nullptr)
+		delete mImageOverlay;
 
 	if (mFavorite != nullptr)
 		delete mFavorite;
@@ -110,8 +97,8 @@ GridTileComponent::~GridTileComponent()
 	mMarquee = nullptr;
 	mImage = nullptr;
 	mVideo = nullptr;
+	mImageOverlay = nullptr;
 }
-
 
 std::shared_ptr<TextureResource> GridTileComponent::getTexture(bool marquee) 
 { 
@@ -133,37 +120,10 @@ void GridTileComponent::resize()
 
 	bool isDefaultImage = mIsDefaultImage && (mCurrentPath == ":/folder.svg" || mCurrentPath == ":/cartridge.svg");
 
-	float height = (int) (size.y() * currentProperties.mLabelSize.y());
+	float height = (int) (size.y() * currentProperties.Label.size.y());
 	float labelHeight = height;
 
-	mLabel.setVisible(mLabelVisible || mIsDefaultImage);
-
-	if (mLabelVisible)
-	{
-		mLabel.setColor(currentProperties.mLabelColor);
-		mLabel.setBackgroundColor(currentProperties.mLabelBackColor);
-		mLabel.setGlowColor(currentProperties.mLabelGlowColor);
-		mLabel.setGlowSize(currentProperties.mLabelGlowSize);
-
-		if (mDefaultProperties.mFontPath != mSelectedProperties.mFontPath || mDefaultProperties.mFontSize != mSelectedProperties.mFontSize)
-			mLabel.setFont(currentProperties.mFontPath, currentProperties.mFontSize);
-
-		if (currentProperties.mLabelPos.x() < 0)
-		{
-			if (mLabelMerged)
-			{
-				mLabel.setPosition(currentProperties.mPadding.x(), mSize.y() - height - currentProperties.mPadding.y());
-				mLabel.setSize(size.x() - 2 * currentProperties.mPadding.x(), height);
-			}
-			else
-			{
-				mLabel.setPosition(0, mSize.y() - height);
-				mLabel.setSize(size.x(), height);
-			}
-		}
-	}
-		
-	if (!mLabelVisible || mLabelMerged || currentProperties.mLabelSize.x() == 0)
+	if (!currentProperties.Label.Visible || mLabelMerged || currentProperties.Label.size.x() == 0)
 		height = 0;
 
 	float topPadding = currentProperties.mPadding.y();
@@ -173,59 +133,75 @@ void GridTileComponent::resize()
 	float imageWidth = size.x() - paddingX * 2.0;
 	float imageHeight = size.y() - topPadding - bottomPadding;
 
-	
+	Vector2f imageSize(size.x(), (size.y() - height));
+
+	// Image
+	if (currentProperties.Image.Loaded)
+	{
+		currentProperties.Image.updateImageComponent(mImage, imageSize, false);
+
+		if (mImage != nullptr && currentProperties.Image.sizeMode != "maxSize" && isDefaultImage)
+			mImage->setMaxSize(imageWidth, imageHeight);
+	}
+	else if (mImage != nullptr)
+	{
+		// Retrocompatibility : imagegrid.image is not defined
+		mImage->setPosition(imageSize.x() / 2.0f, imageSize.y() / 2.0f);
+		mImage->setColorShift(currentProperties.Image.color);
+		mImage->setMirroring(currentProperties.Image.reflexion);
+
+		if (currentProperties.Image.sizeMode == "minSize" && !isDefaultImage)
+			mImage->setMinSize(imageWidth, imageHeight);
+		else if (currentProperties.Image.sizeMode == "size")
+			mImage->setSize(imageWidth, imageHeight);
+		else
+			mImage->setMaxSize(imageWidth, imageHeight);	
+	}
+
+	// Text
+	mLabel.setVisible(currentProperties.Label.Visible || mIsDefaultImage);
+
+	if (currentProperties.Label.Visible)
+	{
+		currentProperties.Label.updateTextComponent(&mLabel, mSize);
+
+		if (currentProperties.Label.pos.x() < 0 && mLabelMerged)
+		{
+			mLabel.setPosition(0, mSize.y() - labelHeight);
+			mLabel.setSize(size.x(), labelHeight);
+		}
+		else if (mImage != nullptr && !mLabelMerged)
+		{
+			mLabel.setPosition(mImage->getPosition().x() - mImage->getSize().x() / 2, mImage->getSize().y());
+			mLabel.setSize(mImage->getSize().x(), labelHeight);
+		}
+	}
+	else if (mIsDefaultImage)
+	{
+		mLabel.setColor(0xFFFFFFFF);
+		mLabel.setGlowColor(0x00000010);
+		mLabel.setGlowSize(2);
+		mLabel.setOpacity(255);
+		mLabel.setPosition(mSize.x() * 0.1, mSize.y() * 0.2);
+		mLabel.setSize(mSize.x() - mSize.x() * 0.2, mSize.y() - mSize.y() * 0.3);
+	}
+
+	// Other controls ( Favorite / Marquee / Overlay )
 	if (currentProperties.Favorite.Loaded)
 		currentProperties.Favorite.updateImageComponent(mFavorite, Vector2f(size.x(), (size.y() - height)), false);
 
 	if (currentProperties.Marquee.Loaded)
 		currentProperties.Marquee.updateImageComponent(mMarquee, Vector2f(size.x(), (size.y() - height)), true);
 
-	if (currentProperties.Image.Loaded)
-		currentProperties.Image.updateImageComponent(mImage, Vector2f(size.x(), (size.y() - height)), false);
-	else if (mImage != nullptr)
-	{
-		mImage->setPosition(size.x() / 2.0f, (size.y() - height) / 2.0f);
-		mImage->setColorShift(currentProperties.mImageColor);
-		mImage->setMirroring(currentProperties.mMirror);
+	if (currentProperties.ImageOverlay.Loaded)
+		currentProperties.ImageOverlay.updateImageComponent(mImageOverlay, Vector2f(size.x(), (size.y() - height)), false);
 
-		if (currentProperties.mImageSizeMode == "minSize" && !isDefaultImage)
-			mImage->setMinSize(imageWidth, imageHeight);
-		else if (currentProperties.mImageSizeMode == "size")
-			mImage->setSize(imageWidth, imageHeight);
-		else
-			mImage->setMaxSize(imageWidth, imageHeight);
-
-		if (mLabelVisible && currentProperties.mLabelPos.x() < 0)
-		{
-			if (mLabelMerged)
-			{
-				mLabel.setPosition(mImage->getPosition().x() - mImage->getSize().x() / 2, currentProperties.mPadding.y() + mImage->getSize().y() - labelHeight);
-				mLabel.setSize(mImage->getSize().x(), labelHeight);
-			}
-			else if (currentProperties.mPadding.x() == 0)
-			{
-				mLabel.setPosition(mImage->getPosition().x() - mImage->getSize().x() / 2, mImage->getSize().y());
-				mLabel.setSize(mImage->getSize().x(), labelHeight);
-			}
-		}
-	}
-
-	if (currentProperties.mLabelPos.x() >= 0)
-	{
-		mLabel.setPosition(
-			currentProperties.mLabelPos.x() * size.x(),
-			currentProperties.mLabelPos.y() * size.y());
-
-		mLabel.setSize(
-			currentProperties.mLabelSize.x() * size.x(),
-			currentProperties.mLabelSize.y() * size.y());
-	}
-
+	// Video
 	if (mVideo != nullptr && mVideo->isPlaying())
 	{
 		mVideo->setPosition(size.x() / 2.0f, (size.y() - height) / 2.0f);
 
-		if (currentProperties.mImageSizeMode == "minSize")
+		if (currentProperties.Image.sizeMode == "minSize")
 		{
 			if (mImage != nullptr)
 				mVideo->setRoundCorners(mImage->getRoundCorners());
@@ -237,18 +213,19 @@ void GridTileComponent::resize()
 			mVideo->setSize(ImageIO::adjustExternPictureSizef(vs, Vector2f(imageWidth, imageHeight)));
 		}
 		else
-			if (currentProperties.mImageSizeMode == "size")
+			if (currentProperties.Image.sizeMode == "size")
 				mVideo->setSize(imageWidth, size.y() - topPadding - bottomPadding);
 			else
 				mVideo->setMaxSize(imageWidth, size.y() - topPadding - bottomPadding);
 	}
 
+	// Background
 	Vector3f bkposition = Vector3f(0, 0);
 	Vector2f bkSize = size;
 
 	if (mImage != NULL && currentProperties.mSelectionMode == "image" && mImage->getSize() != Vector2f(0, 0))
 	{
-		if (currentProperties.mImageSizeMode == "minSize")
+		if (currentProperties.Image.sizeMode == "minSize")
 			bkSize = Vector2f(size.x(), size.y() - bottomPadding + topPadding);
 		else if (mAnimPosition == Vector3f(0, 0, 0))
 		{
@@ -277,20 +254,11 @@ void GridTileComponent::resize()
 		y = mAnimPosition.y() * (1.0 - mSelectedZoomPercent) + y * mSelectedZoomPercent;
 
 		bkposition = Vector3f(x - mPosition.x(), y - mPosition.y(), 0);
-	}
-
-	if (!mLabelVisible && mIsDefaultImage)
-	{
-		mLabel.setColor(0xFFFFFFFF);
-		mLabel.setGlowColor(0x00000010);
-		mLabel.setGlowSize(2);
-		mLabel.setOpacity(255);
-		mLabel.setPosition(mSize.x() * 0.1, mSize.y() * 0.2);
-		mLabel.setSize(mSize.x() - mSize.x() * 0.2, mSize.y() - mSize.y() * 0.3);
-	}
+	}	
 	
 	mBackground.setPosition(bkposition);
 	mBackground.setSize(bkSize);
+
 	mBackground.setCornerSize(currentProperties.mBackgroundCornerSize);
 	mBackground.setCenterColor(currentProperties.mBackgroundCenterColor);
 	mBackground.setEdgeColor(currentProperties.mBackgroundEdgeColor);
@@ -336,14 +304,14 @@ void GridTileComponent::renderContent(const Transform4x4f& parentTrans)
 	float topPadding = currentProperties.mPadding.y();
 	float bottomPadding = topPadding;
 
-	if (mLabelVisible && !mLabelMerged)
-		bottomPadding = std::max((int)topPadding, (int)(mSize.y() * currentProperties.mLabelSize.y()));
+	if (currentProperties.Label.Visible && !mLabelMerged)
+		bottomPadding = std::max((int)topPadding, (int)(mSize.y() * currentProperties.Label.size.y()));
 
 	Vector2i pos((int)Math::round(trans.translation()[0] + padding), (int)Math::round(trans.translation()[1] + topPadding));
 	Vector2i size((int)Math::round(mSize.x() - 2 * padding), (int)Math::round(mSize.y() - topPadding - bottomPadding));
 	
 	bool isDefaultImage = mIsDefaultImage && (mCurrentPath == ":/folder.svg" || mCurrentPath == ":/cartridge.svg");
-	bool isMinSize = currentProperties.mImageSizeMode == "minSize" && !isDefaultImage;
+	bool isMinSize = currentProperties.Image.sizeMode == "minSize" && !isDefaultImage;
 
 	if (isMinSize)
 		Renderer::pushClipRect(pos, size);
@@ -359,13 +327,16 @@ void GridTileComponent::renderContent(const Transform4x4f& parentTrans)
 
 	if (mMarquee != nullptr && mMarquee->hasImage())
 		mMarquee->render(trans);
-	else if (mLabelVisible && currentProperties.mLabelSize.y()>0)
+	else if (currentProperties.Label.Visible && currentProperties.Label.size.y()>0)
 		mLabel.render(trans);
-	else if (!mLabelVisible && mIsDefaultImage)
+	else if (!currentProperties.Label.Visible && mIsDefaultImage)
 		mLabel.render(trans);
 
 	if (mFavorite != nullptr && mFavorite->hasImage() && mFavorite->isVisible())
 		mFavorite->render(trans);
+
+	if (mImageOverlay != nullptr && mImageOverlay->hasImage() && mImageOverlay->isVisible())
+		mImageOverlay->render(trans);
 
 	if (mLabelMerged && isMinSize)
 		Renderer::popClipRect();
@@ -404,6 +375,19 @@ void GridTileComponent::createFavorite()
 	addChild(mFavorite);
 }
 
+void GridTileComponent::createImageOverlay()
+{
+	if (mImageOverlay != nullptr)
+		return;
+
+	mImageOverlay = new ImageComponent(mWindow);
+	mImageOverlay->setOrigin(0.5f, 0.5f);
+	mImageOverlay->setDefaultZIndex(35);
+	mImageOverlay->setVisible(false);
+
+	addChild(mImageOverlay);
+}
+
 void GridTileComponent::createVideo()
 {
 	if (mVideo != nullptr)
@@ -418,11 +402,143 @@ void GridTileComponent::createVideo()
 	addChild(mVideo);
 }
 
+void GridTileComponent::applyThemeToProperties(const ThemeData::ThemeElement* elem, GridTileProperties& properties)
+{
+	if (elem == nullptr)
+		return;
+
+	Vector2f screen = Vector2f((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
+
+	if (elem->has("size"))
+		properties.mSize = elem->get<Vector2f>("size") * screen;
+
+	if (elem->has("padding"))
+		properties.mPadding = elem->get<Vector2f>("padding");
+
+	if (elem->has("backgroundImage"))
+		properties.mBackgroundImage = elem->get<std::string>("backgroundImage");
+
+	if (elem->has("backgroundCornerSize"))
+		properties.mBackgroundCornerSize = elem->get<Vector2f>("backgroundCornerSize");
+
+	if (elem->has("backgroundColor"))
+	{
+		properties.mBackgroundCenterColor = elem->get<unsigned int>("backgroundColor");
+		properties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundColor");
+	}
+
+	if (elem->has("backgroundCenterColor"))
+		properties.mBackgroundCenterColor = elem->get<unsigned int>("backgroundCenterColor");
+
+	if (elem->has("backgroundEdgeColor"))
+		properties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundEdgeColor");
+
+	if (elem && elem->has("selectionMode"))
+		properties.mSelectionMode = elem->get<std::string>("selectionMode");		
+
+	if (elem && elem->has("reflexion"))
+		properties.Image.reflexion = elem->get<Vector2f>("reflexion");
+
+	if (elem->has("imageColor"))
+		properties.Image.color = properties.Image.colorEnd = elem->get<unsigned int>("imageColor");
+
+	if (elem && elem->has("imageSizeMode"))
+		properties.Image.sizeMode = elem->get<std::string>("imageSizeMode");
+}
+
+bool GridImageProperties::applyTheme(const ThemeData::ThemeElement* elem)
+{
+	if (!elem)
+	{
+		Visible = false;
+		return false;
+	}
+
+	Loaded = true;
+	Visible = true;
+
+	if (elem && elem->has("visible"))
+		Visible = elem->get<bool>("visible");
+
+	if (elem && elem->has("origin"))
+		origin = elem->get<Vector2f>("origin");
+
+	if (elem && elem->has("pos"))
+		pos = elem->get<Vector2f>("pos");
+
+	if (elem && elem->has("size"))
+	{
+		sizeMode = "size";
+		size = elem->get<Vector2f>("size");
+	}
+	else if (elem && elem->has("minSize"))
+	{
+		sizeMode = "minSize";
+		size = elem->get<Vector2f>("minSize");
+	}
+	else if (elem && elem->has("maxSize"))
+	{
+		sizeMode = "maxSize";
+		size = elem->get<Vector2f>("maxSize");
+	}
+
+	if (elem && elem->has("color"))
+		color = colorEnd = elem->get<unsigned int>("color");
+
+	if (elem && elem->has("colorEnd"))
+		colorEnd = elem->get<unsigned int>("colorEnd");
+
+	if (elem && elem->has("reflexion"))
+		reflexion = elem->get<Vector2f>("reflexion");
+
+	return true;
+}
+
+bool GridTextProperties::applyTheme(const ThemeData::ThemeElement* elem)
+{
+	if (!elem)
+	{
+		Visible = false;
+		return false;
+	}
+
+	Loaded = true;
+	Visible = true;
+
+	if (elem && elem->has("visible"))
+		Visible = elem->get<bool>("visible");
+
+	if (elem && elem->has("pos"))
+		pos = elem->get<Vector2f>("pos");
+
+	if (elem && elem->has("size"))
+		size = elem->get<Vector2f>("size");
+
+	if (elem && elem->has("color"))
+		color = elem->get<unsigned int>("color");
+
+	if (elem && elem->has("backgroundColor"))
+		backColor = elem->get<unsigned int>("backgroundColor");
+
+	if (elem && elem->has("glowColor"))
+		glowColor = elem->get<unsigned int>("glowColor");
+
+	if (elem && elem->has("glowSize"))
+		glowSize = elem->get<float>("glowSize");
+
+	if (elem && elem->has("fontSize"))
+		fontSize = elem->get<float>("fontSize");
+
+	if (elem && elem->has("fontPath"))
+		fontPath = elem->get<std::string>("fontPath");
+
+	return true;
+}
+
+
 void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties)
 {
 	resetProperties();
-
-	Vector2f screen = Vector2f((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
 
 	const ThemeData::ThemeElement* grid = theme->getElement(view, "gamegrid", "imagegrid");
 	if (grid && grid->has("showVideoAtDelay"))
@@ -441,93 +557,46 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 	const ThemeData::ThemeElement* elem = theme->getElement(view, "default", "gridtile");
 	if (elem)
 	{
-		if (elem->has("size"))
-			mDefaultProperties.mSize = elem->get<Vector2f>("size") * screen;
-
-		if (elem->has("padding"))
-			mDefaultProperties.mPadding = elem->get<Vector2f>("padding");
-
-		if (elem->has("imageColor"))
-			mDefaultProperties.mImageColor = elem->get<unsigned int>("imageColor");
-
-		if (elem->has("backgroundImage"))
-			mDefaultProperties.mBackgroundImage = elem->get<std::string>("backgroundImage");
-
-		if (elem->has("backgroundCornerSize"))
-			mDefaultProperties.mBackgroundCornerSize = elem->get<Vector2f>("backgroundCornerSize");
-
-		if (elem->has("backgroundColor"))
-		{
-			mDefaultProperties.mBackgroundCenterColor = elem->get<unsigned int>("backgroundColor");
-			mDefaultProperties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundColor");
-		}
-
-		if (elem->has("backgroundCenterColor"))
-			mDefaultProperties.mBackgroundCenterColor = elem->get<unsigned int>("backgroundCenterColor");
-
-		if (elem->has("backgroundEdgeColor"))
-			mDefaultProperties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundEdgeColor");
-
-		if (elem && elem->has("imageSizeMode"))
-		{
-			mDefaultProperties.mImageSizeMode = elem->get<std::string>("imageSizeMode");
-			mSelectedProperties.mImageSizeMode = mDefaultProperties.mImageSizeMode;
-		}
-
-		if (elem && elem->has("selectionMode"))
-		{
-			mDefaultProperties.mSelectionMode = elem->get<std::string>("selectionMode");
-			mSelectedProperties.mSelectionMode = mDefaultProperties.mSelectionMode;
-		}
-
-		if (elem && elem->has("reflexion"))
-		{
-			mDefaultProperties.mMirror = elem->get<Vector2f>("reflexion");
-			mSelectedProperties.mMirror = mDefaultProperties.mMirror;
-		}
+		applyThemeToProperties(elem, mDefaultProperties);
+		applyThemeToProperties(elem, mSelectedProperties);		
 	}
-	
+
+	// Apply theme to the selected gridtile
+	elem = theme->getElement(view, "selected", "gridtile");
+	if (elem)
+		applyThemeToProperties(elem, mSelectedProperties);
+		
+
+	// Apply theme to the <image name="gridtile.image"> element
 	elem = theme->getElement(view, "gridtile.image", "image");
 	if (elem)
 	{
 		mImage->applyTheme(theme, view, "gridtile.image", ThemeFlags::ALL ^ (ThemeFlags::PATH));
 
-		mDefaultProperties.Image.color = mDefaultProperties.mImageColor;
-		mDefaultProperties.Image.colorEnd = mDefaultProperties.mImageColor;
+		mDefaultProperties.Image.applyTheme(elem);
+		mSelectedProperties.Image.applyTheme(elem);
 
-		mSelectedProperties.Image.color = mSelectedProperties.mImageColor;
-		mSelectedProperties.Image.colorEnd = mSelectedProperties.mImageColor;
-
-		if (mDefaultProperties.mImageSizeMode == "minSize")
-			mDefaultProperties.Image.sizeMode = 1;
-		else if (mDefaultProperties.mImageSizeMode == "maxSize")
-			mDefaultProperties.Image.sizeMode = 2;
-		else 
-			mDefaultProperties.Image.sizeMode = 0;
-
-		mSelectedProperties.Image.sizeMode = mDefaultProperties.Image.sizeMode;
-
-		mDefaultProperties.Image.loadElement(elem);
-		mSelectedProperties.Image.loadElement(elem);
-
+		// Apply theme to the <image name="gridtile.image:selected"> element
 		elem = theme->getElement(view, "gridtile.image:selected", "image");
 		if (elem)
-			mSelectedProperties.Image.loadElement(elem);
+			mSelectedProperties.Image.applyTheme(elem);
 	}
+	
 
-
+	// Apply theme to the <image name="gridtile.marquee"> element
 	elem = theme->getElement(view, "gridtile.marquee", "image");
 	if (elem)
 	{
 		createMarquee();
 		mMarquee->applyTheme(theme, view, "gridtile.marquee", ThemeFlags::ALL ^ (ThemeFlags::PATH));
 
-		mDefaultProperties.Marquee.loadElement(elem);
+		mDefaultProperties.Marquee.applyTheme(elem);
 		mSelectedProperties.Marquee = mDefaultProperties.Marquee;
 
+		// Apply theme to the <image name="gridtile.marquee:selected"> element
 		elem = theme->getElement(view, "gridtile.marquee:selected", "image");
 		if (elem)
-			mSelectedProperties.Marquee.loadElement(elem);
+			mSelectedProperties.Marquee.applyTheme(elem);
 	}
 	else if (mMarquee != nullptr)
 	{
@@ -536,19 +605,22 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 		mMarquee = nullptr;
 	}
 
+
+	// Apply theme to the <image name="gridtile.marquee"> element
 	elem = theme->getElement(view, "gridtile.favorite", "image");
 	if (elem)
 	{
 		createFavorite();
 		mFavorite->applyTheme(theme, view, "gridtile.favorite", ThemeFlags::ALL);
 
-		mDefaultProperties.Favorite.sizeMode = 0;
-		mDefaultProperties.Favorite.loadElement(elem);
+		mDefaultProperties.Favorite.sizeMode = "size";
+		mDefaultProperties.Favorite.applyTheme(elem);
 		mSelectedProperties.Favorite = mDefaultProperties.Favorite;
 
+		// Apply theme to the <image name="gridtile.favorite:selected"> element
 		elem = theme->getElement(view, "gridtile.favorite:selected", "image");
 		if (elem)
-			mSelectedProperties.Favorite.loadElement(elem);
+			mSelectedProperties.Favorite.applyTheme(elem);
 	}
 	else if (mFavorite != nullptr)
 	{
@@ -557,145 +629,55 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 		mFavorite = nullptr;
 	}
 
-		// Apply theme to the selected gridtile
-		// NOTE that some of the default gridtile properties influence on the selected gridtile properties
-		// See THEMES.md for more informations
-	elem = theme->getElement(view, "selected", "gridtile");
 
-	mSelectedProperties.mSize = elem && elem->has("size") ?
-		elem->get<Vector2f>("size") * screen :
-		mDefaultProperties.mSize;
-	//getSelectedTileSize();
-
-	mSelectedProperties.mPadding = elem && elem->has("padding") ?
-		elem->get<Vector2f>("padding") :
-		mDefaultProperties.mPadding;
-
-	if (elem && elem->has("imageColor"))
-		mSelectedProperties.mImageColor = elem->get<unsigned int>("imageColor");
-
-	mSelectedProperties.mBackgroundImage = elem && elem->has("backgroundImage") ?
-		elem->get<std::string>("backgroundImage") :
-		mDefaultProperties.mBackgroundImage;
-
-	mSelectedProperties.mBackgroundCornerSize = elem && elem->has("backgroundCornerSize") ?
-		elem->get<Vector2f>("backgroundCornerSize") :
-		mDefaultProperties.mBackgroundCornerSize;
-
-	if (elem && elem->has("backgroundColor"))
+	// Apply theme to the <image name="gridtile.overlay"> element
+	elem = theme->getElement(view, "gridtile.overlay", "image");
+	if (elem)
 	{
-		mSelectedProperties.mBackgroundCenterColor = elem->get<unsigned int>("backgroundColor");
-		mSelectedProperties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundColor");
+		createImageOverlay();
+		mImageOverlay->applyTheme(theme, view, "gridtile.overlay", ThemeFlags::ALL);
+
+		mDefaultProperties.ImageOverlay.sizeMode = "size";
+		mDefaultProperties.ImageOverlay.applyTheme(elem);
+		mSelectedProperties.ImageOverlay = mDefaultProperties.ImageOverlay;
+
+		// Apply theme to the <image name="gridtile.favorite:selected"> element
+		elem = theme->getElement(view, "gridtile.overlay:selected", "image");
+		if (elem)
+			mSelectedProperties.ImageOverlay.applyTheme(elem);
+	}
+	else if (mImageOverlay != nullptr)
+	{
+		removeChild(mImageOverlay);
+		delete mImageOverlay;
+		mImageOverlay = nullptr;
 	}
 
-	if (elem && elem->has("backgroundCenterColor"))
-		mSelectedProperties.mBackgroundCenterColor = elem->get<unsigned int>("backgroundCenterColor");
 
-	if (elem && elem->has("backgroundEdgeColor"))
-		mSelectedProperties.mBackgroundEdgeColor = elem->get<unsigned int>("backgroundEdgeColor");
-
-	if (elem && elem->has("reflexion"))
-		mSelectedProperties.mMirror = elem->get<Vector2f>("reflexion");
-
+	// Apply theme to the <text name="gridtile"> element
 	elem = theme->getElement(view, "gridtile", "text");
+	if (elem == nullptr) // Apply theme to the <text name="gridtile.text"> element		
+		elem = theme->getElement(view, "gridtile.text", "text");
+
 	if (elem != NULL)
 	{
-		float sh = (float)Renderer::getScreenHeight();
-
-		if (elem->has("pos"))
-		{
-			mDefaultProperties.mLabelPos = elem->get<Vector2f>("pos");
-			mSelectedProperties.mLabelPos = mDefaultProperties.mLabelPos;
-			mLabelMerged = true;
-		}
-		else 
-			mLabelMerged = false;
-
-		if (elem->has("size"))
-		{
-			mDefaultProperties.mLabelSize = elem->get<Vector2f>("size");
-			mSelectedProperties.mLabelSize = mDefaultProperties.mLabelSize;
-
-			if (!mLabelMerged)
-				mLabelMerged = mDefaultProperties.mLabelSize.x() == 0;
-		}
-
-		if (elem->has("color"))
-		{
-			mDefaultProperties.mLabelColor = elem->get<unsigned int>("color");
-			mSelectedProperties.mLabelColor = mDefaultProperties.mLabelColor;
-		}
-
-		if (elem->has("backgroundColor"))
-		{
-			mDefaultProperties.mLabelBackColor = elem->get<unsigned int>("backgroundColor");
-			mSelectedProperties.mLabelBackColor = mDefaultProperties.mLabelBackColor;
-		}
-
-		if (elem->has("glowSize"))
-		{
-			mDefaultProperties.mLabelGlowSize = (unsigned int)elem->get<float>("glowSize");
-			mSelectedProperties.mLabelGlowSize = mDefaultProperties.mLabelGlowSize;
-		}
-
-		if (elem->has("glowColor"))
-		{
-			mDefaultProperties.mLabelGlowColor = elem->get<unsigned int>("glowColor");
-			mSelectedProperties.mLabelGlowColor = mDefaultProperties.mLabelGlowColor;
-		}
-
-		if (elem->has("fontSize"))
-		{
-			mDefaultProperties.mFontSize = elem->get<float>("fontSize") * sh;
-			mSelectedProperties.mFontSize = mDefaultProperties.mFontSize;
-		}
-
-		if (elem->has("fontPath"))
-		{
-			mDefaultProperties.mFontPath = elem->get<std::string>("fontPath");
-			mSelectedProperties.mFontPath = mDefaultProperties.mFontPath;
-		}
-	
-		if (elem->has("visible"))
-			mLabelVisible = elem->get<bool>("visible");
-		else
-			mLabelVisible = true;
-
 		mLabel.applyTheme(theme, view, element, properties);
 
-		elem = theme->getElement(view, "gridtile_selected", "text");
-		if (elem == nullptr)
-			elem = theme->getElement(view, "gridtile:selected", "text");
+		mDefaultProperties.Label.applyTheme(elem);
+		mSelectedProperties.Label = mDefaultProperties.Label;
 
-		if (elem != NULL)
-		{
-			if (elem->has("pos") && mDefaultProperties.mLabelPos.x() >= 0)
-				mSelectedProperties.mLabelPos = elem->get<Vector2f>("pos");
+		mLabelMerged = elem->has("pos");
+		if (!mLabelMerged && elem->has("size"))
+			mLabelMerged = mDefaultProperties.Label.size.x() == 0;
 
-			if (elem->has("size"))
-				mSelectedProperties.mLabelSize = elem->get<Vector2f>("size");
+		// Apply theme to the <text name="gridtile:selected"> element
+		elem = theme->getElement(view, "gridtile:selected", "text");
+		if (elem == nullptr) // Apply theme to the <text name="gridtile.text:selected"> element
+			elem = theme->getElement(view, "gridtile.text:selected", "text");
 
-			if (elem->has("color"))
-				mSelectedProperties.mLabelColor = elem->get<unsigned int>("color");
-
-			if (elem->has("backgroundColor"))
-				mSelectedProperties.mLabelBackColor = elem->get<unsigned int>("backgroundColor");
-
-			if (elem->has("glowSize"))
-				mSelectedProperties.mLabelGlowSize = (unsigned int)elem->get<float>("glowSize");
-
-			if (elem->has("glowColor"))
-				mSelectedProperties.mLabelGlowColor = elem->get<unsigned int>("glowColor");
-
-			if (elem->has("fontSize"))
-				mSelectedProperties.mFontSize = elem->get<float>("fontSize") * sh;
-
-			if (elem->has("fontPath"))
-				mSelectedProperties.mFontPath = elem->get<std::string>("fontPath");
-		}
+		if (elem)
+			mSelectedProperties.Label.applyTheme(elem);
 	}
-	else
-		mLabelVisible = false;
 }
 
 // Made this a static function because the ImageGridComponent need to know the default tile size
@@ -703,7 +685,6 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 Vector2f GridTileComponent::getDefaultTileSize()
 {
 	Vector2f screen = Vector2f((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
-
 	return screen * 0.22f;
 }
 
@@ -726,9 +707,9 @@ void GridTileComponent::setImage(const std::string& path, bool isDefaultImage)
 	mCurrentPath = path;
 
 	if (mSelectedProperties.mSize.x() > mSize.x())
-		mImage->setImage(path, false, MaxSizeInfo(mSelectedProperties.mSize, mSelectedProperties.mImageSizeMode != "maxSize"));
+		mImage->setImage(path, false, MaxSizeInfo(mSelectedProperties.mSize, mSelectedProperties.Image.sizeMode != "maxSize"));
 	else
-		mImage->setImage(path, false, MaxSizeInfo(mSize, mSelectedProperties.mImageSizeMode != "maxSize"));
+		mImage->setImage(path, false, MaxSizeInfo(mSize, mSelectedProperties.Image.sizeMode != "maxSize"));
 
 	resize();
 }
@@ -813,7 +794,7 @@ void GridTileComponent::startVideo()
 	if (mVideo != nullptr)
 	{
 		// Inform video component about size before staring in order to be able to use OptimizeVideo parameter
-		if (mSelectedProperties.mImageSizeMode == "minSize")
+		if (mSelectedProperties.Image.sizeMode == "minSize")
 			mVideo->setMinSize(mSelectedProperties.mSize);
 		else
 			mVideo->setResize(mSelectedProperties.mSize);
@@ -942,6 +923,15 @@ unsigned int GridTileComponent::mixUnsigned(const unsigned int def, const unsign
 	return def * (1.0 - percent) + sel * percent;
 }
 
+float GridTileComponent::mixFloat(const float def, const float sel, float percent)
+{
+	if (def == sel)
+		return def;
+
+	return def * (1.0 - percent) + sel * percent;
+}
+
+
 GridTileProperties GridTileComponent::getCurrentProperties()
 {
 	using namespace Renderer;
@@ -955,16 +945,17 @@ GridTileProperties GridTileComponent::getCurrentProperties()
 
 	mMixedProperties.mSize				= mixVectors(mDefaultProperties.mSize, mSelectedProperties.mSize, mSelectedZoomPercent);
 	mMixedProperties.mPadding			= mixVectors(mDefaultProperties.mPadding, mSelectedProperties.mPadding, mSelectedZoomPercent);
-	
-	mMixedProperties.mLabelPos		    = mixVectors(mDefaultProperties.mLabelPos, mSelectedProperties.mLabelPos, mSelectedZoomPercent);
-	mMixedProperties.mLabelSize			= mixVectors(mDefaultProperties.mLabelSize, mSelectedProperties.mLabelSize, mSelectedZoomPercent);
-	mMixedProperties.mLabelColor		= mixColors(mDefaultProperties.mLabelColor, mSelectedProperties.mLabelColor, mSelectedZoomPercent);
-	mMixedProperties.mLabelBackColor	= mixColors(mDefaultProperties.mLabelBackColor, mSelectedProperties.mLabelBackColor, mSelectedZoomPercent);
-	mMixedProperties.mLabelGlowColor	= mixColors(mDefaultProperties.mLabelGlowColor, mSelectedProperties.mLabelGlowColor, mSelectedZoomPercent);
-	mMixedProperties.mLabelGlowSize		= mixUnsigned(mDefaultProperties.mLabelGlowSize, mSelectedProperties.mLabelGlowSize, mSelectedZoomPercent);	
 
-	mMixedProperties.mImageColor		= mixColors(mDefaultProperties.mImageColor, mSelectedProperties.mImageColor, mSelectedZoomPercent);
-	mMixedProperties.mMirror			= mixVectors(mDefaultProperties.mMirror, mSelectedProperties.mMirror, mSelectedZoomPercent);
+	if (mDefaultProperties.Label.Loaded)
+	{
+		mMixedProperties.Label.pos = mixVectors(mDefaultProperties.Label.pos, mSelectedProperties.Label.pos, mSelectedZoomPercent);
+		mMixedProperties.Label.size = mixVectors(mDefaultProperties.Label.size, mSelectedProperties.Label.size, mSelectedZoomPercent);		
+		mMixedProperties.Label.color = mixColors(mDefaultProperties.Label.color, mSelectedProperties.Label.color, mSelectedZoomPercent);
+		mMixedProperties.Label.backColor = mixColors(mDefaultProperties.Label.backColor, mSelectedProperties.Label.backColor, mSelectedZoomPercent);
+		mMixedProperties.Label.glowColor = mixColors(mDefaultProperties.Label.glowColor, mSelectedProperties.Label.glowColor, mSelectedZoomPercent);
+		mMixedProperties.Label.glowSize = mixFloat(mDefaultProperties.Label.glowSize, mSelectedProperties.Label.glowSize, mSelectedZoomPercent);
+		mMixedProperties.Label.fontSize = mixFloat(mDefaultProperties.Label.fontSize, mSelectedProperties.Label.fontSize, mSelectedZoomPercent);
+	}
 
 	if (mDefaultProperties.Image.Loaded)
 	{
@@ -994,6 +985,16 @@ GridTileProperties GridTileComponent::getCurrentProperties()
 		mMixedProperties.Favorite.color = mixColors(mDefaultProperties.Favorite.color, mSelectedProperties.Favorite.color, mSelectedZoomPercent);
 		mMixedProperties.Favorite.colorEnd = mixColors(mDefaultProperties.Favorite.colorEnd, mSelectedProperties.Favorite.colorEnd, mSelectedZoomPercent);
 		mMixedProperties.Favorite.reflexion = mixVectors(mDefaultProperties.Favorite.reflexion, mSelectedProperties.Favorite.reflexion, mSelectedZoomPercent);
+	}
+
+	if (mDefaultProperties.ImageOverlay.Loaded)
+	{
+		mMixedProperties.ImageOverlay.pos = mixVectors(mDefaultProperties.ImageOverlay.pos, mSelectedProperties.ImageOverlay.pos, mSelectedZoomPercent);
+		mMixedProperties.ImageOverlay.size = mixVectors(mDefaultProperties.ImageOverlay.size, mSelectedProperties.ImageOverlay.size, mSelectedZoomPercent);
+		mMixedProperties.ImageOverlay.origin = mixVectors(mDefaultProperties.ImageOverlay.origin, mSelectedProperties.ImageOverlay.origin, mSelectedZoomPercent);
+		mMixedProperties.ImageOverlay.color = mixColors(mDefaultProperties.ImageOverlay.color, mSelectedProperties.ImageOverlay.color, mSelectedZoomPercent);
+		mMixedProperties.ImageOverlay.colorEnd = mixColors(mDefaultProperties.ImageOverlay.colorEnd, mSelectedProperties.ImageOverlay.colorEnd, mSelectedZoomPercent);
+		mMixedProperties.ImageOverlay.reflexion = mixVectors(mDefaultProperties.ImageOverlay.reflexion, mSelectedProperties.ImageOverlay.reflexion, mSelectedZoomPercent);
 	}
 	
 	return mMixedProperties;

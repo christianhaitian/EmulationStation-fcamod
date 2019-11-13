@@ -9,10 +9,10 @@
 
 class VideoComponent;
 
-struct ImageProperties
+struct GridImageProperties
 {
 public:
-	ImageProperties()
+	GridImageProperties()
 	{
 		Loaded = false;
 		Visible  = false;
@@ -22,7 +22,7 @@ public:
 		size = Vector2f(1.0f, 1.0f);
 		origin = Vector2f(0.5f, 0.5f);
 		color = colorEnd = 0xFFFFFFFF;		
-		sizeMode = 2;
+		sizeMode = "maxSize";
 	}
 
 	void updateImageComponent(ImageComponent* image, Vector2f parentSize, bool disableSize = false)
@@ -32,9 +32,9 @@ public:
 
 		image->setPosition(pos.x() * parentSize.x(), pos.y() * parentSize.y());
 		
-		if (!disableSize && sizeMode == 0)
+		if (!disableSize && sizeMode == "size")
 			image->setSize(size.x() * parentSize.x(), size.y() * parentSize.y());
-		else if (sizeMode == 1)
+		else if (sizeMode == "minSize")
 			image->setMinSize(size.x() * parentSize.x(), size.y() * parentSize.y());
 		else
 			image->setMaxSize(size.x() * parentSize.x(), size.y() * parentSize.y());
@@ -45,53 +45,54 @@ public:
 		image->setMirroring(reflexion);
 	}
 
-	bool loadElement(const ThemeData::ThemeElement* elem)
+	bool applyTheme(const ThemeData::ThemeElement* elem);
+
+	bool Loaded;
+	bool Visible;
+
+	Vector2f pos;
+	Vector2f size;
+	Vector2f origin;
+	Vector2f reflexion;
+	
+	unsigned int color;
+	unsigned int colorEnd;
+
+	std::string  sizeMode;
+};
+
+struct GridTextProperties
+{
+public:
+	GridTextProperties()
 	{
-		if (!elem)
-		{
-			Visible = false;
-			return false;
-		}
-
-		Loaded = true;
-		Visible = true;
-
-		if (elem && elem->has("visible"))
-			Visible = elem->get<bool>("visible");
-
-		if (elem && elem->has("origin"))
-			origin = elem->get<Vector2f>("origin");
-
-		if (elem && elem->has("pos"))
-			pos = elem->get<Vector2f>("pos");
-
-		if (elem && elem->has("size"))
-		{
-			sizeMode = 0;
-			size = elem->get<Vector2f>("size");
-		}
-		else if (elem && elem->has("minSize"))
-		{
-			sizeMode = 1;
-			size = elem->get<Vector2f>("minSize");
-		}
-		else if (elem && elem->has("maxSize"))
-		{
-			sizeMode = 2;
-			size = elem->get<Vector2f>("maxSize");
-		}
-
-		if (elem && elem->has("color"))
-			color = colorEnd = elem->get<unsigned int>("color");
-
-		if (elem && elem->has("colorEnd"))
-			colorEnd = elem->get<unsigned int>("colorEnd");
-
-		if (elem && elem->has("reflexion"))
-			reflexion = elem->get<Vector2f>("reflexion");
-
-		return true;
+		Loaded = false;
+		Visible = false;
+		
+		pos = Vector2f(-1, -1);
+		size = Vector2f(1.0f, 0.30f);		
+		color = 0xFFFFFFFF;
+		backColor = 0;		
+		fontSize = 0;
+		glowColor = 0;
+		glowSize = 0;
 	}
+
+	void updateTextComponent(TextComponent* text, Vector2f parentSize, bool disableSize = false)
+	{
+		if (text == nullptr)
+			return;
+
+		text->setPosition(pos.x() * parentSize.x(), pos.y() * parentSize.y());
+		text->setSize(size.x() * parentSize.x(), size.y() * parentSize.y());
+		text->setColor(color);
+		text->setBackgroundColor(backColor);
+		text->setGlowColor(glowColor);
+		text->setGlowSize(glowSize);
+		text->setFont(fontPath, fontSize * (float)Renderer::getScreenHeight());
+	}
+
+	bool applyTheme(const ThemeData::ThemeElement* elem);
 
 	bool Loaded;
 	bool Visible;
@@ -99,46 +100,32 @@ public:
 	Vector2f pos;
 	Vector2f size;
 
-	Vector2f origin;
-
-	Vector2f reflexion;
-	
 	unsigned int color;
-	unsigned int colorEnd;
+	unsigned int backColor;
 
-	int sizeMode;
+	unsigned int glowColor;
+	float glowSize;
+
+	std::string  fontPath;
+	float fontSize;
 };
 
 struct GridTileProperties
 {
-	Vector2f mSize;
-	Vector2f mPadding;
-	unsigned int mImageColor;
-	std::string mBackgroundImage;
-	Vector2f mBackgroundCornerSize;
-	unsigned int mBackgroundCenterColor;
-	unsigned int mBackgroundEdgeColor;
+	Vector2f				mSize;
+	Vector2f				mPadding;
+	std::string				mSelectionMode;
 
-	std::string mImageSizeMode;
-	std::string mSelectionMode;
+	std::string				mBackgroundImage;
+	Vector2f				mBackgroundCornerSize;
+	unsigned int			mBackgroundCenterColor;
+	unsigned int			mBackgroundEdgeColor;
 
-	Vector2f mLabelPos;
-	Vector2f mLabelSize;
-
-	unsigned int mLabelColor;
-	unsigned int mLabelBackColor;
-
-	unsigned int mLabelGlowColor;
-	unsigned int mLabelGlowSize;
-
-	std::string		mFontPath;
-	unsigned int	mFontSize;
-
-	Vector2f		mMirror;
-
-	ImageProperties Image;
-	ImageProperties Marquee;
-	ImageProperties Favorite;
+	GridTextProperties		Label;
+	GridImageProperties		Image;
+	GridImageProperties		Marquee;
+	GridImageProperties		Favorite;
+	GridImageProperties		ImageOverlay;
 };
 
 class GridTileComponent : public GuiComponent
@@ -191,19 +178,22 @@ private:
 	void	createVideo();
 	void	createMarquee();
 	void	createFavorite();
+	void	createImageOverlay();
 	void	startVideo();
 	void	stopVideo();
 
 	void resize();
 	
 	inline static unsigned int mixUnsigned(const unsigned int def, const unsigned int sel, float percent);
+	inline static float mixFloat(const float def, const float sel, float percent);
 	static Vector2f mixVectors(const Vector2f& def, const Vector2f& sel, float percent);
+	static void applyThemeToProperties(const ThemeData::ThemeElement* elem, GridTileProperties& properties);
 
 	GridTileProperties getCurrentProperties();
 
 	TextComponent mLabel;
 
-	bool mLabelVisible;
+	// bool mLabelVisible;
 	bool mLabelMerged;
 
 	NinePatchComponent mBackground;
@@ -229,6 +219,7 @@ private:
 	ImageComponent* mImage;
 	ImageComponent* mMarquee;
 	ImageComponent* mFavorite;
+	ImageComponent* mImageOverlay;
 
 	bool mVideoPlaying;
 	bool mShown;

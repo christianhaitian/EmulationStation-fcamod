@@ -457,7 +457,7 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 				size_x = mTargetSize.x();
 				size_y = mTargetSize.y();
 			}
-
+			
 			Renderer::enableRoundCornerStencil(x, y, size_x, size_y, radius);
 
 			mTexture->bind();

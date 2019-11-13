@@ -109,7 +109,7 @@ namespace Renderer
 	unsigned int mixColors(unsigned int first, unsigned int second, float percent);
 
 
-	void enableRoundCornerStencil(int x, int y, int size_x, int size_y, int radius);
+	void enableRoundCornerStencil(float x, float y, float size_x, float size_y, float radius);
 	void disableStencil();
 
 } // Renderer::
