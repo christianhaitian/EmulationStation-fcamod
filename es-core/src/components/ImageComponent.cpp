@@ -33,6 +33,8 @@ ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : G
 	mLoadingTexture = nullptr;
 	mAllowFading = true;
 	mRoundCorners = 0.0f;
+	mShowing = false;
+	mPlaylistTimer = 0;
 }
 
 ImageComponent::~ImageComponent()
@@ -689,4 +691,57 @@ std::vector<HelpPrompt> ImageComponent::getHelpPrompts()
 	std::vector<HelpPrompt> ret;
 	ret.push_back(HelpPrompt("a", _("SELECT")));
 	return ret;
+}
+
+
+
+void ImageComponent::setPlaylist(std::shared_ptr<IPlaylist> playList)
+{
+	mPlaylist = playList;
+	if (mPlaylist == nullptr)
+		return;
+
+	auto image = mPlaylist->getNextItem();
+	if (!image.empty())
+		setImage(image);
+}
+
+void ImageComponent::onShow()
+{
+	GuiComponent::onShow();
+
+	if (!mShowing && mPlaylist != nullptr && !mPath.empty())
+	{
+		auto item = mPlaylist->getNextItem();
+		if (!item.empty())
+			setImage(item, false, getMaxSizeInfo());
+	}
+
+	mShowing = true;	
+}
+
+void ImageComponent::onHide()
+{
+	GuiComponent::onHide();
+	mShowing = false;	
+}
+
+
+void ImageComponent::update(int deltaTime)
+{
+	GuiComponent::update(deltaTime);
+
+	if (mPlaylist != nullptr && mShowing)
+	{
+		mPlaylistTimer += deltaTime;
+
+		if (mPlaylistTimer >= 10000)
+		{
+			auto item = mPlaylist->getNextItem();
+			if (!item.empty())
+				setImage(item, false, getMaxSizeInfo());
+
+			mPlaylistTimer = 0.0;
+		}
+	}
 }

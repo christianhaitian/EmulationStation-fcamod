@@ -404,7 +404,7 @@ void VideoVlcComponent::handleLooping()
 		{
 			if (mPlaylist != nullptr)
 			{
-				auto nextVideo = mPlaylist->getNextVideo();
+				auto nextVideo = mPlaylist->getNextItem();
 				if (!nextVideo.empty())
 				{
 					stopVideo();

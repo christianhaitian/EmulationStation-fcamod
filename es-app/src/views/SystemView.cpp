@@ -57,37 +57,75 @@ void SystemView::clearEntries()
 	mEntries.clear();
 }
 
-class SystemVideoPlaylist : public IVideoPlaylist
+class SystemRandomPlaylist : public IPlaylist
 {
 public:
-	SystemVideoPlaylist(SystemData* system)
+	enum PlaylistType
 	{
+		IMAGE,
+		THUMBNAIL,
+		MARQUEE,
+		VIDEO
+	};
+
+	SystemRandomPlaylist(SystemData* system, PlaylistType type)
+	{
+		mFirstRun = true;
 		mSystem = system;
+		mType = type;
 	}
-	
-	std::string getNextVideo()
+		
+	std::string getNextItem()
 	{
 		if (mFirstRun)
 		{
 			std::vector<FileData*> files = mSystem->getRootFolder()->getFilesRecursive(GAME, false);
+
 			for (auto file : files)
-				if (!file->getVideoPath().empty())
-					mVideos.push_back(file->getVideoPath());
+			{
+				switch (mType)
+				{
+				case IMAGE:
+					if (!file->getImagePath().empty())
+						mPaths.push_back(file->getImagePath());
+					break;
+
+				case THUMBNAIL:
+					if (!file->getThumbnailPath().empty())
+						mPaths.push_back(file->getThumbnailPath());
+					break;
+
+				case MARQUEE:
+					if (!file->getMarqueePath().empty())
+						mPaths.push_back(file->getMarqueePath());
+					break;
+
+				case VIDEO:
+					if (!file->getVideoPath().empty())
+						mPaths.push_back(file->getVideoPath());
+					break;
+				}
+			}
+
+			mFirstRun = false;
 		}
 
-		int video = (int) ((float) rand() * mVideos.size()) / float(RAND_MAX);
-			
-		//	(int)(((float)rand() / float(RAND_MAX)) * (float)mVideos.size());
-		if (video >= 0 && video < mVideos.size())
-			return mVideos[video];
+		int idx = (int) ((float) rand() * mPaths.size()) / float(RAND_MAX);
+				
+		if (idx >= 0 && idx < mPaths.size())
+			return mPaths[idx];
 
 		return "";
 	}
 
+
+
 private:
-	SystemData* mSystem;
-	bool mFirstRun;
-	std::vector<std::string> mVideos;
+	SystemData*		mSystem;
+	bool			mFirstRun;
+	PlaylistType	mType;
+
+	std::vector<std::string> mPaths;
 };
 
 void SystemView::populate()
@@ -195,12 +233,29 @@ void SystemView::populate()
 		
 		for (auto bx : e.data.backgroundExtras)
 		{
-			if (bx->getValue() != "VideoComponent")
-				continue;
-			
-			auto elem = (*it)->getTheme()->getElement("system", bx->getTag(), "video");
-			if (elem != nullptr && elem->has("path") && elem->get<std::string>("path") == "*")
-				((VideoComponent*)bx)->setPlaylist(std::make_shared<SystemVideoPlaylist>(*it));
+			if (bx->getValue() == "VideoComponent")
+			{
+				auto elem = (*it)->getTheme()->getElement("system", bx->getTag(), "video");
+				if (elem != nullptr && elem->has("path") && elem->get<std::string>("path") == "*")
+					((VideoComponent*)bx)->setPlaylist(std::make_shared<SystemRandomPlaylist>(*it, SystemRandomPlaylist::VIDEO));
+			}
+			else if (bx->getValue() == "ImageComponent")
+			{
+				auto elem = (*it)->getTheme()->getElement("system", bx->getTag(), "image");
+				if (elem != nullptr && elem->has("path") && Utils::String::startsWith(elem->get<std::string>("path"), "*"))
+				{
+					std::string src = elem->get<std::string>("path");
+
+					SystemRandomPlaylist::PlaylistType type = SystemRandomPlaylist::IMAGE;
+
+					if (src == "*.thumbnail")
+						type = SystemRandomPlaylist::THUMBNAIL;
+					else if (src == "*.marquee")
+						type = SystemRandomPlaylist::MARQUEE;
+
+					((ImageComponent*)bx)->setPlaylist(std::make_shared<SystemRandomPlaylist>(*it, type));
+				}
+			}
 		}
 	
 		// sort the extras by z-index

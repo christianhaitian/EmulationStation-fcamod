@@ -450,7 +450,7 @@ void VideoComponent::onShow()
 {
 	if (!mShowing && mPlaylist != nullptr && !mVideoPath.empty())
 	{
-		auto video = mPlaylist->getNextVideo();
+		auto video = mPlaylist->getNextItem();
 		if (!video.empty())
 			mVideoPath = video;
 	}
@@ -484,13 +484,13 @@ void VideoComponent::topWindow(bool isTop)
 }
 
 
-void VideoComponent::setPlaylist(std::shared_ptr<IVideoPlaylist> playList)
+void VideoComponent::setPlaylist(std::shared_ptr<IPlaylist> playList)
 {
 	mPlaylist = playList;
 	if (mPlaylist == nullptr)
 		return;
 
-	auto video = mPlaylist->getNextVideo();
+	auto video = mPlaylist->getNextItem();
 	if (!video.empty())
 		setVideo(video);
 }

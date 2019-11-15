@@ -986,7 +986,7 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 		case PATH:
 		{
 			std::string path = Utils::FileSystem::resolveRelativePath(str, mPaths.back(), true);
-			if (path == "*")
+			if (Utils::String::startsWith(path, "*"))
 			{
 				element.properties[node.name()] = path;
 				break;

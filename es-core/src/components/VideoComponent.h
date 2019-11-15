@@ -21,12 +21,6 @@ enum ImageSource
 };
 */
 
-class IVideoPlaylist
-{
-public:
-	virtual std::string getNextVideo() = 0;
-};
-
 class VideoComponent : public GuiComponent
 {
 	// Structure that groups together the configuration of the video component
@@ -134,10 +128,10 @@ public:
 		return mVideoPath; 
 	}
 
-	void setPlaylist(std::shared_ptr<IVideoPlaylist> playList);
+	void setPlaylist(std::shared_ptr<IPlaylist> playList);
 
 protected:
-	std::shared_ptr<IVideoPlaylist> mPlaylist;
+	std::shared_ptr<IPlaylist> mPlaylist;
 	std::function<bool()> mVideoEnded;
 
 private:
