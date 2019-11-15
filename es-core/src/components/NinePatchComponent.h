@@ -25,6 +25,7 @@ public:
 	virtual ~NinePatchComponent();
 
 	void render(const Transform4x4f& parentTrans) override;
+	void update(int deltaTime) override;
 
 	void onSizeChanged() override;
 
@@ -42,6 +43,9 @@ public:
 
 	virtual void setOpacity(unsigned char opacity);
 
+	void setAnimateColor(unsigned int color) { mAnimateColor = color; };
+	void setAnimateTiming(float timing) { mAnimateTiming = timing; };
+
 private:
 	void buildVertices();
 	void updateColors();
@@ -55,6 +59,11 @@ private:
 	std::shared_ptr<TextureResource> mTexture;
 
 	Vector2f mPreviousSize;
+
+
+	float mTimer;
+	float mAnimateTiming;
+	unsigned int mAnimateColor;
 };
 
 #endif // ES_CORE_COMPONENTS_NINE_PATCH_COMPONENT_H

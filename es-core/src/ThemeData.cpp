@@ -128,6 +128,8 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "cornerSize", NORMALIZED_PAIR },
 		{ "centerColor", COLOR },
 		{ "edgeColor", COLOR },
+		{ "animateColor", COLOR },
+		{ "animateColorTime", FLOAT },
 		{ "zIndex", FLOAT } } },
 	{ "datetime", {
 		{ "pos", NORMALIZED_PAIR },
@@ -154,6 +156,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "rotation", FLOAT },
 		{ "rotationOrigin", NORMALIZED_PAIR },
 		{ "color", COLOR },
+		{ "unfilledColor", COLOR },
 		{ "filledPath", PATH },
 		{ "unfilledPath", PATH },
 		{ "visible", BOOLEAN },
@@ -983,6 +986,11 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 		case PATH:
 		{
 			std::string path = Utils::FileSystem::resolveRelativePath(str, mPaths.back(), true);
+			if (path == "*")
+			{
+				element.properties[node.name()] = path;
+				break;
+			}
 
 #if WIN32
 			path = Utils::String::replace(path,

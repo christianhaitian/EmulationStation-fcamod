@@ -20,6 +20,13 @@ enum ImageSource
 	MARQUEE
 };
 */
+
+class IVideoPlaylist
+{
+public:
+	virtual std::string getNextVideo() = 0;
+};
+
 class VideoComponent : public GuiComponent
 {
 	// Structure that groups together the configuration of the video component
@@ -35,6 +42,8 @@ class VideoComponent : public GuiComponent
 public:
 	VideoComponent(Window* window);
 	virtual ~VideoComponent();
+
+	std::string getValue() const override { return "VideoComponent"; }
 
 	// Loads the video at the given filepath
 	bool setVideo(std::string path);
@@ -112,8 +121,23 @@ public:
 
 	float getRoundCorners() { return mRoundCorners; }
 	void setRoundCorners(float value) { mRoundCorners = value; }
+	
+	bool isFading() {
+		return mIsPlaying && mFadeIn < 1.0;
+	}
+
+	std::string getVideoPath() 
+	{ 
+		if (mPlayingVideoPath.empty())
+			return mPlayingVideoPath;
+
+		return mVideoPath; 
+	}
+
+	void setPlaylist(std::shared_ptr<IVideoPlaylist> playList);
 
 protected:
+	std::shared_ptr<IVideoPlaylist> mPlaylist;
 	std::function<bool()> mVideoEnded;
 
 private:
@@ -132,7 +156,6 @@ private:
 
 	// Manage the playing state of the component
 	void manageState();
-
 
 
 protected:

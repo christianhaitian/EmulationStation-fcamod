@@ -105,6 +105,7 @@ public:
 	void setVerticalAlignment(Alignment align) { mVerticalAlignment = align; }
 
 	float getRoundCorners() { return mRoundCorners; }
+	void setRoundCorners(float value) { mRoundCorners = value; }
 
 private:
 	Vector2f mTargetSize;

@@ -23,14 +23,18 @@ public:
 		origin = Vector2f(0.5f, 0.5f);
 		color = colorEnd = 0xFFFFFFFF;		
 		sizeMode = "maxSize";
+		roundCorners = 0;
 	}
 
-	void updateImageComponent(ImageComponent* image, Vector2f parentSize, bool disableSize = false)
+	void mixProperties(GridImageProperties& def, GridImageProperties& sel, float percent);
+	bool applyTheme(const ThemeData::ThemeElement* elem);
+
+	void updateImageComponent(ImageComponent* image, Vector2f offsetPos, Vector2f parentSize, bool disableSize = false)
 	{
 		if (image == nullptr)
 			return;
 
-		image->setPosition(pos.x() * parentSize.x(), pos.y() * parentSize.y());
+		image->setPosition(offsetPos.x() + pos.x() * parentSize.x(), offsetPos.y() + pos.y() * parentSize.y());
 		
 		if (!disableSize && sizeMode == "size")
 			image->setSize(size.x() * parentSize.x(), size.y() * parentSize.y());
@@ -43,9 +47,10 @@ public:
 		image->setColorShift(color);
 		image->setColorShiftEnd(colorEnd);
 		image->setMirroring(reflexion);
+		image->setRoundCorners(roundCorners);
 	}
 
-	bool applyTheme(const ThemeData::ThemeElement* elem);
+
 
 	bool Loaded;
 	bool Visible;
@@ -59,6 +64,8 @@ public:
 	unsigned int colorEnd;
 
 	std::string  sizeMode;
+
+	float roundCorners;
 };
 
 struct GridTextProperties
@@ -78,6 +85,9 @@ public:
 		glowSize = 0;
 	}
 
+	void mixProperties(GridTextProperties& def, GridTextProperties& sel, float percent);
+	bool applyTheme(const ThemeData::ThemeElement* elem);
+
 	void updateTextComponent(TextComponent* text, Vector2f parentSize, bool disableSize = false)
 	{
 		if (text == nullptr)
@@ -92,7 +102,7 @@ public:
 		text->setFont(fontPath, fontSize * (float)Renderer::getScreenHeight());
 	}
 
-	bool applyTheme(const ThemeData::ThemeElement* elem);
+	
 
 	bool Loaded;
 	bool Visible;
@@ -110,16 +120,58 @@ public:
 	float fontSize;
 };
 
+struct GridNinePatchProperties
+{
+public:
+	GridNinePatchProperties()
+	{
+		Loaded = false;
+		Visible = false;
+
+		edgeColor = centerColor = animateColor = 0xFFFFFFFF;
+		cornerSize = Vector2f(16, 16);
+		path = ":/frame.png";
+		animateTime = 0;
+	}
+
+
+
+	bool applyTheme(const ThemeData::ThemeElement* elem);
+
+	void updateNinePatchComponent(NinePatchComponent* ctl)
+	{
+		if (ctl == nullptr)
+			return;
+
+		ctl->setCenterColor(centerColor);
+		ctl->setEdgeColor(edgeColor);
+		ctl->setCornerSize(cornerSize);
+		ctl->setAnimateTiming(animateTime);
+		ctl->setAnimateColor(animateColor);
+		ctl->setImagePath(path);
+	}
+
+
+
+	bool Loaded;
+	bool Visible;
+
+	Vector2f	 cornerSize;
+	unsigned int centerColor;
+	unsigned int edgeColor;
+	std::string  path;
+
+	unsigned int animateColor;
+	float animateTime;
+};
+
 struct GridTileProperties
 {
-	Vector2f				mSize;
-	Vector2f				mPadding;
-	std::string				mSelectionMode;
+	Vector2f				Size;
+	Vector2f				Padding;
+	std::string				SelectionMode;
 
-	std::string				mBackgroundImage;
-	Vector2f				mBackgroundCornerSize;
-	unsigned int			mBackgroundCenterColor;
-	unsigned int			mBackgroundEdgeColor;
+	GridNinePatchProperties Background;
 
 	GridTextProperties		Label;
 	GridImageProperties		Image;
@@ -183,13 +235,10 @@ private:
 	void	stopVideo();
 
 	void resize();
-	
-	inline static unsigned int mixUnsigned(const unsigned int def, const unsigned int sel, float percent);
-	inline static float mixFloat(const float def, const float sel, float percent);
-	static Vector2f mixVectors(const Vector2f& def, const Vector2f& sel, float percent);
+
 	static void applyThemeToProperties(const ThemeData::ThemeElement* elem, GridTileProperties& properties);
 
-	GridTileProperties getCurrentProperties();
+	GridTileProperties getCurrentProperties(bool mixValues = true);
 
 	TextComponent mLabel;
 

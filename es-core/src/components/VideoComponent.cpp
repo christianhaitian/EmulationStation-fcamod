@@ -448,6 +448,13 @@ void VideoComponent::manageState()
 
 void VideoComponent::onShow()
 {
+	if (!mShowing && mPlaylist != nullptr && !mVideoPath.empty())
+	{
+		auto video = mPlaylist->getNextVideo();
+		if (!video.empty())
+			mVideoPath = video;
+	}
+
 	mShowing = true;
 	manageState();
 }
@@ -474,4 +481,16 @@ void VideoComponent::topWindow(bool isTop)
 {
 	mDisable = !isTop;
 	manageState();
+}
+
+
+void VideoComponent::setPlaylist(std::shared_ptr<IVideoPlaylist> playList)
+{
+	mPlaylist = playList;
+	if (mPlaylist == nullptr)
+		return;
+
+	auto video = mPlaylist->getNextVideo();
+	if (!video.empty())
+		setVideo(video);
 }

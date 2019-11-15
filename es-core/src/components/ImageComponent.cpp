@@ -444,20 +444,22 @@ void ImageComponent::render(const Transform4x4f& parentTrans)
 
 		if (mRoundCorners > 0)
 		{
-			int x = 0;
-			int y = 0;
-			int size_x = mSize.x();
-			int size_y = mSize.y();
-			int radius = Math::max(size_x, size_y) * mRoundCorners;
-
+			float x = 0;
+			float y = 0;
+			float size_x = mSize.x();
+			float size_y = mSize.y();
+			
+			
 			if (mTargetIsMin)
 			{
 				x = targetSizePos.x();
 				y = targetSizePos.y();
 				size_x = mTargetSize.x();
 				size_y = mTargetSize.y();
-			}
-			
+			}			
+
+			float radius = Math::max(size_x, size_y) * mRoundCorners;
+
 			Renderer::enableRoundCornerStencil(x, y, size_x, size_y, radius);
 
 			mTexture->bind();

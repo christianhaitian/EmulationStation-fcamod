@@ -9,6 +9,7 @@
 #include "SystemData.h"
 #include "Window.h"
 #include "AudioManager.h"
+#include "components/VideoComponent.h"
 
 // buffer values for scrolling velocity (left, stopped, right)
 const int logoBuffersLeft[] = { -5, -2, -1 };
@@ -55,6 +56,39 @@ void SystemView::clearEntries()
 
 	mEntries.clear();
 }
+
+class SystemVideoPlaylist : public IVideoPlaylist
+{
+public:
+	SystemVideoPlaylist(SystemData* system)
+	{
+		mSystem = system;
+	}
+	
+	std::string getNextVideo()
+	{
+		if (mFirstRun)
+		{
+			std::vector<FileData*> files = mSystem->getRootFolder()->getFilesRecursive(GAME, false);
+			for (auto file : files)
+				if (!file->getVideoPath().empty())
+					mVideos.push_back(file->getVideoPath());
+		}
+
+		int video = (int) ((float) rand() * mVideos.size()) / float(RAND_MAX);
+			
+		//	(int)(((float)rand() / float(RAND_MAX)) * (float)mVideos.size());
+		if (video >= 0 && video < mVideos.size())
+			return mVideos[video];
+
+		return "";
+	}
+
+private:
+	SystemData* mSystem;
+	bool mFirstRun;
+	std::vector<std::string> mVideos;
+};
 
 void SystemView::populate()
 {
@@ -159,6 +193,16 @@ void SystemView::populate()
 		// make background extras
 		e.data.backgroundExtras = ThemeData::makeExtras((*it)->getTheme(), "system", mWindow);
 		
+		for (auto bx : e.data.backgroundExtras)
+		{
+			if (bx->getValue() != "VideoComponent")
+				continue;
+			
+			auto elem = (*it)->getTheme()->getElement("system", bx->getTag(), "video");
+			if (elem != nullptr && elem->has("path") && elem->get<std::string>("path") == "*")
+				((VideoComponent*)bx)->setPlaylist(std::make_shared<SystemVideoPlaylist>(*it));
+		}
+	
 		// sort the extras by z-index
 		std::stable_sort(e.data.backgroundExtras.begin(), e.data.backgroundExtras.end(), [](GuiComponent* a, GuiComponent* b) {
 			return b->getZIndex() > a->getZIndex();

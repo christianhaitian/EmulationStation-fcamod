@@ -216,11 +216,12 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	if (t == 0.0)
 		return;
 
+	
 	Transform4x4f trans = parentTrans * getTransform();
-
-	if (!Renderer::isVisibleOnScreen(trans.translation().x(), trans.translation().y(), mSize.x(), mSize.y()))
+	
+	if (mRotation == 0 && !mTargetIsMin && !Renderer::isVisibleOnScreen(trans.translation().x(), trans.translation().y(), mSize.x(), mSize.y()))
 		return;
-
+		
 	GuiComponent::renderChildren(trans);
 	Renderer::setMatrix(trans);
 
@@ -254,7 +255,7 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 
 	if (mTexture == nullptr)
 		return;
-
+	
 	const unsigned int fadeIn = t * 255.0f;
 	const unsigned int color = Renderer::convertColor(0xFFFFFF00 | fadeIn);
 	Renderer::Vertex   vertices[4];
@@ -302,12 +303,11 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 
 		if (mRoundCorners > 0)
 		{
-			int x = 0;
-			int y = 0;
-			int size_x = mSize.x();
-			int size_y = mSize.y();
-			int radius = Math::max(size_x, size_y) * mRoundCorners;
-
+			float x = 0;
+			float y = 0;
+			float size_x = mSize.x();
+			float size_y = mSize.y();
+			
 			if (mTargetIsMin)
 			{
 				x = targetSizePos.x();
@@ -315,7 +315,8 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 				size_x = mTargetSize.x();
 				size_y = mTargetSize.y();
 			}
-
+			
+			float radius = Math::max(size_x, size_y) * mRoundCorners;
 			Renderer::enableRoundCornerStencil(x, y, size_x, size_y, radius);
 
 			mTexture->bind();
@@ -401,6 +402,19 @@ void VideoVlcComponent::handleLooping()
 		libvlc_state_t state = libvlc_media_player_get_state(mMediaPlayer);
 		if (state == libvlc_Ended)
 		{
+			if (mPlaylist != nullptr)
+			{
+				auto nextVideo = mPlaylist->getNextVideo();
+				if (!nextVideo.empty())
+				{
+					stopVideo();
+					setVideo(nextVideo);
+					return;
+				}
+				else
+					mPlaylist = nullptr;
+			}
+			
 			if (mVideoEnded != nullptr)
 			{
 				bool cont = mVideoEnded();
