@@ -282,13 +282,13 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 	// convert extensions list from a string into a vector of strings
 
 	std::vector<std::string> list = readList(system.child("extension").text().get());
-	std::vector<std::string> extensions;
+	std::unordered_set<std::string> extensions;
 
 	for (auto extension = list.cbegin(); extension != list.cend(); extension++)
 	{
 		std::string xt = Utils::String::toLower(*extension);
 		if (std::find(extensions.begin(), extensions.end(), xt) == extensions.end())
-			extensions.push_back(xt);
+			extensions.insert(xt);
 	}
 
 	cmd = system.child("command").text().get();

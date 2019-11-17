@@ -11,6 +11,7 @@
 #include <pugixml/src/pugixml.hpp>
 #include "math/Vector2f.h"
 #include <unordered_map>
+#include <unordered_set>
 
 #include "FileFilterIndex.h"
 #include "Settings.h"
@@ -32,14 +33,14 @@ struct SystemEnvironmentData
 	std::string mSystemName;
 
 	std::string mStartPath;
-	std::vector<std::string> mSearchExtensions;
+	std::unordered_set<std::string> mSearchExtensions;
 	std::string mLaunchCommand;
 	std::vector<PlatformIds::PlatformId> mPlatformIds;
 	std::vector<EmulatorData> mEmulators;
 
 	bool isValidExtension(const std::string extension)
 	{
-		return std::find(mSearchExtensions.cbegin(), mSearchExtensions.cend(), extension) != mSearchExtensions.cend();
+		return mSearchExtensions.find(extension) != mSearchExtensions.cend();		
 	}
 
 	std::vector<std::string> getCores(std::string emulatorName) 
@@ -107,7 +108,7 @@ public:
 	inline const std::string& getName() const { return mName; }
 	inline const std::string& getFullName() const { return mFullName; }
 	inline const std::string& getStartPath() const { return mEnvData->mStartPath; }
-	inline const std::vector<std::string>& getExtensions() const { return mEnvData->mSearchExtensions; }
+	//inline const std::vector<std::string>& getExtensions() const { return mEnvData->mSearchExtensions; }
 	inline const std::string& getThemeFolder() const { return mThemeFolder; }
 	inline SystemEnvironmentData* getSystemEnvData() const { return mEnvData; }
 	inline const std::vector<PlatformIds::PlatformId>& getPlatformIds() const { return mEnvData->mPlatformIds; }
