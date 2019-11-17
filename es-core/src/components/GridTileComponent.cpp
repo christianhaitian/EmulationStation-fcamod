@@ -165,16 +165,20 @@ void GridTileComponent::resize()
 	if (currentProperties.Label.Visible)
 	{
 		currentProperties.Label.updateTextComponent(&mLabel, mSize);
-
-		if (currentProperties.Label.pos.x() < 0 && mLabelMerged)
-		{
-			mLabel.setPosition(0, mSize.y() - labelHeight);
-			mLabel.setSize(size.x(), labelHeight);
-		}
-		else if (mImage != nullptr && !mLabelMerged)
-		{
-			mLabel.setPosition(mImage->getPosition().x() - mImage->getSize().x() / 2, mImage->getSize().y());
-			mLabel.setSize(mImage->getSize().x(), labelHeight);
+		
+		// Automatic layout for not merged labels 
+		if (currentProperties.Label.pos.x() < 0 && !mLabelMerged)
+		{			
+			if (currentProperties.Padding.x() == 0)
+			{
+				mLabel.setPosition(mImage->getPosition().x() - mImage->getSize().x() / 2, mImage->getSize().y());
+				mLabel.setSize(mImage->getSize().x(), labelHeight);
+			}
+			else
+			{
+				mLabel.setPosition(0, mSize.y() - labelHeight);
+				mLabel.setSize(size.x(), labelHeight);
+			}
 		}
 	}
 	else if (mIsDefaultImage)
