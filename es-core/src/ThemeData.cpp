@@ -986,9 +986,24 @@ void ThemeData::parseElement(const pugi::xml_node& root, const std::map<std::str
 		case PATH:
 		{
 			std::string path = Utils::FileSystem::resolveRelativePath(str, mPaths.back(), true);
-			if (Utils::String::startsWith(path, "*"))
+			
+			if (Utils::String::startsWith(path, "{random"))
 			{
-				element.properties[node.name()] = path;
+				pugi::xml_node parent = root.parent();
+
+				if (!element.extra)
+					LOG(LogWarning) << "random is only supported in extras";
+				else if (element.type != "image" && element.type != "video")
+					LOG(LogWarning) << "random is only supported in video or image elements";
+				else if (std::string(parent.name()) != "view" || std::string(parent.attribute("name").as_string()) != "system")
+					LOG(LogWarning) << "random is only supported in systemview";
+				else if (element.type == "video" && path != "{random}")
+					LOG(LogWarning) << "video element only supports {random} element";
+				else if (element.type == "image" && path != "{random}" && path != "{random:thumbnail}" && path != "{random:marquee}" && path != "{random:image}")
+					LOG(LogWarning) << "unknow random element " << path;
+				else
+					element.properties[node.name()] = path;
+
 				break;
 			}
 

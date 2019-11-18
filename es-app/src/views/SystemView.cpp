@@ -236,21 +236,21 @@ void SystemView::populate()
 			if (bx->getValue() == "VideoComponent")
 			{
 				auto elem = (*it)->getTheme()->getElement("system", bx->getTag(), "video");
-				if (elem != nullptr && elem->has("path") && elem->get<std::string>("path") == "*")
+				if (elem != nullptr && elem->has("path") && Utils::String::startsWith(elem->get<std::string>("path"), "{random"))
 					((VideoComponent*)bx)->setPlaylist(std::make_shared<SystemRandomPlaylist>(*it, SystemRandomPlaylist::VIDEO));
 			}
 			else if (bx->getValue() == "ImageComponent")
 			{
 				auto elem = (*it)->getTheme()->getElement("system", bx->getTag(), "image");
-				if (elem != nullptr && elem->has("path") && Utils::String::startsWith(elem->get<std::string>("path"), "*"))
+				if (elem != nullptr && elem->has("path") && Utils::String::startsWith(elem->get<std::string>("path"), "{random"))
 				{
 					std::string src = elem->get<std::string>("path");
 
 					SystemRandomPlaylist::PlaylistType type = SystemRandomPlaylist::IMAGE;
 
-					if (src == "*.thumbnail")
+					if (src == "{random:thumbnail}")
 						type = SystemRandomPlaylist::THUMBNAIL;
-					else if (src == "*.marquee")
+					else if (src == "{random:marquee}")
 						type = SystemRandomPlaylist::MARQUEE;
 
 					((ImageComponent*)bx)->setPlaylist(std::make_shared<SystemRandomPlaylist>(*it, type));
