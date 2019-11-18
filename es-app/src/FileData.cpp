@@ -16,6 +16,7 @@
 #include "Window.h"
 #include "views/UIModeController.h"
 #include <assert.h>
+#include "Gamelist.h"
 
 FileData::FileData(FileType type, const std::string& path, SystemData* system)
 	: mType(type), mSystem(system), mParent(NULL), mMetadata(type == GAME ? GAME_METADATA : FOLDER_METADATA) // metadata is REALLY set in the constructor!
@@ -296,6 +297,8 @@ void FileData::launchGame(Window* window)
 		//update last played time
 		gameToUpdate->getMetadata().set("lastplayed", Utils::Time::DateTime(Utils::Time::now()));
 		CollectionSystemManager::get()->refreshCollectionSystems(gameToUpdate);
+
+		saveToGamelistRecovery(gameToUpdate);
 	}
 
 	// music

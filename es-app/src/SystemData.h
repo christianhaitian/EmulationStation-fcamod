@@ -130,6 +130,7 @@ public:
 	int getDisplayedGameCount();
 	void updateDisplayedGameCount();
 
+	static bool hasDirtySystems();
 	static void deleteSystems();
 	static bool loadConfig(Window* window); //Load the system config file at getConfigPath(). Returns true if no errors were encountered. An example will be written if the file doesn't exist.
 	static void writeExampleConfig(const std::string& path);
@@ -179,9 +180,13 @@ public:
 	unsigned int getSortId() const { return mSortId; };
 	void setSortId(const unsigned int sortId = 0);
 
+	void setGamelistHash(size_t size) { mGameListHash = size; }
+	size_t getGamelistHash() { return mGameListHash; }
+
 private:
 	static SystemData* loadSystem(pugi::xml_node system);
 
+	size_t mGameListHash;
 	bool mIsCollectionSystem;
 	bool mIsGameSystem;
 	std::string mName;

@@ -678,7 +678,8 @@ int main(int argc, char* argv[])
 	while(window.peekGui() != ViewController::get())
 		delete window.peekGui();
 
-	window.deinit(true);
+	if (SystemData::hasDirtySystems())
+		window.renderLoadingScreen(_("SAVING DATA. PLEASE WAIT..."));
 
 	MameNames::deinit();
 	CollectionSystemManager::deinit();
@@ -688,6 +689,8 @@ int main(int argc, char* argv[])
 #ifdef FREEIMAGE_LIB
 	FreeImage_DeInitialise();
 #endif
+
+	window.deinit(true);
 
 	processQuitMode();
 

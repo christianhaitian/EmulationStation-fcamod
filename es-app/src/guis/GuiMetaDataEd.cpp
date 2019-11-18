@@ -296,6 +296,9 @@ void GuiMetaDataEd::onSizeChanged()
 	mHeaderGrid->setRowHeightPerc(3, subtitleHeight / mHeaderGrid->getSize().y());
 }
 
+
+#include "Gamelist.h"
+
 void GuiMetaDataEd::save()
 {
 	// remove game from index
@@ -322,6 +325,8 @@ void GuiMetaDataEd::save()
 
 	if (mSavedCallback)
 		mSavedCallback();
+
+	saveToGamelistRecovery(mScraperParams.game);
 
 	// update respective Collection Entries
 	CollectionSystemManager::get()->refreshCollectionSystems(mScraperParams.game);

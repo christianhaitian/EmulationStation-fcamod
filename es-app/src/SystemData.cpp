@@ -24,6 +24,7 @@ std::vector<SystemData*> SystemData::sSystemVector;
 SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem) :
 	mName(name), mFullName(fullName), mEnvData(envData), mThemeFolder(themeFolder), mIsCollectionSystem(CollectionSystem), mIsGameSystem(true)
 {
+	mGameListHash = 0;
 	mGameCount = -1;
 	mSortId = Settings::getInstance()->getInt(getName() + ".sort"),
 
@@ -541,6 +542,26 @@ void SystemData::writeExampleConfig(const std::string& path)
 	file.close();
 
 	LOG(LogError) << "Example config written!  Go read it at \"" << path << "\"!";
+}
+
+bool SystemData::hasDirtySystems()
+{
+	bool saveOnExit = !Settings::getInstance()->getBool("IgnoreGamelist") && Settings::getInstance()->getBool("SaveGamelistsOnExit");
+	if (!saveOnExit)
+		return false;
+
+	for (unsigned int i = 0; i < sSystemVector.size(); i++)
+	{
+		SystemData* pData = sSystemVector.at(i);
+		if (pData->mIsCollectionSystem)
+			continue;
+
+		
+		if (hasDirtyFile(pData))
+			return true;
+	}
+
+	return false;
 }
 
 void SystemData::deleteSystems()
