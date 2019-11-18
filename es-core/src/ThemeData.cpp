@@ -206,6 +206,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "effect", STRING },
 	 	{ "visible", BOOLEAN },
 		{ "roundCorners", FLOAT },
+		{ "color", COLOR },
 	 	{ "zIndex", FLOAT },		
 		{ "snapshotSource", STRING }, // image, thumbnail, marquee
 		{ "showSnapshotNoVideo", BOOLEAN },

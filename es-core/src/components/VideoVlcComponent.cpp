@@ -62,6 +62,7 @@ VideoVlcComponent::VideoVlcComponent(Window* window, std::string subtitles) :
 	mMedia(nullptr)
 {
 	mElapsed = 0;
+	mColorShift = 0xFFFFFFFF;
 
 	// Get an empty texture for rendering the video
 	mTexture = nullptr;// TextureResource::get("");
@@ -185,6 +186,11 @@ void VideoVlcComponent::resize()
 	onSizeChanged();
 }
 
+void VideoVlcComponent::setColorShift(unsigned int color)
+{
+	mColorShift = color;
+}
+
 void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 {
 	if (!isVisible())
@@ -255,9 +261,11 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 
 	if (mTexture == nullptr)
 		return;
-	
+		
 	const unsigned int fadeIn = t * 255.0f;
-	const unsigned int color = Renderer::convertColor(0xFFFFFF00 | fadeIn);
+	float opacity = mOpacity * fadeIn;
+	const unsigned int color = Renderer::convertColor(mColorShift & 0xFFFFFF00 | (unsigned char)((mColorShift & 0xFF) * opacity));
+	
 	Renderer::Vertex   vertices[4];
 
 	if (mEffect == VideoVlcFlags::VideoVlcEffect::BUMP && mFadeIn > 0.0 && mFadeIn < 1.0 && mConfig.startDelay > 0)
@@ -567,6 +575,12 @@ void VideoVlcComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 
 	if (elem && elem->has("roundCorners"))
 		mRoundCorners = elem->get<float>("roundCorners");
+	
+	if (properties & COLOR)
+	{
+		if (elem && elem->has("color"))
+			setColorShift(elem->get<unsigned int>("color"));
+	}
 }
 
 void VideoVlcComponent::update(int deltaTime)
