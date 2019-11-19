@@ -37,7 +37,9 @@ namespace VideoVlcFlags
 	enum VideoVlcEffect
 	{
 		NONE,
-		BUMP
+		BUMP,
+		SIZE,
+		SLIDERIGHT
 	};
 }
 

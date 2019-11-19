@@ -50,8 +50,6 @@ public:
 		image->setRoundCorners(roundCorners);
 	}
 
-
-
 	bool Loaded;
 	bool Visible;
 
@@ -249,6 +247,7 @@ private:
 
 	GridTileProperties mDefaultProperties;
 	GridTileProperties mSelectedProperties;
+	GridTileProperties mVideoPlayingProperties;
 
 	std::string mCurrentMarquee;
 	std::string mCurrentPath;

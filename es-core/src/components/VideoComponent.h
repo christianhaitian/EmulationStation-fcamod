@@ -120,6 +120,14 @@ public:
 		return mIsPlaying && mFadeIn < 1.0;
 	}
 
+	float getFade() 
+	{
+		if (!mIsPlaying)
+			return 0.0; 
+
+		return mFadeIn;
+	}
+
 	std::string getVideoPath() 
 	{ 
 		if (mPlayingVideoPath.empty())

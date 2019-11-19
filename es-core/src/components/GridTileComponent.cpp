@@ -60,12 +60,15 @@ void GridTileComponent::resetProperties()
 
 	mDefaultProperties.Background.centerColor = mDefaultProperties.Background.edgeColor = 0xAAAAEEFF;
 	mDefaultProperties.Image.color = mDefaultProperties.Image.colorEnd = 0xFFFFFFDD;
+
+	mVideoPlayingProperties = mSelectedProperties;
 }
 
 void GridTileComponent::forceSize(Vector2f size, float selectedZoom)
 {
 	mDefaultProperties.Size = size;
 	mSelectedProperties.Size = size * selectedZoom;
+	mVideoPlayingProperties.Size = mSelectedProperties.Size;
 }
 
 GridTileComponent::~GridTileComponent()
@@ -272,7 +275,7 @@ void GridTileComponent::update(int deltaTime)
 {
 	GuiComponent::update(deltaTime);
 
-	if (mVideo != nullptr && mVideo->isPlaying())
+	if (mVideo != nullptr && mVideo->isPlaying() && mVideo->isFading())
 		resize();
 }
 
@@ -452,10 +455,7 @@ void GridTileComponent::applyThemeToProperties(const ThemeData::ThemeElement* el
 bool GridImageProperties::applyTheme(const ThemeData::ThemeElement* elem)
 {
 	if (!elem)
-	{
-		Visible = false;
 		return false;
-	}
 
 	Loaded = true;
 	Visible = true;
@@ -747,6 +747,16 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 
 	if (elem)
 		mSelectedProperties.Background.applyTheme(elem);
+
+	mVideoPlayingProperties = mSelectedProperties;
+
+	if (!mVideoPlayingProperties.Label.applyTheme(theme->getElement(view, "gridtile:videoplaying", "text")))
+		mVideoPlayingProperties.Label.applyTheme(theme->getElement(view, "gridtile.text:videoplaying", "text"));
+
+	mVideoPlayingProperties.Image.applyTheme(theme->getElement(view, "gridtile.image:videoplaying", "image"));
+	mVideoPlayingProperties.Marquee.applyTheme(theme->getElement(view, "gridtile.marquee:videoplaying", "image"));
+	mVideoPlayingProperties.Favorite.applyTheme(theme->getElement(view, "gridtile.favorite:selected", "image"));
+	mVideoPlayingProperties.ImageOverlay.applyTheme(theme->getElement(view, "gridtile.overlay:videoplaying", "image"));
 }
 
 // Made this a static function because the ImageGridComponent need to know the default tile size
@@ -981,9 +991,12 @@ Vector3f GridTileComponent::getBackgroundPosition()
 
 static Vector2f mixVectors(const Vector2f& def, const Vector2f& sel, float percent)
 {
-	if (def == sel)
+	if (def == sel || percent == 0)
 		return def;
 		
+	if (percent == 1)
+		return sel;
+
 	float x = def.x() * (1.0 - percent) + sel.x() * percent;
 	float y = def.y() * (1.0 - percent) + sel.y() * percent;
 	return Vector2f(x, y);	
@@ -991,16 +1004,22 @@ static Vector2f mixVectors(const Vector2f& def, const Vector2f& sel, float perce
 
 static unsigned int mixUnsigned(const unsigned int def, const unsigned int sel, float percent)
 {
-	if (def == sel)
+	if (def == sel || percent == 0)
 		return def;
+
+	if (percent == 1)
+		return sel;
 
 	return def * (1.0 - percent) + sel * percent;
 }
 
 static float mixFloat(const float def, const float sel, float percent)
 {
-	if (def == sel)
+	if (def == sel || percent == 0)
 		return def;
+
+	if (percent == 1)
+		return sel;
 
 	return def * (1.0 - percent) + sel * percent;
 }
@@ -1039,24 +1058,41 @@ void GridTextProperties::mixProperties(GridTextProperties& def, GridTextProperti
 
 GridTileProperties GridTileComponent::getCurrentProperties(bool mixValues)
 {
-	GridTileProperties prop;
-
-	if (mSelectedZoomPercent == 0.0f || mSelectedZoomPercent == 1.0f)
-		return mSelected ? mSelectedProperties : mDefaultProperties;
-
-	prop = mSelected ? mSelectedProperties : mDefaultProperties;
+	if (mSelectedZoomPercent == 0 && !mSelected)
+		return mDefaultProperties;
+		
+	GridTileProperties prop = mSelected ? mSelectedProperties : mDefaultProperties;
 
 	if (mixValues)
 	{
-		prop.Size = mixVectors(mDefaultProperties.Size, mSelectedProperties.Size, mSelectedZoomPercent);
-		prop.Padding = mixVectors(mDefaultProperties.Padding, mSelectedProperties.Padding, mSelectedZoomPercent);
+		GridTileProperties* from = &mDefaultProperties;
+		GridTileProperties* to = &mSelectedProperties;
+		float pc = mSelectedZoomPercent;
+		
+		if (mSelected && mVideo != nullptr && mVideo->isPlaying())
+		{
+			if (!mVideo->isFading())
+				return mVideoPlayingProperties;
 
-		prop.Label.mixProperties(mDefaultProperties.Label, mSelectedProperties.Label, mSelectedZoomPercent);
-		prop.Image.mixProperties(mDefaultProperties.Image, mSelectedProperties.Image, mSelectedZoomPercent);
-		prop.Marquee.mixProperties(mDefaultProperties.Marquee, mSelectedProperties.Marquee, mSelectedZoomPercent);
-		prop.Favorite.mixProperties(mDefaultProperties.Favorite, mSelectedProperties.Favorite, mSelectedZoomPercent);
-		prop.ImageOverlay.mixProperties(mDefaultProperties.ImageOverlay, mSelectedProperties.ImageOverlay, mSelectedZoomPercent);
+			from = &mSelectedProperties;
+			to = &mVideoPlayingProperties;
+
+			float t = mVideo->getFade() - 1; // cubic ease in
+			pc = Math::lerp(0, 1, t*t*t + 1);
+		}
+
+		prop.Size = mixVectors(from->Size, to->Size, pc);
+		prop.Padding = mixVectors(from->Padding, to->Padding, pc);
+
+		prop.Label.mixProperties(from->Label, to->Label, pc);
+		prop.Image.mixProperties(from->Image, to->Image, pc);
+		prop.Marquee.mixProperties(from->Marquee, to->Marquee, pc);
+				
+		prop.Favorite.mixProperties(from->Favorite, to->Favorite, pc);
+		prop.ImageOverlay.mixProperties(from->ImageOverlay, to->ImageOverlay, pc);
 	}
+	else if (mSelected && mVideo != nullptr && mVideo->isPlaying() && !mVideo->isFading())
+		return mVideoPlayingProperties;
 
 	return prop;
 }

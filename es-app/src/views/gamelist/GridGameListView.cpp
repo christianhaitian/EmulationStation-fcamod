@@ -252,33 +252,31 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 
 		if (favoritesFirst)
 		{
-			for (auto it = files.cbegin(); it != files.cend(); it++)
+			for (auto file : files)
 			{
-				if (!(*it)->getFavorite())
-					continue;
-				
-				mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), showFavoriteIcon, *it);
+				if (file->getFavorite() && showFavoriteIcon)
+					mGrid.add(file->getName(), getImagePath(file), file->getVideoPath(), file->getMarqueePath(), true, file);
 			}
 		}
 
-		for (auto it = files.cbegin(); it != files.cend(); it++)
+		for (auto file : files)
 		{
-			if ((*it)->getFavorite())
+			if (file->getFavorite())
 			{
 				if (favoritesFirst)
 					continue;
 
 				if (showFavoriteIcon)
 				{
-					mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), true, *it);
+					mGrid.add(_U("\uF006 ") + file->getName(), getImagePath(file), file->getVideoPath(), file->getMarqueePath(), true, file);
 					continue;
 				}
 			}
 
-			if (((*it)->getType() == FOLDER) && Utils::FileSystem::exists(getImagePath(*it)))
-				mGrid.add(_U("\uF114 ") + (*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), (*it)->getFavorite(), *it);
+			if (file->getType() == FOLDER && Utils::FileSystem::exists(getImagePath(file)))
+				mGrid.add(_U("\uF114 ") + file->getName(), getImagePath(file), file->getVideoPath(), file->getMarqueePath(), file->getFavorite(), file);
 			else
-				mGrid.add((*it)->getName(), getImagePath(*it), (*it)->getVideoPath(), (*it)->getMarqueePath(), (*it)->getFavorite(), *it);
+				mGrid.add(file->getName(), getImagePath(file), file->getVideoPath(), file->getMarqueePath(), file->getFavorite(), file);
 		}
 	}
 	else

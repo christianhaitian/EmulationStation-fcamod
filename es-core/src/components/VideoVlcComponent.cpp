@@ -193,6 +193,9 @@ void VideoVlcComponent::setColorShift(unsigned int color)
 
 void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 {
+	if (!mShowing)
+		return;
+
 	if (!isVisible())
 		return;
 
@@ -262,13 +265,45 @@ void VideoVlcComponent::render(const Transform4x4f& parentTrans)
 	if (mTexture == nullptr)
 		return;
 		
-	const unsigned int fadeIn = t * 255.0f;
-	float opacity = mOpacity * fadeIn;
-	const unsigned int color = Renderer::convertColor(mColorShift & 0xFFFFFF00 | (unsigned char)((mColorShift & 0xFF) * opacity));
-	
+	float opacity = (mOpacity / 255.0f) * t;
+	unsigned int color = Renderer::convertColor(mColorShift & 0xFFFFFF00 | (unsigned char)((mColorShift & 0xFF) * opacity));
+
 	Renderer::Vertex   vertices[4];
 
-	if (mEffect == VideoVlcFlags::VideoVlcEffect::BUMP && mFadeIn > 0.0 && mFadeIn < 1.0 && mConfig.startDelay > 0)
+	if (mEffect == VideoVlcFlags::VideoVlcEffect::SLIDERIGHT && mFadeIn > 0.0 && mFadeIn < 1.0 && mConfig.startDelay > 0)
+	{
+		float t = 1.0 - mFadeIn;
+		t -= 1; // cubic ease in
+		t = Math::lerp(0, 1, t*t*t + 1);
+		//t = 1.0 - t;
+
+		vertices[0] = { { 0.0f     , 0.0f },{ t, 0.0f }, color };
+		vertices[1] = { { 0.0f     , mSize.y() },{ t, 1.0f }, color };
+		vertices[2] = { { mSize.x(), 0.0f },{ t + 1.0f, 0.0f }, color };
+		vertices[3] = { { mSize.x(), mSize.y() },{ t + 1.0f, 1.0f }, color };
+	}
+	else
+		if (mEffect == VideoVlcFlags::VideoVlcEffect::SIZE && mFadeIn > 0.0 && mFadeIn < 1.0 && mConfig.startDelay > 0)
+		{
+			float t = 1.0 - mFadeIn;
+			t -= 1; // cubic ease in
+			t = Math::lerp(0, 1, t*t*t + 1);
+			t = 1.0 - t;
+
+			float w = mSize.x() * t;
+			float h = mSize.y() * t;
+			float centerX = mSize.x() / 2.0f;
+			float centerY = mSize.y() / 2.0f;
+
+			Vector2f topLeft(Math::round(centerX - w / 2.0f), Math::round(centerY - h / 2.0f));
+			Vector2f bottomRight(Math::round(centerX + w / 2.0f), Math::round(centerY + h / 2.0f));
+
+			vertices[0] = { { topLeft.x()		, topLeft.y() },{ 0.0f, 0.0f }, color };
+			vertices[1] = { { topLeft.x()		, bottomRight.y() },{ 0.0f, 1.0f }, color };
+			vertices[2] = { { bottomRight.x()	, topLeft.y() },{ 1.0f, 0.0f }, color };
+			vertices[3] = { { bottomRight.x()	, bottomRight.y() },{ 1.0f, 1.0f }, color };
+		}
+		else if (mEffect == VideoVlcFlags::VideoVlcEffect::BUMP && mFadeIn > 0.0 && mFadeIn < 1.0 && mConfig.startDelay > 0)
 	{
 		// Bump Effect
 		float bump = sin((MATHPI / 2.0) * mFadeIn) + sin(MATHPI * mFadeIn) / 2.0;
@@ -469,6 +504,10 @@ void VideoVlcComponent::startVideo()
 		mMedia = libvlc_media_new_path(mVLC, path.c_str());
 		if (mMedia)
 		{
+			// If we have a playlist : most videos have a fader, skip it 1 second
+			if (mPlaylist != nullptr && mConfig.startDelay == 0 && !mConfig.showSnapshotDelay && !mConfig.showSnapshotNoVideo)
+				libvlc_media_add_option(mMedia, ":start-time=0.7");
+
 			unsigned track_count;
 			// Get the media metadata so we can find the aspect ratio
 			libvlc_media_parse(mMedia);

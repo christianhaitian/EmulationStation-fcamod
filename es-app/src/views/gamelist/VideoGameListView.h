@@ -35,6 +35,7 @@ protected:
 private:
 	void updateInfoPanel();
 	void createImage();
+	void createThumbnail();
 
 	void initMDLabels();
 	void initMDValues();
@@ -42,6 +43,7 @@ private:
 	ImageComponent mMarquee;
 	VideoComponent* mVideo;
 	ImageComponent* mImage;
+	ImageComponent* mThumbnail;
 
 	TextComponent mLblRating, mLblReleaseDate, mLblDeveloper, mLblPublisher, mLblGenre, mLblPlayers, mLblLastPlayed, mLblPlayCount;
 

@@ -34,12 +34,14 @@ private:
 	void createVideo();
 	void createMarquee();
 	void createImage();	
+	void createThumbnail();
 
 	void initMDLabels();
 	void initMDValues();
 	std::string getMetadata(FileData* file, std::string name);
 
 	ImageComponent* mImage;
+	ImageComponent* mThumbnail;
 	ImageComponent* mMarquee;
 	VideoComponent* mVideo;
 

@@ -81,38 +81,38 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 
 		if (favoritesFirst)
 		{
-			for (auto it = files.cbegin(); it != files.cend(); it++)
+			for (auto file : files)
 			{
-				if (!(*it)->getFavorite())
+				if (!file->getFavorite())
 					continue;
-				
+
 				if (showFavoriteIcon)
-					mList.add(_U("\uF006 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
-				else if (((*it)->getType() == FOLDER))
-					mList.add(_U("\uF114 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
+					mList.add(_U("\uF006 ") + file->getName(), file, file->getType() == FOLDER);
+				else if (file->getType() == FOLDER)
+					mList.add(_U("\uF114 ") + file->getName(), file, true);
 				else
-					mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));				
+					mList.add(file->getName(), file, false);
 			}
 		}
 
-		for (auto it = files.cbegin(); it != files.cend(); it++)
+		for (auto file : files)
 		{
-			if ((*it)->getFavorite())
+			if (file->getFavorite())
 			{
 				if (favoritesFirst)
 					continue;
 
 				if (showFavoriteIcon)
 				{
-					mList.add(_U("\uF006 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
+					mList.add(_U("\uF006 ") + file->getName(), file, file->getType() == FOLDER);
 					continue;
 				}
 			}
 
-			if (((*it)->getType() == FOLDER))
-				mList.add(_U("\uF114 ") + (*it)->getName(), *it, ((*it)->getType() == FOLDER));
+			if (file->getType() == FOLDER)
+				mList.add(_U("\uF114 ") + file->getName(), file, true);
 			else
-				mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+				mList.add(file->getName(), file, false);
 		}
 	}
 	else
@@ -169,8 +169,8 @@ void BasicGameListView::setCursor(FileData* cursor)
 void BasicGameListView::addPlaceholder()
 {
 	// empty list - add a placeholder
-	FileData* placeholder = new FileData(PLACEHOLDER, "<No Entries Found>", this->mRoot->getSystem());
-	mList.add(placeholder->getName(), placeholder, (placeholder->getType() == PLACEHOLDER));
+	FileData* placeholder = new FileData(PLACEHOLDER, "<" + _("No Entries Found") + ">", mRoot->getSystem());	
+	mList.add(placeholder->getName(), placeholder, true);
 }
 
 std::string BasicGameListView::getQuickSystemSelectRightButton()

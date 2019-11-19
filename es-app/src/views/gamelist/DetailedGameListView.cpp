@@ -15,7 +15,7 @@
 DetailedGameListView::DetailedGameListView(Window* window, FolderData* root) :
 	BasicGameListView(window, root), 
 	mDescContainer(window), mDescription(window), 
-	mImage(nullptr), mMarquee(nullptr), mVideo(nullptr),
+	mImage(nullptr), mMarquee(nullptr), mVideo(nullptr), mThumbnail(nullptr),
 
 	mLblRating(window), mLblReleaseDate(window), mLblDeveloper(window), mLblPublisher(window), 
 	mLblGenre(window), mLblPlayers(window), mLblLastPlayed(window), mLblPlayCount(window),
@@ -83,6 +83,9 @@ DetailedGameListView::DetailedGameListView(Window* window, FolderData* root) :
 
 DetailedGameListView::~DetailedGameListView()
 {
+	if (mThumbnail != nullptr)
+		delete mThumbnail;
+
 	if (mImage != nullptr)
 		delete mImage;
 
@@ -107,6 +110,23 @@ void DetailedGameListView::createImage()
 	mImage->setMaxSize(mSize.x() * (0.50f - 2 * padding), mSize.y() * 0.4f);
 	mImage->setDefaultZIndex(30);
 	addChild(mImage);
+}
+
+void DetailedGameListView::createThumbnail()
+{
+	if (mThumbnail != nullptr)
+		return;
+
+	const float padding = 0.01f;
+
+	// Image
+	mThumbnail = new ImageComponent(mWindow);
+	mThumbnail->setAllowFading(false);
+	mThumbnail->setOrigin(0.5f, 0.5f);
+	mThumbnail->setPosition(mSize.x() * 0.25f, mList.getPosition().y() + mSize.y() * 0.2125f);
+	mThumbnail->setMaxSize(mSize.x() * (0.50f - 2 * padding), mSize.y() * 0.4f);
+	mThumbnail->setDefaultZIndex(30);
+	addChild(mThumbnail);
 }
 
 void DetailedGameListView::createVideo()
@@ -180,6 +200,18 @@ void DetailedGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& them
 		removeChild(mImage);
 		delete mImage;
 		mImage = nullptr;
+	}
+
+	if (theme->getElement(getName(), "md_thumbnail", "image"))
+	{
+		createThumbnail();
+		mThumbnail->applyTheme(theme, getName(), "md_thumbnail", ALL ^ (PATH));
+	}
+	else if (mThumbnail != nullptr)
+	{
+		removeChild(mThumbnail);
+		delete mThumbnail;
+		mThumbnail = nullptr;
 	}
 
 	if (theme->getElement(getName(), "md_marquee", "image"))
@@ -338,9 +370,12 @@ void DetailedGameListView::updateInfoPanel()
 
 			mVideo->setImage(snapShot);
 		}
+
+		if (mThumbnail != nullptr)
+			mThumbnail->setImage(file->getThumbnailPath());
 	
 		if (mImage != nullptr)
-			mImage->setImage(imagePath, false, mImage->getMaxSizeInfo());
+			mImage->setImage(imagePath);
 
 		if (mMarquee != nullptr)
 			mMarquee->setImage(file->getMarqueePath(), false, mMarquee->getMaxSizeInfo());
@@ -377,6 +412,9 @@ void DetailedGameListView::updateInfoPanel()
 	if (mImage != nullptr)
 		comps.push_back(mImage);
 
+	if (mThumbnail != nullptr)
+		comps.push_back(mThumbnail);
+
 	if (mMarquee != nullptr)
 		comps.push_back(mMarquee);
 
@@ -407,6 +445,7 @@ void DetailedGameListView::updateInfoPanel()
 				{
 					if (mVideo != nullptr) mVideo->setImage("");
 					if (mImage != nullptr) mImage->setImage("");
+					if (mThumbnail != nullptr) mThumbnail->setImage("");
 					if (mMarquee != nullptr) mMarquee->setImage("");
 				}
 			}, fadingOut);
@@ -422,7 +461,9 @@ void DetailedGameListView::launch(FileData* game)
 		target = Vector3f(mVideo->getCenter().x(), mVideo->getCenter().y(), 0);
 	else if (mImage != nullptr && mImage->hasImage())
 		target = Vector3f(mImage->getCenter().x(), mImage->getCenter().y(), 0); 
-	
+	else if (mThumbnail != nullptr && mThumbnail->hasImage())
+		target = Vector3f(mThumbnail->getCenter().x(), mThumbnail->getCenter().y(), 0);
+
 	ViewController::get()->launch(game, target);
 }
 
