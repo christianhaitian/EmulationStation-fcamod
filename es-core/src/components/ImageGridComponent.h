@@ -798,7 +798,7 @@ void ImageGridComponent<T>::updateTileAtPos(int tilePos, int imgPos, bool allowA
 
 		std::string name = mEntries.at(imgPos).name; // .object->getName();
 
-		if (tile->hasFavoriteMedia())
+		if (!mEntries.at(imgPos).data.favorite || tile->hasFavoriteMedia())
 			tile->setLabel(name);
 		else
 			tile->setLabel(_U("\uF006 ") + name);

@@ -92,8 +92,21 @@ void EsLocale::checkLocalisationLoaded()
 
 	std::string xmlpath = ResourceManager::getInstance()->getResourcePath(":/locale/" + mCurrentLanguage + "/emulationstation2.po");
 	if (!Utils::FileSystem::exists(xmlpath))
-		return;
-	
+		xmlpath = ResourceManager::getInstance()->getResourcePath(":/locale/" + mCurrentLanguage + "/LC_MESSAGES/emulationstation2.po");
+
+	if (!Utils::FileSystem::exists(xmlpath))
+	{
+		auto shortNameDivider = mCurrentLanguage.find("_");
+		if (shortNameDivider != std::string::npos)
+		{
+			auto shortName = mCurrentLanguage.substr(0, shortNameDivider);
+
+			xmlpath = ResourceManager::getInstance()->getResourcePath(":/locale/" + shortName + "/emulationstation2.po");
+			if (!Utils::FileSystem::exists(xmlpath))
+				xmlpath = ResourceManager::getInstance()->getResourcePath(":/locale/" + shortName + "/LC_MESSAGES/emulationstation2.po");
+		}
+	}
+
 	std::string	msgid;
 	std::string	msgid_plural;
 	

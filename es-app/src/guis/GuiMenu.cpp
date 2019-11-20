@@ -1057,7 +1057,17 @@ void GuiMenu::openOtherSettings()
 			if (name.rfind("emulationstation2.po") == std::string::npos)
 				continue;
 
-			name = Utils::FileSystem::getParent(name);
+			name = Utils::FileSystem::createRelativePath(name, xmlpath, false);
+			if (Utils::String::startsWith(name, "./"))
+			{
+				name = name.substr(2);
+
+				while (name.find("/") != std::string::npos)
+					name = Utils::FileSystem::getParent(name);
+			}
+			else
+				name = Utils::FileSystem::getParent(name);
+
 			name = Utils::FileSystem::getFileName(name);
 
 			if (name != "en")
