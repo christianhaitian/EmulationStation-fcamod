@@ -860,6 +860,7 @@ void GridTileComponent::onShow()
 {
 	GuiComponent::onShow();
 	mShown = true;
+	resize();
 }
 
 void GridTileComponent::onHide()
@@ -1057,18 +1058,19 @@ void GridTextProperties::mixProperties(GridTextProperties& def, GridTextProperti
 }
 
 GridTileProperties GridTileComponent::getCurrentProperties(bool mixValues)
-{
-	if (mSelectedZoomPercent == 0 && !mSelected)
-		return mDefaultProperties;
-		
+{	
 	GridTileProperties prop = mSelected ? mSelectedProperties : mDefaultProperties;
+
+	if (mSelectedZoomPercent == 0.0f || mSelectedZoomPercent == 1.0f)
+		if (!mSelected || (mVideo != nullptr && !mVideo->isPlaying()))
+			return prop;
 
 	if (mixValues)
 	{
 		GridTileProperties* from = &mDefaultProperties;
 		GridTileProperties* to = &mSelectedProperties;
 		float pc = mSelectedZoomPercent;
-		
+
 		if (mSelected && mVideo != nullptr && mVideo->isPlaying())
 		{
 			if (!mVideo->isFading())
@@ -1087,12 +1089,10 @@ GridTileProperties GridTileComponent::getCurrentProperties(bool mixValues)
 		prop.Label.mixProperties(from->Label, to->Label, pc);
 		prop.Image.mixProperties(from->Image, to->Image, pc);
 		prop.Marquee.mixProperties(from->Marquee, to->Marquee, pc);
-				
+
 		prop.Favorite.mixProperties(from->Favorite, to->Favorite, pc);
 		prop.ImageOverlay.mixProperties(from->ImageOverlay, to->ImageOverlay, pc);
 	}
-	else if (mSelected && mVideo != nullptr && mVideo->isPlaying() && !mVideo->isFading())
-		return mVideoPlayingProperties;
 
 	return prop;
 }
