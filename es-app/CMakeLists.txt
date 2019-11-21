@@ -37,6 +37,7 @@ set(ES_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiScraperMulti.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiScraperStart.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiGamelistFilter.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiThemeInstall.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiCollectionSystemsOptions.h    
 
     # Scrapers
@@ -99,6 +100,7 @@ set(ES_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiScraperMulti.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiScraperStart.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiGamelistFilter.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiThemeInstall.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiCollectionSystemsOptions.cpp    
 
     # Scrapers

@@ -37,6 +37,18 @@ msgid "PREFERED THUMBNAIL SOURCE"
 msgstr "SOURCE DE MINIATURE PRÉFÉRÉE"
 
 #:
+msgid "SELECT THEME TO INSTALL"
+msgstr "CHOIX DU THEME A INSTALLER"
+
+#:
+msgid "'%s' ADDED TO DOWNLOAD QUEUE"
+msgstr "'%s' SERA PROCHAINEMENT TELÉCHARGÉ"
+
+#:
+msgid "'%s' ADDED TO DOWNLOAD QUEUE"
+msgstr "'%s' SERA PROCHAINEMENT TELÉCHARGÉ"
+
+#:
 msgid "SCRAPE MARQUEE"
 msgstr "SCRAPER LES LOGOS DE JEU"
 
@@ -61,6 +73,22 @@ msgstr "CONTRÔLE DE l'ÉCONOMISEUR D'ÉCRAN"
 #:
 msgid "All Games"
 msgstr "Tous les jeux"
+
+#:
+msgid "DOWNLOADING"
+msgstr "TÉLÉCHARGEMENT"
+
+#:
+msgid "THEME INSTALLED SUCCESSFULLY"
+msgstr "THEME INSTALLÉ"
+
+#:
+msgid "Downloading"
+msgstr "Telechargement"
+
+#:
+msgid "Extracting"
+msgstr "Extraction"
 
 #:
 msgid "Only missing medias"
@@ -1044,6 +1072,42 @@ msgstr "MISE À JOUR TÉLÉCHARGÉE, REDÉMARRAGE EN COURS"
 #: 
 msgid "UPDATE FAILED, THE SYSTEM WILL NOW REBOOT"
 msgstr "ÉCHEC DE LA MISE À JOUR"
+
+#: 
+msgid "START UPDATE"
+msgstr "TELÉCHARGER LA MISE À JOUR"
+
+#: 
+msgid "APPLY UPDATE"
+msgstr "APPLIQUER LA MISE À JOUR"
+
+#: 
+msgid "DOWNLOADS AND UPDATES"
+msgstr "TELÉCHARGEMENTS ET MISES À JOUR"
+
+#: 
+msgid "THEME INSTALLER"
+msgstr "TELÉCHARGER DES THEMES"
+
+#: 
+msgid "IMAGE SOURCE"
+msgstr "TYPE D'IMAGE"
+
+#: 
+msgid "BOX SOURCE"
+msgstr "TYPE DE BOITE"
+
+#: 
+msgid "LOGO SOURCE"
+msgstr "TYPE DE LOGO"
+
+#:
+msgid "SHOW FILENAMES IN LISTS"
+msgstr "AFFICHER LES NOMS DE FICHIER"
+
+#:
+msgid "SHOW CLOCK"
+msgstr "AFFICHER L'HEURE"
 
 #: 
 msgid "NO UPDATE AVAILABLE"

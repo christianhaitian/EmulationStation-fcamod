@@ -317,7 +317,9 @@ std::vector<ThemeDownloadInfo> ApiSystem::getThemesList()
 			if (parts.size() > 1)
 			{
 				auto themeName = parts[0];
-				std::string themeUrl = Utils::FileSystem::getFileName(parts[1]);
+
+				std::string themeUrl = parts[1];
+				std::string themeFolder = Utils::FileSystem::getFileName(themeUrl);
 
 				bool themeExists = false;
 
@@ -329,17 +331,17 @@ std::vector<ThemeDownloadInfo> ApiSystem::getThemesList()
 
 				for (auto path : paths)
 				{
-					if (Utils::FileSystem::isDirectory(path + "/" + themeUrl + "-master"))
+					if (Utils::FileSystem::isDirectory(path + "/" + themeFolder + "-master"))
 					{
 						themeExists = true;
 						break;
 					}
-					else if (Utils::FileSystem::isDirectory(path + "/" + themeUrl))
+					else if (Utils::FileSystem::isDirectory(path + "/" + themeFolder))
 					{
 						themeExists = true;
 						break;
 					}
-					else if (Utils::FileSystem::isDirectory(path + "/" + themeName))
+					else if (Utils::FileSystem::isDirectory(path + "/" + themeFolder))
 					{
 						themeExists = true;
 						break;
@@ -362,7 +364,7 @@ std::vector<ThemeDownloadInfo> ApiSystem::getThemesList()
 std::shared_ptr<HttpReq> downloadGitRepository(const std::string url, const std::string label, const std::function<void(const std::string)>& func)
 {
 	if (func != nullptr)
-		func("Downloading " + label);
+		func(_("Downloading") + " " + label);
 
 	long downloadSize = 0;
 
@@ -400,7 +402,7 @@ std::shared_ptr<HttpReq> downloadGitRepository(const std::string url, const std:
 				if (func != nullptr)
 				{
 					std::string pc = std::to_string((int)(pos * 100.0 / downloadSize));
-					func(std::string("Downloading " + label + " >>> " + pc + " %"));
+					func(std::string(_("Downloading") + " " + label + " >>> " + pc + " %"));
 				}
 
 				curPos = pos;
@@ -428,7 +430,7 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 		if (httpreq != nullptr && httpreq->status() == HttpReq::REQ_SUCCESS)
 		{
 			if (func != nullptr)
-				func("Extracting " + themeName);
+				func(_("Extracting") + " " + themeName);
 
 			std::string themeFileName = Utils::FileSystem::getFileName(theme.url);
 			std::string zipFile = Utils::FileSystem::getHomePath() + "/.emulationstation/themes/" + themeFileName + ".zip";

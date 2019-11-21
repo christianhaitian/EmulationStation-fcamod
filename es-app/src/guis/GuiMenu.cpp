@@ -21,6 +21,7 @@
 #include "AudioManager.h"
 #include "resources/TextureData.h"
 #include "animations/LambdaAnimation.h"
+#include "guis/GuiThemeInstall.h"
 #include "GuiGamelistOptions.h" // grid sizes
 #include "platform.h"
 #include "renderers/Renderer.h" // setSwapInterval()
@@ -46,7 +47,23 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 	if (isFullUI)
 	{
 		addEntry(_("GAME COLLECTION SETTINGS"), true, [this] { openCollectionSystemSettings(); }, "iconGames");
+
+		// Emulator settings 
+		for (auto system : SystemData::sSystemVector)
+		{
+			if (system->isCollection() || system->getSystemEnvData()->mEmulators.size() == 0 || (system->getSystemEnvData()->mEmulators.size() == 1 && system->getSystemEnvData()->mEmulators[0].mCores.size() <= 1))
+				continue;
+
+			addEntry(_("EMULATOR SETTINGS"), true, [this] { openEmulatorSettings(); }, "iconSystem");
+			break;
+		}
+		
 		addEntry(_("SCRAPER"), true, [this] { openScraperSettings(); }, "iconScraper");
+
+#if WIN32
+		addEntry(_("DOWNLOADS AND UPDATES"), true, [this] { openUpdateSettings(); }, "iconUpdates");
+#endif
+
 		addEntry(_("ADVANCED SETTINGS"), true, [this] { openOtherSettings(); }, "iconAdvanced");
 	}
 	
@@ -994,22 +1011,82 @@ void GuiMenu::openEmulatorSettings()
 	window->pushGui(configuration);
 }
 
+void GuiMenu::openUpdateSettings()
+{
+	Window* window = mWindow;
+	auto s = new GuiSettings(mWindow, _("DOWNLOADS AND UPDATES"));
+
+	// themes installer/browser
+	s->addEntry(_("THEME INSTALLER"), true, [this]
+	{
+		mWindow->pushGui(new GuiThemeInstall(mWindow));
+	});
+
+	// Enable updates
+	auto updates_enabled = std::make_shared<SwitchComponent>(mWindow);
+	updates_enabled->setState(Settings::getInstance()->getBool("updates.enabled"));
+	s->addWithLabel(_("AUTO UPDATES"), updates_enabled);
+	s->addSaveFunc([updates_enabled]
+	{
+		Settings::getInstance()->setBool("updates.enabled", updates_enabled->getState());
+	});
+
+	// Start update
+	s->addEntry(ApiSystem::state == UpdateState::State::UPDATE_READY ? _("APPLY UPDATE") : _("START UPDATE"), true, [this, s]
+	{
+		if (ApiSystem::checkUpdateVersion().empty())
+		{
+			mWindow->pushGui(new GuiMsgBox(mWindow, _("NO UPDATE AVAILABLE")));
+			return;
+		}
+
+		if (ApiSystem::state == UpdateState::State::UPDATE_READY)
+		{
+			if (quitES(QuitMode::QUIT))
+				LOG(LogWarning) << "Reboot terminated with non-zero result!";
+		}
+		else if (ApiSystem::state == UpdateState::State::UPDATER_RUNNING)
+			mWindow->pushGui(new GuiMsgBox(mWindow, _("UPDATE IS ALREADY RUNNING")));
+		else
+		{
+			ApiSystem::startUpdate(mWindow);
+
+			s->setVariable("closeGuiMenu", true);
+			s->close();			
+		}
+	});
+
+	s->updatePosition();
+
+	auto pthis = this;
+
+	s->onFinalize([s, pthis, window]
+	{
+		if (s->getVariable("closeGuiMenu"))
+			delete pthis;
+	});
+
+	mWindow->pushGui(s);
+
+}
+	
+
 void GuiMenu::openOtherSettings()
 {
 	Window* window = mWindow;
 	auto s = new GuiSettings(mWindow, _("ADVANCED SETTINGS"));
 
-
+	/*
 	// Emulator settings 
 	for (auto system : SystemData::sSystemVector)
 	{
 		if (system->isCollection() || system->getSystemEnvData()->mEmulators.size() == 0 || (system->getSystemEnvData()->mEmulators.size() == 1 && system->getSystemEnvData()->mEmulators[0].mCores.size() <= 1))
 			continue;
 
-		s->addEntry(_("EMULATOR SETTINGS"), true, [this] { openEmulatorSettings(); });
+		s->addEntry(_("EMULATOR SETTINGS"), true, [this] { openEmulatorSettings(); }, "iconGames");
 		break;
 	}
-
+	*/
 	// power saver
 	auto power_saver = std::make_shared< OptionListComponent<std::string> >(mWindow, _("POWER SAVER MODES"), false);
 	std::vector<std::string> modes;
@@ -1101,7 +1178,7 @@ void GuiMenu::openOtherSettings()
 	s->addSaveFunc([max_vram] { Settings::getInstance()->setInt("MaxVRAM", (int)Math::round(max_vram->getValue())); });
 
 
-
+	/*
 #if WIN32
 
 	// Enable updates
@@ -1133,7 +1210,7 @@ void GuiMenu::openOtherSettings()
 			ApiSystem::startUpdate(mWindow);
 	});
 #endif
-
+*/
 
 
 

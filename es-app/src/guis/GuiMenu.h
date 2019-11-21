@@ -31,6 +31,7 @@ private:
 	void openScreensaverOptions();
 	void openSoundSettings();
 	void openUISettings();
+	void openUpdateSettings();
 	void openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListComponent<std::string>> theme_set);
 	void openEmulatorSettings();
 	void openSystemEmulatorSettings(SystemData* system);
