@@ -150,8 +150,6 @@ void loadGamelistFile (const std::string xmlpath, SystemData* system, std::unord
 			continue;
 
 		const std::string path = Utils::FileSystem::resolveRelativePath(fileNode.child("path").text().get(), relativeTo, false);
-
-	
 		if (!trustGamelist && !Utils::FileSystem::exists(path))
 		{
 			LOG(LogWarning) << "File \"" << path << "\" does not exist! Ignoring.";
@@ -173,7 +171,7 @@ void loadGamelistFile (const std::string xmlpath, SystemData* system, std::unord
 			if (file->getMetadata().get("name").empty())
 				file->setMetadata("name", defaultName);
 
-			if (Utils::FileSystem::isHidden(path))
+			if (!file->getHidden() && Utils::FileSystem::isHidden(path))
 				file->getMetadata().set("hidden", "true");
 
 			if (checkSize != SIZE_MAX)
@@ -309,9 +307,25 @@ void updateGamelist(SystemData* system)
 	if(Settings::getInstance()->getBool("IgnoreGamelist"))
 		return;
 
-	if (system != nullptr && system->getName() == "imageviewer")
+	if (system != nullptr && system->getName() == "imageviewer" || system->isCollection())
 		return;
-		
+	
+	FolderData* rootFolder = system->getRootFolder();
+	if (rootFolder == nullptr)
+	{
+		LOG(LogError) << "Found no root folder for system \"" << system->getName() << "\"!";
+		return;
+	}
+
+	std::vector<FileData*> dirtyFiles;
+	std::vector<FileData*> files = rootFolder->getFilesRecursive(GAME | FOLDER);
+	for (auto file : files)
+		if (file->getMetadata().wasChanged())
+			dirtyFiles.push_back(file);
+
+	if (dirtyFiles.size() == 0)
+		return;
+
 	int numUpdated = 0;
 
 	pugi::xml_document doc;
@@ -340,104 +354,90 @@ void updateGamelist(SystemData* system)
 		root = doc.append_child("gameList");
 	}
 
-
-	//now we have all the information from the XML. now iterate through all our games and add information from there
-	FolderData* rootFolder = system->getRootFolder();
-	if (rootFolder != nullptr)
+	//iterate through all files, checking if they're already in the XML
+	for(auto file : dirtyFiles)
 	{
-		//get only files, no folders
-		std::vector<FileData*> files = rootFolder->getFilesRecursive(GAME | FOLDER);
-		//iterate through all files, checking if they're already in the XML
-		for(std::vector<FileData*>::const_iterator fit = files.cbegin(); fit != files.cend(); ++fit)
+		const char* tag = (file->getType() == GAME) ? "game" : "folder";
+
+		bool removed = false;
+
+		// check if the file already exists in the XML
+		// if it does, remove it before adding
+		for(pugi::xml_node fileNode = root.child(tag); fileNode; fileNode = fileNode.next_sibling(tag))
 		{
-			const char* tag = ((*fit)->getType() == GAME) ? "game" : "folder";
-
-			// do not touch if it wasn't changed anyway
-			if (!(*fit)->getMetadata().wasChanged())
-				continue;
-
-			bool removed = false;
-
-			// check if the file already exists in the XML
-			// if it does, remove it before adding
-			for(pugi::xml_node fileNode = root.child(tag); fileNode; fileNode = fileNode.next_sibling(tag))
+			pugi::xml_node pathNode = fileNode.child("path");
+			if(!pathNode)
 			{
-				pugi::xml_node pathNode = fileNode.child("path");
-				if(!pathNode)
-				{
-					LOG(LogError) << "<" << tag << "> node contains no <path> child!";
-					continue;
-				}
-
-				std::string nodePath = Utils::FileSystem::getCanonicalPath(Utils::FileSystem::resolveRelativePath(pathNode.text().get(), system->getStartPath(), true));
-				std::string gamePath = Utils::FileSystem::getCanonicalPath((*fit)->getPath());
-				if(nodePath == gamePath)
-				{
-					// found it
-					removed = true;
-					root.remove_child(fileNode);					
-					break;
-				}
+				LOG(LogError) << "<" << tag << "> node contains no <path> child!";
+				continue;
 			}
 
-			// it was either removed or never existed to begin with; either way, we can add it now
-			if (addFileDataNode(root, *fit, tag, system))
-				++numUpdated; // Only if really added
-			else if (removed)
-				++numUpdated; // Only if really removed
+			std::string nodePath = Utils::FileSystem::getCanonicalPath(Utils::FileSystem::resolveRelativePath(pathNode.text().get(), system->getStartPath(), true));
+			std::string gamePath = Utils::FileSystem::getCanonicalPath(file->getPath());
+			if(nodePath == gamePath)
+			{
+				// found it
+				removed = true;
+				root.remove_child(fileNode);					
+				break;
+			}
 		}
 
-		//now write the file
+		// it was either removed or never existed to begin with; either way, we can add it now
+		if (addFileDataNode(root, file, tag, system))
+			++numUpdated; // Only if really added
+		else if (removed)
+			++numUpdated; // Only if really removed
+	}
 
-		if (numUpdated > 0) {
-			//make sure the folders leading up to this path exist (or the write will fail)
-			std::string xmlWritePath(system->getGamelistPath(true));
-			Utils::FileSystem::createDirectory(Utils::FileSystem::getParent(xmlWritePath));
+	//now write the file
 
-			LOG(LogInfo) << "Added/Updated " << numUpdated << " entities in '" << xmlReadPath << "'";
+	if (numUpdated > 0) {
+		//make sure the folders leading up to this path exist (or the write will fail)
+		std::string xmlWritePath(system->getGamelistPath(true));
+		Utils::FileSystem::createDirectory(Utils::FileSystem::getParent(xmlWritePath));
 
-			// Secure XML writing -> Write to a temporary file first
-			std::string tmpFile = xmlWritePath + ".tmp";
-			if (Utils::FileSystem::exists(tmpFile))
-				Utils::FileSystem::removeFile(tmpFile);
+		LOG(LogInfo) << "Added/Updated " << numUpdated << " entities in '" << xmlReadPath << "'";
 
-			if (!doc.save_file(tmpFile.c_str())) {
-				LOG(LogError) << "Error saving gamelist.xml to \"" << xmlWritePath << "\" (for system " << system->getName() << ")!";
-			}
-			else if (Utils::FileSystem::exists(tmpFile))
-			{				
-				doc.reset();
+		// Secure XML writing -> Write to a temporary file first
+		std::string tmpFile = xmlWritePath + ".tmp";
+		if (Utils::FileSystem::exists(tmpFile))
+			Utils::FileSystem::removeFile(tmpFile);
+
+		if (!doc.save_file(tmpFile.c_str())) {
+			LOG(LogError) << "Error saving gamelist.xml to \"" << xmlWritePath << "\" (for system " << system->getName() << ")!";
+		}
+		else if (Utils::FileSystem::exists(tmpFile))
+		{				
+			doc.reset();
 
 #ifdef WIN32
-				::Sleep(50); // Introduce a small sleep
+			::Sleep(50); // Introduce a small sleep
 #endif
 
-				// Secure XML writing
-				if (Utils::FileSystem::getFileSize(tmpFile) != 0)
-				{
-					std::string savFile = xmlWritePath + ".old";
+			// Secure XML writing
+			if (Utils::FileSystem::getFileSize(tmpFile) != 0)
+			{
+				std::string savFile = xmlWritePath + ".old";
 
-					// remove previous gamelist.xml.old file
-					if (Utils::FileSystem::exists(savFile))
-						Utils::FileSystem::removeFile(savFile);					
+				// remove previous gamelist.xml.old file
+				if (Utils::FileSystem::exists(savFile))
+					Utils::FileSystem::removeFile(savFile);					
 
-					// rename gamelist.xml to gamelist.xml.old
-					if (Utils::FileSystem::exists(xmlWritePath))
-						std::rename(xmlWritePath.c_str(), savFile.c_str());
-					else
-						LOG(LogError) << "Unable to rename \"" << xmlWritePath << "to " << savFile << "\"!";
+				// rename gamelist.xml to gamelist.xml.old
+				if (Utils::FileSystem::exists(xmlWritePath))
+					std::rename(xmlWritePath.c_str(), savFile.c_str());
+				else
+					LOG(LogError) << "Unable to rename \"" << xmlWritePath << "to " << savFile << "\"!";
 
-					// rename gamelist.tmp.xml to gamelist.xml
-					if (std::rename(tmpFile.c_str(), xmlWritePath.c_str()) != 0)
-						LOG(LogError) << "Unable to rename \"" << tmpFile << "to " << xmlWritePath << "\"!";
+				// rename gamelist.tmp.xml to gamelist.xml
+				if (std::rename(tmpFile.c_str(), xmlWritePath.c_str()) != 0)
+					LOG(LogError) << "Unable to rename \"" << tmpFile << "to " << xmlWritePath << "\"!";
 
-					clearTemporaryGamelistRecovery(system);
-				}
-				else 
-					Utils::FileSystem::removeFile(tmpFile);
+				clearTemporaryGamelistRecovery(system);
 			}
+			else 
+				Utils::FileSystem::removeFile(tmpFile);
 		}
-	}else{
-		LOG(LogError) << "Found no root folder for system \"" << system->getName() << "\"!";
 	}
 }

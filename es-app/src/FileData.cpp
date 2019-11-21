@@ -438,7 +438,7 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 	}
 
 	unsigned int currentSortId = sys->getSortId();
-	if (currentSortId > FileSorts::getSortTypes().size())
+	if (currentSortId >= FileSorts::getSortTypes().size())
 		currentSortId = 0;
 
 	const FileSorts::SortType& sort = FileSorts::getSortTypes().at(currentSortId);
@@ -476,7 +476,7 @@ std::vector<FileData*> FolderData::getFlatGameList(bool displayedOnly, SystemDat
 	std::vector<FileData*> ret = getFilesRecursive(GAME, displayedOnly, system);
 
 	unsigned int currentSortId = system->getSortId();
-	if (currentSortId < 0 || currentSortId >FileSorts::getSortTypes().size())
+	if (currentSortId < 0 || currentSortId >= FileSorts::getSortTypes().size())
 		currentSortId = 0;
 
 	auto sort = FileSorts::getSortTypes().at(currentSortId);

@@ -137,6 +137,9 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		mListSort->add(sort.icon + sort.description, sort.id, sort.id == currentSortId); // TODO - actually make the sort type persistent
 	}
 
+	if (!mListSort->hasSelection())
+		mListSort->selectFirstItem();
+
 	mMenu.addWithLabel(_("SORT GAMES BY"), mListSort);
 
 	// GameList view style

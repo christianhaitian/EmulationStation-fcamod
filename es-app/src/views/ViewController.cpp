@@ -17,6 +17,8 @@
 #include "SystemData.h"
 #include "Window.h"
 #include "AudioManager.h"
+#include "utils/ThreadPool.h"
+#include <mutex>
 
 ViewController* ViewController::sInstance = NULL;
 
@@ -658,6 +660,8 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 
 void ViewController::reloadAll(Window* window)
 {
+	Utils::FileSystem::FileSystemCacheActivator fsc;
+
 	ThemeData::setDefaultTheme(nullptr);
 
 	SystemData* system = nullptr;
@@ -687,11 +691,28 @@ void ViewController::reloadAll(Window* window)
 
 	float idx = 0;
 
+	if (window)
+		window->renderLoadingScreen(_("Loading theme..."));	
+
+	Utils::ThreadPool pool;
+	
+	for (auto it = cursorMap.cbegin(); it != cursorMap.cend(); it++)
+	{
+		auto system = it->first;
+		pool.queueWorkItem([system]
+		{
+			system->loadTheme();
+			system->resetFilters();	
+		});		
+	}
+
+	pool.wait();
+
 	// load themes, create gamelistviews and reset filters
 	for(auto it = cursorMap.cbegin(); it != cursorMap.cend(); it++)
 	{
-		it->first->loadTheme();
-		it->first->resetFilters();
+	//	it->first->loadTheme();
+	//	it->first->resetFilters();
 
 		if (it->second != NULL)
 			getGameListView(it->first)->setCursor(it->second);

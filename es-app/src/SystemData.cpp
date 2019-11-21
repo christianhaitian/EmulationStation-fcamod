@@ -336,6 +336,7 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 	{
 		path.erase(0, 1);
 		path.insert(0, Utils::FileSystem::getHomePath());
+		path = Utils::FileSystem::getCanonicalPath(path);
 	}
 
 	//create the system runtime environment data
@@ -403,6 +404,8 @@ bool SystemData::loadConfig(Window* window)
 		systemsNames.push_back(system.child("fullname").text().get());
 		systemCount++;
 	}
+
+	Utils::FileSystem::FileSystemCacheActivator fsc;
 
 	int currentSystem = 0;
 

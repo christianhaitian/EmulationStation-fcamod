@@ -23,6 +23,7 @@
 #else // _WIN32
 #include <dirent.h>
 #include <unistd.h>
+#include <mutex>
 #endif // _WIN32
 #include <fstream>
 #include <sstream>
@@ -33,39 +34,152 @@ namespace Utils
 	{
 		static std::string homePath;
 		static std::string exePath;
+		
+		struct FileCache
+		{
+			FileCache() {}
 
-#if defined(_WIN32)
-		static std::mutex mFileMutex;
+			FileCache(bool _exists, bool _dir) 
+			{
+				directory = _dir;
+				exists = _exists;
+				hidden = false;
+				isSymLink = false;
+			}
+
+#if WIN32			
+			FileCache(DWORD dwFileAttributes)
+			{
+				if (0xFFFFFFFF == dwFileAttributes)
+				{
+					directory = false;
+					exists = false;
+					hidden = false;
+					isSymLink = false;
+				}
+				else
+				{
+					exists = true;
+					directory = dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+					hidden = dwFileAttributes & FILE_ATTRIBUTE_HIDDEN;
+					isSymLink = dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
+				}
+			}
+#else
+			FileCache(const std::string& name, dirent* entry)
+			{
+				exists = true;
+				hidden = (getFileName(name)[0] == '.');
+				directory = (entry->d_type == 4); // DT_DIR;
+				isSymLink = (entry->d_type == 10); // DT_LNK;
+			}
+
+			FileCache(dirent* entry, bool _hidden)
+			{
+				exists = true;
+				hidden = _hidden;
+				directory = (entry->d_type == 4); // DT_DIR;
+				isSymLink = (entry->d_type == 10); // DT_LNK;
+			}
 #endif
 
-		bool compareFileInfo(const FileInfo& first, const FileInfo& second)
-		{
-			unsigned int i = 0;
-			while ((i < first.path.length()) && (i < second.path.length()))
+			bool exists;
+			bool directory;
+			bool hidden;
+			bool isSymLink;
+
+			static int fromStat64(const std::string& key, struct stat64* info)
 			{
-				if (tolower(first.path[i]) < tolower(second.path[i])) return true;
-				else if (tolower(first.path[i]) > tolower(second.path[i])) return false;
-				++i;
+				int ret = stat64(key.c_str(), info);
+
+				std::unique_lock<std::mutex> lock(mFileCacheMutex);
+
+				FileCache cache(ret == 0, false);
+				if (cache.exists)
+				{
+					cache.directory = S_ISDIR(info->st_mode);
+#ifndef WIN32
+					cache.isSymLink = S_ISLNK(info->st_mode);
+#endif
+				}
+
+				mFileCache[key] = cache;
+
+				return ret;
 			}
-			return (first.path.length() < second.path.length());			
-		}
 
-		std::string	readAllText(const std::string fileName)
+			static void add(const std::string& key, FileCache cache)
+			{
+				if (!mEnabled)
+					return;
+
+				std::unique_lock<std::mutex> lock(mFileCacheMutex);
+				mFileCache[key] = cache;
+			}
+
+			static FileCache* get(const std::string& key)
+			{
+				if (!mEnabled)
+					return nullptr;
+
+				std::unique_lock<std::mutex> lock(mFileCacheMutex);
+
+				auto it = mFileCache.find(key);
+				if (it != mFileCache.cend())
+					return &it->second;
+
+				it = mFileCache.find(Utils::FileSystem::getParent(key)+"/*");
+				if (it != mFileCache.cend())
+				{
+					mFileCache[key] = FileCache(false, false);
+					return &mFileCache[key];
+				}				
+
+				return nullptr;
+			}
+
+			static void resetCache()
+			{
+				std::unique_lock<std::mutex> lock(mFileCacheMutex);
+				mFileCache.clear();
+			}
+
+			static void setEnabled(bool value) { mEnabled = value; }
+
+		private:
+			static std::map<std::string, FileCache> mFileCache;
+			static std::mutex mFileCacheMutex;
+			static bool mEnabled;
+		};
+
+		std::map<std::string, FileCache> FileCache::mFileCache;
+		std::mutex FileCache::mFileCacheMutex;
+		bool FileCache::mEnabled = false;
+
+		FileSystemCacheActivator::FileSystemCacheActivator()
 		{
-			std::ifstream t(fileName);
-			std::stringstream buffer;
-			buffer << t.rdbuf();
-			return buffer.str();
+			if (mReferenceCount == 0)
+			{
+				FileCache::setEnabled(true);
+				FileCache::resetCache();
+			}
+
+			mReferenceCount++;
 		}
 
-		void writeAllText(const std::string fileName, const std::string text)
+		FileSystemCacheActivator::~FileSystemCacheActivator()
 		{
-			std::fstream fs;
-			fs.open(fileName.c_str(), std::fstream::out);
-			fs << text;
-			fs.close();
+			mReferenceCount--;
+
+			if (mReferenceCount <= 0)
+			{
+				FileCache::setEnabled(false);
+				FileCache::resetCache();
+			}
 		}
 
+		int FileSystemCacheActivator::mReferenceCount = 0;
+			   
 		fileList getDirInfo(const std::string& _path/*, const bool _recursive*/)
 		{
 			std::string path = getGenericPath(_path);
@@ -74,12 +188,11 @@ namespace Utils
 			// only parse the directory, if it's a directory
 			if (isDirectory(path))
 			{
-#if defined(_WIN32)
-				std::unique_lock<std::mutex> lock(mFileMutex);
+				FileCache::add(path + "/*", FileCache(true, true));
 
+#if defined(_WIN32)
 				WIN32_FIND_DATAW findData;
 				std::string      wildcard = path + "/*";
-			//	HANDLE           hFind = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
 
 				HANDLE hFind = FindFirstFileExW(std::wstring(wildcard.begin(), wildcard.end()).c_str(),
 					FINDEX_INFO_LEVELS::FindExInfoStandard, &findData, FINDEX_SEARCH_OPS::FindExSearchNameMatch
@@ -96,10 +209,12 @@ namespace Utils
 							continue;
 
 						FileInfo fi;
-						fi.path = path + "/" + name;
+						fi.path = path + "/" + getGenericPath(name);
 						fi.hidden = (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN;
 						fi.directory = (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
 						contentList.push_back(fi);			
+
+						FileCache::add(fi.path, FileCache((DWORD)findData.dwFileAttributes));
 					} 
 					while (FindNextFileW(hFind, &findData));
 
@@ -120,13 +235,15 @@ namespace Utils
 						// ignore "." and ".."
 						if ((name != ".") && (name != ".."))
 						{
-							std::string fullName(getGenericPath(path + "/" + name));
+							std::string fullName(path + "/" + getGenericPath(name));
 
 							FileInfo fi;
 							fi.path = fullName;
 							fi.hidden = Utils::FileSystem::isHidden(fullName);
-							fi.directory = isDirectory(fullName);
+							fi.directory = (entry->d_type == 4); // DT_DIR;
 							contentList.push_back(fi);
+
+							FileCache::add(fullName, FileCache(entry, fi.hidden));
 						}
 					}
 
@@ -135,9 +252,6 @@ namespace Utils
 #endif // _WIN32
 
 			}
-
-			// sort the content list
-			// Why loose time -> It will be sorted later ????		contentList.sort(compareFileInfo);
 
 			// return the content list
 			return contentList;
@@ -151,22 +265,16 @@ namespace Utils
 
 			// only parse the directory, if it's a directory
 			if(isDirectory(path))
-			{				
+			{		
+				FileCache::add(path + "/*", FileCache(true, true));
+
 #if defined(_WIN32)
-				std::unique_lock<std::mutex>* pLock = nullptr;
-
-				if (!_recursive)
-					pLock = new std::unique_lock<std::mutex>(mFileMutex);
-
 				WIN32_FIND_DATAW findData;
 				std::string      wildcard = path + "/*";
-			//	HANDLE           hFind    = FindFirstFileW(std::wstring(wildcard.begin(), wildcard.end()).c_str(), &findData);
 				
 				HANDLE hFind = FindFirstFileExW(std::wstring(wildcard.begin(), wildcard.end()).c_str(),
 					FINDEX_INFO_LEVELS::FindExInfoStandard, &findData, FINDEX_SEARCH_OPS::FindExSearchNameMatch
 					, NULL, FIND_FIRST_EX_LARGE_FETCH);
-
-				//handle = FindFirstFileEx(search, 0, &FindFileData, 2, NULL, 0);
 
 				if(hFind != INVALID_HANDLE_VALUE)
 				{
@@ -179,12 +287,14 @@ namespace Utils
 						if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && name == "." || name == "..")
 							continue;
 
-						std::string fullName(getGenericPath(path + "/" + name));
+						std::string fullName(path + "/" + getGenericPath(name));
 
 						if (!includeHidden && (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN)
 							continue;
 							
 						contentList.push_back(fullName);
+
+						FileCache::add(fullName, FileCache((DWORD)findData.dwFileAttributes));
 
 						if (_recursive && (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
 						{
@@ -196,9 +306,6 @@ namespace Utils
 
 					FindClose(hFind);
 				}
-
-				if (pLock != nullptr)
-					delete pLock;
 #else // _WIN32
 				DIR* dir = opendir(path.c_str());
 
@@ -216,11 +323,13 @@ namespace Utils
 						{
 							std::string fullName(getGenericPath(path + "/" + name));
 
+							FileCache::add(fullName, FileCache(fullName, entry));
+
 							if (!includeHidden && Utils::FileSystem::isHidden(fullName))
 								continue;
 
 							contentList.push_back(fullName);
-
+							
 							if(_recursive && isDirectory(fullName))
 								contentList.merge(getDirContent(fullName, true));
 						}
@@ -231,9 +340,6 @@ namespace Utils
 #endif // _WIN32
 
 			}
-
-			// sort the content list
-// Why loose time -> It will be sorted later ????			contentList.sort();
 
 			// return the content list
 			return contentList;
@@ -267,7 +373,7 @@ namespace Utils
 
 		void setHomePath(const std::string& _path)
 		{
-			homePath = getGenericPath(_path);
+			homePath = Utils::FileSystem::getGenericPath(_path);
 		}
 
 		std::string getHomePath()
@@ -302,6 +408,8 @@ namespace Utils
 			// no homepath found, fall back to current working directory
 			if (!homePath.length())
 				homePath = getCWDPath();
+
+			homePath = getGenericPath(homePath);
 
 			// return constructed homepath
 			return homePath;
@@ -408,7 +516,7 @@ namespace Utils
 		std::string getCanonicalPath(const std::string& _path)
 		{
 			// temporary hack for builtin resources
-			if((_path[0] == ':') && (_path[1] == '/'))
+			if(_path.size() >= 2 && _path[0] == ':' && _path[1] == '/')
 				return _path;
 
 			std::string path = exists(_path) ? getAbsolutePath(_path) : getGenericPath(_path);
@@ -476,12 +584,10 @@ namespace Utils
 
 		std::string getAbsolutePath(const std::string& _path, const std::string& _base)
 		{
-			std::string path = getGenericPath(_path);
-			std::string base = isAbsolute(_base) ? getGenericPath(_base) : getAbsolutePath(_base);
+			if (_path.empty() || isAbsolute(_path))
+				return getGenericPath(_path);
 
-			// return absolute path
-			return isAbsolute(path) ? path : getGenericPath(base + "/" + path);
-
+			return getCanonicalPath(_base + "/" + _path);
 		} // getAbsolutePath
 
 		std::string getParent(const std::string& _path)
@@ -550,23 +656,20 @@ namespace Utils
 
 		std::string resolveRelativePath(const std::string& _path, const std::string& _relativeTo, const bool _allowHome)
 		{
-			std::string path       = getGenericPath(_path);
-			std::string relativeTo = isDirectory(_relativeTo) ? getGenericPath(_relativeTo) : getParent(_relativeTo);
-
 			// nothing to resolve
-			if(!path.length())
-				return path;
+			if(!_path.length())
+				return _path;
 
 			// replace '.' with relativeTo
-			if((path[0] == '.') && (path[1] == '/'))
-				return (relativeTo + &(path[1]));
+			if((_path[0] == '.') && (_path[1] == '/'))
+				return getGenericPath(_relativeTo + &(_path[1]));
 
 			// replace '~' with homePath
-			if(_allowHome && (path[0] == '~') && (path[1] == '/'))
-				return (getGenericPath(getHomePath()) + &(path[1]));
+			if(_allowHome && (_path[0] == '~') && (_path[1] == '/'))
+				return getCanonicalPath(getHomePath() + &(_path[1]));
 
 			// nothing to resolve
-			return path;
+			return getGenericPath(_path);
 
 		} // resolveRelativePath
 
@@ -605,14 +708,15 @@ namespace Utils
 
 		std::string removeCommonPath(const std::string& _path, const std::string& _common, bool& _contains)
 		{
-			std::string path   = getGenericPath(_path);
-			std::string common = isDirectory(_common) ? getGenericPath(_common) : getParent(_common);
+			std::string path = _path; // getGenericPath(_path);
+			//std::string common = isDirectory(_common) ? getGenericPath(_common) : getParent(_common);
 
 			// check if path contains common
-			if(path.find(common) == 0 && path != common)
+			if(path.find(_common) == 0 && path != _common)
 			{
 				_contains = true;
-				return path.substr(common.length() + 1);
+				int trailingSlash = _common.find_last_of('/') == (_common.length() - 1) ? 0 : 1;
+				return path.substr(_common.length() + trailingSlash);
 			}
 
 			// it didn't
@@ -703,6 +807,8 @@ namespace Utils
 
 		bool createDirectory(const std::string& _path)
 		{
+			FileCache::resetCache();
+
 			std::string path = getGenericPath(_path);
 
 			// don't create if it already exists
@@ -730,8 +836,13 @@ namespace Utils
 			if (_path.empty())
 				return false;
 
-#ifdef WIN32
+			auto it = FileCache::get(_path);
+			if (it != nullptr)
+				return it->exists;
+
+#ifdef WIN32			
 			DWORD dwAttr = GetFileAttributes(_path.c_str());
+			FileCache::add(_path, FileCache(dwAttr));
 			if (0xFFFFFFFF == dwAttr)
 				return false;
 
@@ -741,12 +852,15 @@ namespace Utils
 			struct stat64 info;
 			
 			// check if stat64 succeeded
-			return (stat64(path.c_str(), &info) == 0);
+			return FileCache::fromStat64(path, &info) == 0;
 #endif
 		} // exists
 
 		size_t getFileSize(const std::string& _path)
 		{
+			if (!exists(_path))
+				return 0;
+
 			std::string path = getGenericPath(_path);
 			struct stat64 info;
 
@@ -759,9 +873,12 @@ namespace Utils
 
 		bool isAbsolute(const std::string& _path)
 		{
+			if (_path.size() >= 2 && _path[0] == ':' && _path[1] == '/')
+				return true;
+
 			std::string path = getGenericPath(_path);
 
-#if defined(_WIN32)
+#ifdef WIN32
 			return ((path.size() > 1) && (path[1] == ':'));
 #else // _WIN32
 			return ((path.size() > 0) && (path[0] == '/'));
@@ -771,11 +888,15 @@ namespace Utils
 
 		bool isRegularFile(const std::string& _path)
 		{
+			auto it = FileCache::get(_path);
+			if (it != nullptr)
+				return it->exists && !it->directory && !it->isSymLink;
+
 			std::string path = getGenericPath(_path);
 			struct stat64 info;
 
 			// check if stat64 succeeded
-			if(stat64(path.c_str(), &info) != 0)
+			if (FileCache::fromStat64(path, &info) != 0) //if(stat64(path.c_str(), &info) != 0)				
 				return false;
 
 			// check for S_IFREG attribute
@@ -785,19 +906,20 @@ namespace Utils
 
 		bool isDirectory(const std::string& _path)
 		{
+			auto it = FileCache::get(_path);
+			if (it != nullptr)
+				return it->exists && it->directory;
+
 #ifdef WIN32
 			DWORD dwAttr = GetFileAttributes(_path.c_str());
-			if (0xFFFFFFFF == dwAttr)
-				return false;
-
-			return (dwAttr & FILE_ATTRIBUTE_DIRECTORY);				
+			FileCache::add(_path, FileCache(dwAttr));
+			return (dwAttr != INVALID_FILE_ATTRIBUTES) && (dwAttr & FILE_ATTRIBUTE_DIRECTORY);		
 #else
-
 			std::string path = getGenericPath(_path);
-			struct stat info;
+			struct stat64 info;
 
 			// check if stat succeeded
-			if(stat(path.c_str(), &info) != 0)
+			if (FileCache::fromStat64(path, &info) != 0) //if(stat64(path.c_str(), &info) != 0)
 				return false;
 
 			// check for S_IFDIR attribute
@@ -806,42 +928,47 @@ namespace Utils
 		} // isDirectory
 
 		bool isSymlink(const std::string& _path)
-		{
+		{		
+			auto it = FileCache::get(_path);
+			if (it != nullptr)
+				return it->exists && it->isSymLink;
+				
 			std::string path = getGenericPath(_path);
 
-#if defined(_WIN32)
+#ifdef WIN32
 			// check for symlink attribute
-			const DWORD Attributes = GetFileAttributes(path.c_str());
-			if((Attributes != INVALID_FILE_ATTRIBUTES) && (Attributes & FILE_ATTRIBUTE_REPARSE_POINT))
-				return true;
-#else // _WIN32
-			struct stat info;
+			DWORD Attributes = GetFileAttributes(path.c_str());
+			FileCache::add(_path, FileCache(Attributes));
+			return (Attributes != INVALID_FILE_ATTRIBUTES) && (Attributes & FILE_ATTRIBUTE_REPARSE_POINT);
+#else // WIN32
+			struct stat64 info;
 
 			// check if lstat succeeded
-			if(lstat(path.c_str(), &info) != 0)
+			if (FileCache::fromStat64(path, &info) != 0) //if(stat64(path.c_str(), &info) != 0)			
 				return false;
 
 			// check for S_IFLNK attribute
 			return (S_ISLNK(info.st_mode));
-#endif // _WIN32
-
-			// not a symlink
-			return false;
-
+#endif //_WIN32
+			
 		} // isSymlink
 
 		bool isHidden(const std::string& _path)
 		{
+			auto it = FileCache::get(_path);
+			if (it != nullptr)
+				return it->exists && it->hidden;
+
 			std::string path = getGenericPath(_path);
 
-#if defined(_WIN32)
+#ifdef WIN32
 			// check for hidden attribute
-			const DWORD Attributes = GetFileAttributes(path.c_str());
-			if((Attributes != INVALID_FILE_ATTRIBUTES) && (Attributes & FILE_ATTRIBUTE_HIDDEN))
-				return true;
+			DWORD Attributes = GetFileAttributes(path.c_str());
+			FileCache::add(_path, FileCache(Attributes));
+			return (Attributes != INVALID_FILE_ATTRIBUTES && Attributes & FILE_ATTRIBUTE_HIDDEN);				
 #endif // _WIN32
 
-			// filenames starting with . are hidden in linux, we do this check for windows as well
+			// filenames starting with . are hidden in linux, we do not do this check for windows as well
 			if (getFileName(path)[0] == '.')
 				return true;
 
@@ -904,6 +1031,21 @@ namespace Utils
 			return gp + filename;
 		}
 
+		std::string	readAllText(const std::string fileName)
+		{
+			std::ifstream t(fileName);
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+			return buffer.str();
+		}
+
+		void writeAllText(const std::string fileName, const std::string text)
+		{
+			std::fstream fs;
+			fs.open(fileName.c_str(), std::fstream::out);
+			fs << text;
+			fs.close();
+		}
 	} // FileSystem::
 
 } // Utils::

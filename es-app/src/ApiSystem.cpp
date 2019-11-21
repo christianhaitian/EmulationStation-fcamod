@@ -5,7 +5,7 @@
 #include <thread>
 #include <codecvt> 
 #include <locale> 
-
+#include "Log.h"
 #include "Window.h"
 #include "components/AsyncNotificationComponent.h"
 
@@ -243,9 +243,9 @@ std::pair<std::string, int> ApiSystem::updateSystem(const std::function<void(con
 			func(std::string("Extracting update"));
 
 		std::string fileName = Utils::FileSystem::getFileName(url);
-		std::string path = Utils::FileSystem::getHomePath() + "\\.emulationstation\\update";
-		path = Utils::String::replace(path, "/", "\\");
-
+		std::string path = Utils::FileSystem::getHomePath() + "/.emulationstation/update";
+		path = Utils::FileSystem::getPreferredPath(path);
+		
 		if (!Utils::FileSystem::exists(path))
 			Utils::FileSystem::createDirectory(path);
 		else
@@ -295,4 +295,161 @@ std::pair<std::string, int> ApiSystem::updateSystem(const std::function<void(con
 #endif
 
 	return std::pair<std::string, int>("error.", 1);
+}
+
+std::vector<ThemeDownloadInfo> ApiSystem::getThemesList()
+{
+	LOG(LogDebug) << "ApiSystem::getThemesList";
+
+	std::vector<ThemeDownloadInfo> res;
+
+	std::shared_ptr<HttpReq> httpreq = std::make_shared<HttpReq>("https://batocera.org/upgrades/themes.txt");
+
+	while (httpreq->status() == HttpReq::REQ_IN_PROGRESS)
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+	if (httpreq->status() == HttpReq::REQ_SUCCESS)
+	{
+		auto lines = Utils::String::split(httpreq->getContent(), '\n');
+		for (auto line : lines)
+		{
+			auto parts = Utils::String::splitAny(line, " \t");
+			if (parts.size() > 1)
+			{
+				auto themeName = parts[0];
+				std::string themeUrl = Utils::FileSystem::getFileName(parts[1]);
+
+				bool themeExists = false;
+
+				std::vector<std::string> paths{
+					Utils::FileSystem::getHomePath() + "/.emulationstation/themes",
+					"/etc/emulationstation/themes",
+					"/userdata/themes"
+				};
+
+				for (auto path : paths)
+				{
+					if (Utils::FileSystem::isDirectory(path + "/" + themeUrl + "-master"))
+					{
+						themeExists = true;
+						break;
+					}
+					else if (Utils::FileSystem::isDirectory(path + "/" + themeUrl))
+					{
+						themeExists = true;
+						break;
+					}
+					else if (Utils::FileSystem::isDirectory(path + "/" + themeName))
+					{
+						themeExists = true;
+						break;
+					}
+				}
+
+				ThemeDownloadInfo info;
+				info.installed = themeExists;
+				info.name = themeName;
+				info.url = themeUrl;
+
+				res.push_back(info);
+			}
+		}
+	}
+
+	return res;
+}
+
+std::shared_ptr<HttpReq> downloadGitRepository(const std::string url, const std::string label, const std::function<void(const std::string)>& func)
+{
+	if (func != nullptr)
+		func("Downloading " + label);
+
+	long downloadSize = 0;
+
+	std::string statUrl = Utils::String::replace(url, "https://github.com/", "https://api.github.com/repos/");
+	if (statUrl != url)
+	{
+		std::shared_ptr<HttpReq> statreq = std::make_shared<HttpReq>(statUrl);
+
+		while (statreq->status() == HttpReq::REQ_IN_PROGRESS)
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+		if (statreq->status() == HttpReq::REQ_SUCCESS)
+		{
+			std::string content = statreq->getContent();
+			auto pos = content.find("\"size\": ");
+			if (pos != std::string::npos)
+			{
+				auto end = content.find(",", pos);
+				if (end != std::string::npos)
+					downloadSize = atoi(content.substr(pos + 8, end - pos - 8).c_str()) * 1024;
+			}
+		}
+	}
+
+	std::shared_ptr<HttpReq> httpreq = std::make_shared<HttpReq>(url + "/archive/master.zip");
+
+	int curPos = -1;
+	while (httpreq->status() == HttpReq::REQ_IN_PROGRESS)
+	{
+		if (downloadSize > 0)
+		{
+			double pos = httpreq->getPosition();
+			if (pos > 0 && curPos != pos)
+			{
+				if (func != nullptr)
+				{
+					std::string pc = std::to_string((int)(pos * 100.0 / downloadSize));
+					func(std::string("Downloading " + label + " >>> " + pc + " %"));
+				}
+
+				curPos = pos;
+			}
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+	}
+
+	if (httpreq->status() != HttpReq::REQ_SUCCESS)
+		return nullptr;
+
+	return httpreq;
+}
+
+std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const std::function<void(const std::string)>& func)
+{
+#if WIN32
+	for (auto theme : getThemesList())
+	{		
+		if (theme.name != themeName)
+			continue;
+
+		std::shared_ptr<HttpReq> httpreq = downloadGitRepository(theme.url, themeName, func);
+		if (httpreq != nullptr && httpreq->status() == HttpReq::REQ_SUCCESS)
+		{
+			if (func != nullptr)
+				func("Extracting " + themeName);
+
+			std::string themeFileName = Utils::FileSystem::getFileName(theme.url);
+			std::string zipFile = Utils::FileSystem::getHomePath() + "/.emulationstation/themes/" + themeFileName + ".zip";
+			zipFile = Utils::String::replace(zipFile, "/", "\\");
+			httpreq->saveContent(zipFile);
+
+			unzipFile(zipFile, Utils::String::replace(Utils::FileSystem::getHomePath() + "/.emulationstation/themes", "/", "\\"));
+
+			std::string folderName = Utils::FileSystem::getHomePath() + "/.emulationstation/themes/" + themeFileName + "-master";
+			std::string finalfolderName = Utils::String::replace(folderName, "-master", "");
+
+			rename(folderName.c_str(), finalfolderName.c_str());
+
+			Utils::FileSystem::removeFile(zipFile);
+
+			return std::pair<std::string, int>(std::string("OK"), 0);
+		}
+
+		break;		
+	}
+#endif
+
+	return std::pair<std::string, int>(std::string(""), 1);
 }

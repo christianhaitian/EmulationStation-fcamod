@@ -89,6 +89,11 @@ BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMoni
 int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Window* window)
 {
 #ifdef WIN32
+
+#if _DEBUG
+	return 0;
+#endif
+
 	if (window != NULL)
 		window->renderGameLoadingScreen();
 

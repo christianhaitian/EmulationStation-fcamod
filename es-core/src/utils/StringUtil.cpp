@@ -328,6 +328,8 @@ namespace Utils
 			return output;
 		}
 
+
+
 #if defined(_WIN32)
 		const std::string convertFromWideString(const std::wstring wstring)
 		{
@@ -352,6 +354,24 @@ namespace Utils
 		}
 #endif
 
+		std::vector<std::string> splitAny(const std::string& s, const std::string& seperator)
+		{
+			std::vector<std::string> output;
+
+			char* str = new char[s.length() + 1];
+			std::strcpy(str, s.c_str());
+
+			char* pch = strtok(str, seperator.c_str());
+			while (pch != NULL)
+			{
+				output.push_back(pch);
+				pch = strtok(NULL, seperator.c_str());
+			}
+
+			delete str;
+
+			return output;
+		}
 	} // String::
 
 } // Utils::

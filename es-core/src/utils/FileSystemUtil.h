@@ -58,6 +58,17 @@ namespace Utils
 		std::string	readAllText(const std::string fileName);
 		void		writeAllText	   (const std::string fileName, const std::string text);
 		bool		copyFile(const std::string src, const std::string dst);
+
+		class FileSystemCacheActivator
+		{
+		public:
+			FileSystemCacheActivator();
+			~FileSystemCacheActivator();			
+
+		private:
+			static int mReferenceCount;
+		};
+		
 	} // FileSystem::
 
 

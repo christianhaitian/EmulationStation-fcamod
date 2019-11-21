@@ -96,6 +96,7 @@ HttpReq::HttpReq(const std::string& url)
 {
 	mUrl = url;
 
+	mPosition = -1;
 	mPercent = -1;
 	mHandle = curl_easy_init();
 
@@ -382,13 +383,13 @@ size_t HttpReq::write_content(void* buff, size_t size, size_t nmemb, void* req_p
 	double cl;
 	if (!curl_easy_getinfo(request->mHandle, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl))
 	{		
+		double position = (double)ss.tellp();
+		request->mPosition = position;
+
 		if (cl <= 0)
 			request->mPercent = -1;
 		else
-		{
-			double position = (double)ss.tellp();
 			request->mPercent = (int) (position * 100.0 / cl);
-		}
 	}
 
 	return nmemb;
