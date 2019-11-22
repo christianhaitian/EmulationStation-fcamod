@@ -331,21 +331,12 @@ std::vector<ThemeDownloadInfo> ApiSystem::getThemesList()
 
 				for (auto path : paths)
 				{
-					if (Utils::FileSystem::isDirectory(path + "/" + themeFolder + "-master"))
-					{
-						themeExists = true;
+					themeExists = Utils::FileSystem::isDirectory(path + "/" + themeName) ||
+						Utils::FileSystem::isDirectory(path + "/" + themeFolder) ||
+						Utils::FileSystem::isDirectory(path + "/" + themeFolder + "-master");
+					
+					if (themeExists)
 						break;
-					}
-					else if (Utils::FileSystem::isDirectory(path + "/" + themeFolder))
-					{
-						themeExists = true;
-						break;
-					}
-					else if (Utils::FileSystem::isDirectory(path + "/" + themeFolder))
-					{
-						themeExists = true;
-						break;
-					}
 				}
 
 				ThemeDownloadInfo info;
@@ -437,21 +428,32 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 			zipFile = Utils::String::replace(zipFile, "/", "\\");
 			httpreq->saveContent(zipFile);
 
-			unzipFile(zipFile, Utils::String::replace(Utils::FileSystem::getHomePath() + "/.emulationstation/themes", "/", "\\"));
+			if (!unzipFile(zipFile, Utils::String::replace(Utils::FileSystem::getHomePath() + "/.emulationstation/themes", "/", "\\")))
+				return std::pair<std::string, int>(std::string("An error occured while extracting"), 1);
 
 			std::string folderName = Utils::FileSystem::getHomePath() + "/.emulationstation/themes/" + themeFileName + "-master";
-			std::string finalfolderName = Utils::String::replace(folderName, "-master", "");
+			if (Utils::FileSystem::isDirectory(folderName))
+			{
+				std::string finalfolderName = Utils::FileSystem::getParent(folderName) + "/" + themeName;
 
-			rename(folderName.c_str(), finalfolderName.c_str());
+				if (Utils::FileSystem::isDirectory(finalfolderName))
+				{
+					deleteDirectoryFiles(finalfolderName);
+				}
 
-			Utils::FileSystem::removeFile(zipFile);
+				rename(folderName.c_str(), finalfolderName.c_str());
 
-			return std::pair<std::string, int>(std::string("OK"), 0);
+				Utils::FileSystem::removeFile(zipFile);
+
+				return std::pair<std::string, int>(std::string("OK"), 0);
+			}			
+
+			return std::pair<std::string, int>(std::string("Invalid extraction folder"), 1);
 		}
-
-		break;		
+				
+		return std::pair<std::string, int>(std::string("An error occured while downloading"), 1);
 	}
 #endif
 
-	return std::pair<std::string, int>(std::string(""), 1);
+	return std::pair<std::string, int>(std::string("Theme not found"), 1);
 }

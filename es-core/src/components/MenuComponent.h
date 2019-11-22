@@ -16,11 +16,15 @@ std::shared_ptr<ComponentGrid> makeMultiDimButtonGrid(Window* window, const std:
 std::shared_ptr<ImageComponent> makeArrow(Window* window);
 
 #define TITLE_VERT_PADDING (Renderer::getScreenHeight()*0.0637f)
+#define TITLE_WITHSUB_VERT_PADDING (Renderer::getScreenHeight()*0.05f)
+#define SUBTITLE_VERT_PADDING (Renderer::getScreenHeight()*0.019f)
 
 class MenuComponent : public GuiComponent
 {
 public:
-	MenuComponent(Window* window, std::string title, const std::shared_ptr<Font>& titleFont = Font::get(FONT_SIZE_LARGE));
+	MenuComponent(Window* window, 
+		const std::string title, const std::shared_ptr<Font>& titleFont = Font::get(FONT_SIZE_LARGE),
+		const std::string subTitle = "");
 
 	void onSizeChanged() override;
 
@@ -31,7 +35,8 @@ public:
 
 	void addButton(const std::string& label, const std::string& helpText, const std::function<void()>& callback);
 
-	void setTitle(const char* title, const std::shared_ptr<Font>& font);
+	void setTitle(const std::string title, const std::shared_ptr<Font>& font = nullptr);
+	void setSubTitle(const std::string text);
 
 	inline void setCursorToList() { mGrid.setCursorTo(mList); }
 	inline void setCursorToButtons() { assert(mButtonGrid); mGrid.setCursorTo(mButtonGrid); }
@@ -40,6 +45,15 @@ public:
 
 	float getButtonGridHeight() const;
 
+	void setMaxHeight(float maxHeight) 
+	{ 
+		if (mMaxHeight == maxHeight)
+			return;
+
+		mMaxHeight = maxHeight; 
+		updateSize();
+	}
+
 private:
 	void updateSize();
 	void updateGrid();
@@ -47,10 +61,14 @@ private:
 	NinePatchComponent mBackground;
 	ComponentGrid mGrid;
 
+	std::shared_ptr<ComponentGrid> mHeaderGrid;
 	std::shared_ptr<TextComponent> mTitle;
+	std::shared_ptr<TextComponent> mSubtitle;
 	std::shared_ptr<ComponentList> mList;
 	std::shared_ptr<ComponentGrid> mButtonGrid;
 	std::vector< std::shared_ptr<ButtonComponent> > mButtons;
+
+	float mMaxHeight;
 };
 
 #endif // ES_CORE_COMPONENTS_MENU_COMPONENT_H

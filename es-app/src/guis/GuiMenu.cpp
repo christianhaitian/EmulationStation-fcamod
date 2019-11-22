@@ -990,7 +990,8 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 
 void GuiMenu::openEmulatorSettings()
 {
-	GuiSettings* configuration = new GuiSettings(mWindow, _("ADVANCED").c_str());
+	GuiSettings* configuration = new GuiSettings(mWindow, _("EMULATOR SETTINGS").c_str());	
+
 	Window* window = mWindow;
 	
 	// For each activated system

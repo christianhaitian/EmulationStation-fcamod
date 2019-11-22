@@ -5,11 +5,16 @@
 #define BUTTON_GRID_VERT_PADDING  (Renderer::getScreenHeight()*0.0296296) //32
 #define BUTTON_GRID_HORIZ_PADDING (Renderer::getScreenWidth()*0.0052083333) //10
 
-#define TITLE_HEIGHT (mTitle->getFont()->getLetterHeight() + TITLE_VERT_PADDING)
+#define TITLE_HEIGHT (mTitle->getFont()->getLetterHeight() + (mSubtitle ? TITLE_WITHSUB_VERT_PADDING : TITLE_VERT_PADDING) + (mSubtitle ? mSubtitle->getSize().y() + SUBTITLE_VERT_PADDING : 0))
 
-MenuComponent::MenuComponent(Window* window, std::string title, const std::shared_ptr<Font>& titleFont) : GuiComponent(window),
+MenuComponent::MenuComponent(Window* window, 
+	const std::string title, const std::shared_ptr<Font>& titleFont,
+	const std::string subTitle) 
+	: GuiComponent(window),
 	mBackground(window), mGrid(window, Vector2i(1, 3))
 {
+	mMaxHeight = 0;
+
 	auto theme = ThemeData::getMenuTheme();
 
 	addChild(&mBackground);
@@ -30,8 +35,14 @@ MenuComponent::MenuComponent(Window* window, std::string title, const std::share
 		mTitle->setRenderBackground(true);
 	}
 
-	setTitle(title.c_str(), theme->Title.font); //  titleFont
-	mGrid.setEntry(mTitle, Vector2i(0, 0), false);
+	mHeaderGrid = std::make_shared<ComponentGrid>(mWindow, Vector2i(1, 2));
+	mHeaderGrid->setEntry(mTitle, Vector2i(0, 0), false, true);
+
+	setTitle(title, theme->Title.font); //  titleFont
+	setSubTitle(subTitle);
+
+	mGrid.setEntry(mHeaderGrid, Vector2i(0, 0), false, true);
+	//mGrid.setEntry(mTitle, Vector2i(0, 0), false);
 
 	// set up list which will never change (externally, anyway)
 	mList = std::make_shared<ComponentList>(mWindow);
@@ -130,10 +141,52 @@ void MenuComponent::addEntry(const std::string name, bool add_arrow, const std::
 	addRow(row, setCursorHere);
 }
 
-void MenuComponent::setTitle(const char* title, const std::shared_ptr<Font>& font)
+void MenuComponent::setTitle(const std::string title, const std::shared_ptr<Font>& font)
 {
 	mTitle->setText(Utils::String::toUpper(title));
-	mTitle->setFont(font);
+	
+	if (font != nullptr)
+		mTitle->setFont(font);
+}
+
+void MenuComponent::setSubTitle(const std::string text)
+{
+	if (text.empty())
+	{
+		if (mSubtitle != nullptr)
+		{
+			mHeaderGrid->removeEntry(mSubtitle);
+			mSubtitle = nullptr;			
+		}
+
+		mHeaderGrid->setRowHeightPerc(0, 1);
+		mHeaderGrid->setRowHeightPerc(1, 0);
+
+		return;
+	}
+	
+	if (mSubtitle == nullptr)
+	{
+		auto theme = ThemeData::getMenuTheme();
+
+		mSubtitle = std::make_shared<TextComponent>(mWindow, 
+			Utils::String::toUpper(Utils::FileSystem::getFileName(text)),
+			theme->TextSmall.font, theme->TextSmall.color, ALIGN_CENTER);
+
+		mHeaderGrid->setEntry(mSubtitle, Vector2i(0, 1), false, true);
+	}
+	
+	mSubtitle->setText(Utils::String::toUpper(text));
+	mSubtitle->setVerticalAlignment(Alignment::ALIGN_TOP);
+	mSubtitle->setSize(Renderer::getScreenWidth() * 0.88f, 0);
+	mSubtitle->setLineSpacing(1.1);
+
+	updateSize();
+
+	const float titleHeight = mTitle->getFont()->getLetterHeight() + (mSubtitle ? TITLE_WITHSUB_VERT_PADDING : TITLE_VERT_PADDING);
+	const float subtitleHeight = mSubtitle->getSize().y() + SUBTITLE_VERT_PADDING;
+
+	mHeaderGrid->setRowHeightPerc(0, titleHeight / TITLE_HEIGHT);
 }
 
 float MenuComponent::getButtonGridHeight() const
@@ -152,7 +205,8 @@ void MenuComponent::updateSize()
 		return;
 	}
 
-	const float maxHeight = Renderer::getScreenHeight() * 0.75f;
+	const float maxHeight = mMaxHeight <= 0 ? Renderer::getScreenHeight() * 0.75f : mMaxHeight;
+
 	float height = TITLE_HEIGHT + mList->getTotalRowHeight() + getButtonGridHeight() + 2;
 	if(height > maxHeight)
 	{

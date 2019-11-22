@@ -43,6 +43,9 @@ public:
 	void setVariable(const std::string name, bool value) { mVariableMap[name] = value; }
 	void updatePosition();
 
+	void setTitle(const std::string title) { mMenu.setTitle(title); }
+	void setSubTitle(const std::string text) { mMenu.setSubTitle(text); }
+
 protected:
 	MenuComponent mMenu;
 
