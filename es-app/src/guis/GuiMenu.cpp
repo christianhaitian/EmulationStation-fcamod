@@ -779,6 +779,42 @@ void GuiMenu::openUISettings()
 	s->addSaveFunc([systemfocus_list] {
 		Settings::getInstance()->setString("StartupSystem", systemfocus_list->getSelected());
 	});
+
+
+
+	// Select systems to hide
+	auto hiddenSystems = Utils::String::split(Settings::getInstance()->getString("HiddenSystems"), ';');
+
+	auto displayedSystems = std::make_shared<OptionListComponent<SystemData*>>(mWindow, _("VISIBLE SYSTEMS"), true);
+
+	for (auto system : SystemData::sSystemVector)
+		displayedSystems->add(system->getFullName(), system, std::find(hiddenSystems.cbegin(), hiddenSystems.cend(), system->getName()) == hiddenSystems.cend());
+
+	s->addWithLabel(_("VISIBLE SYSTEMS"), displayedSystems);
+	s->addSaveFunc([s, displayedSystems]
+	{
+		std::string hiddenSystems;
+
+		std::vector<SystemData*> sys = displayedSystems->getSelectedObjects();
+
+		for (auto system : SystemData::sSystemVector)
+		{
+			if (std::find(sys.cbegin(), sys.cend(), system) == sys.cend())
+			{
+				if (hiddenSystems.empty())
+					hiddenSystems = system->getName();
+				else
+					hiddenSystems = hiddenSystems + ";" + system->getName();
+			}
+		}
+
+		if (Settings::getInstance()->setString("HiddenSystems", hiddenSystems))
+		{
+			Settings::getInstance()->saveFile();
+			s->setVariable("reloadAll", true);
+		}		
+	});
+
 	
 	// Open gamelist at start
 	auto bootOnGamelist = std::make_shared<SwitchComponent>(mWindow);
@@ -798,7 +834,7 @@ void GuiMenu::openUISettings()
 		if (!hideSysView && hideSystemView->getState())
 			ViewController::get()->goToStart(true);
 	});
-	
+
 
 #if defined(_WIN32)
 	// quick system select (left/right in game list view)

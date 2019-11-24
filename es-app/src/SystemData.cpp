@@ -595,9 +595,20 @@ std::string SystemData::getConfigPath(bool forWrite)
 
 bool SystemData::isVisible()
 {
-   return (getDisplayedGameCount() > 0 || 
-           (UIModeController::getInstance()->isUIModeFull() && mIsCollectionSystem) ||
-           (mIsCollectionSystem && mName == "favorites"));
+	if ((getDisplayedGameCount() > 0 ||
+		(UIModeController::getInstance()->isUIModeFull() && mIsCollectionSystem) ||
+		(mIsCollectionSystem && mName == "favorites")))
+	{
+		if (!mIsCollectionSystem)
+		{
+			auto hiddenSystems = Utils::String::split(Settings::getInstance()->getString("HiddenSystems"), ';');
+			return std::find(hiddenSystems.cbegin(), hiddenSystems.cend(), getName()) == hiddenSystems.cend();
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
 SystemData* SystemData::getNext() const

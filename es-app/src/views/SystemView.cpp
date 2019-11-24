@@ -274,6 +274,15 @@ void SystemView::populate()
 			Settings::getInstance()->setString("UIMode", "Full");
 			mWindow->pushGui(new GuiMsgBox(mWindow, "The selected UI mode has nothing to show,\n returning to UI mode: FULL", "OK", nullptr));
 		}
+		
+		if (Settings::getInstance()->setString("HiddenSystems", ""))
+		{
+			Settings::getInstance()->saveFile();
+
+			// refresh GUI
+			populate();
+			mWindow->pushGui(new GuiMsgBox(mWindow, "ERROR: EVERY SYSTEM IS HIDDEN, RE-DISPLAYING ALL OF THEM NOW", "OK", nullptr));
+		}
 	}
 }
 

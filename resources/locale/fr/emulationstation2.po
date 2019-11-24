@@ -2233,6 +2233,10 @@ msgid "EMPTY LIST"
 msgstr "Liste vide"
 
 #:
+msgid "VISIBLE SYSTEMS"
+msgstr "SYSTÈMES A AFFICHER"
+
+#:
 msgid "COMPLETE QUIT MENU"
 msgstr "AFFICHER LE MENU QUITTER COMPLET"
 
