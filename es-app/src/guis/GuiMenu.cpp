@@ -788,7 +788,8 @@ void GuiMenu::openUISettings()
 	auto displayedSystems = std::make_shared<OptionListComponent<SystemData*>>(mWindow, _("VISIBLE SYSTEMS"), true);
 
 	for (auto system : SystemData::sSystemVector)
-		displayedSystems->add(system->getFullName(), system, std::find(hiddenSystems.cbegin(), hiddenSystems.cend(), system->getName()) == hiddenSystems.cend());
+		if(!system->isCollection())
+			displayedSystems->add(system->getFullName(), system, std::find(hiddenSystems.cbegin(), hiddenSystems.cend(), system->getName()) == hiddenSystems.cend());
 
 	s->addWithLabel(_("VISIBLE SYSTEMS"), displayedSystems);
 	s->addSaveFunc([s, displayedSystems]
@@ -799,6 +800,9 @@ void GuiMenu::openUISettings()
 
 		for (auto system : SystemData::sSystemVector)
 		{
+			if (system->isCollection())
+				continue;
+
 			if (std::find(sys.cbegin(), sys.cend(), system) == sys.cend())
 			{
 				if (hiddenSystems.empty())
