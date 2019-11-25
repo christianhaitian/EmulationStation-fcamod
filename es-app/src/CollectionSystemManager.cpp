@@ -548,9 +548,9 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 				ViewController::get()->onFileChanged(file, FILE_METADATA_CHANGED);
 				ViewController::get()->getGameListView(systemViewToUpdate)->onFileChanged(file, FILE_METADATA_CHANGED);
 			}
-		}
 
-		saveToGamelistRecovery(file);
+			saveToGamelistRecovery(file);
+		}
 
 		char trstring[512];
 
