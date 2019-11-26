@@ -18,6 +18,10 @@
 
 FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType type, std::unordered_map<std::string, FileData*>& fileMap)
 {
+	auto pGame = fileMap.find(path);
+	if (pGame != fileMap.end())
+		return pGame->second;
+
 	// first, verify that path is within the system's root folder
 	FolderData* root = system->getRootFolder();
 
@@ -29,10 +33,6 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 		LOG(LogError) << "File path \"" << path << "\" is outside system path \"" << system->getStartPath() << "\"";
 		return NULL;
 	}
-
-	auto pGame = fileMap.find(path);
-	if (pGame != fileMap.end())
-		return pGame->second;
 
 	Utils::FileSystem::stringList pathList = Utils::FileSystem::getPathList(relative);
 	auto path_it = pathList.begin();
@@ -357,34 +357,33 @@ void updateGamelist(SystemData* system)
 		root = doc.append_child("gameList");
 	}
 
-	//iterate through all files, checking if they're already in the XML
+	std::map<std::string, pugi::xml_node> xmlMap;
+
+	for (pugi::xml_node fileNode : root.children())
+	{
+		pugi::xml_node path = fileNode.child("path");
+		if (path)
+		{
+			std::string nodePath = Utils::FileSystem::getCanonicalPath(Utils::FileSystem::resolveRelativePath(path.text().get(), system->getStartPath(), true));
+			xmlMap[nodePath] = fileNode;
+		}
+	}
+	
+	// iterate through all files, checking if they're already in the XML
 	for(auto file : dirtyFiles)
 	{
-		const char* tag = (file->getType() == GAME) ? "game" : "folder";
-
 		bool removed = false;
 
 		// check if the file already exists in the XML
 		// if it does, remove it before adding
-		for(pugi::xml_node fileNode = root.child(tag); fileNode; fileNode = fileNode.next_sibling(tag))
+		auto xmf = xmlMap.find(Utils::FileSystem::getCanonicalPath(file->getPath()));
+		if (xmf != xmlMap.cend())
 		{
-			pugi::xml_node pathNode = fileNode.child("path");
-			if(!pathNode)
-			{
-				LOG(LogError) << "<" << tag << "> node contains no <path> child!";
-				continue;
-			}
-
-			std::string nodePath = Utils::FileSystem::getCanonicalPath(Utils::FileSystem::resolveRelativePath(pathNode.text().get(), system->getStartPath(), true));
-			std::string gamePath = Utils::FileSystem::getCanonicalPath(file->getPath());
-			if(nodePath == gamePath)
-			{
-				// found it
-				removed = true;
-				root.remove_child(fileNode);					
-				break;
-			}
+			removed = true;
+			root.remove_child(xmf->second);
 		}
+		
+		const char* tag = (file->getType() == GAME) ? "game" : "folder";
 
 		// it was either removed or never existed to begin with; either way, we can add it now
 		if (addFileDataNode(root, file, tag, system))
@@ -393,9 +392,9 @@ void updateGamelist(SystemData* system)
 			++numUpdated; // Only if really removed
 	}
 
-	//now write the file
-
-	if (numUpdated > 0) {
+	// Now write the file
+	if (numUpdated > 0) 
+	{
 		//make sure the folders leading up to this path exist (or the write will fail)
 		std::string xmlWritePath(system->getGamelistPath(true));
 		Utils::FileSystem::createDirectory(Utils::FileSystem::getParent(xmlWritePath));
