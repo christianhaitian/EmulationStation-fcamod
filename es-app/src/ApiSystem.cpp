@@ -225,7 +225,7 @@ void deleteDirectoryFiles(const std::string path)
 	for (auto file : files)
 	{
 		if (Utils::FileSystem::isDirectory(file))
-			::RemoveDirectoryA(file.c_str());
+			::RemoveDirectoryA(Utils::FileSystem::getPreferredPath(file).c_str());
 		else
 			Utils::FileSystem::removeFile(file);
 	}
@@ -235,7 +235,7 @@ void deleteDirectoryFiles(const std::string path)
 std::pair<std::string, int> ApiSystem::updateSystem(const std::function<void(const std::string)>& func)
 {
 #if WIN32
-	std::string url = "https://github.com/fabricecaruso/EmulationStation/releases/download/continuous-master/EmulationStation-Win32.zip";
+	std::string url = "https://github.com/fabricecaruso/EmulationStation/releases/download/continuous-master/EmulationStation-Win32-no-deps.zip";
 	auto req = downloadFile(url, "update", func);
 	if (req != nullptr && req->status() == HttpReq::REQ_SUCCESS)
 	{
@@ -244,17 +244,17 @@ std::pair<std::string, int> ApiSystem::updateSystem(const std::function<void(con
 
 		std::string fileName = Utils::FileSystem::getFileName(url);
 		std::string path = Utils::FileSystem::getHomePath() + "/.emulationstation/update";
-		path = Utils::FileSystem::getPreferredPath(path);
+	
 		
 		if (!Utils::FileSystem::exists(path))
 			Utils::FileSystem::createDirectory(path);
 		else
 			deleteDirectoryFiles(path);
 
-		std::string zipFile = path + "\\" + fileName;		
+		std::string zipFile = path + "/" + fileName;		
 		req->saveContent(zipFile);
 
-		unzipFile(zipFile, path);
+		unzipFile(Utils::FileSystem::getPreferredPath(zipFile), Utils::FileSystem::getPreferredPath(path));
 		Utils::FileSystem::removeFile(zipFile);
 
 		auto files = Utils::FileSystem::getDirContent(path, true, true);
