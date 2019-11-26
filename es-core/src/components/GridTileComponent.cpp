@@ -66,6 +66,7 @@ void GridTileComponent::resetProperties()
 
 void GridTileComponent::forceSize(Vector2f size, float selectedZoom)
 {
+	mSize = size;
 	mDefaultProperties.Size = size;
 	mSelectedProperties.Size = size * selectedZoom;
 	mVideoPlayingProperties.Size = mSelectedProperties.Size;
@@ -134,7 +135,7 @@ void GridTileComponent::resize()
 
 		if (mImage != nullptr && currentProperties.Image.sizeMode != "maxSize" && isDefaultImage)
 			mImage->setMaxSize(imageSize.x(), imageSize.y());
-	}
+	}	
 	else if (mImage != nullptr)
 	{
 		// Retrocompatibility : imagegrid.image is not defined
@@ -167,7 +168,9 @@ void GridTileComponent::resize()
 
 	if (currentProperties.Label.Visible)
 	{
-		currentProperties.Label.updateTextComponent(&mLabel, mSize);
+		auto szRef = mLabelMerged ? mSize - imageOffset : mSize;
+
+		currentProperties.Label.updateTextComponent(&mLabel, szRef);
 		
 		// Automatic layout for not merged labels 
 		if (currentProperties.Label.pos.x() < 0)
@@ -179,7 +182,7 @@ void GridTileComponent::resize()
 			}
 			else
 			{
-				mLabel.setPosition(0, mSize.y() - labelHeight);
+				mLabel.setPosition(0, szRef.y() - labelHeight);
 				mLabel.setSize(size.x(), labelHeight);
 			}
 		}
@@ -723,7 +726,9 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 			mLabelMerged = mDefaultProperties.Label.size.x() == 0;
 
 		// Apply theme to the <text name="gridtile:selected"> element
-		elem = theme->getElement(view, "gridtile:selected", "text");
+		elem = theme->getElement(view, "gridtile_selected", "text");
+		if (elem == nullptr)
+			elem = theme->getElement(view, "gridtile:selected", "text");
 		if (elem == nullptr) // Apply theme to the <text name="gridtile.text:selected"> element
 			elem = theme->getElement(view, "gridtile.text:selected", "text");
 

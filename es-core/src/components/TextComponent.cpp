@@ -206,7 +206,7 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 
 		Transform4x4f drawTrans = trans;
 
-		if (mMarqueeOffset > 0)
+		if (mMarqueeOffset != 0.0)
 			trans.translate(off - Vector3f((float)mMarqueeOffset, 0, 0));
 		else
 			trans.translate(off);
@@ -236,7 +236,7 @@ void TextComponent::render(const Transform4x4f& parentTrans)
 		// render currently selected item text again if
 		// marquee is scrolled far enough for it to repeat
 		
-		if (mMarqueeOffset2 < 0)
+		if (mMarqueeOffset2 != 0.0)
 		{
 			trans = drawTrans;
 			trans.translate(off - Vector3f((float)mMarqueeOffset2, 0, 0));
@@ -310,7 +310,7 @@ void TextComponent::onTextChanged()
 	std::string text = mUppercase ? Utils::String::toUpper(mText) : mText;
 
 	std::shared_ptr<Font> f = mFont;
-	const bool isMultiline = (mSize.y() == 0 || sy > f->getHeight()*1.2f);
+	const bool isMultiline = !mAutoScroll && (mSize.y() == 0 || sy > f->getHeight()*1.2f);
 
 	bool addAbbrev = false;
 	if (!isMultiline)
@@ -323,9 +323,9 @@ void TextComponent::onTextChanged()
 	auto color = mColor & 0xFFFFFF00 | (unsigned char)((mColor & 0xFF) * (mOpacity / 255.0));
 
 	Vector2f size = f->sizeText(text);
-	if (!isMultiline && sx && text.size() && (size.x() > sx || addAbbrev))
+	if (!isMultiline)
 	{
-		if (!mAutoScroll)
+		if (sx && text.size() && (size.x() > sx || addAbbrev) && !mAutoScroll)
 		{
 			// abbreviate text
 			const std::string abbrev = "...";
@@ -343,9 +343,8 @@ void TextComponent::onTextChanged()
 
 		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(text, Vector2f(0, 0), color, sx, mHorizontalAlignment, mLineSpacing));
 	}
-	else {
+	else
 		mTextCache = std::shared_ptr<TextCache>(f->buildTextCache(f->wrapText(text, sx), Vector2f(0, 0), color, sx, mHorizontalAlignment, mLineSpacing));
-	}
 }
 
 void TextComponent::update(int deltaTime)
@@ -353,7 +352,7 @@ void TextComponent::update(int deltaTime)
 	GuiComponent::update(deltaTime);
 
 	int sy = mSize.y() - mPadding.y() - mPadding.w();
-	const bool isMultiline = (mSize.y() == 0 || sy > mFont->getHeight()*1.2f);
+	const bool isMultiline = !mAutoScroll && (mSize.y() == 0 || sy > mFont->getHeight()*1.2f);
 
 	if (mAutoScroll && !isMultiline && mSize.x() > 0)
 	{
@@ -388,6 +387,12 @@ void TextComponent::update(int deltaTime)
 			if (mMarqueeOffset > (scrollLength - (limit - returnLength)))
 				mMarqueeOffset2 = (int)(mMarqueeOffset - (scrollLength + returnLength));
 		}
+	}
+	else
+	{
+		mMarqueeTime = 0;
+		mMarqueeOffset = 0;
+		mMarqueeOffset2 = 0;
 	}
 }
 
@@ -520,8 +525,8 @@ void TextComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const st
 		else
 			mReflectOnBorders = false;
 
-		if (elem->has("autoScroll"))
-			mAutoScroll = elem->get<bool>("autoScroll");
+		if (elem->has("singleLineScroll"))
+			mAutoScroll = elem->get<bool>("singleLineScroll");
 		else
 			mAutoScroll = false;
 	}

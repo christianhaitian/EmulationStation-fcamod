@@ -548,7 +548,7 @@ void ViewController::render(const Transform4x4f& parentTrans)
 		Vector3f guiStart = it->second->getPosition();
 		Vector3f guiEnd = it->second->getPosition() + Vector3f(it->second->getSize().x(), it->second->getSize().y(), 0);
 
-		if (guiEnd.x() >= viewStart.x() && guiEnd.y() >= viewStart.y() && guiStart.x() <= viewEnd.x() && guiStart.y() <= viewEnd.y())
+		if (guiEnd.x() > viewStart.x() && guiEnd.y() >= viewStart.y() && guiStart.x() < viewEnd.x() && guiStart.y() <= viewEnd.y())
 			it->second->render(trans);
 	}
 
