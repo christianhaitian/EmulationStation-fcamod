@@ -47,7 +47,7 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 void GridTileComponent::resetProperties()
 {
 	mDefaultProperties.Size = getDefaultTileSize();
-	mDefaultProperties.Padding = Vector2f(16.0f, 16.0f);
+	mDefaultProperties.Padding = Vector4f(16.0f, 16.0f, 16.0f, 16.0f);
 
 	mSelectedProperties.Size = getSelectedTileSize();
 	mSelectedProperties.Padding = mDefaultProperties.Padding;
@@ -123,10 +123,10 @@ void GridTileComponent::resize()
 		height = 0;
 
 	float topPadding = currentProperties.Padding.y();
-	float bottomPadding = std::max(topPadding, height);
+	float bottomPadding = std::max(currentProperties.Padding.w(), height);
 
-	Vector2f imageOffset = currentProperties.Padding;
-	Vector2f imageSize(size.x() - currentProperties.Padding.x() * 2.0, size.y() - topPadding - bottomPadding);
+	Vector2f imageOffset = Vector2f(currentProperties.Padding.x(), currentProperties.Padding.y());
+	Vector2f imageSize(size.x() - currentProperties.Padding.x() - currentProperties.Padding.z(), size.y() - topPadding - bottomPadding);
 
 	// Image
 	if (currentProperties.Image.Loaded)
@@ -238,7 +238,10 @@ void GridTileComponent::resize()
 	if (mImage != NULL && currentProperties.SelectionMode == "image" && mImage->getSize() != Vector2f(0, 0))
 	{
 		if (currentProperties.Image.sizeMode == "minSize")
-			bkSize = Vector2f(size.x(), size.y() - bottomPadding + topPadding);
+		{
+			if (!mLabelMerged)
+				bkSize = Vector2f(size.x(), size.y() - bottomPadding + topPadding);
+		}
 		else
 		{
 			bkPosition = Vector3f(imageOffset.x() - mSelectedProperties.Padding.x(), imageOffset.y() - mSelectedProperties.Padding.y(), 0);
@@ -420,7 +423,7 @@ void GridTileComponent::applyThemeToProperties(const ThemeData::ThemeElement* el
 		properties.Size = elem->get<Vector2f>("size") * screen;
 
 	if (elem->has("padding"))
-		properties.Padding = elem->get<Vector2f>("padding");
+		properties.Padding = elem->get<Vector4f>("padding");
 
 	if (elem && elem->has("selectionMode"))
 		properties.SelectionMode = elem->get<std::string>("selectionMode");		
@@ -1009,6 +1012,21 @@ static Vector2f mixVectors(const Vector2f& def, const Vector2f& sel, float perce
 	float x = def.x() * (1.0 - percent) + sel.x() * percent;
 	float y = def.y() * (1.0 - percent) + sel.y() * percent;
 	return Vector2f(x, y);	
+}
+
+static Vector4f mixVectors(const Vector4f& def, const Vector4f& sel, float percent)
+{
+	if (def == sel || percent == 0)
+		return def;
+
+	if (percent == 1)
+		return sel;
+
+	float x = def.x() * (1.0 - percent) + sel.x() * percent;
+	float y = def.y() * (1.0 - percent) + sel.y() * percent;
+	float z = def.z() * (1.0 - percent) + sel.z() * percent;
+	float w = def.w() * (1.0 - percent) + sel.w() * percent;
+	return Vector4f(x, y, z, w);
 }
 
 static unsigned int mixUnsigned(const unsigned int def, const unsigned int sel, float percent)
