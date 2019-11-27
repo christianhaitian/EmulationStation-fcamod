@@ -36,6 +36,8 @@ GridTileComponent::GridTileComponent(Window* window) : GuiComponent(window), mBa
 	mImage = new ImageComponent(mWindow);
 	mImage->setOrigin(0.5f, 0.5f);
 
+	mLabel.setDefaultZIndex(10);
+
 	addChild(&mBackground);
 	addChild(&(*mImage));
 	addChild(&mLabel);
@@ -334,20 +336,25 @@ void GridTileComponent::renderContent(const Transform4x4f& parentTrans)
 	
 	if (!mLabelMerged && isMinSize)
 		Renderer::popClipRect();
-		
+
+	std::vector<GuiComponent*> zOrdered;
+
 	if (mMarquee != nullptr && mMarquee->hasImage())
-		mMarquee->render(trans);
-	else if (currentProperties.Label.Visible && currentProperties.Label.size.y()>0)
-		mLabel.render(trans);
-	else if (!currentProperties.Label.Visible && mIsDefaultImage)
-		mLabel.render(trans);
+		zOrdered.push_back(mMarquee);
+	else
+		zOrdered.push_back(&mLabel);
 
 	if (mFavorite != nullptr && mFavorite->hasImage() && mFavorite->isVisible())
-		mFavorite->render(trans);
+		zOrdered.push_back(mFavorite);
 
 	if (mImageOverlay != nullptr && mImageOverlay->hasImage() && mImageOverlay->isVisible())
-		mImageOverlay->render(trans);
-	
+		zOrdered.push_back(mImageOverlay);
+
+	std::stable_sort(zOrdered.begin(), zOrdered.end(), [](GuiComponent* a, GuiComponent* b) { return b->getZIndex() > a->getZIndex(); });
+
+	for (auto comp : zOrdered)
+		comp->render(trans);
+
 	if (mLabelMerged && isMinSize)
 		Renderer::popClipRect();
 }
@@ -368,7 +375,7 @@ void GridTileComponent::createMarquee()
 
 	mMarquee = new ImageComponent(mWindow);
 	mMarquee->setOrigin(0.5f, 0.5f);
-	mMarquee->setDefaultZIndex(35);
+	mMarquee->setDefaultZIndex(20);
 	addChild(mMarquee);
 }
 
@@ -379,7 +386,7 @@ void GridTileComponent::createFavorite()
 
 	mFavorite = new ImageComponent(mWindow);
 	mFavorite->setOrigin(0.5f, 0.5f);
-	mFavorite->setDefaultZIndex(35);
+	mFavorite->setDefaultZIndex(15);
 	mFavorite->setVisible(false);
 	
 	addChild(mFavorite);
@@ -392,7 +399,7 @@ void GridTileComponent::createImageOverlay()
 
 	mImageOverlay = new ImageComponent(mWindow);
 	mImageOverlay->setOrigin(0.5f, 0.5f);
-	mImageOverlay->setDefaultZIndex(35);
+	mImageOverlay->setDefaultZIndex(25);
 	mImageOverlay->setVisible(false);
 
 	addChild(mImageOverlay);
@@ -408,7 +415,7 @@ void GridTileComponent::createVideo()
 	// video
 	mVideo->setOrigin(0.5f, 0.5f);
 	mVideo->setStartDelay(VIDEODELAY);
-	mVideo->setDefaultZIndex(30);
+	mVideo->setDefaultZIndex(11);
 	addChild(mVideo);
 }
 
