@@ -108,6 +108,7 @@ private:
 	float mCamOffset;
 	float mExtrasCamOffset;
 	float mExtrasFadeOpacity;
+	int	  mExtrasFadeOldCursor;
 
 	bool mViewNeedsReload;
 	bool mShowing;

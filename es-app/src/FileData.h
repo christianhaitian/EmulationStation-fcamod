@@ -47,10 +47,10 @@ public:
 
 	virtual SystemEnvironmentData* getSystemEnvData() const;
 
-	virtual const std::string getThumbnailPath() const;
-	virtual const std::string getVideoPath() const;
-	virtual const std::string getMarqueePath() const;
-	virtual const std::string getImagePath() const;
+	virtual const std::string getThumbnailPath();
+	virtual const std::string getVideoPath();
+	virtual const std::string getMarqueePath();
+	virtual const std::string getImagePath();
 
 	virtual const std::string getCore() const;
 	virtual const std::string getEmulator() const;

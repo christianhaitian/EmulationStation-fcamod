@@ -745,3 +745,8 @@ void ImageComponent::update(int deltaTime)
 		}
 	}
 }
+
+bool ImageComponent::isTiled()
+{ 
+	return mTexture != nullptr && mTexture->isTiled(); 
+}
