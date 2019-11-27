@@ -209,7 +209,7 @@ void ViewController::playViewTransition(bool forceImmediate)
 		else
 			advanceAnimation(0, (int)(mFadeOpacity * FADE_DURATION));		
 	} 
-	else if (!forceImmediate && transition_style == "slide")
+	else if (!forceImmediate && (transition_style == "slide" || transition_style == "auto"))
 	{
 		// slide or simple slide
 		setAnimation(new MoveCameraAnimation(mCamera, target));

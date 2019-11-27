@@ -171,7 +171,7 @@ void SystemView::populate()
 						logo->setImage(path, (elem->has("tile") && elem->get<bool>("tile")), MaxSizeInfo(carouselLogoSize() * mCarousel.logoScale));
 				}
 
-				if (mCarousel.size.x() != carouselLogoSize().x() & mCarousel.size.y() != carouselLogoSize().y())
+				if (carouselSize().x() != carouselLogoSize().x() & carouselSize().y() != carouselLogoSize().y())
 					logo->setRotateByTargetSize(true);
 					
 				e.data.logo = std::shared_ptr<GuiComponent>(logo);
@@ -405,6 +405,13 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 	cancelAnimation(2);
 
 	std::string transition_style = Settings::getInstance()->getString("TransitionStyle");
+	if (transition_style == "auto")
+	{
+		if (mCarousel.defaultTransition == "instant" || mCarousel.defaultTransition == "fade" || mCarousel.defaultTransition == "slide")
+			transition_style = mCarousel.defaultTransition;
+		else
+			transition_style = "slide";
+	}
 
 	int systemInfoDelay = mCarousel.systemInfoDelay;
 	bool goFast = transition_style == "instant" || systemInfoDelay == 0;
@@ -455,6 +462,9 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 
 	if (mLastCursor == mCursor)
 		return;
+
+	if (!mCarousel.scrollSound.empty())
+		Sound::get(mCarousel.scrollSound)->play();
 
 	int oldCursor = mLastCursor;
 	mLastCursor = mCursor;
@@ -542,32 +552,9 @@ void SystemView::render(const Transform4x4f& parentTrans)
 		
 	Transform4x4f trans = getTransform() * parentTrans;
 
-	Vector2f clipPos(trans.translation().x(), trans.translation().y());
-	if (!Renderer::isVisibleOnScreen(clipPos.x(), clipPos.y(), mSize.x(), mSize.y()))
+	if (!Renderer::isVisibleOnScreen(trans.translation().x(), trans.translation().y(), mSize.x(), mSize.y()))
 		return;
-
-	if (mSize.x() != Renderer::getScreenWidth() || mSize.x() != Renderer::getScreenHeight())
-	{
-		for (int i = 0; i < mEntries.size(); i++)
-		{
-			if (mEntries[i].data.logo)
-			{
-				Vector2f denormalized = carouselLogoSize() * mEntries[i].data.logo->getOrigin();
-				mEntries[i].data.logo->setPosition(denormalized.x(), denormalized.y(), 0.0);
-
-				if (mEntries[i].data.logoIsImage)
-				{
-					ImageComponent* img = (ImageComponent*)mEntries[i].data.logo.get();
-					img->setMaxSize(carouselLogoSize() * mCarousel.logoScale);
-				}
-				else
-					mEntries[i].data.logo->setSize(carouselLogoSize() * mCarousel.logoScale);
-			}
-		}
-	}
-
-
-		
+	
 	auto systemInfoZIndex = mSystemInfo.getZIndex();
 	auto minMax = std::minmax(mCarousel.zIndex, systemInfoZIndex);
 
@@ -890,6 +877,8 @@ void  SystemView::getDefaultElements(void)
 	mCarousel.maxLogoCount = 3;
 	mCarousel.zIndex = 40;
 	mCarousel.systemInfoDelay = 2000;
+	mCarousel.scrollSound = "";
+	mCarousel.defaultTransition = "";
 
 	// System Info Bar
 	mSystemInfo.setSize(mSize.x(), mSystemInfo.getFont()->getLetterHeight()*2.2f);
@@ -1007,6 +996,12 @@ void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
 	}
 	if (elem->has("systemInfoDelay"))
 		mCarousel.systemInfoDelay = elem->get<float>("systemInfoDelay");
+
+	if (elem->has("scrollSound"))
+		mCarousel.scrollSound = elem->get<std::string>("scrollSound");
+
+	if (elem->has("defaultTransition"))
+		mCarousel.defaultTransition = elem->get<std::string>("defaultTransition");
 }
 
 void SystemView::onShow()

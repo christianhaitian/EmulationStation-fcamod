@@ -45,6 +45,9 @@ struct SystemViewCarousel
 	Vector2f logoPos;
 	float zIndex;
 	float systemInfoDelay;
+
+	std::string		defaultTransition;
+	std::string		scrollSound;
 };
 
 class SystemView : public IList<SystemViewData, SystemData*>

@@ -725,11 +725,16 @@ void GuiMenu::openUISettings()
 	// transition style
 	auto transition_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("TRANSITION STYLE"), false);
 	std::vector<std::string> transitions;
+	transitions.push_back("auto");
 	transitions.push_back("fade");
 	transitions.push_back("slide");
 	transitions.push_back("instant");
+	
 	for (auto it = transitions.cbegin(); it != transitions.cend(); it++)
 		transition_style->add(_(*it), *it, Settings::getInstance()->getString("TransitionStyle") == *it);
+
+	if (!transition_style->hasSelection())
+		transition_style->selectFirstItem();
 
 	s->addWithLabel(_("TRANSITION STYLE"), transition_style);
 	s->addSaveFunc([transition_style] {

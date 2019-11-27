@@ -136,7 +136,7 @@ void Settings::setDefaults()
 	mBoolMap["HideWindow"] = true;
 #endif
 	mStringMap["GameTransitionStyle"] = "fade";
-	mStringMap["TransitionStyle"] = "slide";
+	mStringMap["TransitionStyle"] = "auto";
 	mStringMap["Language"] = "en";	
 	mStringMap["ThemeSet"] = "";
 	mStringMap["ScreenSaverBehavior"] = "dim";	
