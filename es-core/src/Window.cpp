@@ -283,7 +283,24 @@ void Window::update(int deltaTime)
 				// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime for more information about date/time format
 				
 				char       clockBuf[32];
-				strftime(clockBuf, sizeof(clockBuf), "%H:%M", &clockTstruct);
+
+#if WIN32
+				std::string oldLocale = setlocale(LC_TIME, nullptr);
+				setlocale(LC_TIME, "");
+
+				char       ampm[32];
+				strftime(ampm, sizeof(ampm), "%p", &clockTstruct);
+
+				if (!std::string(&ampm[0]).empty())
+					strftime(clockBuf, sizeof(clockBuf), "%I:%M %p", &clockTstruct);
+				else
+#endif
+					strftime(clockBuf, sizeof(clockBuf), "%H:%M", &clockTstruct);
+				
+#if WIN32
+				setlocale(LC_TIME, oldLocale.c_str());
+#endif
+
 				mClock->setText(clockBuf);
 			}
 
