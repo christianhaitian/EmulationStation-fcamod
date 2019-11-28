@@ -39,7 +39,6 @@ std::vector<const char*> settings_dont_save {
 	{ "ScreenRotate" },
 	{ "MonitorID" },
 	{ "ExePath" },
-	{ "FixedCarousel" },
 	{ "HomePath" },
 	{ "MusicDirectory"},
 	{ "UserMusicDirectory" }
@@ -66,12 +65,6 @@ void Settings::setDefaults()
 
 	mBoolMap.clear();
 	mIntMap.clear();
-
-#if _DEBUG
-	mBoolMap["FixedCarousel"] = false;
-#else
-	mBoolMap["FixedCarousel"] = false;
-#endif
 
 	mBoolMap["BackgroundJoystickInput"] = false;
 	mBoolMap["ParseGamelistOnly"] = false;
