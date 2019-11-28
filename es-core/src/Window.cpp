@@ -13,6 +13,7 @@
 #include <SDL_events.h>
 #include "guis/GuiInfoPopup.h"
 #include "components/AsyncNotificationComponent.h"
+#include "guis/GuiMsgBox.h"
 
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
   mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false), mInfoPopup(NULL), mClockElapsed(0) // batocera
@@ -315,7 +316,7 @@ void Window::render()
 		bottom->render(transform);
 		if(bottom != top)
 		{
-			if (top->getValue() == "GuiMsgBox" && mGuiStack.size() > 2)
+			if (top->isKindOf<GuiMsgBox>() && mGuiStack.size() > 2)
 			{
 				auto& middle = mGuiStack.at(mGuiStack.size() - 2);
 				if (middle != bottom)
