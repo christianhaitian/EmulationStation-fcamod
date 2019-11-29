@@ -62,6 +62,7 @@ private:
 	void	playMusic(std::string path);
 		
 	std::string mCurrentSong;
+	std::string mCurrentMusicPath;
 	std::string mSystemName;
 	std::string mCurrentThemeMusicDirectory;	
 	bool		mRunningFromPlaylist;	
