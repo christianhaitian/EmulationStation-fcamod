@@ -34,7 +34,8 @@ public:
 	static void startUpdate(Window* c);
 
 	static std::vector<ThemeDownloadInfo> getThemesList();
-	static std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const std::function<void(const std::string)>& func = nullptr);
+	static std::pair<std::string, int> installTheme(std::string themeName, const std::function<void(const std::string)>& func = nullptr);
 };
 
 #endif
+
