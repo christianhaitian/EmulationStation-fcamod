@@ -83,7 +83,7 @@ namespace Renderer
 #if WIN32
 		if (!Settings::getInstance()->getBool("Windowed"))
 		{
-			::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+			::SetProcessDPIAware();			
 			dispMode.w = ::GetSystemMetrics(SM_CXSCREEN);
 			dispMode.h = ::GetSystemMetrics(SM_CYSCREEN);
 		}
