@@ -428,7 +428,7 @@ namespace Utils
 #if defined(_WIN32)
 			std::wstring result(path_max, 0);
 			if (GetModuleFileNameW(nullptr, &result[0], path_max) != 0) {
-				exePath = getCanonicalPath(convertFromWideString(result));
+				exePath = getCanonicalPath(Utils::String::convertFromWideString(result));
 			}
 #else
 			std::string result(path_max, 0);
