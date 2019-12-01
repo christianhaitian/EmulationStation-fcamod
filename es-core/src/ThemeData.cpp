@@ -53,7 +53,7 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 		{ "showVideoAtDelay", FLOAT },
 		{ "scrollDirection", STRING },
 		{ "scrollSound", PATH },
-		{ "centerSelection", BOOLEAN },
+		{ "centerSelection", STRING },
 		{ "scrollLoop", BOOLEAN } } },
 	{ "gridtile", {
 		{ "size", NORMALIZED_PAIR },
