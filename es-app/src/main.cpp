@@ -168,6 +168,7 @@ bool parseArgs(int argc, char* argv[])
 			i += 2; // skip the argument value
 			Settings::getInstance()->setInt("WindowWidth", width);
 			Settings::getInstance()->setInt("WindowHeight", height);
+			Settings::getInstance()->setBool("FullscreenBorderless", false);
 		}
 		else if (strcmp(argv[i], "--screensize") == 0)
 		{

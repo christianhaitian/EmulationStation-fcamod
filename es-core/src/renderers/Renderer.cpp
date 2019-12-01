@@ -77,11 +77,14 @@ namespace Renderer
 
 		initialCursorState = (SDL_ShowCursor(0) != 0);
 
+		if (!Settings::getInstance()->getBool("Windowed"))
+			SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+
 		SDL_DisplayMode dispMode;
 		SDL_GetDesktopDisplayMode(0, &dispMode);
 
 #if WIN32
-		if (!Settings::getInstance()->getBool("Windowed"))
+		if (!Settings::getInstance()->getBool("Windowed") && !Settings::getInstance()->getInt("WindowWidth"))
 		{
 			::SetProcessDPIAware();			
 			dispMode.w = ::GetSystemMetrics(SM_CXSCREEN);
@@ -136,7 +139,7 @@ namespace Renderer
 			windowFlags |= SDL_WINDOW_ALWAYS_ON_TOP;
 
 		windowFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
-
+	
 		if((sdlWindow = SDL_CreateWindow("EmulationStation", 
 			sdlWindowPosition.x(),
 			sdlWindowPosition.y(), 
