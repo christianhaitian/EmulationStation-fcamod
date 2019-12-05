@@ -361,31 +361,6 @@ void ImageComponent::updateVertices()
 	}
 }
 
-#include <SDL_opengl.h>
-
-#define N_ROUNDING_PIECES 10
-
-void DrawGLRoundedCorner(int x, int y, double sa, double arc, float r) 
-{	
-	// centre of the arc, for clockwise sense
-	float cent_x = x + r * cos(sa + ES_PI / 2);
-	float cent_y = y + r * sin(sa + ES_PI / 2);
-
-	// build up piecemeal including end of the arc
-	int n = ceil(N_ROUNDING_PIECES * arc / ES_PI * 2);
-	for (int i = 0; i <= n; i++) 
-	{
-		double ang = sa + arc * (double)i / (double)n;
-
-		// compute the next point
-		float next_x = cent_x + r * sin(ang);
-		float next_y = cent_y - r * cos(ang);
-	
-		glColor3f(1.0f, 1.0f, 1.0f);
-		glVertex2f(next_x, next_y);
-	}
-}
-
 void ImageComponent::render(const Transform4x4f& parentTrans)
 {
 	if (!mVisible)
