@@ -921,7 +921,7 @@ namespace Utils
 		bool isDirectory(const std::string& _path)
 		{
 			auto it = FileCache::get(_path);
-			if (it != nullptr)
+			if (it != nullptr && !it->isSymLink)
 				return it->exists && it->directory;
 
 #ifdef WIN32
