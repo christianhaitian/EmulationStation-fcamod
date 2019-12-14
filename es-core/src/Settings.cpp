@@ -135,6 +135,7 @@ void Settings::setDefaults()
 	mStringMap["ScreenSaverBehavior"] = "dim";	
 	mStringMap["GamelistViewStyle"] = "automatic";
 	mStringMap["DefaultGridSize"] = "";
+	mStringMap["HiddenSystems"] = "";
 
 	mStringMap["ThemeColorSet"] = "";
 	mStringMap["ThemeIconSet"] = "";
