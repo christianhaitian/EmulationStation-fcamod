@@ -204,6 +204,8 @@ std::string DateTimeEditComponent::getDisplayString(DisplayMode mode) const
 		fmt = "%m/%d/%Y";
 		break;
 	case DISP_DATE_TIME:
+		if(mTime.getTime() == 0)
+			return "unknown";
 		fmt = "%m/%d/%Y %H:%M:%S";
 		break;
 	case DISP_RELATIVE_TO_NOW:
