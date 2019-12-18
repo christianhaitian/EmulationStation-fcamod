@@ -9,6 +9,10 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: 
+msgid "extracting update..."
+msgstr "Extraindo Atualizações..."
+
+#: 
 msgid "Loading..."
 msgstr "Carregando..."
 
@@ -23,6 +27,10 @@ msgstr "TAMANHO DA GRADE"
 #: 
 msgid "DEFAULT GRID SIZE"
 msgstr "TAMANHO DE GRADE PADRÃO"
+
+#: 
+msgid "RESET GAMELIST CUSTOMISATIONS"
+msgstr "RESETAR CUSTOMIZAÇÕES DO GAMELIST"
 
 #: 
 msgid "UI MODE"
@@ -86,7 +94,7 @@ msgstr "desaparecer"
 
 #: 
 msgid "instant"
-msgstr "instantáneo"
+msgstr "instantâneo"
 
 #: 
 msgid "slide"
@@ -153,12 +161,20 @@ msgid "SORT CUSTOM COLLECTIONS AND SYSTEMS"
 msgstr "ORGANIZAÇÃO DE COLEÇÕES E SISTEMAS"
 
 #: 
+msgid "SHOW SYSTEM NAME IN COLLECTIONS"
+msgstr "EXIBIR NOME DO SISTEMA NAS COLEÇÕES"
+
+#: 
 msgid "FINISH EDITING COLLECTION"
 msgstr "FINALIZAR COLEÇÃO"
 
 #: 
 msgid "PARSE GAMESLISTS ONLY"
 msgstr "APENAS LISTA DE JOGOS XML"
+
+#: 
+msgid "EMULATOR SETTINGS"
+msgstr "CONFIGURAÇÕES DO EMULADOR"
 
 #: 
 msgid "POWER SAVER MODES"
@@ -367,7 +383,6 @@ msgstr "IDIOMA"
 #: 
 msgid "OVERCLOCK"
 msgstr "OVERCLOCK"
-
 #: 
 msgid "EXTREM (1100Mhz)"
 msgstr "EXTREMO (1100Mhz)"
@@ -408,6 +423,14 @@ msgstr "NENHUM"
 #: 
 msgid "UPDATES"
 msgstr "ATUALIZAÇÕES"
+
+#: 
+msgid "THEME INSTALLER"
+msgstr "INSTALADOR DE TEMAS"
+
+#: 
+msgid "SELECT THEME TO INSTALL"
+msgstr "SELECIONE O TEMA PARA INSTALAR"
 
 #: 
 msgid "AUTO UPDATES"
@@ -546,8 +569,136 @@ msgid "SCREENSAVER BEHAVIOR"
 msgstr "COMPORTAMENTO DE TELA"
 
 #: 
+msgid "dim"
+msgstr "escura"
+
+#: 
+msgid "black"
+msgstr "preta"
+
+#: 
+msgid "random video"
+msgstr "vídeo aleatório"
+
+#: 
+msgid "slideshow"
+msgstr "apresentação de slides"
+
+#: 
+msgid "VIDEO SCREENSAVER SETTINGS"
+msgstr "CONFIGURAÇÕES DO PROTETOR DE TELA"
+
+#: 
+msgid "VIDEO SCREENSAVER"
+msgstr "PROTETOR DE TELA EM VÍDEO"
+
+#: 
+msgid "SWAP VIDEO AFTER (SECS)"
+msgstr "TROQUE O VÍDEO DEPOIS DE (Segundos)"
+
+#: 
+msgid "SHOW GAME INFO ON SCREENSAVER"
+msgstr "MOSTRAR INFORMAÇÕES DO JOGO"
+
+#: 
+msgid "SHOW GAME INFO"
+msgstr "MOSTRAR INFORMAÇÕES DO JOGO"
+
+#: 
+msgid "USE MARQUEE AS GAME INFO"
+msgstr "UTILIZAR MARQUEE COMO INFORMAÇÕES DO JOGO"
+
+#: 
+msgid "STRETCH VIDEO ON SCREENSAVER"
+msgstr "ESTICAR VÍDEO DO PROTETOR DE TELA"
+
+#: 
+msgid "SLIDESHOW SCREENSAVER SETTINGS"
+msgstr "CONFIGURAÇÕES DA APRESENTAÇÃO DE SLIDES DE TELA"
+
+#: 
+msgid "SLIDESHOW SCREENSAVER"
+msgstr "APRESENTAÇÃO DE SLIDES DE TELA"
+
+#: 
+msgid "SWAP IMAGE AFTER (SECS)"
+msgstr "TROQUE A IMAGEM APÓS DE (SEGUNDOS)"
+
+#: 
+msgid "STRETCH IMAGES"
+msgstr "ESTICAR IMAGENS"
+
+#: 
+msgid "USE CUSTOM IMAGES"
+msgstr "UTILIZAR IMAGENS PERSONALIZADAS"
+
+#: 
+msgid "CUSTOM IMAGE DIR"
+msgstr "DIRETÓRIO DE IMAGEM PERSONALIZADO"
+
+#: 
+msgid "CUSTOM IMAGE DIR RECURSIVE"
+msgstr "DIRETÓRIO RECURSIVO DE IMAGEM PERSONALIZADO"
+
+#: 
+msgid "CUSTOM IMAGE FILTER"
+msgstr "FILTRO DE IMAGEM PERSONALIZADO"
+
+#: 
+msgid "SCREENSAVER CONTROLS"
+msgstr "CONTROLAR PROTETOR DE TELA"
+
+#: 
 msgid "SHOW FRAMERATE"
 msgstr "MOSTRAR TAXA DE QUADROS"
+
+#: 
+msgid "THREADED LOADING"
+msgstr "LOADING EM LINHA"
+
+#: 
+msgid "COMPLETE QUIT MENU"
+msgstr "MENU DE SAÍDA COMPLETO"
+
+#: 
+msgid "LOG LEVEL"
+msgstr "NÍVEL DE LOG"
+
+#: 
+msgid "enabled"
+msgstr "ativado"
+
+#: 
+msgid "enable"
+msgstr "ativado"
+
+#: 
+msgid "disabled"
+msgstr "desativado"
+
+#: 
+msgid "disable"
+msgstr "desativado"
+
+#: 
+msgid "default"
+msgstr "padrão"
+
+#: 
+msgid "warning"
+msgstr "atenção"
+
+#: 
+msgid "error"
+msgstr "erro"
+
+#: 
+msgid "debug"
+msgstr "depurar"
+
+#: 
+msgid "enhanced"
+msgstr "melhorado"
 
 #: 
 msgid "ON-SCREEN HELP"
@@ -576,6 +727,19 @@ msgstr "VOLUME DO SISTEMA"
 #: 
 msgid "FRONTEND MUSIC"
 msgstr "MÚSICA DE FUNDO"
+
+#: 
+msgid "DISPLAY SONG TITLES"
+msgstr "EXIBIR TÍTULOS DE MÚSICAS"
+
+#: 
+msgid "ONLY PLAY SYSTEM-SPECIFIC MUSIC FOLDER"
+msgstr "ATIVAR APENAS PASTA DE MÚSICA ESPECÍFICA DO SISTEMA"
+
+#: 
+msgid "PLAY THEME MUSICS"
+msgstr "ATIVAR MÚSICAS TEMÁTICAS"
+
 
 #: 
 msgid "OUTPUT DEVICE"
@@ -627,7 +791,7 @@ msgstr "SSID WIFI"
 
 #: 
 msgid "WIFI KEY"
-msgstr "CHAVE DO WIFI"
+msgstr "SENHA DO WIFI"
 
 #: 
 msgid "WIFI ENABLED"
@@ -642,12 +806,32 @@ msgid "SCRAPER"
 msgstr "SCRAPER DE JOGOS"
 
 #: 
+msgid "DOWNLOADS AND UPDATES"
+msgstr "DOWNLOADS E ATUALIZAÇÕES"
+
+#: 
 msgid "SCRAPE FROM"
-msgstr "SCRAPE DESDE:"
+msgstr "SERVIDOR SCRAPE"
+
+#: 
+msgid "IMAGE SOURCE"
+msgstr "TIPO DE IMAGEM"
+
+#: 
+msgid "BOX SOURCE"
+msgstr "TIPO DE BOX"
+
+#: 
+msgid "LOGO SOURCE"
+msgstr "TIPO DE LOGO"
 
 #: 
 msgid "SCRAPE RATINGS"
 msgstr "CLASSIFICAÇÕES DE SCRAPER"
+
+#: 
+msgid "SCRAPE VIDEOS"
+msgstr "VÍDEOS SCRAPE"
 
 #: 
 msgid "SCRAPE NOW"
@@ -658,20 +842,28 @@ msgid "QUIT"
 msgstr "SAIR"
 
 #: 
-msgid "REALLY RESTART?"
-msgstr "¿QUER REALMENTE REINICIAR?"
+msgid "REALLY QUIT?"
+msgstr "QUER REALMENTE SAIR?"
 
 #: 
-msgid "RESTART SYSTEM"
-msgstr "REINICIAR SISTEMA"
+msgid "REALLY RESTART?"
+msgstr "QUER REALMENTE REINICIAR?"
 
 #: 
 msgid "REALLY SHUTDOWN?"
-msgstr "¿QUER REALMENTE DESLIGAR?"
+msgstr "QUER REALMENTE DESLIGAR?"
+
+#: 
+msgid "QUIT EMULATIONSTATION"
+msgstr "SAIR DO RETRORAT"
+
+#: 
+msgid "RESTART SYSTEM"
+msgstr "REINICIAR WINDOWS"
 
 #: 
 msgid "SHUTDOWN SYSTEM"
-msgstr "DESLIGANDO SISTEMA"
+msgstr "DESLIGAR WINDOWS"
 
 #: 
 msgid "Emulator"
@@ -758,7 +950,7 @@ msgstr "SCRAPER PARA ESTES JOGOS"
 
 #: 
 msgid "All Games"
-msgstr "TODOS JOGOS"
+msgstr "TODOS OS JOGOS"
 
 #. MISSING SCRAPPER TRANSLATIONS
 #: 
@@ -768,6 +960,10 @@ msgstr "SOMENTE FALTANDO IMAGEM"
 #: 
 msgid "FILTER"
 msgstr "FILTRO"
+
+#: 
+msgid "ONLY MISSING MEDIAS"
+msgstr "SOMENTE MÍDIAS PERDIDAS"
 
 #: 
 msgid "SCRAPE THESE SYSTEMS"
@@ -813,7 +1009,7 @@ msgstr "ATUALIZAÇÃO FALHOU, O SISTEMA REINICIARÁ AGORA"
 
 #: 
 msgid "NO UPDATE AVAILABLE"
-msgstr "NENHUMA ATUALIZAÇÃO DISPONIVEL"
+msgstr "NENHUMA ATUALIZAÇÃO DISPONÍVEL"
 
 #: 
 msgid "enter emulator"
@@ -956,11 +1152,15 @@ msgid "enter last played date"
 msgstr "insira a última data reproduzida"
 
 #: 
-msgid "GAMES AVAILABLE"
-msgstr "JOGOS DISPONIVEIS"
+msgid "%i GAME AVAILABLE"
+msgstr "%i ITEM DISPONÍVEL"
 
 #: 
-msgid "%i FAVORITE"
+msgid "%i GAMES AVAILABLE"
+msgstr "%i ITENS DISPONÍVEIS"
+
+#: 
+msgid "%i FAVORITES"
 msgid_plural "%i FAVORITES"
 msgstr[0] "%i FAVORITO"
 msgstr[1] "%i FAVORITOS"
@@ -1020,6 +1220,14 @@ msgstr "TRABALHANDO..."
 #: 
 msgid "CHANGE"
 msgstr "MUDAR"
+
+#: 
+msgid "start & end"
+msgstr "início e fim"
+
+#: 
+msgid "always"
+msgstr "sempre"
 
 #: 
 msgid "never"
@@ -1526,11 +1734,11 @@ msgstr "CONFIGURAÇÕES DE TEMA"
 
 #: 
 msgid "THEME COLORSET"
-msgstr "COLORSET TEMA"
+msgstr "COR DO TEMA"
 
 #: 
 msgid "THEME ICONSET"
-msgstr "ICONSET TEMA"
+msgstr "ÍCONES DO TEMA"
 
 #: 
 msgid "THEME MENU"
@@ -1797,8 +2005,8 @@ msgid "Only missing hashs"
 msgstr "Apenas faltando hashs"
 
 #: 
-msgid "Username"
-msgstr "Nome de usuario"
+msgid "USERNAME"
+msgstr "NOME DE USUÁRIO"
 
 #: 
 msgid "Country"
@@ -1897,8 +2105,11 @@ msgid "No core match"
 msgstr "Não á match de núcleo"
 
 #: 
-msgid "Add a clock in the main menu."
-msgstr "Adicione um relógio no menu principal."
+Add a clock in the main menu.
+Adicione um relógio no menu principal
+
+msgid "SHOW CLOCK"
+msgstr "ATIVAR RELÓGIO"
 
 #:
 msgid "UPGRADING"
