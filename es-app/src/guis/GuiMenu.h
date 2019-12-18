@@ -19,6 +19,8 @@ public:
 	std::vector<HelpPrompt> getHelpPrompts() override;
 	HelpStyle getHelpStyle() override;
 
+	static void openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shared_ptr<OptionListComponent<std::string>> theme_set, const std::string systemTheme = "");
+
 private:
 	void addEntry(std::string name, bool add_arrow, const std::function<void()>& func, const std::string iconName = "");	
 
@@ -32,7 +34,6 @@ private:
 	void openSoundSettings();
 	void openUISettings();
 	void openUpdateSettings();
-	void openThemeConfiguration(GuiSettings* s, std::shared_ptr<OptionListComponent<std::string>> theme_set);
 	void openEmulatorSettings();
 	void openSystemEmulatorSettings(SystemData* system);
 

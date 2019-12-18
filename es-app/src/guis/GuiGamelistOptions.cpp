@@ -16,6 +16,7 @@
 #include "guis/GuiTextEditPopupKeyboard.h"
 #include "guis/GuiMsgBox.h"
 #include "scrapers/ThreadedScraper.h"
+#include "guis/GuiMenu.h"
 
 std::vector<std::string> GuiGamelistOptions::gridSizes {
 	"automatic",
@@ -142,61 +143,74 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 
 	mMenu.addWithLabel(_("SORT GAMES BY"), mListSort);
 
-	// GameList view style
-	mViewMode = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
-	std::vector<std::pair<std::string, std::string>> styles;
-	styles.push_back(std::pair<std::string, std::string>("automatic", _("automatic")));
 
-	auto mViews = system->getTheme()->getViewsOfTheme();
-	for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
-	{
-		if (it->first == "basic" || it->first == "detailed" || it->first == "grid")
-			styles.push_back(std::pair<std::string, std::string>(it->first, _(it->first.c_str())));
-		else
-			styles.push_back(*it);
-	}
 
-	std::string viewMode = system->getSystemViewMode();
-
-	bool found = false;
-	for (auto it = styles.cbegin(); it != styles.cend(); it++)
-	{		
-		bool sel = (viewMode.empty() && it->first == "automatic") || viewMode == it->first;
-		if (sel)
-			found = true;
-
-		mViewMode->add(it->second, it->first, sel);
-	}
-
-	if (!found)
-		mViewMode->selectFirstItem();
-
-	mMenu.addWithLabel(_("GAMELIST VIEW STYLE"), mViewMode);	
+	auto glv = ViewController::get()->getGameListView(system);
 	
+	std::string viewName = glv->getName();	
+
 	
 
-	// Grid size override
-	if (showGridFeatures)
+	//else
 	{
-		auto gridOverride = system->getGridSizeOverride();
-		auto ovv = std::to_string((int)gridOverride.x()) + "x" + std::to_string((int)gridOverride.y());
+		// GameList view style
+		mViewMode = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
+		std::vector<std::pair<std::string, std::string>> styles;
+		styles.push_back(std::pair<std::string, std::string>("automatic", _("automatic")));
 
-		mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _("GRID SIZE"), false);
-
-		found = false;
-		for (auto it = gridSizes.cbegin(); it != gridSizes.cend(); it++)
+		auto mViews = system->getTheme()->getViewsOfTheme();
+		for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
 		{
-			bool sel = (gridOverride == Vector2f(0, 0) && *it == "automatic") || ovv == *it;
+			if (it->first == "basic" || it->first == "detailed" || it->first == "grid")
+				styles.push_back(std::pair<std::string, std::string>(it->first, _(it->first.c_str())));
+			else
+				styles.push_back(*it);
+		}
+
+		std::string viewMode = system->getSystemViewMode();
+
+		bool found = false;
+		for (auto it = styles.cbegin(); it != styles.cend(); it++)
+		{
+			bool sel = (viewMode.empty() && it->first == "automatic") || viewMode == it->first;
 			if (sel)
 				found = true;
 
-			mGridSize->add(_(*it), *it, sel);
+			mViewMode->add(it->second, it->first, sel);
 		}
 
 		if (!found)
-			mGridSize->selectFirstItem();
+			mViewMode->selectFirstItem();
 
-		mMenu.addWithLabel(_("GRID SIZE"), mGridSize);
+		mMenu.addWithLabel(_("GAMELIST VIEW STYLE"), mViewMode);
+
+		auto subsetNames = system->getTheme()->getSubSetNames(viewName);
+		if (subsetNames.size() > 0)
+		{
+			mMenu.addEntry(_("VIEW CUSTOMISATION"), true, [this, system]() { GuiMenu::openThemeConfiguration(mWindow, this, nullptr, system->getThemeFolder()); });
+		}
+		else if (showGridFeatures)		// Grid size override
+		{
+			auto gridOverride = system->getGridSizeOverride();
+			auto ovv = std::to_string((int)gridOverride.x()) + "x" + std::to_string((int)gridOverride.y());
+
+			mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _("GRID SIZE"), false);
+
+			found = false;
+			for (auto it = gridSizes.cbegin(); it != gridSizes.cend(); it++)
+			{
+				bool sel = (gridOverride == Vector2f(0, 0) && *it == "automatic") || ovv == *it;
+				if (sel)
+					found = true;
+
+				mGridSize->add(_(*it), *it, sel);
+			}
+
+			if (!found)
+				mGridSize->selectFirstItem();
+
+			mMenu.addWithLabel(_("GRID SIZE"), mGridSize);
+		}
 	}
 
 	// show filtered menu
@@ -307,11 +321,13 @@ GuiGamelistOptions::~GuiGamelistOptions()
 		if (divider != std::string::npos)
 		{
 			std::string first = str.substr(0, divider);
-			std::string second = str.substr(divider+1, std::string::npos);
+			std::string second = str.substr(divider + 1, std::string::npos);
 
 			gridSizeOverride = Vector2f((float)atof(first.c_str()), (float)atof(second.c_str()));
 		}
 	}
+	else
+		gridSizeOverride = mSystem->getGridSizeOverride();
 	
 	bool viewModeChanged = mSystem->setSystemViewMode(mViewMode->getSelected(), gridSizeOverride);
 
