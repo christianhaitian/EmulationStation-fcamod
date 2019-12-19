@@ -1524,3 +1524,8 @@ std::string	ThemeData::getDefaultSubSetValue(const std::string subsetname)
 
 	return "";
 }
+
+bool ThemeData::ThemeView::isOfType(const std::string type)
+{
+	return baseType == type || std::find(baseTypes.cbegin(), baseTypes.cend(), type) != baseTypes.cend();
+};
