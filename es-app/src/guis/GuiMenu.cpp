@@ -392,6 +392,75 @@ void GuiMenu::openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shar
 		showGridFeatures = (viewName == "grid" || baseType == "grid");
 	}
 
+
+	// gamelist_style
+	std::shared_ptr<OptionListComponent<std::string>> gamelist_style = nullptr;
+
+	if (systemTheme.empty())
+	{
+		gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
+
+		std::vector<std::pair<std::string, std::string>> styles;
+		styles.push_back(std::pair<std::string, std::string>("automatic", _("automatic")));
+
+		if (system != NULL)
+		{
+			auto mViews = theme->getViewsOfTheme();
+			for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
+			{
+				if (it->first == "basic" || it->first == "detailed" || it->first == "grid")
+					styles.push_back(std::pair<std::string, std::string>(it->first, _(it->first.c_str())));
+				else
+					styles.push_back(*it);
+			}
+		}
+		else
+		{
+			styles.push_back(std::pair<std::string, std::string>("basic", _("basic")));
+			styles.push_back(std::pair<std::string, std::string>("detailed", _("detailed")));
+		}
+
+		auto viewPreference = systemTheme.empty() ? Settings::getInstance()->getString("GamelistViewStyle") : system->getSystemViewMode();
+		if (!theme->hasView(viewPreference))
+			viewPreference = "automatic";
+
+		for (auto it = styles.cbegin(); it != styles.cend(); it++)
+			gamelist_style->add(it->second, it->first, viewPreference == it->first);
+
+		if (!gamelist_style->hasSelection())
+			gamelist_style->selectFirstItem();
+
+		themeconfig->addWithLabel(_("GAMELIST VIEW STYLE"), gamelist_style);
+	}
+
+	// Default grid size
+	std::shared_ptr<OptionListComponent<std::string>> mGridSize = nullptr;
+	if (showGridFeatures && system != NULL && theme->hasView("grid"))
+	{
+		Vector2f gridOverride =
+			systemTheme.empty() ? Vector2f::parseString(Settings::getInstance()->getString("DefaultGridSize")) :
+			system->getGridSizeOverride();
+
+		auto ovv = std::to_string((int)gridOverride.x()) + "x" + std::to_string((int)gridOverride.y());
+
+		mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _("DEFAULT GRID SIZE"), false);
+
+		bool found = false;
+		for (auto it = GuiGamelistOptions::gridSizes.cbegin(); it != GuiGamelistOptions::gridSizes.cend(); it++)
+		{
+			bool sel = (gridOverride == Vector2f(0, 0) && *it == "automatic") || ovv == *it;
+			if (sel)
+				found = true;
+
+			mGridSize->add(_(it->c_str()), *it, sel);
+		}
+
+		if (!found)
+			mGridSize->selectFirstItem();
+
+		themeconfig->addWithLabel(_("DEFAULT GRID SIZE"), mGridSize);
+	}
+
 	std::map<std::string, ThemeConfigOption> options;
 
 	for (std::string subset : theme->getSubSetNames(viewName))
@@ -452,16 +521,24 @@ void GuiMenu::openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shar
 
 					if (systemTheme.empty())
 					{
-						auto itSubsetName = themeColorSets.cbegin()->appliesTo.cbegin();
-						if (itSubsetName != themeColorSets.cbegin()->appliesTo.cend())
+						for (auto subsetName : themeColorSets.cbegin()->appliesTo)
 						{
-							prefix = theme->getViewDisplayName(*itSubsetName);
-							if (!prefix.empty())
-								prefix = prefix + " / ";
+							std::string pfx = theme->getViewDisplayName(subsetName);
+							if (!pfx.empty())
+							{
+								if (prefix.empty())
+									prefix = pfx;
+								else
+									prefix = prefix + ", " + pfx;								
+							}
 						}
+
+						if (!prefix.empty())
+							prefix = " ("+ prefix+")";
+
 					}					
 
-					themeconfig->addWithLabel(prefix + displayName, item);
+					themeconfig->addWithLabel(displayName + prefix, item);
 				}
 				else
 					themeconfig->addWithLabel(_(("THEME " + Utils::String::toUpper(subset)).c_str()), item);
@@ -481,73 +558,6 @@ void GuiMenu::openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shar
 		}
 	}
 
-	// gamelist_style
-	std::shared_ptr<OptionListComponent<std::string>> gamelist_style = nullptr;
-	
-	if (systemTheme.empty())
-	{
-		gamelist_style = std::make_shared< OptionListComponent<std::string> >(mWindow, _("GAMELIST VIEW STYLE"), false);
-
-		std::vector<std::pair<std::string, std::string>> styles;
-		styles.push_back(std::pair<std::string, std::string>("automatic", _("automatic")));
-
-		if (system != NULL)
-		{
-			auto mViews = theme->getViewsOfTheme();
-			for (auto it = mViews.cbegin(); it != mViews.cend(); ++it)
-			{
-				if (it->first == "basic" || it->first == "detailed" || it->first == "grid")
-					styles.push_back(std::pair<std::string, std::string>(it->first, _(it->first.c_str())));
-				else
-					styles.push_back(*it);
-			}
-		}
-		else
-		{
-			styles.push_back(std::pair<std::string, std::string>("basic", _("basic")));
-			styles.push_back(std::pair<std::string, std::string>("detailed", _("detailed")));
-		}
-
-		auto viewPreference = systemTheme.empty() ? Settings::getInstance()->getString("GamelistViewStyle") : system->getSystemViewMode();
-		if (!theme->hasView(viewPreference))
-			viewPreference = "automatic";
-
-		for (auto it = styles.cbegin(); it != styles.cend(); it++)
-			gamelist_style->add(it->second, it->first, viewPreference == it->first);
-
-		if (!gamelist_style->hasSelection())
-			gamelist_style->selectFirstItem();
-
-		themeconfig->addWithLabel(_("GAMELIST VIEW STYLE"), gamelist_style);
-	}
-
-	// Default grid size
-	std::shared_ptr<OptionListComponent<std::string>> mGridSize = nullptr;
-	if (showGridFeatures && system != NULL && theme->hasView("grid"))
-	{
-		Vector2f gridOverride =
-			systemTheme.empty() ? Vector2f::parseString(Settings::getInstance()->getString("DefaultGridSize")) : 
-			system->getGridSizeOverride();
-
-		auto ovv = std::to_string((int)gridOverride.x()) + "x" + std::to_string((int)gridOverride.y());
-
-		mGridSize = std::make_shared<OptionListComponent<std::string>>(mWindow, _("DEFAULT GRID SIZE"), false);
-
-		bool found = false;
-		for (auto it = GuiGamelistOptions::gridSizes.cbegin(); it != GuiGamelistOptions::gridSizes.cend(); it++)
-		{
-			bool sel = (gridOverride == Vector2f(0, 0) && *it == "automatic") || ovv == *it;
-			if (sel)
-				found = true;
-
-			mGridSize->add(_(it->c_str()), *it, sel);
-		}
-
-		if (!found)
-			mGridSize->selectFirstItem();
-
-		themeconfig->addWithLabel(_("DEFAULT GRID SIZE"), mGridSize);
-	}
 
 	if (systemTheme.empty())
 	{
@@ -742,7 +752,8 @@ void GuiMenu::openUISettings()
 				gamelist_style->add(it->second, it->first, viewPreference == it->first);
 
 			s->addWithLabel(_("GAMELIST VIEW STYLE"), gamelist_style);
-			s->addSaveFunc([s, gamelist_style, window] {
+			s->addSaveFunc([s, gamelist_style, window] 
+			{
 				if (Settings::getInstance()->setString("GamelistViewStyle", gamelist_style->getSelected()))
 				{
 					s->setVariable("reloadAll", true);
