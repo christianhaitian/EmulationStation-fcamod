@@ -9,9 +9,28 @@
 #include "math/Vector2i.h"
 #include "utils/FileSystemUtil.h"
 #include "utils/StringUtil.h"
+#include "resources/ResourceManager.h"
+
+#include <map>
+#include <mutex>
+
+static std::map<std::string, Vector2i> sizeCache;
 
 bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 {
+	auto it = sizeCache.find(fn);
+	if (it != sizeCache.cend())
+	{
+		if (*x < 0)
+			return false;
+
+		*x = it->second.x();
+		*y = it->second.y();
+		return true;
+	}
+
+	std::unique_lock<std::mutex> lock(ResourceManager::FileSystemLock);
+
 	LOG(LogDebug) << "ImageIO::loadImageSize " << fn;
 
 	auto ext = Utils::String::toLower(Utils::FileSystem::getExtension(fn));
@@ -25,6 +44,7 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 	if (f == 0)
 	{
 		LOG(LogWarning) << "ImageIO::loadImageSize\tUnable to open file";
+		sizeCache[fn] = Vector2i(-1, -1);
 		return false;
 	}
 
@@ -35,7 +55,10 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 	// In all formats, the file is at least 24 bytes big, so we'll read that always
 	unsigned char buf[24];
 	if (fread(buf, 1, 24, f) != 24)
+	{
+		sizeCache[fn] = Vector2i(-1, -1);
 		return false;
+	}
 
 	// For JPEGs, we need to read the first 12 bytes of each chunk.
 	// We'll read those 12 bytes at buf+2...buf+14, i.e. overwriting the existing buf.
@@ -73,8 +96,12 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 		LOG(LogDebug) << "ImageIO::loadImageSize\tJPG size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
 
 		if (*x > 5000) // security ?
+		{
+			sizeCache[fn] = Vector2i(-1, -1);
 			return false;
+		}
 
+		sizeCache[fn] = Vector2i(*x, *y);
 		return true;
 	}
 
@@ -86,6 +113,7 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 
 		LOG(LogDebug) << "ImageIO::loadImageSize\tGIF size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
 
+		sizeCache[fn] = Vector2i(*x, *y);
 		return true;
 	}
 
@@ -97,9 +125,11 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 
 		LOG(LogDebug) << "ImageIO::loadImageSize\tPNG size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
 
+		sizeCache[fn] = Vector2i(*x, *y);
 		return true;
 	}
 
+	sizeCache[fn] = Vector2i(-1, -1);
 	LOG(LogWarning) << "ImageIO::loadImageSize\tUnable to extract size";
 	return false;
 }

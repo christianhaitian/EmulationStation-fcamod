@@ -285,14 +285,17 @@ void TextureLoader::threadProc()
 
 			if (textureData && !textureData->isLoaded())
 			{
+				std::this_thread::yield();
+
 				textureData->load();
 				mManager->onTextureLoaded(textureData);
 
 				lock.lock();
 				mProcessingTextureDataQ.remove(textureData);
-
-				std::this_thread::yield();
+				lock.unlock();
 			}
+
+			std::this_thread::yield();
 		}
 	}
 }

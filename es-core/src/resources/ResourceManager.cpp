@@ -7,6 +7,7 @@ auto array_deleter = [](unsigned char* p) { delete[] p; };
 auto nop_deleter = [](unsigned char* /*p*/) { };
 
 std::shared_ptr<ResourceManager> ResourceManager::sInstance = nullptr;
+std::mutex ResourceManager::FileSystemLock;
 
 ResourceManager::ResourceManager()
 {
@@ -64,8 +65,12 @@ const ResourceData ResourceManager::getFileData(const std::string& path) const
 	return data;
 }
 
+
+
 ResourceData ResourceManager::loadFile(const std::string& path, size_t size) const
 {
+	std::unique_lock<std::mutex> lock(FileSystemLock);
+
 	std::ifstream stream(path, std::ios::binary);
 
 	if (size == 0)
