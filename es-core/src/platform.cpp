@@ -152,6 +152,8 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 	}
 	
 	lpExecInfo.lpParameters = args.c_str(); //  file name as an argument
+	lpExecInfo.lpDirectory = Utils::FileSystem::getParent(exe).c_str();
+
 	ShellExecuteEx(&lpExecInfo);
 
 	if (lpExecInfo.hProcess != NULL)
