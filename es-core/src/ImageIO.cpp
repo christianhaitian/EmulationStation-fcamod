@@ -14,22 +14,142 @@
 #include <map>
 #include <mutex>
 
-static std::map<std::string, Vector2i> sizeCache;
+struct CachedFileInfo
+{
+	CachedFileInfo(int sz, int sx, int sy)
+	{
+		size = sz;
+		x = sx;
+		y = sy;		
+		sizeResolved = true;
+	};
+
+	CachedFileInfo()
+	{
+		size = 0;
+		x = 0;
+		y = 0;
+		sizeResolved = false;
+	};
+
+	int size;
+	int x;
+	int y;	
+	bool sizeResolved;
+};
+
+static std::map<std::string, CachedFileInfo> sizeCache;
+static bool sizeCacheDirty = false;
+
+static void addtoCache(const std::string fn, int sz, int x, int y)
+{
+	sizeCache[fn] = CachedFileInfo(sz, x, y);
+
+	if (sz > 0 && x > 0 && fn.find("/themes/") == std::string::npos)
+		sizeCacheDirty = true;
+}
+
+#include <sstream>
+#include <fstream>
+
+std::string getImageCacheFilename()
+{
+	return Utils::FileSystem::getHomePath() + "/.emulationstation/imagecache.db";	
+}
+
+void ImageIO::loadImageCache()
+{	
+	std::string fname = getImageCacheFilename();
+
+	std::ifstream f(fname.c_str());
+	if (f.fail())
+		return;
+
+	std::string relativeTo = Utils::FileSystem::getParent(Utils::FileSystem::getHomePath());
+
+	std::string line;
+	while (std::getline(f, line))
+	{
+		auto splits = Utils::String::split(line, '|');
+		if (splits.size() == 4)
+		{
+			std::string file = splits[0];
+			file = Utils::FileSystem::resolveRelativePath(splits[0], relativeTo, true);
+
+			CachedFileInfo fi;
+			fi.size = atoi(splits[1].c_str());
+			fi.x = atoi(splits[2].c_str());
+			fi.y = atoi(splits[3].c_str());
+
+			sizeCache[file] = fi;
+		}
+	}
+
+	f.close();
+}
+
+void ImageIO::saveImageCache()
+{
+	if (!sizeCacheDirty)
+		return;
+
+	std::string fname = getImageCacheFilename();
+	std::ofstream f(fname.c_str(), std::ios::binary);
+	if (f.fail()) 
+		return;
+
+	std::string relativeTo = Utils::FileSystem::getParent(Utils::FileSystem::getHomePath());
+	for (auto it : sizeCache)
+	{
+		if (it.second.size < 0)
+			continue;
+		
+		if (it.first.find("/themes/") != std::string::npos)
+			continue;
+
+		std::string path = Utils::FileSystem::createRelativePath(it.first, "_path_", true);
+		if (path[0] != '~')
+			path = Utils::FileSystem::createRelativePath(it.first, relativeTo, false);
+
+		f << path;
+		f << "|";
+		f << std::to_string(it.second.size);
+		f << "|";
+		f << std::to_string(it.second.x);
+		f << "|";
+		f << std::to_string(it.second.y);
+		f << "\n";
+	}
+
+	f.close();
+}
+
 
 bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 {
+
 	auto it = sizeCache.find(fn);
 	if (it != sizeCache.cend())
 	{
 		if (*x < 0)
 			return false;
 
-		*x = it->second.x();
-		*y = it->second.y();
-		return true;
-	}
+		bool resolved = true;
 
-	std::unique_lock<std::mutex> lock(ResourceManager::FileSystemLock);
+		if (!it->second.sizeResolved)
+		{
+			auto size = Utils::FileSystem::getFileSize(fn);
+			if (it->second.size != size)
+				resolved = false;
+		}
+
+		if (resolved)
+		{
+			*x = it->second.x;
+			*y = it->second.y;
+			return true;
+		}
+	}
 
 	LOG(LogDebug) << "ImageIO::loadImageSize " << fn;
 
@@ -40,11 +160,14 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 		return false;
 	}
 
+	std::unique_lock<std::mutex> lock(ResourceManager::FileSystemLock);
+	auto size = Utils::FileSystem::getFileSize(fn);
+
 	FILE *f = fopen(fn, "rb");
 	if (f == 0)
 	{
 		LOG(LogWarning) << "ImageIO::loadImageSize\tUnable to open file";
-		sizeCache[fn] = Vector2i(-1, -1);
+		addtoCache(fn, -1, -1, -1);
 		return false;
 	}
 
@@ -56,7 +179,7 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 	unsigned char buf[24];
 	if (fread(buf, 1, 24, f) != 24)
 	{
-		sizeCache[fn] = Vector2i(-1, -1);
+		addtoCache(fn, -1, -1, -1);
 		return false;
 	}
 
@@ -97,11 +220,11 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 
 		if (*x > 5000) // security ?
 		{
-			sizeCache[fn] = Vector2i(-1, -1);
+			addtoCache(fn, -1, -1, -1);
 			return false;
 		}
 
-		sizeCache[fn] = Vector2i(*x, *y);
+		addtoCache(fn, size, *x, *y);
 		return true;
 	}
 
@@ -113,7 +236,7 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 
 		LOG(LogDebug) << "ImageIO::loadImageSize\tGIF size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
 
-		sizeCache[fn] = Vector2i(*x, *y);
+		addtoCache(fn, size, *x, *y);
 		return true;
 	}
 
@@ -125,11 +248,11 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 
 		LOG(LogDebug) << "ImageIO::loadImageSize\tPNG size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
 
-		sizeCache[fn] = Vector2i(*x, *y);
+		addtoCache(fn, size, *x, *y);
 		return true;
 	}
 
-	sizeCache[fn] = Vector2i(-1, -1);
+	addtoCache(fn, -1, -1, -1);
 	LOG(LogWarning) << "ImageIO::loadImageSize\tUnable to extract size";
 	return false;
 }

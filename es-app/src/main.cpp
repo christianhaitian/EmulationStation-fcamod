@@ -33,6 +33,7 @@
 #include "AudioManager.h"
 #include "NetworkThread.h"
 #include "scrapers/ThreadedScraper.h"
+#include "ImageIO.h"
 
 bool scrape_cmdline = false;
 
@@ -355,6 +356,8 @@ bool loadSystemConfigFile(Window* window, const char** errorString)
 {
 	*errorString = NULL;
 	
+	ImageIO::loadImageCache();
+
 	if (!SystemData::loadConfig(window))
 	{
 		LOG(LogError) << "Error while parsing systems configuration file!";
@@ -672,6 +675,7 @@ int main(int argc, char* argv[])
 	if (SystemData::hasDirtySystems())
 		window.renderLoadingScreen(_("SAVING DATA. PLEASE WAIT..."));
 
+	ImageIO::saveImageCache();
 	MameNames::deinit();
 	CollectionSystemManager::deinit();
 	SystemData::deleteSystems();

@@ -288,7 +288,7 @@ void TextureLoader::threadProc()
 				std::this_thread::yield();
 
 				textureData->load();
-				mManager->onTextureLoaded(textureData);
+				// mManager->onTextureLoaded(textureData);
 
 				lock.lock();
 				mProcessingTextureDataQ.remove(textureData);

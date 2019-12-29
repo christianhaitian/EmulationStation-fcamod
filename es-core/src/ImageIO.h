@@ -20,6 +20,9 @@ public:
 	static Vector2i adjustPictureSize(Vector2i imageSize, Vector2i maxSize, bool externSize = false);
 	static Vector2f adjustExternPictureSizef(Vector2f imageSize, Vector2f maxSize);
 	static Vector2f adjustPictureSizef(Vector2f imageSize, Vector2f maxSize);
+
+	static void loadImageCache();
+	static void saveImageCache();
 };
 
 #endif // ES_CORE_IMAGE_IO

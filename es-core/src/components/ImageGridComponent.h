@@ -729,6 +729,9 @@ void ImageGridComponent<T>::updateTiles(bool allowAnimation, bool updateSelected
 	if (!mTiles.size())
 		return;
 
+	if (!mEntries.size())
+		return;
+
 	// Stop updating the tiles at highest scroll speed
 	if (mScrollTier == 3)
 	{

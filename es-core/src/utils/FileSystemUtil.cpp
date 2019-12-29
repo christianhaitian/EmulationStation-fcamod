@@ -533,7 +533,13 @@ namespace Utils
 			if(_path.size() >= 2 && _path[0] == ':' && _path[1] == '/')
 				return _path;
 
+#if WIN32
+			std::string path = _path[0] == '.' ? getAbsolutePath(_path) : getGenericPath(_path);
+			if (path.find("./") == std::string::npos)
+				return path;
+#else
 			std::string path = exists(_path) ? getAbsolutePath(_path) : getGenericPath(_path);
+#endif
 
 			// cleanup path
 			bool scan = true;
