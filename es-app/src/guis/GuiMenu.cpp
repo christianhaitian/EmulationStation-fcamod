@@ -898,13 +898,11 @@ void GuiMenu::openUISettings()
 	// Optionally start in selected system
 	auto systemfocus_list = std::make_shared< OptionListComponent<std::string> >(mWindow, _("START ON SYSTEM"), false);
 	systemfocus_list->add(_("NONE"), "", Settings::getInstance()->getString("StartupSystem") == "");
+
 	for (auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
-	{
-		if ("retropie" != (*it)->getName())
-		{
+		if ("retropie" != (*it)->getName() && (*it)->isVisible())
 			systemfocus_list->add((*it)->getName(), (*it)->getName(), Settings::getInstance()->getString("StartupSystem") == (*it)->getName());
-		}
-	}
+
 	s->addWithLabel(_("START ON SYSTEM"), systemfocus_list);
 	s->addSaveFunc([systemfocus_list] {
 		Settings::getInstance()->setString("StartupSystem", systemfocus_list->getSelected());
@@ -918,7 +916,7 @@ void GuiMenu::openUISettings()
 	auto displayedSystems = std::make_shared<OptionListComponent<SystemData*>>(mWindow, _("VISIBLE SYSTEMS"), true);
 
 	for (auto system : SystemData::sSystemVector)
-		if(!system->isCollection())
+		if(!system->isCollection() && !system->isGroupChildSystem())
 			displayedSystems->add(system->getFullName(), system, std::find(hiddenSystems.cbegin(), hiddenSystems.cend(), system->getName()) == hiddenSystems.cend());
 
 	s->addWithLabel(_("VISIBLE SYSTEMS"), displayedSystems);
@@ -930,7 +928,7 @@ void GuiMenu::openUISettings()
 
 		for (auto system : SystemData::sSystemVector)
 		{
-			if (system->isCollection())
+			if (system->isCollection() || system->isGroupChildSystem())
 				continue;
 
 			if (std::find(sys.cbegin(), sys.cend(), system) == sys.cend())

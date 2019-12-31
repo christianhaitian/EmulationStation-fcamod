@@ -56,7 +56,7 @@ void ViewController::goToStart(bool forceImmediate)
 	if("" != requestedSystem && "retropie" != requestedSystem)
 	{
 		for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++){
-			if ((*it)->getName() == requestedSystem)
+			if ((*it)->getName() == requestedSystem && !(*it)->isGroupChildSystem())
 			{
 				if (hideSystemView || startOnGamelist)
 					goToGameList(*it, forceImmediate);
@@ -564,7 +564,10 @@ void ViewController::preload()
 		mWindow->renderLoadingScreen(_("Preloading UI"), (float)i / (float)max);
 	
 	for(auto it = SystemData::sSystemVector.cbegin(); it != SystemData::sSystemVector.cend(); it++)
-	{
+	{		
+		if ((*it)->isGroupChildSystem())
+			continue;
+
 		if (splash)
 		{
 			i++;

@@ -52,6 +52,7 @@ protected:
 private:
 	void updateInfoPanel();
 	const std::string getImagePath(FileData* file);
+	const bool isVirtualFolder(FileData* file);
 
 	void createMarquee();
 	void createImage();

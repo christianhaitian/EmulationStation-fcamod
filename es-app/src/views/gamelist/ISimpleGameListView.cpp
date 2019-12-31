@@ -126,7 +126,11 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				auto top = mCursorStack.top();
 				mCursorStack.pop();
 
-				populateList(top->getParent()->getChildrenListToDisplay());
+				FolderData* folder = top->getParent();
+				if (folder == nullptr)
+					folder = getCursor()->getSystem()->getParentGroupSystem()->getRootFolder();
+
+				populateList(folder->getChildrenListToDisplay());
 				setCursor(top);				
 				Sound::getFromTheme(getTheme(), getName(), "back")->play();
 			} 
@@ -134,7 +138,10 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			{
 				onFocusLost();
 				SystemData* systemToView = getCursor()->getSystem();
-				if (systemToView->isCollection())
+
+				if (systemToView->isGroupChildSystem())
+					systemToView = systemToView->getParentGroupSystem();
+				else if (systemToView->isCollection())
 					systemToView = CollectionSystemManager::get()->getSystemToView(systemToView);
 
 				ViewController::get()->goToSystemView(systemToView);

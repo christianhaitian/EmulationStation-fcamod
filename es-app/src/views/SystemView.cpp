@@ -488,7 +488,7 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 	setAnimation(infoFadeOut, 0, [this, gameCount] {
 		std::stringstream ss;
 
-		if (!getSelected()->isGameSystem())
+		if (!getSelected()->isGameSystem() && !getSelected()->isGroupSystem())
 			ss << "CONFIGURATION";
 		else
 		{

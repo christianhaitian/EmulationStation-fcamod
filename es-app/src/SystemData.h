@@ -37,6 +37,7 @@ struct SystemEnvironmentData
 	std::string mLaunchCommand;
 	std::vector<PlatformIds::PlatformId> mPlatformIds;
 	std::vector<EmulatorData> mEmulators;
+	std::string mGroup;
 
 	bool isValidExtension(const std::string extension)
 	{
@@ -143,6 +144,9 @@ public:
 	inline bool isCollection() { return mIsCollectionSystem; };
 	inline bool isGameSystem() { return mIsGameSystem; };
 
+	inline bool isGroupSystem() { return mIsGroupSystem; };	
+	inline bool isGroupChildSystem() { return mEnvData != nullptr && !mEnvData->mGroup.empty(); }
+
 	bool isVisible();
 	
 	SystemData* getNext() const;
@@ -183,12 +187,17 @@ public:
 	void setGamelistHash(size_t size) { mGameListHash = size; }
 	size_t getGamelistHash() { return mGameListHash; }
 
+	SystemData* getParentGroupSystem();
+
 private:
 	static SystemData* loadSystem(pugi::xml_node system);
+	static void createGroupedSystems();
 
 	size_t mGameListHash;
 	bool mIsCollectionSystem;
 	bool mIsGameSystem;
+	bool mIsGroupSystem;
+	
 	std::string mName;
 	std::string mFullName;
 	SystemEnvironmentData* mEnvData;

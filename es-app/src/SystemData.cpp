@@ -24,6 +24,7 @@ std::vector<SystemData*> SystemData::sSystemVector;
 SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem) :
 	mName(name), mFullName(fullName), mEnvData(envData), mThemeFolder(themeFolder), mIsCollectionSystem(CollectionSystem), mIsGameSystem(true)
 {
+	mIsGroupSystem = false;
 	mGameListHash = 0;
 	mGameCount = -1;
 	mSortId = Settings::getInstance()->getInt(getName() + ".sort"),
@@ -347,6 +348,7 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 	envData->mLaunchCommand = cmd;
 	envData->mPlatformIds = platformIds;
 	envData->mEmulators = emulatorList;
+	envData->mGroup = system.child("group").text().get();
 
 	SystemData* newSys = new SystemData(name, fullname, envData, themeFolder);
 	if (newSys->getRootFolder()->getChildren().size() == 0)
@@ -358,6 +360,55 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 	}
 
 	return newSys;
+}
+
+void SystemData::createGroupedSystems()
+{
+	std::map<std::string, std::vector<SystemData*>> map;
+
+	for (auto it = sSystemVector.cbegin(); it != sSystemVector.cend(); it++)
+	{
+		SystemData* sys = *it;
+		if (!sys->isCollection() && !sys->getSystemEnvData()->mGroup.empty())
+			map[sys->getSystemEnvData()->mGroup].push_back(sys);
+	}
+
+	for (auto item : map)
+	{
+		SystemEnvironmentData* envData = new SystemEnvironmentData;
+		envData->mStartPath = "";
+		envData->mLaunchCommand = "";
+
+		SystemData* system = new SystemData(item.first, item.first, envData, item.first, nullptr);
+		system->mIsGroupSystem = true;
+		system->mIsGameSystem = false;
+
+		FolderData* root = system->getRootFolder();
+
+		for (auto childSystem : item.second)
+		{
+			auto folder = new FolderData(childSystem->getRootFolder()->getPath(), childSystem, false);
+			root->addChild(folder);
+
+			auto theme = childSystem->getTheme();
+			if (theme)
+			{
+				const ThemeData::ThemeElement* logoElem = theme->getElement("system", "logo", "image");
+				if (logoElem && logoElem->has("path"))
+				{
+					std::string path = logoElem->get<std::string>("path");
+					folder->setMetadata("image", path);
+					folder->setMetadata("thumbnail", path);
+				}
+			}
+
+			auto children = childSystem->getRootFolder()->getFilesRecursive(GAME | FOLDER);
+			for (auto child : children)
+				folder->addChild(child, false);
+		}
+
+		sSystemVector.push_back(system);
+	}
 }
 
 //creates systems from information located in a config file
@@ -482,6 +533,7 @@ bool SystemData::loadConfig(Window* window)
 		if (window != NULL)
 			window->renderLoadingScreen(_("Favorites"), systemCount == 0 ? 0 : currentSystem / systemCount);
 
+		createGroupedSystems();
 		CollectionSystemManager::get()->updateSystemsList();
 	}
 	else
@@ -489,6 +541,7 @@ bool SystemData::loadConfig(Window* window)
 		if (window != NULL)
 			window->renderLoadingScreen(_("Favorites"), systemCount == 0 ? 0 : currentSystem / systemCount);
 
+		createGroupedSystems();
 		CollectionSystemManager::get()->loadCollectionSystems();
 	}
 
@@ -595,6 +648,9 @@ std::string SystemData::getConfigPath(bool forWrite)
 
 bool SystemData::isVisible()
 {
+	if (isGroupChildSystem())
+		return false;
+
 	if ((getDisplayedGameCount() > 0 ||
 		(UIModeController::getInstance()->isUIModeFull() && mIsCollectionSystem) ||
 		(mIsCollectionSystem && mName == "favorites")))
@@ -790,4 +846,16 @@ void SystemData::deleteIndex()
 		delete mFilterIndex;
 		mFilterIndex = nullptr;
 	}
+}
+
+SystemData* SystemData::getParentGroupSystem()
+{
+	if (!isGroupChildSystem() || isGroupSystem())
+		return this;
+
+	for (auto sys : SystemData::sSystemVector)
+		if (sys->isGroupSystem() && sys->getName() == mEnvData->mGroup)
+			return sys;
+
+	return this;
 }
