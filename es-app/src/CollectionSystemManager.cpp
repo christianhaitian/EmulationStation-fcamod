@@ -539,6 +539,7 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 				md->set("favorite", "false");
 			}
 			sysData->addToIndex(file);
+			saveToGamelistRecovery(file);
 
 			refreshCollectionSystems(file->getSourceFileData());
 
@@ -549,7 +550,7 @@ bool CollectionSystemManager::toggleGameInCollection(FileData* file)
 				ViewController::get()->getGameListView(systemViewToUpdate)->onFileChanged(file, FILE_METADATA_CHANGED);
 			}
 
-			saveToGamelistRecovery(file);
+			
 		}
 
 		char trstring[512];
