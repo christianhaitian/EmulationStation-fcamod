@@ -102,7 +102,7 @@ struct SystemEnvironmentData
 class SystemData
 {
 public:
-	SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem = false);
+	SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem = false, bool groupedSystem = false);
 	~SystemData();
 
 	inline FolderData* getRootFolder() const { return mRootFolder; };

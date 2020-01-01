@@ -21,10 +21,10 @@ using namespace Utils;
 
 std::vector<SystemData*> SystemData::sSystemVector;
 
-SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem) :
+SystemData::SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem, bool groupedSystem) :
 	mName(name), mFullName(fullName), mEnvData(envData), mThemeFolder(themeFolder), mIsCollectionSystem(CollectionSystem), mIsGameSystem(true)
 {
-	mIsGroupSystem = false;
+	mIsGroupSystem = groupedSystem;
 	mGameListHash = 0;
 	mGameCount = -1;
 	mSortId = Settings::getInstance()->getInt(getName() + ".sort"),
@@ -34,7 +34,7 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, Sys
 	mFilterIndex = nullptr;// new FileFilterIndex();
 
 	// if it's an actual system, initialize it, if not, just create the data structure
-	if (!CollectionSystem)
+	if(!CollectionSystem && !mIsGroupSystem)
 	{
 		mRootFolder = new FolderData(mEnvData->mStartPath, this);
 		mRootFolder->getMetadata().set("name", mFullName);
@@ -379,35 +379,42 @@ void SystemData::createGroupedSystems()
 		envData->mStartPath = "";
 		envData->mLaunchCommand = "";
 
-		SystemData* system = new SystemData(item.first, item.first, envData, item.first, nullptr);
+		SystemData* system = new SystemData(item.first, item.first, envData, item.first, false, true);
 		system->mIsGroupSystem = true;
 		system->mIsGameSystem = false;
 
 		FolderData* root = system->getRootFolder();
 
 		for (auto childSystem : item.second)
-		{
-			auto folder = new FolderData(childSystem->getRootFolder()->getPath(), childSystem, false);
-			root->addChild(folder);
-
-			auto theme = childSystem->getTheme();
-			if (theme)
-			{
-				const ThemeData::ThemeElement* logoElem = theme->getElement("system", "logo", "image");
-				if (logoElem && logoElem->has("path"))
-				{
-					std::string path = logoElem->get<std::string>("path");
-					folder->setMetadata("image", path);
-					folder->setMetadata("thumbnail", path);
-				}
-			}
-
+		{			
 			auto children = childSystem->getRootFolder()->getFilesRecursive(GAME | FOLDER);
-			for (auto child : children)
-				folder->addChild(child, false);
+			if (children.size() > 0)
+			{
+				auto folder = new FolderData(childSystem->getRootFolder()->getPath(), childSystem, false);
+				root->addChild(folder);
+
+				auto theme = childSystem->getTheme();
+				if (theme)
+				{
+					const ThemeData::ThemeElement* logoElem = theme->getElement("system", "logo", "image");
+					if (logoElem && logoElem->has("path"))
+					{
+						std::string path = logoElem->get<std::string>("path");
+						folder->setMetadata("image", path);
+						folder->setMetadata("thumbnail", path);
+					}
+				}
+
+				for (auto child : children)
+					folder->addChild(child, false);
+			}
 		}
 
-		sSystemVector.push_back(system);
+		if (root->getChildren().size() > 0)
+		{
+			system->loadTheme();
+			sSystemVector.push_back(system);
+		}
 	}
 }
 
