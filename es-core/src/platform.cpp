@@ -115,6 +115,7 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 	std::string args;
 
 	splitCommand(command, &exe, &args);
+	exe = Utils::FileSystem::getPreferredPath(exe);
 	
 	SHELLEXECUTEINFO lpExecInfo;
 	lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
@@ -152,7 +153,10 @@ int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Windo
 	}
 	
 	lpExecInfo.lpParameters = args.c_str(); //  file name as an argument	
-	lpExecInfo.lpDirectory = Utils::FileSystem::getAbsolutePath(Utils::FileSystem::getParent(exe)).c_str();
+
+	// Don't set directory for relative paths
+	if (!Utils::String::startsWith(exe, ".") && !Utils::String::startsWith(exe, "/") && !Utils::String::startsWith(exe, "\\"))
+		lpExecInfo.lpDirectory = Utils::FileSystem::getAbsolutePath(Utils::FileSystem::getParent(exe)).c_str();
 
 	ShellExecuteEx(&lpExecInfo);
 
