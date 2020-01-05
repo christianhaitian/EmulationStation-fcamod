@@ -488,7 +488,7 @@ void Window::loadCustomImageLoadingScreen(std::string imagePath, std::string cus
 	if (mSplash != NULL)
 		endRenderLoadingScreen();
 
-	mSplash = TextureResource::get(imagePath, false, true, false, false, MaxSizeInfo(Renderer::getScreenWidth() * 0.60f, Renderer::getScreenHeight() * 0.60f));
+	mSplash = TextureResource::get(imagePath, false, false, true, false, false, MaxSizeInfo(Renderer::getScreenWidth() * 0.60f, Renderer::getScreenHeight() * 0.60f));
 	mCustomSplash = customText;
 	
 	std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();

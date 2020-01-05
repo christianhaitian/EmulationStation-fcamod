@@ -48,10 +48,10 @@ private:
 class TextureResource : public IReloadable
 {
 protected:
-	TextureResource(const std::string& path, bool tile, bool dynamic, bool allowAsync, MaxSizeInfo maxSize);
+	TextureResource(const std::string& path, bool tile, bool linear, bool dynamic, bool allowAsync, MaxSizeInfo maxSize);
 
 public:
-	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true, bool asReloadable = true, MaxSizeInfo maxSize = MaxSizeInfo());
+	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool linear = false, bool forceLoad = false, bool dynamic = true, bool asReloadable = true, MaxSizeInfo maxSize = MaxSizeInfo());
 	static void cancelAsync(std::shared_ptr<TextureResource> texture);
 
 	void initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height);
@@ -92,7 +92,7 @@ private:
 	Vector2f					mSourceSize;
 	bool							mForceLoad;
 
-	typedef std::pair<std::string, bool> TextureKeyType;
+	typedef std::tuple<std::string, bool, bool> TextureKeyType;
 	static std::map< TextureKeyType, std::weak_ptr<TextureResource> > sTextureMap; // map of textures, used to prevent duplicate textures
 	static std::map< TextureKeyType, std::shared_ptr<TextureResource> > sPermanentTextureMap; // map of textures, used to prevent duplicate textures // FCAWEAK
 	static std::set<TextureResource*> 	sAllTextures;	// Set of all textures, used for memory management

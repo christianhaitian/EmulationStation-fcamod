@@ -14,7 +14,7 @@
 
 bool TextureData::OPTIMIZEVRAM = false;
 
-TextureData::TextureData(bool tile) : mTile(tile), mTextureID(0), mDataRGBA(nullptr), mScalable(false),
+TextureData::TextureData(bool tile, bool linear) : mTile(tile), mLinear(linear), mTextureID(0), mDataRGBA(nullptr), mScalable(false),
 									  mWidth(0), mHeight(0), mSourceWidth(0.0f), mSourceHeight(0.0f), mMaxSize(MaxSizeInfo()), mPackedSize(Vector2i(0,0)), mBaseSize(Vector2i(0, 0))
 {
 	mIsExternalDataRGBA = false;
@@ -311,7 +311,7 @@ bool TextureData::uploadAndBind()
 		if ((mWidth == 0) || (mHeight == 0) || (mDataRGBA == nullptr))
 			return false;
 
-		mTextureID = Renderer::createTexture(Renderer::Texture::RGBA, mHeight >= 480, mTile, mWidth, mHeight, mDataRGBA);
+		mTextureID = Renderer::createTexture(Renderer::Texture::RGBA, mLinear, mTile, mWidth, mHeight, mDataRGBA);
 		if (mTextureID)
 		{
 			if (mDataRGBA != nullptr && !mIsExternalDataRGBA)

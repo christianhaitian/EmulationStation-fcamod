@@ -14,7 +14,7 @@
 class TextureData
 {
 public:
-	TextureData(bool tile);
+	TextureData(bool tile, bool linear);
 	~TextureData();
 
 	static bool OPTIMIZEVRAM;
@@ -71,6 +71,7 @@ public:
 private:
 	std::mutex		mMutex;
 	bool			mTile;
+	bool			mLinear;
 	unsigned char*	mDataRGBA;
 	size_t			mWidth;
 	size_t			mHeight;
