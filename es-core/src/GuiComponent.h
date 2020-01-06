@@ -164,6 +164,9 @@ public:
 	void animateTo(Vector2f from, Vector2f to, unsigned int flags = 0xFFFFFFFF, int delay = 350);
 	void animateTo(Vector2f from, unsigned int flags = AnimateFlags::OPACITY | AnimateFlags::SCALE, int delay = 350) { animateTo(from, from, flags, delay); }
 
+	bool isStaticExtra() const { return mStaticExtra; }
+	void setIsStaticExtra(bool value) { mStaticExtra = value; }
+
 protected:
 	void renderChildren(const Transform4x4f& transform) const;
 	void updateSelf(int deltaTime); // updates animations
@@ -190,6 +193,8 @@ protected:
 
 	bool mIsProcessing;
 	bool mVisible;
+
+	bool mStaticExtra;
 
 public:
 	const static unsigned char MAX_ANIMATIONS = 4;
