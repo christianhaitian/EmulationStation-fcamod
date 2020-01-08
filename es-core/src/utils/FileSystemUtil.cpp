@@ -573,7 +573,7 @@ namespace Utils
 #else // _WIN32
 					// append folder to path
 					path += ("/" + (*it));
-#endif // _WIN32
+
 
 					// resolve symlink
 					if(isSymlink(path))
@@ -594,6 +594,7 @@ namespace Utils
 						scan = true;
 						break;
 					}
+#endif // _WIN32
 				}
 			}
 
