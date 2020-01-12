@@ -23,6 +23,8 @@ public:
 
 	static void loadImageCache();
 	static void saveImageCache();
+
+	static void updateImageCache(const std::string fn, int sz, int x, int y);
 };
 
 #endif // ES_CORE_IMAGE_IO

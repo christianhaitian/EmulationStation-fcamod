@@ -30,7 +30,7 @@ public:
 	bool initFromExternalRGBA(unsigned char* dataRGBA, size_t width, size_t height);
 
 	// Read the data into memory if necessary
-	bool load();
+	bool load(bool updateCache = false);
 
 	bool isLoaded();
 

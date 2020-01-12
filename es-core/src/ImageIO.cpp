@@ -21,7 +21,6 @@ struct CachedFileInfo
 		size = sz;
 		x = sx;
 		y = sy;		
-		sizeResolved = true;
 	};
 
 	CachedFileInfo()
@@ -29,25 +28,16 @@ struct CachedFileInfo
 		size = 0;
 		x = 0;
 		y = 0;
-		sizeResolved = false;
 	};
 
 	int size;
 	int x;
 	int y;	
-	bool sizeResolved;
 };
 
 static std::map<std::string, CachedFileInfo> sizeCache;
 static bool sizeCacheDirty = false;
 
-static void addtoCache(const std::string fn, int sz, int x, int y)
-{
-	sizeCache[fn] = CachedFileInfo(sz, x, y);
-
-	if (sz > 0 && x > 0 && fn.find("/themes/") == std::string::npos)
-		sizeCacheDirty = true;
-}
 
 #include <sstream>
 #include <fstream>
@@ -124,30 +114,49 @@ void ImageIO::saveImageCache()
 	f.close();
 }
 
+static std::mutex sizeCacheLock;
 
-bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
+void ImageIO::updateImageCache(const std::string fn, int sz, int x, int y)
 {
+	std::unique_lock<std::mutex> lock(sizeCacheLock);
 
 	auto it = sizeCache.find(fn);
 	if (it != sizeCache.cend())
 	{
-		if (*x < 0)
-			return false;
-
-		bool resolved = true;
-
-		if (!it->second.sizeResolved)
+		if (x != it->second.x || y != it->second.y || sz != it->second.size)
 		{
-			auto size = Utils::FileSystem::getFileSize(fn);
-			if (it->second.size != size)
-				resolved = false;
+			auto& item = it->second;
+
+			item.x = x;
+			item.y = y;
+			item.size = sz;			
+			sizeCacheDirty = true;
 		}
+	}
+	else
+	{
+		sizeCache[fn] = CachedFileInfo(sz, x, y);
 
-		if (resolved)
+		if (sz > 0 && x > 0 && fn.find("/themes/") == std::string::npos)
+			sizeCacheDirty = true;
+	}
+}
+
+
+bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
+{
+	{
+		std::unique_lock<std::mutex> lock(sizeCacheLock);
+
+		auto it = sizeCache.find(fn);
+		if (it != sizeCache.cend())
 		{
+			if (it->second.size == -1)
+				return false;
+
 			*x = it->second.x;
 			*y = it->second.y;
-			return true;
+			return true;			
 		}
 	}
 
@@ -167,7 +176,7 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 	if (f == 0)
 	{
 		LOG(LogWarning) << "ImageIO::loadImageSize\tUnable to open file";
-		addtoCache(fn, -1, -1, -1);
+		updateImageCache(fn, -1, -1, -1);
 		return false;
 	}
 
@@ -179,7 +188,7 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 	unsigned char buf[24];
 	if (fread(buf, 1, 24, f) != 24)
 	{
-		addtoCache(fn, -1, -1, -1);
+		updateImageCache(fn, -1, -1, -1);
 		return false;
 	}
 
@@ -220,11 +229,11 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 
 		if (*x > 5000) // security ?
 		{
-			addtoCache(fn, -1, -1, -1);
+			updateImageCache(fn, -1, -1, -1);
 			return false;
 		}
 
-		addtoCache(fn, size, *x, *y);
+		updateImageCache(fn, size, *x, *y);
 		return true;
 	}
 
@@ -236,7 +245,7 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 
 		LOG(LogDebug) << "ImageIO::loadImageSize\tGIF size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
 
-		addtoCache(fn, size, *x, *y);
+		updateImageCache(fn, size, *x, *y);
 		return true;
 	}
 
@@ -248,11 +257,11 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 
 		LOG(LogDebug) << "ImageIO::loadImageSize\tPNG size " << std::string(std::to_string(*x) + "x" + std::to_string(*y)).c_str();
 
-		addtoCache(fn, size, *x, *y);
+		updateImageCache(fn, size, *x, *y);
 		return true;
 	}
 
-	addtoCache(fn, -1, -1, -1);
+	updateImageCache(fn, -1, -1, -1);
 	LOG(LogWarning) << "ImageIO::loadImageSize\tUnable to extract size";
 	return false;
 }
