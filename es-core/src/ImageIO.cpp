@@ -130,7 +130,9 @@ void ImageIO::updateImageCache(const std::string fn, int sz, int x, int y)
 			item.x = x;
 			item.y = y;
 			item.size = sz;			
-			sizeCacheDirty = true;
+
+			if (sz > 0 && x > 0 && fn.find("/themes/") == std::string::npos)
+				sizeCacheDirty = true;
 		}
 	}
 	else
@@ -151,7 +153,7 @@ bool ImageIO::getImageSize(const char *fn, unsigned int *x, unsigned int *y)
 		auto it = sizeCache.find(fn);
 		if (it != sizeCache.cend())
 		{
-			if (it->second.size == -1)
+			if (it->second.size < 0)
 				return false;
 
 			*x = it->second.x;
