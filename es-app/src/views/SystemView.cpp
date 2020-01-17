@@ -10,6 +10,7 @@
 #include "Window.h"
 #include "AudioManager.h"
 #include "components/VideoComponent.h"
+#include "components/VideoVlcComponent.h"
 
 // buffer values for scrolling velocity (left, stopped, right)
 const int logoBuffersLeft[] = { -5, -2, -1 };
@@ -28,6 +29,7 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 	mShowing = false;
 	mLastCursor = 0;
 	mStaticBackground = nullptr;
+	mStaticVideoBackground = nullptr;
 	mExtrasFadeOldCursor = -1;
 	
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
@@ -36,6 +38,12 @@ SystemView::SystemView(Window* window) : IList<SystemViewData, SystemData*>(wind
 
 SystemView::~SystemView()
 {
+	if (mStaticVideoBackground != nullptr)
+	{
+		delete mStaticVideoBackground;
+		mStaticVideoBackground = nullptr;
+	}
+
 	if (mStaticBackground != nullptr)
 	{
 		delete mStaticBackground;
@@ -631,6 +639,9 @@ void SystemView::render(const Transform4x4f& parentTrans)
 	if (mStaticBackground != nullptr)
 		mStaticBackground->render(trans);
 
+	if (mStaticVideoBackground != nullptr)
+		mStaticVideoBackground->render(trans);
+
 	if (mCarousel.zIndex > mSystemInfo.getZIndex()) {
 		renderInfoBar(trans);
 	} else {
@@ -713,6 +724,21 @@ void  SystemView::getViewElements(const std::shared_ptr<ThemeData>& theme)
 		delete mStaticBackground;
 		mStaticBackground = nullptr;
 	}
+
+	const ThemeData::ThemeElement* fixedVideoBackgroundElem = theme->getElement("system", "staticBackgroundVideo", "video");
+	if (fixedVideoBackgroundElem && (!fixedVideoBackgroundElem->has("visible") || fixedVideoBackgroundElem->get<bool>("visible")))
+	{		
+		if (mStaticVideoBackground == nullptr)
+			mStaticVideoBackground = new VideoVlcComponent(mWindow);
+
+		mStaticVideoBackground->applyTheme(theme, "system", "staticBackgroundVideo", ThemeFlags::ALL);
+	}
+	else if (mStaticBackground != nullptr)
+	{
+		delete mStaticVideoBackground;
+		mStaticVideoBackground = nullptr;
+	}
+	
 
 	mViewNeedsReload = false;
 }
@@ -1090,6 +1116,12 @@ void  SystemView::getDefaultElements(void)
 		delete mStaticBackground;
 		mStaticBackground = nullptr;
 	}
+
+	if (mStaticVideoBackground != nullptr)
+	{
+		delete mStaticVideoBackground;
+		mStaticVideoBackground = nullptr;
+	}
 }
 
 void SystemView::getCarouselFromTheme(const ThemeData::ThemeElement* elem)
@@ -1163,6 +1195,9 @@ void SystemView::onShow()
 	GuiComponent::onShow();	
 	mShowing = true;
 	activateExtras(mCursor);
+
+	if (mStaticVideoBackground)
+		mStaticVideoBackground->onShow();
 }
 
 void SystemView::onHide()
@@ -1170,24 +1205,36 @@ void SystemView::onHide()
 	GuiComponent::onHide();
 	mShowing = false;
 	updateExtras([this](GuiComponent* p) { p->onHide(); });
+
+	if (mStaticVideoBackground)
+		mStaticVideoBackground->onHide();
 }
 
 void SystemView::onScreenSaverActivate()
 {
 	mScreensaverActive = true;
 	updateExtras([this](GuiComponent* p) { p->onScreenSaverActivate(); });
+
+	if (mStaticVideoBackground)
+		mStaticVideoBackground->onScreenSaverActivate();
 }
 
 void SystemView::onScreenSaverDeactivate()
 {
 	mScreensaverActive = false;
 	updateExtras([this](GuiComponent* p) { p->onScreenSaverDeactivate(); });
+
+	if (mStaticVideoBackground)
+		mStaticVideoBackground->onScreenSaverDeactivate();
 }
 
 void SystemView::topWindow(bool isTop)
 {
 	mDisable = !isTop;
 	updateExtras([this, isTop](GuiComponent* p) { p->topWindow(isTop); });
+
+	if (mStaticVideoBackground)
+		mStaticVideoBackground->topWindow(isTop);
 }
 
 void SystemView::updateExtras(const std::function<void(GuiComponent*)>& func)

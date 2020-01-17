@@ -11,6 +11,7 @@
 
 class AnimatedImageComponent;
 class SystemData;
+class VideoVlcComponent;
 
 enum CarouselType : unsigned int
 {
@@ -96,6 +97,7 @@ private:
 	TextComponent		mSystemInfo;
 	SystemData*			mLastSystem;
 	ImageComponent*		mStaticBackground;
+	VideoVlcComponent*	mStaticVideoBackground;
 
 	// unit is list index
 	float mCamOffset;
