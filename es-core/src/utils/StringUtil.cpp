@@ -333,9 +333,10 @@ namespace Utils
 
 				wchar_t character = (wchar_t)chars2Unicode(text, i);
 				wchar_t unicode = toUpper ? toupperUnicode(character) : tolowerUnicode(character);
+				int charSize = i - pos;
+
 				if (unicode != character)
-				{
-					int charSize = i - pos;
+				{					
 					if (charSize == 1)
 					{
 						text[pos] = (char)(unicode & 0xFF);
@@ -353,8 +354,8 @@ namespace Utils
 
 					}
 				}
-				else
-					text[i] = toUpper ? toupper(text[i]) : tolower(text[i]);
+				else if (charSize == 1)
+					text[pos] = toUpper ? toupper(text[pos]) : tolower(text[pos]);
 			}
 
 			return text;
