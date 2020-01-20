@@ -626,9 +626,9 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 	{
 		createVideo();
 
-		if (theme->getElement(view, "gridtile", "video"))
+		/*if (theme->getElement(view, "gridtile", "video"))
 			mVideo->applyTheme(theme, view, "gridtile", ThemeFlags::ALL ^ (ThemeFlags::PATH));
-		else if (theme->getElement(view, "gridtile.video", "video"))
+		else */if (theme->getElement(view, "gridtile.video", "video"))
 			mVideo->applyTheme(theme, view, "gridtile.video", ThemeFlags::ALL ^ (ThemeFlags::PATH));
 	}
 	else if (mVideo != nullptr)
@@ -770,24 +770,18 @@ void GridTileComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 				mSelectedProperties.Label.Visible = mDefaultProperties.Label.Visible;
 		}
 	}
-
-	// Apply theme to the <ninepatch name="gridtile"> element
-	elem = theme->getElement(view, "gridtile", "ninepatch");
-	if (elem == nullptr) // Apply theme to the <ninepatch name="gridtile.background"> element		
-		elem = theme->getElement(view, "gridtile.background", "ninepatch");
-
+	
+	// Apply theme to the <ninepatch name="gridtile.background"> element		
+	elem = theme->getElement(view, "gridtile.background", "ninepatch");
 	if (elem != NULL)
 	{
 		mBackground.applyTheme(theme, view, element, properties);
 		mDefaultProperties.Background.applyTheme(elem);		
 		mSelectedProperties.Background.applyTheme(elem);
 	}
-
-	// Apply theme to the <ninepatch name="gridtile:selected"> element
-	elem = theme->getElement(view, "gridtile:selected", "ninepatch");
-	if (elem == nullptr) // Apply theme to the <ninepatch name="gridtile.background:selected"> element
-		elem = theme->getElement(view, "gridtile.background:selected", "ninepatch");
-
+	
+	// Apply theme to the <ninepatch name="gridtile.background:selected"> element
+	elem = theme->getElement(view, "gridtile.background:selected", "ninepatch");
 	if (elem)
 		mSelectedProperties.Background.applyTheme(elem);
 

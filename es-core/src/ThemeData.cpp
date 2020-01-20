@@ -560,6 +560,9 @@ void ThemeData::parseInclude(const pugi::xml_node& node)
 		return;
 
 	std::string relPath = resolvePlaceholders(node.text().as_string());
+	if (relPath.empty())
+		return;
+
 	std::string path = Utils::FileSystem::resolveRelativePath(relPath, Utils::FileSystem::getParent(mPaths.back()), true);
 	path = resolveSystemVariable(mSystemThemeFolder, path);
 
