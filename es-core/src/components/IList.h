@@ -110,6 +110,26 @@ public:
 		onCursorChanged(CURSOR_STOPPED);
 	}
 
+	// batocera
+	void setCursorIndex(int index, bool force = false)
+	{
+		if (mCursor == index && !force)
+			return;
+
+		if(index >= 0 && index < (int)mEntries.size()) 
+		{
+			mCursor = onBeforeScroll(index, 1);			
+			onCursorChanged(CURSOR_STOPPED);
+		}
+	}
+
+	// batocera
+	int getCursorIndex()
+	{
+		return mCursor;
+	}
+
+
 	void clear()
 	{
 		mEntries.clear();
@@ -137,18 +157,6 @@ public:
 		onCursorChanged(CURSOR_STOPPED);
 	}
 
-	void setCursorIndex(int index) 
-	{
-		if (mCursor == index)
-			return;
-
-		if (index >= 0 && index < (int)mEntries.size()) 
-		{
-			mCursor = index;
-			onCursorChanged(CURSOR_STOPPED);
-		}
-	}
-
 	// returns true if successful (select is in our list), false if not
 	bool setCursor(const UserData& obj)
 	{
@@ -163,11 +171,6 @@ public:
 		}
 
 		return false;
-	}
-
-	int getCursorIndex()
-	{
-		return mCursor;
 	}
 
 	// entry management
@@ -325,6 +328,9 @@ protected:
 				cursor -= size();
 		}
 
+		if (amt != 0)
+			cursor = onBeforeScroll(cursor, amt > 0 ? 1 : -1);
+
 		if(cursor != mCursor)
 			onScroll(absAmt);
 
@@ -332,8 +338,11 @@ protected:
 		onCursorChanged((mScrollTier > 0) ? CURSOR_SCROLLING : CURSOR_STOPPED);
 	}
 
+
 	virtual void onCursorChanged(const CursorState& /*state*/) {}
 	virtual void onScroll(int /*amt*/) {}
+
+	virtual int onBeforeScroll(int cursor, int direction) { return cursor; }
 };
 
 #endif // ES_CORE_COMPONENTS_ILIST_H
