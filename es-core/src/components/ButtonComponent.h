@@ -33,6 +33,8 @@ public:
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 
+	void setRenderNonFocusedBackground(bool value) { mRenderNonFocusedBackground = value; }
+
 private:
 	std::shared_ptr<Font> mFont;
 	std::function<void()> mPressedFunc;
@@ -40,6 +42,8 @@ private:
 	bool mFocused;
 	bool mEnabled;
 	bool mNewColor = false;
+	bool mRenderNonFocusedBackground;
+
 	unsigned int mTextColorFocused;
 	unsigned int mTextColorUnfocused;
 	unsigned int mModdedColor;

@@ -75,13 +75,17 @@ size_t Font::getTotalMemUsage()
 Font::Font(int size, const std::string& path) : mSize(size), mPath(path)
 {
 	mSize = size;
-
-	// GPI
+	
 	if (Renderer::isSmallScreen())
-		mSize = size * 1.5;
-	
-	assert(mSize > 0);
-	
+	{
+		float sz = Math::min(Renderer::getScreenWidth(), Renderer::getScreenHeight());
+		if (sz >= 320) // ODROID 480x320;
+			mSize = size * 1.31;
+		else // GPI 320x240
+			mSize = size * 1.5;
+	}
+
+	assert(mSize > 0);	
 
 	mLoaded = true;
 	mMaxGlyphHeight = 0;

@@ -140,6 +140,7 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 				else
 					button = makeButton(lower, upper);					
 
+				button->setRenderNonFocusedBackground(false);
 				buttons.push_back(button);
 
 				button->setSize(getButtonSize());
