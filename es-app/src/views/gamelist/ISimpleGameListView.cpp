@@ -84,6 +84,10 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 	{
 		if (config->isMappedTo("a", input))
 		{
+			// Don't launch game if transition is still running
+			if (ViewController::get()->isAnimationPlaying(0))
+				return true;
+			
 			FileData* cursor = getCursor();
 			FolderData* folder = NULL;
 
