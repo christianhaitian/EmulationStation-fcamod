@@ -17,8 +17,39 @@ enum CollectionSystemType
 {
 	AUTO_ALL_GAMES,
 	AUTO_LAST_PLAYED,
+	AUTO_AT2PLAYERS,
+	AUTO_AT4PLAYERS,
+	AUTO_NEVER_PLAYED,
 	AUTO_FAVORITES,
-	CUSTOM_COLLECTION
+
+	AUTO_ARCADE,
+
+	CUSTOM_COLLECTION,
+
+	CPS1_COLLECTION,
+	CPS2_COLLECTION,
+	CPS3_COLLECTION,
+	CAVE_COLLECTION,
+	NEOGEO_COLLECTION,
+	SEGA_COLLECTION,
+	IREM_COLLECTION,
+	MIDWAY_COLLECTION,
+	CAPCOM_COLLECTION,
+	TECMO_COLLECTION,
+	SNK_COLLECTION,
+	NAMCO_COLLECTION,
+	TAITO_COLLECTION,
+	KONAMI_COLLECTION,
+	JALECO_COLLECTION,
+	ATARI_COLLECTION,
+	NINTENDO_COLLECTION,
+	SAMMY_COLLECTION,
+	ACCLAIM_COLLECTION,
+	PSIKYO_COLLECTION,
+	KANEKO_COLLECTION,
+	COLECO_COLLECTION,
+	ATLUS_COLLECTION,
+	BANPRESTO_COLLECTION
 };
 
 struct CollectionSystemDecl
@@ -29,6 +60,7 @@ struct CollectionSystemDecl
 	std::string defaultSort;
 	std::string themeFolder;
 	bool isCustom;
+	bool displayIfEmpty;
 };
 
 struct CollectionSystemData
@@ -43,6 +75,8 @@ struct CollectionSystemData
 class CollectionSystemManager
 {
 public:
+	static std::vector<CollectionSystemDecl> getSystemDecls();
+
 	CollectionSystemManager(Window* window);
 	~CollectionSystemManager();
 
@@ -59,7 +93,7 @@ public:
 	void updateCollectionSystem(FileData* file, CollectionSystemData sysData);
 	void deleteCollectionFiles(FileData* file);
 
-	inline std::map<std::string, CollectionSystemData> getAutoCollectionSystems() { return mAutoCollectionSystemsData; };
+	inline std::map<std::string, CollectionSystemData>& getAutoCollectionSystems() { return mAutoCollectionSystemsData; };
 	inline std::map<std::string, CollectionSystemData> getCustomCollectionSystems() { return mCustomCollectionSystemsData; };
 	inline SystemData* getCustomCollectionsBundle() { return mCustomCollectionsBundle; };
 	std::vector<std::string> getUnusedSystemsFromTheme();
@@ -77,6 +111,7 @@ public:
 
 	SystemData* getSystemToView(SystemData* sys);
 	void updateCollectionFolderMetadata(SystemData* sys);
+	void populateAutoCollection(CollectionSystemData* sysData);
 
 private:
 	static CollectionSystemManager* sInstance;
@@ -93,7 +128,7 @@ private:
 	void initCustomCollectionSystems();
 	SystemData* getAllGamesCollection();
 	SystemData* createNewCollectionEntry(std::string name, CollectionSystemDecl sysDecl, bool index = true);
-	void populateAutoCollection(CollectionSystemData* sysData);
+	
 	void populateCustomCollection(CollectionSystemData* sysData, std::unordered_map<std::string, FileData*>* pMap = nullptr);
 
 	void removeCollectionsFromDisplayedSystems();

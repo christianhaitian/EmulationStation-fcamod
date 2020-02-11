@@ -130,6 +130,35 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	
 };
 
+const std::map<unsigned short, std::string> screenscraper_arcadesystemid_map{
+		{ 6, "cps1" },
+		{ 7, "cps2" },
+		{ 8, "cps3" },
+		{ 47, "cave" },
+		{ 68, "neogeo" },
+		{ 142, "neogeo" },
+		{ 147, "sega" },
+		{ 148, "irem" },
+		{ 150, "midway" },
+		{ 151, "capcom" },
+		{ 153, "tecmo" },
+		{ 154, "snk" },
+		{ 155, "namco" },
+		{ 156, "namco" },
+		{ 157, "taito" },
+		{ 158, "konami" },
+		{ 159, "jaleco" },
+		{ 160, "atari" },
+		{ 161, "nintendo" },
+		{ 162, "dataeast" },
+		{ 164, "sammy" },
+		{ 166, "acclaim" },
+		{ 167, "psikyo" },
+		{ 174, "kaneko" },
+		{ 183, "coleco" },
+		{ 185, "atlus" },
+		{ 186, "banpresto" }
+};
 
 // Helper XML parsing method, finding a node-by-name recursively.
 pugi::xml_node find_node_by_name_re(const pugi::xml_node& node, const std::vector<std::string> node_names) {
@@ -348,6 +377,8 @@ std::vector<std::string> ScreenScraperRequest::getRipList(std::string imageSourc
 
 void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::vector<ScraperSearchResult>& out_results)
 {
+	LOG(LogDebug) << "ScreenScraperRequest::processGame >>";
+
 	pugi::xml_node data = xmldoc.child("Data");
 	if (data.child("jeux"))
 		data = data.child("jeux");
@@ -384,12 +415,12 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 
 		// Genre fallback language: EN. ( Xpath: Data/jeu[0]/genres/genre[*] )
 		result.mdl.set("genre", find_child_by_attribute_list(game.child("genres"), "genre", "langue", { language, "en" }).text().get());
-		LOG(LogDebug) << "Genre: " << result.mdl.get("genre");
+		//LOG(LogDebug) << "Genre: " << result.mdl.get("genre");
 
 		// Get the date proper. The API returns multiple 'date' children nodes to the 'dates' main child of 'jeu'.
 		// Date fallback: WOR(LD), US, SS, JP, EU
 		std::string _date = find_child_by_attribute_list(game.child("dates"), "date", "region", { region, "wor", "us", "ss", "jp", "eu" }).text().get();
-		LOG(LogDebug) << "Release Date (unparsed): " << _date;
+		//LOG(LogDebug) << "Release Date (unparsed): " << _date;
 
 		// Date can be YYYY-MM-DD or just YYYY.
 		if (_date.length() > 4)
@@ -400,7 +431,7 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 			result.mdl.set("releasedate", Utils::Time::DateTime(Utils::Time::stringToTime(_date, "%Y")));
 		}
 
-		LOG(LogDebug) << "Release Date (parsed): " << result.mdl.get("releasedate");
+		//LOG(LogDebug) << "Release Date (parsed): " << result.mdl.get("releasedate");
 
 		/// Developer for the game( Xpath: Data/jeu[0]/developpeur )
 		std::string developer = game.child("developpeur").text().get();
@@ -415,7 +446,20 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 		// Players
 		result.mdl.set("players", game.child("joueurs").text().get());
 
-		// TODO: Validate rating
+        if(game.child("systeme").attribute("id"))
+        {
+            int systemId = game.child("systeme").attribute("id").as_int();
+
+            if(screenscraper_arcadesystemid_map.find(systemId) != screenscraper_arcadesystemid_map.cend())
+            {
+                std::string systemName = screenscraper_arcadesystemid_map.at(game.child("systeme").attribute("id").as_int(0));
+                result.mdl.set("arcadesystemname", systemName);
+            }
+            //else
+            //    LOG(LogDebug) << "System " << systemId << " not found";
+        }
+
+        // TODO: Validate rating
 		if (Settings::getInstance()->getBool("ScrapeRatings") && game.child("note"))
 		{
 			float ratingVal = (game.child("note").text().as_int() / 20.0f);
@@ -497,6 +541,8 @@ void ScreenScraperRequest::processGame(const pugi::xml_document& xmldoc, std::ve
 
 		out_results.push_back(result);
 	} // game
+
+	LOG(LogDebug) << "ScreenScraperRequest::processGame <<";
 }
 
 // Currently not used in this module

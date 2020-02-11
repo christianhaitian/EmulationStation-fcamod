@@ -8,6 +8,7 @@
 #include "views/ViewController.h"
 #include "CollectionSystemManager.h"
 #include "Window.h"
+#include "SystemData.h"
 
 GuiCollectionSystemsOptions::GuiCollectionSystemsOptions(Window* window) : GuiComponent(window), mMenu(window, _("GAME COLLECTION SETTINGS"))
 {
@@ -145,14 +146,37 @@ GuiCollectionSystemsOptions::~GuiCollectionSystemsOptions()
 void GuiCollectionSystemsOptions::addSystemsToMenu()
 {
 
-	std::map<std::string, CollectionSystemData> autoSystems = CollectionSystemManager::get()->getAutoCollectionSystems();
+	std::map<std::string, CollectionSystemData> &autoSystems = CollectionSystemManager::get()->getAutoCollectionSystems();
 
 	autoOptionList = std::make_shared< OptionListComponent<std::string> >(mWindow, _("SELECT COLLECTIONS"), true);
 
-	// add Auto Systems
-	for(std::map<std::string, CollectionSystemData>::const_iterator it = autoSystems.cbegin() ; it != autoSystems.cend() ; it++ )
+	bool hasGroup = false;
+
+	// add Auto Systems && preserve order
+	for (auto systemDecl : CollectionSystemManager::getSystemDecls())
 	{
-		autoOptionList->add(it->second.decl.longName, it->second.decl.name, it->second.isEnabled);
+		auto it = autoSystems.find(systemDecl.name);
+		if (it == autoSystems.cend())
+			continue;
+
+		if (it->second.decl.displayIfEmpty)
+			autoOptionList->add(it->second.decl.longName, it->second.decl.name, it->second.isEnabled);
+		else
+		{
+			if (!it->second.isPopulated)
+				CollectionSystemManager::get()->populateAutoCollection(&(it->second));
+
+			if (it->second.system->getRootFolder()->getChildren().size() == 0)
+				continue;
+
+			if (!hasGroup)
+			{
+				autoOptionList->addGroup(_("ARCADE SYSTEMS"));
+				hasGroup = true;
+			}
+
+			autoOptionList->add(it->second.decl.longName, it->second.decl.name, it->second.isEnabled);
+		}
 	}
 	mMenu.addWithLabel(_("AUTOMATIC GAME COLLECTIONS"), autoOptionList);
 
