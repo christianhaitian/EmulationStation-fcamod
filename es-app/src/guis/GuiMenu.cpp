@@ -343,6 +343,11 @@ void GuiMenu::openSoundSettings()
 		s->addWithLabel(_("ENABLE VIDEO AUDIO"), video_audio);
 		s->addSaveFunc([video_audio] { Settings::getInstance()->setBool("VideoAudio", video_audio->getState()); });
 
+		auto videolowermusic = std::make_shared<SwitchComponent>(mWindow);
+		videolowermusic->setState(Settings::getInstance()->getBool("VideoLowersMusic"));
+		s->addWithLabel(_("LOWER MUSIC WHEN PLAYING VIDEO"), videolowermusic);
+		s->addSaveFunc([videolowermusic] { Settings::getInstance()->setBool("VideoLowersMusic", videolowermusic->getState()); });
+
 #ifdef _RPI_
 		// OMX player Audio Device
 		auto omx_audio_dev = std::make_shared< OptionListComponent<std::string> >(mWindow, "OMX PLAYER AUDIO DEVICE", false);

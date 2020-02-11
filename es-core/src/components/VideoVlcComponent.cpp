@@ -9,6 +9,9 @@
 #include <SDL_mutex.h>
 #include <cmath>
 #include "ThemeData.h"
+#include <SDL_timer.h>
+#include "AudioManager.h"
+
 
 #ifdef WIN32
 #include <codecvt>
@@ -526,6 +529,8 @@ void VideoVlcComponent::startVideo()
 			if (mPlaylist != nullptr && mConfig.startDelay == 0 && !mConfig.showSnapshotDelay && !mConfig.showSnapshotNoVideo)
 				libvlc_media_add_option(mMedia, ":start-time=0.7");
 
+			bool hasAudioTrack = false;
+
 			unsigned track_count;
 			// Get the media metadata so we can find the aspect ratio
 			libvlc_media_parse(mMedia);
@@ -533,11 +538,15 @@ void VideoVlcComponent::startVideo()
 			track_count = libvlc_media_tracks_get(mMedia, &tracks);
 			for (unsigned track = 0; track < track_count; ++track)
 			{
-				if (tracks[track]->i_type == libvlc_track_video)
+				if (tracks[track]->i_type == libvlc_track_audio)
+					hasAudioTrack = true;
+				else if (tracks[track]->i_type == libvlc_track_video)
 				{
 					mVideoWidth = tracks[track]->video->i_width;
-					mVideoHeight = tracks[track]->video->i_height;
-					break;
+					mVideoHeight = tracks[track]->video->i_height;		
+
+					if (hasAudioTrack)
+						break;
 				}
 			}
 			libvlc_media_tracks_release(tracks, track_count);
@@ -574,9 +583,14 @@ void VideoVlcComponent::startVideo()
 
 				// Setup the media player
 				mMediaPlayer = libvlc_media_player_new_from_media(mMedia);
-
-				if (!Settings::getInstance()->getBool("VideoAudio"))
-					libvlc_audio_set_mute(mMediaPlayer, 1);
+			
+				if (hasAudioTrack)
+				{
+					if (!Settings::getInstance()->getBool("VideoAudio"))
+						libvlc_audio_set_mute(mMediaPlayer, 1);
+					else
+						AudioManager::setVideoPlaying(true);
+				}
 
 				libvlc_media_player_play(mMediaPlayer);
 				libvlc_video_set_callbacks(mMediaPlayer, lock, unlock, display, (void*)&mContext);
@@ -612,7 +626,8 @@ void VideoVlcComponent::stopVideo()
 	}
 
 	freeContext();
-	PowerSaver::resume();
+	PowerSaver::resume();	
+	AudioManager::setVideoPlaying(false);
 }
 
 void VideoVlcComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const std::string& view, const std::string& element, unsigned int properties)
@@ -652,5 +667,5 @@ void VideoVlcComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, cons
 void VideoVlcComponent::update(int deltaTime)
 {
 	mElapsed += deltaTime;
-	VideoComponent::update(deltaTime);
+	VideoComponent::update(deltaTime);	
 }

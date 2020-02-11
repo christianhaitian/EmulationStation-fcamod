@@ -17,7 +17,7 @@ class AudioManager
 public:
 	static std::shared_ptr<AudioManager> & getInstance();
 	static bool isInitialized();
-
+	
 	void init();
 	void deinit();
 
@@ -49,6 +49,12 @@ public:
 
 	virtual ~AudioManager();
 
+	float mMusicVolume;
+	int mVideoPlaying;
+
+	static void setVideoPlaying(bool state);
+	static void update(int deltaTime);
+
 private:
 	AudioManager();
 
@@ -69,6 +75,8 @@ private:
 	bool		mInitialized;
 
 	Mix_Music* mCurrentMusic;
+
+
 };
 
 #endif // ES_CORE_AUDIO_MANAGER_H

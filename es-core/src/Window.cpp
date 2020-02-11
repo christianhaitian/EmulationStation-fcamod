@@ -14,6 +14,7 @@
 #include "guis/GuiInfoPopup.h"
 #include "components/AsyncNotificationComponent.h"
 #include "guis/GuiMsgBox.h"
+#include "AudioManager.h"
 
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
   mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false), mInfoPopup(NULL), mClockElapsed(0) // batocera
@@ -316,6 +317,8 @@ void Window::update(int deltaTime)
 	// Update the screensaver
 	if (mScreenSaver)
 		mScreenSaver->update(deltaTime);
+
+	AudioManager::update(deltaTime);
 }
 
 void Window::render()
