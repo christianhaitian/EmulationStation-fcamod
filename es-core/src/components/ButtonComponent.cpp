@@ -18,6 +18,9 @@ ButtonComponent::ButtonComponent(Window* window, const std::string& text, const 
 	mColor = menuTheme->Text.color;
 	mColorFocused = menuTheme->Text.selectorColor;
 	mRenderNonFocusedBackground = true;
+	
+	if (Renderer::isSmallScreen())
+		mBox.setCornerSize(8, 8);
 
 	setPressedFunc(func);
 	setText(text, helpText, upperCase);
@@ -26,7 +29,8 @@ ButtonComponent::ButtonComponent(Window* window, const std::string& text, const 
 
 void ButtonComponent::onSizeChanged()
 {
-	mBox.fitTo(mSize, Vector3f::Zero(), Vector2f(-32, -32));
+	auto sz = mBox.getCornerSize();
+	mBox.fitTo(mSize, Vector3f::Zero(), Vector2f(-sz.x() * 2, -sz.y() * 2));
 }
 
 void ButtonComponent::setPressedFunc(std::function<void()> f)
