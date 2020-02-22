@@ -103,14 +103,10 @@ std::string ApiSystem::checkUpdateVersion()
 		localVersion = Utils::String::replace(Utils::String::replace(localVersion, "\r", ""), "\n", "");
 	}
 	
-	std::shared_ptr<HttpReq> httpreq = std::make_shared<HttpReq>("https://github.com/fabricecaruso/EmulationStation/releases/download/continuous-master/version.info");
-
-	while (httpreq->status() == HttpReq::REQ_IN_PROGRESS)
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
-	if (httpreq->status() == HttpReq::REQ_SUCCESS)
+	HttpReq httpreq("https://github.com/fabricecaruso/EmulationStation/releases/download/continuous-master/version.info");	
+	if (httpreq.wait())
 	{
-		std::string serverVersion = httpreq->getContent();
+		std::string serverVersion = httpreq.getContent();
 		serverVersion = Utils::String::replace(Utils::String::replace(serverVersion, "\r", ""), "\n", "");
 		if (!serverVersion.empty() && serverVersion != localVersion)
 			return serverVersion;
@@ -196,25 +192,24 @@ bool unzipFile(const std::string fileName, const std::string dest)
 	return ret;
 }
 
-std::shared_ptr<HttpReq> downloadFile(const std::string url, const std::string label, const std::function<void(const std::string)>& func)
+bool downloadFile(const std::string url, const std::string fileName, const std::string label, const std::function<void(const std::string)>& func)
 {
 	if (func != nullptr)
 		func("Downloading " + label);
 
-	std::shared_ptr<HttpReq> httpreq = std::make_shared<HttpReq>(url);
-
-	while (httpreq->status() == HttpReq::REQ_IN_PROGRESS)
+	HttpReq httpreq(url, fileName);
+	while (httpreq.status() == HttpReq::REQ_IN_PROGRESS)
 	{
 		if (func != nullptr)
-			func(std::string("Downloading " + label + " >>> " + std::to_string(httpreq->getPercent()) + " %"));
+			func(std::string("Downloading " + label + " >>> " + std::to_string(httpreq.getPercent()) + " %"));
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	}
 
-	if (httpreq->status() != HttpReq::REQ_SUCCESS)
-		return nullptr;
+	if (httpreq.status() != HttpReq::REQ_SUCCESS)
+		return false;
 
-	return httpreq;
+	return true;
 }
 
 
@@ -236,23 +231,21 @@ std::pair<std::string, int> ApiSystem::updateSystem(const std::function<void(con
 {
 #if WIN32
 	std::string url = "https://github.com/fabricecaruso/EmulationStation/releases/download/continuous-master/EmulationStation-Win32-no-deps.zip";
-	auto req = downloadFile(url, "update", func);
-	if (req != nullptr && req->status() == HttpReq::REQ_SUCCESS)
+
+	std::string fileName = Utils::FileSystem::getFileName(url);
+	std::string path = Utils::FileSystem::getHomePath() + "/.emulationstation/update";
+
+	if (!Utils::FileSystem::exists(path))
+		Utils::FileSystem::createDirectory(path);
+	else
+		deleteDirectoryFiles(path);
+
+	std::string zipFile = path + "/" + fileName;
+
+	if (downloadFile(url, zipFile, "update", func))
 	{
 		if (func != nullptr)
 			func(std::string("Extracting update"));
-
-		std::string fileName = Utils::FileSystem::getFileName(url);
-		std::string path = Utils::FileSystem::getHomePath() + "/.emulationstation/update";
-	
-		
-		if (!Utils::FileSystem::exists(path))
-			Utils::FileSystem::createDirectory(path);
-		else
-			deleteDirectoryFiles(path);
-
-		std::string zipFile = path + "/" + fileName;		
-		req->saveContent(zipFile);
 
 		unzipFile(Utils::FileSystem::getPreferredPath(zipFile), Utils::FileSystem::getPreferredPath(path));
 		Utils::FileSystem::removeFile(zipFile);
@@ -303,14 +296,10 @@ std::vector<ThemeDownloadInfo> ApiSystem::getThemesList()
 
 	std::vector<ThemeDownloadInfo> res;
 
-	std::shared_ptr<HttpReq> httpreq = std::make_shared<HttpReq>("https://batocera.org/upgrades/themes.txt");
-
-	while (httpreq->status() == HttpReq::REQ_IN_PROGRESS)
-		std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
-	if (httpreq->status() == HttpReq::REQ_SUCCESS)
+	HttpReq httpreq("https://batocera.org/upgrades/themes.txt");
+	if (httpreq.wait())
 	{
-		auto lines = Utils::String::split(httpreq->getContent(), '\n');
+		auto lines = Utils::String::split(httpreq.getContent(), '\n');
 		for (auto line : lines)
 		{
 			auto parts = Utils::String::splitAny(line, " \t");
@@ -352,7 +341,7 @@ std::vector<ThemeDownloadInfo> ApiSystem::getThemesList()
 	return res;
 }
 
-std::shared_ptr<HttpReq> downloadGitRepository(const std::string url, const std::string label, const std::function<void(const std::string)>& func)
+bool downloadGitRepository(const std::string url, const std::string fileName, const std::string label, const std::function<void(const std::string)>& func)
 {
 	if (func != nullptr)
 		func(_("Downloading") + " " + label);
@@ -362,14 +351,10 @@ std::shared_ptr<HttpReq> downloadGitRepository(const std::string url, const std:
 	std::string statUrl = Utils::String::replace(url, "https://github.com/", "https://api.github.com/repos/");
 	if (statUrl != url)
 	{
-		std::shared_ptr<HttpReq> statreq = std::make_shared<HttpReq>(statUrl);
-
-		while (statreq->status() == HttpReq::REQ_IN_PROGRESS)
-			std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
-		if (statreq->status() == HttpReq::REQ_SUCCESS)
+		HttpReq statreq(statUrl);
+		if (statreq.wait())
 		{
-			std::string content = statreq->getContent();
+			std::string content = statreq.getContent();
 			auto pos = content.find("\"size\": ");
 			if (pos != std::string::npos)
 			{
@@ -380,14 +365,14 @@ std::shared_ptr<HttpReq> downloadGitRepository(const std::string url, const std:
 		}
 	}
 
-	std::shared_ptr<HttpReq> httpreq = std::make_shared<HttpReq>(url + "/archive/master.zip");
+	HttpReq httpreq(url + "/archive/master.zip", fileName);
 
 	int curPos = -1;
-	while (httpreq->status() == HttpReq::REQ_IN_PROGRESS)
+	while (httpreq.status() == HttpReq::REQ_IN_PROGRESS)
 	{
 		if (downloadSize > 0)
 		{
-			double pos = httpreq->getPosition();
+			double pos = httpreq.getPosition();
 			if (pos > 0 && curPos != pos)
 			{
 				if (func != nullptr)
@@ -403,10 +388,10 @@ std::shared_ptr<HttpReq> downloadGitRepository(const std::string url, const std:
 		std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	}
 
-	if (httpreq->status() != HttpReq::REQ_SUCCESS)
-		return nullptr;
+	if (httpreq.status() != HttpReq::REQ_SUCCESS)
+		return false;
 
-	return httpreq;
+	return true;
 }
 
 std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const std::function<void(const std::string)>& func)
@@ -417,16 +402,14 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 		if (theme.name != themeName)
 			continue;
 
-		std::shared_ptr<HttpReq> httpreq = downloadGitRepository(theme.url, themeName, func);
-		if (httpreq != nullptr && httpreq->status() == HttpReq::REQ_SUCCESS)
+		std::string themeFileName = Utils::FileSystem::getFileName(theme.url);
+		std::string zipFile = Utils::FileSystem::getHomePath() + "/.emulationstation/themes/" + themeFileName + ".zip";
+		zipFile = Utils::String::replace(zipFile, "/", "\\");
+
+		if (downloadGitRepository(theme.url, zipFile, themeName, func))
 		{
 			if (func != nullptr)
 				func(_("Extracting") + " " + themeName);
-
-			std::string themeFileName = Utils::FileSystem::getFileName(theme.url);
-			std::string zipFile = Utils::FileSystem::getHomePath() + "/.emulationstation/themes/" + themeFileName + ".zip";
-			zipFile = Utils::String::replace(zipFile, "/", "\\");
-			httpreq->saveContent(zipFile);
 
 			if (!unzipFile(zipFile, Utils::String::replace(Utils::FileSystem::getHomePath() + "/.emulationstation/themes", "/", "\\")))
 				return std::pair<std::string, int>(std::string("An error occured while extracting"), 1);
@@ -437,9 +420,7 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 				std::string finalfolderName = Utils::FileSystem::getParent(folderName) + "/" + themeName;
 
 				if (Utils::FileSystem::isDirectory(finalfolderName))
-				{
 					deleteDirectoryFiles(finalfolderName);
-				}
 
 				rename(folderName.c_str(), finalfolderName.c_str());
 
