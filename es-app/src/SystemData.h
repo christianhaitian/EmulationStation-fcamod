@@ -145,7 +145,7 @@ public:
 	inline bool isGameSystem() { return mIsGameSystem; };
 
 	inline bool isGroupSystem() { return mIsGroupSystem; };	
-	inline bool isGroupChildSystem();
+	bool isGroupChildSystem();
 
 	bool isVisible();
 	
