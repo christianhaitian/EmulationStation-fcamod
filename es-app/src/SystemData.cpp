@@ -370,7 +370,12 @@ void SystemData::createGroupedSystems()
 	{
 		SystemData* sys = *it;
 		if (!sys->isCollection() && !sys->getSystemEnvData()->mGroup.empty())
+		{
+			if (Settings::getInstance()->getBool(sys->getSystemEnvData()->mGroup + ".ungroup"))
+				continue;
+
 			map[sys->getSystemEnvData()->mGroup].push_back(sys);
+		}
 	}
 
 	for (auto item : map)
@@ -402,6 +407,8 @@ void SystemData::createGroupedSystems()
 						std::string path = logoElem->get<std::string>("path");
 						folder->setMetadata("image", path);
 						folder->setMetadata("thumbnail", path);
+
+						folder->enableVirtualFolderDisplay(true);
 					}
 				}
 
@@ -853,6 +860,40 @@ void SystemData::deleteIndex()
 		delete mFilterIndex;
 		mFilterIndex = nullptr;
 	}
+}
+
+bool SystemData::isGroupChildSystem()
+{
+	if (mEnvData != nullptr && !mEnvData->mGroup.empty())
+		return !Settings::getInstance()->getBool(mEnvData->mGroup + ".ungroup");
+
+	return false;
+}
+
+std::unordered_set<std::string> SystemData::getAllGroupNames()
+{
+	std::unordered_set<std::string> names;
+
+	for (auto sys : SystemData::sSystemVector)
+	{
+		if (sys->isGroupSystem())
+			names.insert(sys->getName());
+		else if (sys->mEnvData != nullptr && !sys->mEnvData->mGroup.empty())
+			names.insert(sys->mEnvData->mGroup);
+	}
+
+	return names;
+}
+
+std::unordered_set<std::string> SystemData::getGroupChildSystemNames(const std::string groupName)
+{
+	std::unordered_set<std::string> names;
+
+	for (auto sys : SystemData::sSystemVector)
+		if (sys->mEnvData != nullptr && sys->mEnvData->mGroup == groupName)
+			names.insert(sys->getFullName());
+
+	return names;
 }
 
 SystemData* SystemData::getParentGroupSystem()

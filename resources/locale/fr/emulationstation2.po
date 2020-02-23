@@ -83,6 +83,10 @@ msgid "DOWNLOADING"
 msgstr "TÉLÉCHARGEMENT"
 
 #:
+msgid "GROUPED SYSTEMS"
+msgstr "SYSTÈMES À FUSIONNER"
+
+#:
 msgid "THEME INSTALLED SUCCESSFULLY"
 msgstr "THEME INSTALLÉ"
 

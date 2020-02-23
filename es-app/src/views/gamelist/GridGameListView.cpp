@@ -232,7 +232,7 @@ const std::string GridGameListView::getImagePath(FileData* file)
 
 const bool GridGameListView::isVirtualFolder(FileData* file)
 {
-	return file->getType() == FOLDER && ((FolderData*)file)->isVirtualFolder();
+	return file->getType() == FOLDER && ((FolderData*)file)->isVirtualFolderDisplay();
 }
 
 void GridGameListView::populateList(const std::vector<FileData*>& files)
@@ -247,6 +247,7 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 			auto top = mCursorStack.top();
 
 			std::string imagePath;
+			bool displayAsVirtualFolder = true;
 
 			// Find logo image from original system
 			if (mCursorStack.size() == 1 && top->getSystem()->isGroupChildSystem())
@@ -254,18 +255,33 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 				std::string startPath = top->getSystem()->getStartPath();
 
 				auto parent = top->getSystem()->getParentGroupSystem();
-				for (auto child : parent->getRootFolder()->getChildren())
+
+				auto theme = parent->getTheme();
+				if (theme)
 				{
-					if (child->getPath() == startPath)
+					const ThemeData::ThemeElement* logoElem = theme->getElement("system", "logo", "image");
+					if (logoElem && logoElem->has("path"))
+						imagePath = logoElem->get<std::string>("path");
+				}
+
+				if (imagePath.empty())
+				{
+					for (auto child : parent->getRootFolder()->getChildren())
 					{
-						imagePath = child->getMetadata("image");
-						break;
+						if (child->getPath() == startPath)
+						{
+							if (child->getType() == FOLDER)
+								displayAsVirtualFolder = ((FolderData*)child)->isVirtualFolderDisplayEnabled();
+
+							imagePath = child->getMetadata("image");
+							break;
+						}
 					}
 				}
 			}
 			
 			FileData* placeholder = new FileData(PLACEHOLDER, "..", this->mRoot->getSystem());
-			mGrid.add(". .", imagePath, "", "", false, true, !imagePath.empty(), placeholder);
+			mGrid.add(". .", imagePath, "", "", false, true, displayAsVirtualFolder && !imagePath.empty(), placeholder);
 		}
 
 		std::string systemName = mRoot->getSystem()->getFullName();

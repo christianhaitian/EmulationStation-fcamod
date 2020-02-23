@@ -145,7 +145,7 @@ public:
 	inline bool isGameSystem() { return mIsGameSystem; };
 
 	inline bool isGroupSystem() { return mIsGroupSystem; };	
-	inline bool isGroupChildSystem() { return mEnvData != nullptr && !mEnvData->mGroup.empty(); }
+	inline bool isGroupChildSystem();
 
 	bool isVisible();
 	
@@ -188,6 +188,9 @@ public:
 	size_t getGamelistHash() { return mGameListHash; }
 
 	SystemData* getParentGroupSystem();
+
+	static std::unordered_set<std::string> getAllGroupNames();
+	static std::unordered_set<std::string> getGroupChildSystemNames(const std::string groupName);
 
 private:
 	static SystemData* loadSystem(pugi::xml_node system);

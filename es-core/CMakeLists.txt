@@ -50,6 +50,7 @@ set(CORE_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoPlayerComponent.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/components/VideoVlcComponent.h	
+	${CMAKE_CURRENT_SOURCE_DIR}/src/components/MultiLineMenuEntry.h
 
 	# Guis
 	${CMAKE_CURRENT_SOURCE_DIR}/src/guis/GuiDetectDevice.h

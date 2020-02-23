@@ -6,6 +6,8 @@
 #include "Log.h"
 #include "Window.h"
 #include "EsLocale.h"
+#include "ThemeData.h"
+#include "components/MultiLineMenuEntry.h"
 
 //Used to display a list of options.
 //Can select one or multiple options.
@@ -26,6 +28,8 @@ private:
 	struct OptionListData
 	{
 		std::string name;
+		std::string description;
+
 		T object;
 		bool selected;
 
@@ -83,7 +87,10 @@ private:
 				}
 				else
 				{
-					row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(it->name), font, color), true);
+					if (!it->description.empty())
+						row.addElement(std::make_shared<MultiLineMenuEntry>(mWindow, Utils::String::toUpper(it->name), it->description), true);
+					else
+						row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(it->name), font, color), true);
 
 					if (mParent->mMultiSelect)
 					{
@@ -295,6 +302,25 @@ public:
 		auto selected = getSelectedObjects();
 		assert(selected.size() == 1);
 		return selected.at(0);
+	}
+
+	void addEx(const std::string name, const std::string description, const T& obj, bool selected)
+	{
+		for (auto sysIt = mEntries.cbegin(); sysIt != mEntries.cend(); sysIt++)
+			if (sysIt->name == name)
+				return;
+
+		OptionListData e;
+		e.name = name;
+		e.description = description;
+		e.object = obj;
+		e.selected = selected;
+
+		e.group = mGroup;
+		mGroup = "";
+
+		mEntries.push_back(e);
+		onSelectedChanged();
 	}
 
 	void add(const std::string& name, const T& obj, bool selected)
