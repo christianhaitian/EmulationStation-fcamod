@@ -285,9 +285,10 @@ void GridGameListView::populateList(const std::vector<FileData*>& files)
 		}
 
 		std::string systemName = mRoot->getSystem()->getFullName();
+		std::string systemShortName = mRoot->getSystem()->getName();
 
 		bool favoritesFirst = Settings::getInstance()->getBool("FavoritesFirst");
-		bool showFavoriteIcon = (systemName != "favorites");
+		bool showFavoriteIcon = (systemName != "favorites" && systemShortName != "recent");
 		if (!showFavoriteIcon)
 			favoritesFirst = false;
 
