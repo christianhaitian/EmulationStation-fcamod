@@ -924,6 +924,9 @@ void GuiMenu::openUISettings()
 		if ("retropie" != (*it)->getName() && (*it)->isVisible())
 			systemfocus_list->add((*it)->getName(), (*it)->getName(), Settings::getInstance()->getString("StartupSystem") == (*it)->getName());
 
+	if (!systemfocus_list->hasSelection())
+		systemfocus_list->selectFirstItem();
+
 	s->addWithLabel(_("START ON SYSTEM"), systemfocus_list);
 	s->addSaveFunc([systemfocus_list] {
 		Settings::getInstance()->setString("StartupSystem", systemfocus_list->getSelected());
