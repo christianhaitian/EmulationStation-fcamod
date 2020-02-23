@@ -141,6 +141,7 @@ private:
 	std::vector<std::string> getUserCollectionThemeFolders();
 
 	void trimCollectionCount(FolderData* rootFolder, int limit);
+	void sortLastPlayed(SystemData* system);
 
 	bool themeFolderExists(std::string folder);
 
