@@ -609,12 +609,12 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 			system->updateDisplayedGameCount();
 
 			std::shared_ptr<IGameListView> newView = getGameListView(system);
-
+			
 			// to counter having come from a placeholder
-			if (!cursor->isPlaceHolder()) 
+			if (cursor != nullptr && !cursor->isPlaceHolder() && system->getName() != "recent")
 				newView->setCursor(cursor);
 			
-			if (isCurrent)
+			if(isCurrent)
 				mCurrentView = newView;
 
 			break;

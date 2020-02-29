@@ -135,8 +135,11 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 				mCursorStack.pop();
 
 				FolderData* folder = top->getParent();
-				if (folder == nullptr)
+				if (folder == nullptr && getCursor()->getSystem()->getParentGroupSystem() != nullptr)
 					folder = getCursor()->getSystem()->getParentGroupSystem()->getRootFolder();
+
+				if (folder == nullptr)
+					return true;
 
 				populateList(folder->getChildrenListToDisplay());
 				setCursor(top);				
@@ -190,13 +193,9 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 		}
 		else if (config->isMappedTo("y", input) && !UIModeController::getInstance()->isUIModeKid())
 		{
-			if(mRoot->getSystem()->isGameSystem())
-			{
-				if(CollectionSystemManager::get()->toggleGameInCollection(getCursor()))
-				{
+			if (mRoot->getSystem()->isGameSystem() || mRoot->getSystem()->isGroupSystem())
+				if (CollectionSystemManager::get()->toggleGameInCollection(getCursor()))
 					return true;
-				}
-			}
 		}
 	}
 
