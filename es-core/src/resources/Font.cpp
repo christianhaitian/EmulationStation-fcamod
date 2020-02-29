@@ -257,10 +257,10 @@ std::vector<std::string> getFallbackFontPaths()
 	fontDir += "\\Fonts\\";
 
 	const char* fontNames[] = {
-		"glyphs.ttf",   // latin		
+		":/glyphs.ttf",   // latin		
+		":/DroidSansFallbackFull.ttf",// japanese, chinese, present on Debian
+		":/NanumMyeongjo.ttf" // korean font
 		"arial.ttf",   // latin		
-		"meiryo.ttc", // japanese
-		"simhei.ttf" // chinese		
 	};
 
 	//prepend to font file names
@@ -269,11 +269,7 @@ std::vector<std::string> getFallbackFontPaths()
 
 	for(unsigned int i = 0; i < sizeof(fontNames) / sizeof(fontNames[0]); i++)
 	{
-		std::string path = fontDir + fontNames[i];
-
-		if (i == 0)
-			path = ":/glyphs.ttf";
-
+		std::string path = Utils::String::startsWith(fontNames[i], ":/") ? fontNames[i] : fontDir + fontNames[i];
 		if (ResourceManager::getInstance()->fileExists(path))
 			fontPaths.push_back(path);
 	}

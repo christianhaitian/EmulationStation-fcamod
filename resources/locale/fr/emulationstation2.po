@@ -567,6 +567,10 @@ msgid "BACK"
 msgstr "RETOUR"
 
 #: 
+msgid "go back"
+msgstr "RETOUR"
+
+#: 
 msgid "CLOSE"
 msgstr "FERMER"
 
