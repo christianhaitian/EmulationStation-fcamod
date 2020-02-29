@@ -1703,7 +1703,14 @@ void GuiMenu::openScreensaverOptions() {
 	mWindow->pushGui(new GuiGeneralScreensaverOptions(mWindow, _("SCREENSAVER SETTINGS")));
 }
 
-void GuiMenu::openCollectionSystemSettings() {
+void GuiMenu::openCollectionSystemSettings() 
+{
+	if (ThreadedScraper::isRunning())
+	{
+		mWindow->pushGui(new GuiMsgBox(mWindow, _("THIS FUNCTION IS DISABLED WHEN SCRAPING IS RUNNING")));
+		return;
+	}
+
 	mWindow->pushGui(new GuiCollectionSystemsOptions(mWindow));
 }
 
