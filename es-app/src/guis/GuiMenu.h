@@ -33,11 +33,13 @@ private:
 	void openScreensaverOptions();
 	void openSoundSettings();
 	void openUISettings();
+
 	void openUpdateSettings();
 	void openEmulatorSettings();
 	void openSystemEmulatorSettings(SystemData* system);
 
 	void createInputTextRow(GuiSettings *gui, std::string title, const char *settingsID, bool password);
+	void openDisplaySettings();
 
 	MenuComponent mMenu;
 	TextComponent mVersion;

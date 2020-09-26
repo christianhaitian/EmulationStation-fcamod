@@ -87,8 +87,8 @@ void VolumeControl::init()
 	if (mixerHandle == nullptr)
 	{
 		// Allow users to override the AudioCard and MixerName in es_settings.cfg
-		mixerCard = Settings::getInstance()->getString("AudioCard").c_str();
-		mixerName = Settings::getInstance()->getString("AudioDevice").c_str();
+		mixerCard = "default"; //Settings::getInstance()->getString("AudioCard").c_str();
+		mixerName = "Playback"; //Settings::getInstance()->getString("AudioDevice").c_str();
 
 		snd_mixer_selem_id_alloca(&mixerSelemId);
 		//sets simple-mixer index and name

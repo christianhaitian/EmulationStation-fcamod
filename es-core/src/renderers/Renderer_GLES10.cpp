@@ -8,10 +8,28 @@
 #include <GLES/gl.h>
 #include <SDL.h>
 #include <vector>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include <go2/display.h>
+#include <go2/input.h>
+#include <go2/audio.h>
+#include <drm/drm_fourcc.h>
+#include "BatteryIcons.h"
+#include "VolumeIcons.h"
+#include "WifiIcons.h"
+#include "BrightnessIcon.h"
+
+static go2_input_t* input = nullptr;
+static go2_surface_t* titlebarSurface = nullptr;
+static unsigned int frame = 0;
 
 namespace Renderer
 {
-	static SDL_GLContext sdlContext = nullptr;
+	//static SDL_GLContext sdlContext = nullptr;
+
+	static go2_context_t* context = nullptr;
+	static go2_presenter_t* presenter = nullptr;
 
 	static GLenum convertBlendFactor(const Blend::Factor _blendFactor)
 	{
@@ -63,6 +81,7 @@ namespace Renderer
 
 	void setupWindow()
 	{
+#if 0
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE,     8);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE,   8);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE,    8);
@@ -71,13 +90,33 @@ namespace Renderer
 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 0);
-
+#endif
 	} // setupWindow
 
 	void createContext()
 	{
-		sdlContext = SDL_GL_CreateContext(getSDLWindow());
-		SDL_GL_MakeCurrent(getSDLWindow(), sdlContext);
+		// sdlContext = SDL_GL_CreateContext(getSDLWindow());
+		// SDL_GL_MakeCurrent(getSDLWindow(), sdlContext);
+		input = go2_input_create();
+
+		go2_context_attributes_t attr;
+		attr.major = 1;
+		attr.minor = 0;
+		attr.red_bits = 8;
+		attr.green_bits = 8;
+		attr.blue_bits = 8;
+		attr.alpha_bits = 8;
+		attr.depth_bits = 24;
+		attr.stencil_bits = 0;
+
+		go2_display_t* display = getDisplay();
+
+		titlebarSurface = go2_surface_create(display, 480, 16, DRM_FORMAT_RGB565);
+
+		context = go2_context_create(display, 480, 320, &attr);
+		go2_context_make_current(context);
+
+		presenter = go2_presenter_create(display, DRM_FORMAT_RGB565, 0xff080808);
 
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -89,9 +128,19 @@ namespace Renderer
 
 	void destroyContext()
 	{
-		SDL_GL_DeleteContext(sdlContext);
-		sdlContext = nullptr;
+		//SDL_GL_DeleteContext(sdlContext);
+		//sdlContext = nullptr;
+		go2_context_destroy(context);
+		context = nullptr;
 
+		go2_presenter_destroy(presenter);
+		presenter = nullptr;
+
+		go2_surface_destroy(titlebarSurface);
+		titlebarSurface = nullptr;
+
+		go2_input_destroy(input);
+		input = nullptr;
 	} // destroyContext
 
 	unsigned int createTexture(const Texture::Type _type, const bool _linear, const bool _repeat, const unsigned int _width, const unsigned int _height, void* _data)
@@ -234,6 +283,7 @@ namespace Renderer
 
 	void setSwapInterval()
 	{
+#if 0
 		// vsync
 		if(Settings::getInstance()->getBool("VSync"))
 		{
@@ -248,7 +298,7 @@ namespace Renderer
 		}
 		else
 			SDL_GL_SetSwapInterval(0);
-
+#endif
 	} // setSwapInterval
 
 	void swapBuffers()
@@ -259,14 +309,427 @@ namespace Renderer
 		Sleep(0);
 #endif
 
-		SDL_GL_SwapWindow(getSDLWindow());
+		//SDL_GL_SwapWindow(getSDLWindow());
+
+		if (context)
+		{
+			{
+				// Battery level
+				const uint8_t* src = battery_image.pixel_data;
+				int src_stride = 32 * sizeof(short);
+
+				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
+				int dst_stride = go2_surface_stride_get(titlebarSurface);
+
+				go2_battery_state_t batteryState;
+				go2_input_battery_read(input, &batteryState);
+
+				int batteryIndex;
+				if (batteryState.level == 1)
+				{
+					batteryIndex = 0;
+				}
+				else if (batteryState.level <= 5)
+				{
+					batteryIndex = 1;
+				}
+				else if (batteryState.level <= 10)
+				{
+					batteryIndex = 2;
+				}
+				else if (batteryState.level <= 15)
+				{
+					batteryIndex = 3;
+				}
+				else if (batteryState.level <= 20)
+				{
+					batteryIndex = 4;
+				}
+				else if (batteryState.level <= 25)
+				{
+					batteryIndex = 5;
+				}
+				else if (batteryState.level <= 30)
+				{
+					batteryIndex = 6;
+				}
+				else if (batteryState.level <= 35)
+				{
+					batteryIndex = 7;
+				}
+				else if (batteryState.level <= 40)
+				{
+					batteryIndex = 8;
+				}
+				else if (batteryState.level <= 45)
+				{
+					batteryIndex = 9;
+				}
+				else if (batteryState.level <= 50)
+				{
+					batteryIndex = 10;
+				}
+				else if (batteryState.level <= 55)
+				{
+					batteryIndex = 11;
+				}
+				else if (batteryState.level <= 60)
+				{
+					batteryIndex = 12;
+				}
+				else if (batteryState.level <= 65)
+				{
+					batteryIndex = 13;
+				}
+				else if (batteryState.level <= 70)
+				{
+					batteryIndex = 14;
+				}
+				else if (batteryState.level <= 75)
+				{
+					batteryIndex = 15;
+				}
+				else if (batteryState.level <= 80)
+				{
+					batteryIndex = 16;
+				}
+				else if (batteryState.level <= 85)
+				{
+					batteryIndex = 17;
+				}
+				else if (batteryState.level <= 90)
+				{
+					batteryIndex = 18;
+				}
+				else if (batteryState.level <= 95)
+				{
+					batteryIndex = 19;
+				}
+				else if (batteryState.level == 100)
+				{
+					batteryIndex = 20;
+				}				
+				else
+				{
+					batteryIndex = 20;
+				}
+
+				src += (batteryIndex * 16 * src_stride);
+				dst += (480 - 32) * sizeof(short);
+
+				for (int y = 0; y < 16; ++y)
+				{
+					memcpy(dst, src, 32 * sizeof(short));
+
+					src += src_stride;
+					dst += dst_stride;
+				}
+			}
+
+			{
+				// Volume level
+				const uint8_t* src = volume_image.pixel_data;
+				int src_stride = 32 * sizeof(short);
+
+				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
+				int dst_stride = go2_surface_stride_get(titlebarSurface);
+
+				uint32_t volume = go2_audio_volume_get(NULL);
+
+				int volumeIndex;
+				if (volume == 0)
+				{
+					volumeIndex = 0;
+				}
+				else if (volume <= 5)
+				{
+					volumeIndex = 1;
+				}
+				else if (volume <= 10)
+				{
+					volumeIndex = 2;
+				}
+				else if (volume <= 15)
+				{
+					volumeIndex = 3;
+				}
+				else if (volume <= 20)
+				{
+					volumeIndex = 4;
+				}
+				else if (volume <= 25)
+				{
+					volumeIndex = 5;
+				}
+				else if (volume <= 30)
+				{
+					volumeIndex = 6;
+				}
+				else if (volume <= 35)
+				{
+					volumeIndex = 7;
+				}
+				else if (volume <= 40)
+				{
+					volumeIndex = 8;
+				}
+				else if (volume <= 45)
+				{
+					volumeIndex = 9;
+				}
+				else if (volume <= 50)
+				{
+					volumeIndex = 10;
+				}
+				else if (volume <= 55)
+				{
+					volumeIndex = 11;
+				}
+				else if (volume <= 60)
+				{
+					volumeIndex = 12;
+				}
+				else if (volume <= 65)
+				{
+					volumeIndex = 13;
+				}
+				else if (volume <= 70)
+				{
+					volumeIndex = 14;
+				}
+				else if (volume <= 75)
+				{
+					volumeIndex = 15;
+				}
+				else if (volume <= 80)
+				{
+					volumeIndex = 16;
+				}
+				else if (volume <= 85)
+				{
+					volumeIndex = 17;
+				}
+				else if (volume <= 90)
+				{
+					volumeIndex = 18;
+				}
+				else if (volume <= 95)
+				{
+					volumeIndex = 19;
+				}
+				else if (volume = 100)
+				{
+					volumeIndex = 20;
+				}
+				else
+				{
+					volumeIndex = 20;
+				}
+
+				src += (volumeIndex * 16 * src_stride);
+				//dst += (480 - 32) * sizeof(short);
+
+				for (int y = 0; y < 16; ++y)
+				{
+					memcpy(dst, src, 32 * sizeof(short));
+
+					src += src_stride;
+					dst += dst_stride;
+				}
+			}
+
+			{
+				// Brightness level
+				const uint8_t* src = brightness_image.pixel_data;
+				int src_stride = 32 * sizeof(short);
+
+				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
+				int dst_stride = go2_surface_stride_get(titlebarSurface);
+
+				int brightnessIndex = 0;
+				int brightness = 0;
+				int fd;
+				char buffer[10];
+				fd = open("/sys/class/backlight/backlight/brightness", O_RDONLY);
+				if (fd > 0)
+				{
+					memset(buffer, 0, 10);
+					ssize_t count = read(fd, buffer, 10);
+					if( count > 0 )
+					{
+						brightness = atoi(buffer);
+						brightness = brightness*100/255;
+					}
+					close(fd);
+				}
+
+
+				if (brightness == 0)
+				{
+					brightnessIndex = 0;
+				}
+				else if (brightness <= 5)
+				{
+					brightnessIndex = 1;
+				}
+				else if (brightness <= 10)
+				{
+					brightnessIndex = 2;
+				}
+				else if (brightness <= 15)
+				{
+					brightnessIndex = 3;
+				}
+				else if (brightness <= 20)
+				{
+					brightnessIndex = 4;
+				}
+				else if (brightness <= 25)
+				{
+					brightnessIndex = 5;
+				}
+				else if (brightness <= 30)
+				{
+					brightnessIndex = 6;
+				}
+				else if (brightness <= 35)
+				{
+					brightnessIndex = 7;
+				}
+				else if (brightness <= 40)
+				{
+					brightnessIndex = 8;
+				}
+				else if (brightness <= 45)
+				{
+					brightnessIndex = 9;
+				}
+				else if (brightness <= 50)
+				{
+					brightnessIndex = 10;
+				}
+				else if (brightness <= 55)
+				{
+					brightnessIndex = 11;
+				}
+				else if (brightness <= 60)
+				{
+					brightnessIndex = 12;
+				}
+				else if (brightness <= 65)
+				{
+					brightnessIndex = 13;
+				}
+				else if (brightness <= 70)
+				{
+					brightnessIndex = 14;
+				}
+				else if (brightness <= 75)
+				{
+					brightnessIndex = 15;
+				}
+				else if (brightness <= 80)
+				{
+					brightnessIndex = 16;
+				}
+				else if (brightness <= 85)
+				{
+					brightnessIndex = 17;
+				}
+				else if (brightness <= 90)
+				{
+					brightnessIndex = 18;
+				}
+				else if (brightness <= 95)
+				{
+					brightnessIndex = 19;
+				}
+				else if (brightness = 100)
+				{
+					brightnessIndex = 20;
+				}
+				else
+				{
+					brightnessIndex = 20;
+				}
+				
+				src += (brightnessIndex * 16 * src_stride);
+				dst += (64) * sizeof(short);
+
+				for (int y = 0; y < 16; ++y)
+				{
+					memcpy(dst, src, 32 * sizeof(short));
+
+					src += src_stride;
+					dst += dst_stride;
+				}
+			}
+
+			{
+				
+				// WIFI ICONS
+				const uint8_t* src = wifi_image.pixel_data;
+				int src_stride = 32 * sizeof(short);
+
+				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
+				int dst_stride = go2_surface_stride_get(titlebarSurface);
+
+				int wifiIndex = 0;
+
+				// Wifi
+				int fd;
+				char buffer[10];
+				fd = open("/sys/class/net/wlan0/operstate", O_RDONLY);
+				if (fd > 0)
+				{
+					memset(buffer, 0, 10);
+					ssize_t count = read(fd, buffer, 10);
+					if( count > 0 )
+					{
+						if( strstr( buffer, "up") != NULL )
+							wifiIndex = 1;
+						else
+							wifiIndex = 0;
+					}
+					close(fd);
+				}
+				if( wifiIndex == 1 )
+				{
+					src += (wifiIndex* 16 * src_stride);
+					dst += (480 - 74) * sizeof(short);
+
+					for (int y = 0; y < 16; ++y)
+					{
+						memcpy(dst, src, 32 * sizeof(short));
+
+						src += src_stride;
+						dst += dst_stride;
+					}
+
+				}
+			}
+
+			go2_context_swap_buffers(context);
+			go2_surface_t* surface = go2_context_surface_lock(context);
+
+			go2_surface_blit(titlebarSurface, 0, 0, 480, 16,
+							 surface, 0, 0, 480, 16,
+							 GO2_ROTATION_DEGREES_0);
+
+			go2_presenter_post(presenter,
+						surface,
+						0, 0, 480, 320,
+						0, 0, 320, 480,
+						GO2_ROTATION_DEGREES_270);
+			go2_context_surface_unlock(context, surface);
+		}
 
 #ifdef WIN32		
 		Sleep(0);
 #endif
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		//printf("Frame %d\n", frame++);
 	} // swapBuffers
 
 #define ROUNDING_PIECES 8.0f

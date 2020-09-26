@@ -28,11 +28,15 @@
 #include "guis/GuiTextEditPopupKeyboard.h"
 #include "scrapers/ThreadedScraper.h"
 #include "ApiSystem.h"
-#include "platform.h"
 #include "views/gamelist/IGameListView.h"
+
+#include <go2/display.h>
+
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
+	addEntry("DISPLAY SETTINGS", true, [this] { openDisplaySettings(); });
+
 	auto theme = ThemeData::getMenuTheme();
 
 	bool isFullUI = UIModeController::getInstance()->isUIModeFull();	
@@ -81,6 +85,19 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 			Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2));
 	else
 		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
+}
+
+void GuiMenu::openDisplaySettings()
+{
+	// Brightness
+	auto s = new GuiSettings(mWindow, "DISPLAY");
+
+	auto bright = std::make_shared<SliderComponent>(mWindow, 1.0f, 100.f, 1.0f, "%");
+	bright->setValue((float)go2_display_backlight_get(NULL));
+	s->addWithLabel("BRIGHTNESS", bright);
+	s->addSaveFunc([bright] { go2_display_backlight_set(NULL, (int)Math::round(bright->getValue())); });
+
+	mWindow->pushGui(s);
 }
 
 void GuiMenu::openScraperSettings()
