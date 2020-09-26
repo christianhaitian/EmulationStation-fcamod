@@ -1,8 +1,7 @@
-EmulationStation FCAMOD
+EmulationStation FCAMOD for rk3326 devices
 =======================
 
-This is a fork of EmulationStation containing many additions. 
-This has been primary developped for Windows platform, but can be compiled for Linux & Raspberry Pi.
+This is a fork of EmulationStation FCAMOD by fabricecaruso containing additions for Odroid Go Advance device and clones. 
 
 Changes in my branch
 ====================
@@ -161,14 +160,14 @@ sudo dnf install SDL2-devel freeimage-devel freetype-devel curl-devel \
 Note this Repository uses a git submodule - to checkout the source and all submodules, use
 
 ```bash
-git clone --recursive https://github.com/RetroPie/EmulationStation.git
+git clone --recursive https://github.com/christianhaitian/EmulationStation-fcamod.git
 ```
 
 or 
 
 ```bash
-git clone https://github.com/RetroPie/EmulationStation.git
-cd EmulationStation
+git clone https://github.com/christianhaitian/EmulationStation-fcamod.git
+cd EmulationStation-fcamod
 git submodule update --init
 ```
 
