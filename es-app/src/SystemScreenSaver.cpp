@@ -94,7 +94,7 @@ void SystemScreenSaver::startScreenSaver()
 		// Load a random video
 		std::string path = pickRandomVideo();
 
-		int retry = 10;
+		int retry = 200;
 		while (retry > 0 && !Utils::FileSystem::exists(path))
 		{
 			retry--;
