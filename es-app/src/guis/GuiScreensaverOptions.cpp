@@ -13,7 +13,7 @@ GuiScreensaverOptions::GuiScreensaverOptions(Window* window, std::string title) 
 	mMenu.addButton(_("BACK"), _("BACK"), [this] { delete this; });
 
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
-	mMenu.setPosition((mSize.x() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.15f);
+	mMenu.setPosition((mSize.x() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.0f);
 }
 
 GuiScreensaverOptions::~GuiScreensaverOptions()
