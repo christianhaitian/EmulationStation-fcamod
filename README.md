@@ -112,6 +112,8 @@ Changes in my branch
 - Added option "Boot on gamelist"
 - Added option "Hide system view"
 - Added option "Display favorites first in gamelist"
+- Fixed cutoff gui menus such as scraper and screensaver for rk3326 devices.
+- Resized metadata menu to be full sized for rk3326 devices.
 
 **General :** 	
 - Localisation (French actually supported)
@@ -140,7 +142,7 @@ Building
 
 EmulationStation uses some C++11 code, which means you'll need to use at least g++-4.7 on Linux, or VS2010 on Windows, to compile.
 
-EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL and RapidJSON.  You also should probably install the `fonts-droid` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time).
+EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL and RapidJSON.  You also should probably install the `fonts-droid-fallback` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time).
 
 **On Debian/Ubuntu:**
 All of this be easily installed with `apt-get`:
