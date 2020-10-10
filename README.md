@@ -144,6 +144,13 @@ EmulationStation uses some C++11 code, which means you'll need to use at least g
 
 EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL and RapidJSON.  You also should probably install the `fonts-droid-fallback` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time).
 
+**On Odroid Go Advance Ubuntu 18.04, 19.10 or 20.04 OS:**
+All of this be easily installed with `apt-get`:
+```bash
+sudo apt-get install -y libboost-system-dev libboost-filesystem-dev libboost-date-time-dev libasound2-dev \
+  libboost-locale-dev libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev \ 
+  cmake libsdl2-dev rapidjson-dev libvlc-dev libvlccore-dev vlc-bin libsdl2-mixer-dev
+```
 **On Debian/Ubuntu:**
 All of this be easily installed with `apt-get`:
 ```bash
