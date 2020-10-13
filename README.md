@@ -1,7 +1,7 @@
 EmulationStation FCAMOD for rk3326 devices
 =======================
 
-This is a fork of EmulationStation FCAMOD by fabricecaruso containing additions for Odroid Go Advance device and clones. 
+This is a fork of EmulationStation FCAMOD by fabricecaruso containing additions for the Odroid Go Advance device and clones. 
 
 Changes in my branch
 ====================
