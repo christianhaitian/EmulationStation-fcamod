@@ -757,7 +757,7 @@ namespace Renderer
 				if( powerIndex == 1 )
 				{
 					src += (powerIndex * 16 * src_stride);
-					dst += (480 - 62) * sizeof(short);
+					dst += (480 - 65) * sizeof(short);
 
 					for (int y = 0; y < 16; ++y)
 					{
@@ -772,7 +772,7 @@ namespace Renderer
 				{
 					const uint8_t* src = blank_image.pixel_data;
 					src += (1 * 16 * src_stride);
-					dst += (480 - 62) * sizeof(short);
+					dst += (480 - 65) * sizeof(short);
 
 					for (int y = 0; y < 16; ++y)
 					{
