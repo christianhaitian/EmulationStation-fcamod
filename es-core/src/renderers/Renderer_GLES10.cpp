@@ -19,6 +19,8 @@
 #include "VolumeIcons.h"
 #include "WifiIcons.h"
 #include "BrightnessIcon.h"
+#include "PowerIcon.h"
+#include "BlankIcon.h"
 
 static go2_input_t* input = nullptr;
 static go2_surface_t* titlebarSurface = nullptr;
@@ -696,7 +698,7 @@ namespace Renderer
 				if( wifiIndex == 1 )
 				{
 					src += (wifiIndex* 16 * src_stride);
-					dst += (480 - 74) * sizeof(short);
+					dst += (480 - 100) * sizeof(short);
 
 					for (int y = 0; y < 16; ++y)
 					{
@@ -707,6 +709,81 @@ namespace Renderer
 					}
 
 				}
+				else
+				{
+					const uint8_t* src = blank_image.pixel_data;
+					src += (1 * 16 * src_stride);
+					dst += (480 - 100) * sizeof(short);
+
+					for (int y = 0; y < 16; ++y)
+					{
+						memcpy(dst, src, 32 * sizeof(short));
+
+						src += src_stride;
+						dst += dst_stride;
+					}
+
+				}
+			}
+
+			{
+				
+				// POWER ICON
+				const uint8_t* src = power_image.pixel_data;
+				int src_stride = 32 * sizeof(short);
+
+				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
+				int dst_stride = go2_surface_stride_get(titlebarSurface);
+
+				int powerIndex = 0;
+
+				// Power
+				int fd;
+				char buffer[10];
+				fd = open("/sys/class/power_supply/ac/online", O_RDONLY);
+				if (fd > 0)
+				{
+					memset(buffer, 0, 10);
+					ssize_t count = read(fd, buffer, 10);
+					if( count > 0 )
+					{
+						if( strstr( buffer, "1") != 0 )
+							powerIndex = 1;
+						else
+							powerIndex = 0;
+					}
+					close(fd);
+				}
+				if( powerIndex == 1 )
+				{
+					src += (powerIndex * 16 * src_stride);
+					dst += (480 - 62) * sizeof(short);
+
+					for (int y = 0; y < 16; ++y)
+					{
+						memcpy(dst, src, 32 * sizeof(short));
+
+						src += src_stride;
+						dst += dst_stride;
+					}
+
+				}
+				else
+				{
+					const uint8_t* src = blank_image.pixel_data;
+					src += (1 * 16 * src_stride);
+					dst += (480 - 62) * sizeof(short);
+
+					for (int y = 0; y < 16; ++y)
+					{
+						memcpy(dst, src, 32 * sizeof(short));
+
+						src += src_stride;
+						dst += dst_stride;
+					}
+
+				}
+
 			}
 
 			go2_context_swap_buffers(context);
