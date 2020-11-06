@@ -21,6 +21,7 @@
 #include "BrightnessIcon.h"
 #include "PowerIcon.h"
 #include "BlankIcon.h"
+#include "ArkOS.h"
 
 static go2_input_t* input = nullptr;
 static go2_surface_t* titlebarSurface = nullptr;
@@ -323,91 +324,103 @@ namespace Renderer
 				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
 				int dst_stride = go2_surface_stride_get(titlebarSurface);
 
-				go2_battery_state_t batteryState;
-				go2_input_battery_read(input, &batteryState);
+				int batcapacity = 0;
+				int fd;
+				char buffer[10];
+				fd = open("/sys/class/power_supply/battery/capacity", O_RDONLY);
+				if (fd > 0)
+				{
+					memset(buffer, 0, 10);
+					ssize_t count = read(fd, buffer, 10);
+					if( count > 0 )
+					{
+						batcapacity = atoi(buffer);
+					}
+					close(fd);
+				}
 
 				int batteryIndex;
-				if (batteryState.level == 1)
+				if (batcapacity == 1)
 				{
 					batteryIndex = 0;
 				}
-				else if (batteryState.level <= 5)
+				else if (batcapacity <= 5)
 				{
 					batteryIndex = 1;
 				}
-				else if (batteryState.level <= 10)
+				else if (batcapacity <= 10)
 				{
 					batteryIndex = 2;
 				}
-				else if (batteryState.level <= 15)
+				else if (batcapacity <= 15)
 				{
 					batteryIndex = 3;
 				}
-				else if (batteryState.level <= 20)
+				else if (batcapacity <= 20)
 				{
 					batteryIndex = 4;
 				}
-				else if (batteryState.level <= 25)
+				else if (batcapacity <= 25)
 				{
 					batteryIndex = 5;
 				}
-				else if (batteryState.level <= 30)
+				else if (batcapacity <= 30)
 				{
 					batteryIndex = 6;
 				}
-				else if (batteryState.level <= 35)
+				else if (batcapacity <= 35)
 				{
 					batteryIndex = 7;
 				}
-				else if (batteryState.level <= 40)
+				else if (batcapacity <= 40)
 				{
 					batteryIndex = 8;
 				}
-				else if (batteryState.level <= 45)
+				else if (batcapacity <= 45)
 				{
 					batteryIndex = 9;
 				}
-				else if (batteryState.level <= 50)
+				else if (batcapacity <= 50)
 				{
 					batteryIndex = 10;
 				}
-				else if (batteryState.level <= 55)
+				else if (batcapacity <= 55)
 				{
 					batteryIndex = 11;
 				}
-				else if (batteryState.level <= 60)
+				else if (batcapacity <= 60)
 				{
 					batteryIndex = 12;
 				}
-				else if (batteryState.level <= 65)
+				else if (batcapacity <= 65)
 				{
 					batteryIndex = 13;
 				}
-				else if (batteryState.level <= 70)
+				else if (batcapacity <= 70)
 				{
 					batteryIndex = 14;
 				}
-				else if (batteryState.level <= 75)
+				else if (batcapacity <= 75)
 				{
 					batteryIndex = 15;
 				}
-				else if (batteryState.level <= 80)
+				else if (batcapacity <= 80)
 				{
 					batteryIndex = 16;
 				}
-				else if (batteryState.level <= 85)
+				else if (batcapacity <= 85)
 				{
 					batteryIndex = 17;
 				}
-				else if (batteryState.level <= 90)
+				else if (batcapacity <= 90)
 				{
 					batteryIndex = 18;
 				}
-				else if (batteryState.level <= 95)
+				else if (batcapacity <= 95)
 				{
 					batteryIndex = 19;
 				}
-				else if (batteryState.level == 100)
+				else if (batcapacity == 100)
 				{
 					batteryIndex = 20;
 				}				
@@ -539,7 +552,24 @@ namespace Renderer
 					dst += dst_stride;
 				}
 			}
+			{
+				// Title
+				const uint8_t* src = header.pixel_data;
+				int src_stride = header.width * sizeof(short);
 
+				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
+				int dst_stride = go2_surface_stride_get(titlebarSurface);
+
+				dst += ((480 / 2) - (header.width / 2)) * sizeof(short);
+
+				for (int y = 0; y < 16; ++y)
+				{
+					memcpy(dst, src, src_stride);
+
+					src += src_stride;
+					dst += dst_stride;
+				}
+			}
 			{
 				// Brightness level
 				const uint8_t* src = brightness_image.pixel_data;
