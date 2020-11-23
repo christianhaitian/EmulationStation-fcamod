@@ -74,7 +74,7 @@ void SystemScreenSaver::startScreenSaver()
 	if (screensaver_behavior == "random video")
 	{
 		if (!loadingNext && Settings::getInstance()->getBool("VideoAudio"))
-			AudioManager::getInstance()->deinit();
+			//AudioManager::getInstance()->deinit();
 
 		mVideoChangeTime = Settings::getInstance()->getInt("ScreenSaverSwapVideoTimeout");
 
