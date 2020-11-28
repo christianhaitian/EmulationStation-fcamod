@@ -80,4 +80,7 @@ private:
 	int mTicks;
 	std::string mName;
 };
+
+std::string getShOutput(const std::string& mStr);
+
 #endif // ES_CORE_PLATFORM_H

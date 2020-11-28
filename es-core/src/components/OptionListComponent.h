@@ -336,6 +336,9 @@ public:
 		e.group = mGroup;
 		mGroup = "";
 
+		if (selected)
+			firstSelected = obj;
+
 		mEntries.push_back(e);
 		onSelectedChanged();
 	}
@@ -379,6 +382,12 @@ public:
 			mEntries.at(i).selected = false;
 		}
 		onSelectedChanged();
+	}
+
+	bool changed(){
+	  auto selected = getSelectedObjects();
+	  if(selected.size() != 1) return false;
+	  return firstSelected != getSelected();
 	}
 
 	bool hasSelection()
@@ -493,6 +502,7 @@ private:
 	std::string mName;
 	std::string mGroup;
 
+	T firstSelected;
 	TextComponent mText;
 	ImageComponent mLeftArrow;
 	ImageComponent mRightArrow;

@@ -241,3 +241,20 @@ void processQuitMode()
 		break;
 	}
 }
+
+// Adapted from emuelec
+std::string getShOutput(const std::string& mStr) 
+{
+    std::string result, file;
+    FILE* pipe{popen(mStr.c_str(), "r")};
+    char buffer[256];
+
+    while(fgets(buffer, sizeof(buffer), pipe) != NULL)
+    {
+        file = buffer;
+        result += file.substr(0, file.size() - 1);
+    }
+
+    pclose(pipe);
+    return result;
+}

@@ -167,5 +167,5 @@ set(CORE_SOURCES
 )
 
 include_directories(${COMMON_INCLUDE_DIRS})
-add_library(es-core STATIC ${CORE_SOURCES} ${CORE_HEADERS})
+add_library(es-core STATIC ${CORE_SOURCES} ${CORE_HEADERS} src/SystemConf.cpp src/SystemConf.h)
 target_link_libraries(es-core ${COMMON_LIBRARIES})

@@ -31,7 +31,7 @@
 #include "views/gamelist/IGameListView.h"
 
 #include <go2/display.h>
-
+#include "SystemConf.h"
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
@@ -1297,6 +1297,27 @@ void GuiMenu::openOtherSettings()
 		break;
 	}
 	*/
+
+	//Timezone - Adapted from emuelec
+
+	auto es_timezones = std::make_shared<OptionListComponent<std::string> >(mWindow, _("TIMEZONE"), false);
+
+	std::string currentTimezone = SystemConf::getInstance()->get("system.timezone");
+	if (currentTimezone.empty())
+		currentTimezone = std::string(getShOutput(R"(/usr/local/bin/timezones current)"));
+	std::string a;
+	for(std::stringstream ss(getShOutput(R"(/usr/local/bin/timezones available)")); getline(ss, a, ','); ) {
+		es_timezones->add(a, a, currentTimezone == a);
+	}
+	s->addWithLabel(_("TIMEZONE"), es_timezones);
+	s->addSaveFunc([es_timezones] {
+		if (es_timezones->changed()) {
+			std::string selectedTimezone = es_timezones->getSelected();
+			runSystemCommand("ln -sf /usr/share/zoneinfo/" + selectedTimezone + " /etc/localtime", "", nullptr);
+		}
+		SystemConf::getInstance()->set("system.timezone", es_timezones->getSelected());
+	});
+
 	// power saver
 	auto power_saver = std::make_shared< OptionListComponent<std::string> >(mWindow, _("POWER SAVER MODES"), false);
 	std::vector<std::string> modes;
@@ -1321,7 +1342,6 @@ void GuiMenu::openOtherSettings()
 		Settings::getInstance()->setString("PowerSaverMode", power_saver->getSelected());
 		PowerSaver::init();
 	});
-
 
 	// LANGUAGE
 
