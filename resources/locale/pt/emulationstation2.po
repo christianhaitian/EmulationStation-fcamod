@@ -30,7 +30,7 @@ msgstr "TAMANHO DE GRELHA PADRÃO"
 
 #: 
 msgid "RESET GAMELIST CUSTOMISATIONS"
-msgstr "APAGAR CUSTOMIZAÇÕES DE GAMELIST"
+msgstr "APAGAR CUSTOMIZAÇÕES DA LISTA DE JOGOS"
 
 #: 
 msgid "UI MODE"
@@ -46,7 +46,7 @@ msgstr "SINCRONIZAÇÃO VERTICAL"
 
 #: 
 msgid "DISPLAY FAVORITES FIRST IN GAMELIST"
-msgstr "MOSTRAR FAVORITOS PRIMEIRO NA GAMELIST"
+msgstr "MOSTRAR FAVORITOS PRIMEIRO NA LISTA DE JOGOS"
 
 #: 
 msgid "OPTIMIZE IMAGES VRAM USE"
@@ -66,7 +66,7 @@ msgstr "Criança"
 
 #: 
 msgstr "GAME COLLECTION SETTINGS"
-msgstr "OPÇÕES DE LISTAS DE JOGOS"
+msgstr "OPÇÕES DE COMPILAÇÃO DE JOGOS"
 
 #:
 msgstr "CANCEL"
@@ -101,8 +101,20 @@ msgid "slide"
 msgstr "animado"
 
 #: 
+msgid "AUDIO DEVICE"
+msgstr "SAIDA DE AUDIO"
+
+#: 
+msgid "AUDIO CARD"
+msgstr "FONTE DE AUDIO"
+
+#: 
 msgid "gridex"
 msgstr "grelha detalhada"
+
+#: 
+msgid "LOWER MUSIC WHEN PLAYING VIDEO"
+msgstr "BAIXAR MUSICA QUANDO DÁ VIDEO"
 
 #: 
 msgid "ENABLE NAVIGATION SOUNDS"
@@ -118,35 +130,35 @@ msgstr "APLICAR FILTRO"
 
 #: 
 msgid "AUTOMATIC GAME COLLECTIONS"
-msgstr "LISTAS DE JOGO AUTOMÁTICAS"
+msgstr "COMPILAÇÕES DE JOGO AUTOMÁTICAS"
 
 #: 
 msgid "SELECT COLLECTIONS"
-msgstr "SELECIONAR LISTAS"
+msgstr "SELECIONAR COMPILAÇÕES"
 
 #: 
 msgid "CUSTOM GAME COLLECTIONS"
-msgstr "LISTAS PERSONALIZADAS"
+msgstr "COMPILAÇÕES PERSONALIZADAS"
 
 #: 
 msgid "CREATE NEW CUSTOM COLLECTION FROM THEME"
-msgstr "CRIAR UMA LISTA DE SISTEMA"
+msgstr "CRIAR UMA COMPILAÇÃO DE SISTEMA"
 
 #: 
 msgid "GAME COLLECTION SETTINGS"
-msgstr "CONFIGURAR LISTA DE JOGOS"
+msgstr "CONFIGURAR COMPILAÇÃO DE JOGOS"
 
 #: 
 msgid "SELECT THEME FOLDER"
-msgstr "SELECIONAR PASTA DE TEMA"
+msgstr "SELECIONAR PASTA A CRIAR"
 
 #: 
 msgid "CREATE NEW CUSTOM COLLECTION"
-msgstr "CRIAR NOVA LISTA PERSONALIZADA"
+msgstr "CRIAR NOVA COMPILAÇÃO PERSONALIZADA"
 
 #: 
-msgid "New Collection Name"
-msgstr "Nova lista"
+msgid "New Collection"
+msgstr "Nova compilação"
 
 #: 
 msgid "Loading..."
@@ -154,19 +166,19 @@ msgstr "A carregar..."
 
 #: 
 msgid "GROUP UNTHEMED CUSTOM COLLECTIONS"
-msgstr "JUNTAR LISTAS SEM SISTEMA"
+msgstr "JUNTAR COMPILAÇÕES SEM SISTEMA"
 
 #: 
 msgid "SORT CUSTOM COLLECTIONS AND SYSTEMS"
-msgstr "ORGANIZAR LISTAS E SISTEMAS"
+msgstr "ORGANIZAR COMPILAÇÕES E SISTEMAS"
 
 #: 
 msgid "SHOW SYSTEM NAME IN COLLECTIONS"
-msgstr "EXIBIR NOME DO SISTEMA NAS LISTAS"
+msgstr "EXIBIR NOME DO SISTEMA NAS COMPILAÇÕES"
 
 #: 
 msgid "FINISH EDITING COLLECTION"
-msgstr "FINALIZAR EDIÇÃO DE LISTA"
+msgstr "FINALIZAR EDIÇÃO DE COMPILAÇÃO"
 
 #: 
 msgid "PARSE GAMESLISTS ONLY"
@@ -191,6 +203,10 @@ msgstr "MOSTRAR ARQUIVOS OCULTOS"
 #: 
 msgid "VRAM LIMIT"
 msgstr "LIMITE DE VRAM"
+
+#: 
+msgid "SEARCH FOR LOCAL ART"
+msgstr "PROCURAR POR ARTE LOCAL"
 
 #: 
 msgid "RESET ALL FILTERS"
@@ -558,7 +574,7 @@ msgstr "AJUSTAR SCREENSAVER"
 
 #: 
 msgid "SCREENSAVER AFTER"
-msgstr "SCREENSAVER DEPOIS DE:"
+msgstr "PROTEÇÃO DE ECRÃ DEPOIS DE:"
 
 #: 
 msgid "TRANSITION STYLE"
@@ -714,7 +730,7 @@ msgstr "SELEÇÃO RAPIDA DE SISTEMA"
 
 #: 
 msgid "THEME"
-msgstr "SELEÇÃO DE TEMAS"
+msgstr "TEMAS"
 
 #: 
 msgid "SOUND SETTINGS"
@@ -784,6 +800,26 @@ msgstr "NOME DO HOST"
 #: 
 msgid "ENABLE WIFI"
 msgstr "ATIVAR WIFI"
+
+#: 
+msgid "DISPLAY SETTINGS"
+msgstr "OPÇÕES DE ECRÃ"
+
+#: 
+msgid "BRIGHTNESS"
+msgstr "BRILHO"
+
+#: 
+msgid "ANALOGUE"
+msgstr "ANALÓGICO"
+
+#: 
+msgid "VISIBLE SYSTEMS"
+msgstr "SISTEMAS VISIVEIS"
+
+#: 
+msgid "SHOW FILENAMES IN LISTS"
+msgstr "MOSTRAR NOME DOS FICHEIROS NAS LISTAS"
 
 #: 
 msgid "WIFI SSID"
@@ -1544,7 +1580,7 @@ msgstr "O modo Hardcore desativa as funções * all * savestate e rewind dentro 
 
 #: 
 msgid "The website retroachievements.org proposes challenges/achievements/trophies on platforms like NES, SNES, GB, GBC, GBA, Genesis/Megadrive, TurboGrafx16/PCEngine and more! Create your account on retroachievements.org and start your quest for achievements!"
-msgstr "O website retroachievements.org propõe desafios / conquistas / troféus em plataformas como NES, SNES, GB, GBC, GBA, Gênesis / Megadrive, TurboGrafx16 / PCEngine e mais! Crie sua conta no retroachievements.org e comece sua busca por conquistas!"
+msgstr "O website retroachievements.org propõe desafios / conquistas / troféus em plataformas como NES, SNES, GB, GBC, GBA, Genesis / Megadrive, TurboGrafx16 / PCEngine e mais! Crie sua conta no retroachievements.org e comece sua busca por conquistas!"
 
 #: 
 msgid "Add and configure up to 5 controllers."
@@ -2061,7 +2097,7 @@ msgstr "Hash da rom"
 
 #: 
 msgid "THIS COULD TAKE A WHILE, CONFIRM?"
-msgstr "ISSO PODE DEMORAR UM POUCO, CONFIRMAR?"
+msgstr "PODE DEMORAR UM POUCO, CONFIRMAR?"
 
 #: 
 msgid "bueno"
@@ -2129,7 +2165,6 @@ msgstr "A VERIFICAR"
 #:
 msgid "EMPTY LIST"
 msgstr "LISTA VAZIA"
-
 
 #: Retroarch ratio
 msgid "Auto"
