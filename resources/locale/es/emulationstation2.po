@@ -274,18 +274,18 @@ msgid "WE CAN'T FIND ANY SYSTEMS!\n"
 "\n"
 ""
 msgstr "¡NO HEMOS ENCONTRADO NINGÚN SISTEMA!\n"
-""COMPRUEBE QUE SUS RUTAS SON CORRECTAS EN EL ARCHIVO DE CONFIGURACIÓN DE SISTEMAS, Y SU DIRECTORIO DE JUEGOS TIENE AL MENOS UN JUEGO CON LA EXTENSIÓN CORRECTA.\n"
+"COMPRUEBE QUE SUS RUTAS SON CORRECTAS EN EL ARCHIVO DE CONFIGURACIÓN DE SISTEMAS, Y SU DIRECTORIO DE JUEGOS TIENE AL MENOS UN JUEGO CON LA EXTENSIÓN CORRECTA.\n"
 "\n"
 ""
 
 #: 
-msgid "%i i ¡JUEGO ESCANEADO EXITOSAMENTE!"
-msgid_plural "%i ¡JUEGOS EXITOSAMENTE ESCANEADOS!"
+msgid "%i GAME SUCCESSFULLY SCRAPED!"
+msgid_plural "%i GAMES SUCCESSFULLY SCRAPED!"
 msgstr[0] "%i ¡JUEGO ESCANEADO!"
 msgstr[1] "%i ¡JUEGOS ESCANEADOS!"
 
 #: 
-msgid "%i i ¡JUEGO SALTADO!"
+msgid "%i GAME SKIPPED."
 msgid_plural "%i GAMES SKIPPED."
 msgstr[0] "%i ¡JUEGO SALTADO!"
 msgstr[1] "%i ¡JUEGOS SALTADOS!"
@@ -1321,7 +1321,7 @@ msgstr "Guardar automáticamente el estado al salir de un juego, y cargar autom�
 
 #: 
 msgid "Integer scaling is scaling by a factor of a whole number, such as 2x, 3x, 4x, etc. This option scales the image up to the greatest integer scale below the set resolution. So for instance, if you set your fullscreen resolution to 1920x1080 and enable integer scaling, it will only scale a 320x240 image up to 1280x960, and leave black borders all around. This is to maintain a 1:1 pixel ratio with the original source image, so that pixels are not unevenly duplicated."
-msgstr "La escala de enteros es escalar por un factor de un número entero, como 2x, 3x, 4x, etc. Esta opción escala la imagen a la escala de enteros más grande por debajo de la resolución establecida. Por ejemplo, si configura la resolución de pantalla completa "Para 1920x1080 y habilitar el escalado de enteros, solo escalará una imagen de 320x240 hasta 1280x960, y dejará bordes negros alrededor. Esto es para mantener una proporción de píxeles de 1:1 con la imagen de origen original, para que los píxeles no se dupliquen de manera desigual."
+msgstr "La escala de enteros es escalar por un factor de un número entero, como 2x, 3x, 4x, etc. Esta opción escala la imagen a la escala de enteros más grande por debajo de la resolución establecida. Por ejemplo, si configura la resolución de pantalla completa Para 1920x1080 y habilitar el escalado de enteros, solo escalará una imagen de 320x240 hasta 1280x960, y dejará bordes negros alrededor. Esto es para mantener una proporción de píxeles de 1:1 con la imagen de origen original, para que los píxeles no se dupliquen de manera desigual."
 
 #: 
 msgid "Shaders are like filters for the game rendering. You can select a shader set here, which is a collection of shaders selected for each system. You can also change the shader within the game with HOTKEY + L2 or HOTKEY + R2."
@@ -1788,7 +1788,7 @@ msgstr "CREAR HASH DE ESTOS SISTEMAS"
 
 #: 
 msgid "Add hash of roms in your gamelists to have more accurate results in Netplay."
-msgstr Agrega hash de roms en tus listas de juego para tener resultados más precisos en juego en red."
+msgstr "Agrega hash de roms en tus listas de juego para tener resultados más precisos en juego en red."
 
 #: 
 msgid "HASH ROMS"

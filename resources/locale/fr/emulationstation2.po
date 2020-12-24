@@ -22,11 +22,11 @@ msgstr "BAISSER LA MUSIQUE EN LECTURE VIDEO"
 
 #:
 msgid "PLAY THEME MUSICS"
-msgstr "JOUER LES MUSIQUES DES THEMES"
+msgstr "JOUER LES MUSIQUES DES THÈMES"
 
 #:
 msgid "DISPLAY SONG TITLES"
-msgstr "AFFICHER LES NOMS DES MUSIQUES"
+msgstr "AFFICHER LES TITRES DES MUSIQUES"
 
 #:
 msgid "SHOW FAVORITES ON TOP"
@@ -34,7 +34,7 @@ msgstr "AFFICHER LES FAVORIS EN PREMIER"
 
 #:
 msgid "PREFERED IMAGE SOURCE"
-msgstr "SOURCE D'IMAGE PREFERÉE"
+msgstr "SOURCE D'IMAGE PRÉFERÉE"
 
 #:
 msgid "PREFERED THUMBNAIL SOURCE"
@@ -42,7 +42,7 @@ msgstr "SOURCE DE MINIATURE PRÉFÉRÉE"
 
 #:
 msgid "SELECT THEME TO INSTALL"
-msgstr "CHOIX DU THEME A INSTALLER"
+msgstr "CHOIX DU THÈME A INSTALLER"
 
 #:
 msgid "'%s' ADDED TO DOWNLOAD QUEUE"
@@ -88,11 +88,11 @@ msgstr "SYSTÈMES À FUSIONNER"
 
 #:
 msgid "THEME INSTALLED SUCCESSFULLY"
-msgstr "THEME INSTALLÉ"
+msgstr "THÈME INSTALLÉ"
 
 #:
 msgid "Downloading"
-msgstr "Telechargement"
+msgstr "Téléchargement"
 
 #:
 msgid "Extracting"
@@ -256,7 +256,7 @@ msgstr "TYPE D'INTERFACE"
 
 #: 
 msgid "PRELOAD UI"
-msgstr "PRECHARGEMENT DE L'INTERFACE"
+msgstr "PRÉCHARGEMENT DE L'INTERFACE"
 
 #: 
 msgid "VSYNC"
@@ -348,11 +348,11 @@ msgstr "SÉLECTIONNER LES COLLECTIONS"
 
 #: 
 msgid "CUSTOM GAME COLLECTIONS"
-msgstr "COLLECTIONS PERSONNALISEES"
+msgstr "COLLECTIONS PERSONNALISÉES"
 
 #: 
 msgid "CREATE NEW CUSTOM COLLECTION FROM THEME"
-msgstr "CRÉER UNE COLLECTION A PARTIR D'UN THEME"
+msgstr "CRÉER UNE COLLECTION A PARTIR D'UN THÈME"
 
 #: 
 msgid "GAME COLLECTION SETTINGS"
@@ -364,7 +364,7 @@ msgstr "SÉLECTIONNEZ LE DOSSIER"
 
 #: 
 msgid "CREATE NEW CUSTOM COLLECTION"
-msgstr "CREER UNE COLLECTION PERSONNALISÉE"
+msgstr "CRÉER UNE COLLECTION PERSONNALISÉE"
 
 #: 
 msgid "New Collection Name"
@@ -376,7 +376,7 @@ msgstr "Chargement en cours..."
 
 #: 
 msgid "GROUP UNTHEMED CUSTOM COLLECTIONS"
-msgstr "GROUPER LES COLLECTIONS SANS THEME"
+msgstr "GROUPER LES COLLECTIONS SANS THÈME"
 
 #: 
 msgid "SORT CUSTOM COLLECTIONS AND SYSTEMS"
@@ -392,7 +392,7 @@ msgstr "LISTES DE JEUX XML UNIQUEMENT"
 
 #: 
 msgid "POWER SAVER MODES"
-msgstr "MODE D'ECONOMIE D'ENERGIE"
+msgstr "MODE D'ÉCONOMIE D'ÉNERGIE"
 
 #: 
 msgid "SAVE METADATA ON EXIT"
@@ -515,8 +515,8 @@ msgstr "AUCUN JEU N'A ÉTÉ TROUVÉ SUR LE SYSTÈME !\n"
 #: 
 msgid "%i GAME SUCCESSFULLY SCRAPED!"
 msgid_plural "%i GAMES SUCCESSFULLY SCRAPED!"
-msgstr[0] "%i JEU SCRAPPÉ !"
-msgstr[1] "%i JEUX SCRAPPÉS !"
+msgstr[0] "%i JEU SCRAPÉ !"
+msgstr[1] "%i JEUX SCRAPÉS !"
 
 #: 
 msgid "%i GAME SKIPPED."
@@ -534,7 +534,7 @@ msgstr "ÉDITER LES DONNÉES"
 
 #: 
 msgid "SCRAPE"
-msgstr "SCRAPPER"
+msgstr "SCRAPER"
 
 #: 
 msgid "SAVE"
@@ -901,19 +901,19 @@ msgstr "ERREUR DE CONFIGURATION WIFI"
 
 #: 
 msgid "SCRAPER"
-msgstr "SCRAPPEUR"
+msgstr "SCRAPEUR"
 
 #: 
 msgid "SCRAPE FROM"
-msgstr "SCRAPPER DEPUIS"
+msgstr "SCRAPER DEPUIS"
 
 #: 
 msgid "SCRAPE RATINGS"
-msgstr "SCRAPPER LES NOTES"
+msgstr "SCRAPER LES NOTES"
 
 #: 
 msgid "SCRAPE NOW"
-msgstr "SCRAPPER MAINTENANT"
+msgstr "SCRAPER MAINTENANT"
 
 #: 
 msgid "QUIT"
@@ -929,11 +929,11 @@ msgstr "REDEMARRER EMULATIONSTATION"
 
 #: 
 msgid "REALLY QUIT?"
-msgstr "ETES-VOUS SUR DE VOULOIR QUITTER ?"
+msgstr "ÊTES-VOUS SÛR DE VOULOIR QUITTER ?"
 
 #: 
 msgid "REALLY RESTART?"
-msgstr "ETES-VOUS SUR DE VOULOIR REDÉMARRER ?"
+msgstr "ÊTES-VOUS SÛR DE VOULOIR REDÉMARRER ?"
 
 #: 
 msgid "RESTART SYSTEM"
@@ -941,7 +941,7 @@ msgstr "REDÉMARRER"
 
 #: 
 msgid "REALLY SHUTDOWN?"
-msgstr "ETES-VOUS SUR DE VOULOIR ÉTEINDRE ?"
+msgstr "ÊTES-VOUS SUR DE VOULOIR ÉTEINDRE ?"
 
 #: 
 msgid "SHUTDOWN SYSTEM"
@@ -1028,13 +1028,13 @@ msgstr "ÉDITER LES DONNÉES DU JEU"
 
 #: 
 msgid "SCRAPE THESE GAMES"
-msgstr "SCRAPPER CES JEUX"
+msgstr "SCRAPER CES JEUX"
 
 #: 
 msgid "All Games"
 msgstr "Tous les jeux"
 
-#. MISSING SCRAPPER TRANSLATIONS
+#. MISSING SCRAPER TRANSLATIONS
 #: 
 msgid "Only missing image"
 msgstr "Seulement images manquantes"
@@ -1045,7 +1045,7 @@ msgstr "FILTRE"
 
 #: 
 msgid "SCRAPE THESE SYSTEMS"
-msgstr "SCRAPPER CES SYSTÈMES"
+msgstr "SCRAPER CES SYSTÈMES"
 
 #: 
 msgid "SYSTEMS"
@@ -1087,7 +1087,7 @@ msgstr "ÉCHEC DE LA MISE À JOUR"
 
 #: 
 msgid "START UPDATE"
-msgstr "TELÉCHARGER LA MISE À JOUR"
+msgstr "TÉLÉCHARGER LA MISE À JOUR"
 
 #: 
 msgid "APPLY UPDATE"
@@ -1095,11 +1095,11 @@ msgstr "APPLIQUER LA MISE À JOUR"
 
 #: 
 msgid "DOWNLOADS AND UPDATES"
-msgstr "TELÉCHARGEMENTS ET MISES À JOUR"
+msgstr "TÉLÉCHARGEMENTS ET MISES À JOUR"
 
 #: 
 msgid "THEME INSTALLER"
-msgstr "TELÉCHARGER DES THEMES"
+msgstr "TÉLÉCHARGER DES THÈMES"
 
 #: 
 msgid "IMAGE SOURCE"
@@ -1284,8 +1284,8 @@ msgstr[1] "%i FAVORIS"
 #:
 msgid "%i GAME SUCCESSFULLY SCRAPED!"
 msgid_plural "%i GAMES SUCCESSFULLY SCRAPED!"
-msgstr[0] "%i JEU SCRAPPÉ !"
-msgstr[1] "%i JEUX SCRAPPÉS !"
+msgstr[0] "%i JEU SCRAPÉ !"
+msgstr[1] "%i JEUX SCRAPÉS !"
 
 #: 
 msgid "SCROLL"
@@ -1506,7 +1506,7 @@ msgstr "VEUILLEZ PATIENTER..."
 
 #: 
 msgid "REALLY SHUTDOWN WITHOUT SAVING METADATAS?"
-msgstr "VOULEZ-VOUS VRAIMENT ÉTEINDRE SANS SAUVEGARDER LES METADATAS ?"
+msgstr "VOULEZ-VOUS VRAIMENT ÉTEINDRE SANS SAUVEGARDER LES MÉTADONNÉES ?"
 
 #: 
 msgid "FAST SHUTDOWN SYSTEM"
@@ -1535,7 +1535,7 @@ msgstr "ESPACE"
 
 #: 
 msgid "DELETE A CHAR"
-msgstr "EFFACER UN CARACTERE"
+msgstr "EFFACER UN CARACTÈRE"
 
 #: 
 msgid "SHIFT"
@@ -1543,7 +1543,7 @@ msgstr "MAJUSCULE"
 
 #: 
 msgid "STOP EDITING"
-msgstr "ARRETER L'EDITION"
+msgstr "ARRÊTER L'ÉDITION"
 
 #: 
 msgid "MOVE CURSOR"
@@ -1551,11 +1551,11 @@ msgstr "BOUGER LE CURSEUR"
 
 #: 
 msgid "EDIT"
-msgstr "EDITER"
+msgstr "ÉDITER"
 
 #: 
 msgid "ACCEPT RESULT"
-msgstr "ACCEPTER LE RESULTAT"
+msgstr "ACCEPTER LE RÉSULTAT"
 
 #: 
 msgid "FILENAME"
@@ -1604,7 +1604,7 @@ msgstr "HIGH (1300MHz)"
 #: 
 msgid "TURBO AND EXTREM OVERCLOCK PRESETS MAY CAUSE SYSTEM UNSTABILITIES, SO USE THEM AT YOUR OWN RISK.\n"
 "IF YOU CONTINUE, THE SYSTEM WILL REBOOT NOW."
-msgstr "LES PRÉRÉGLAGES TURBO ET EXTRÊME PEUVENT PROVOQUER DES INSTABILITÉS DU SYSTÈME, UTILISEZ-LES À VOS PROPRES RISQUES.\n"
+msgstr "LES PRÉRÉGLAGES TURBO ET EXTRÊME PEUVENT PROVOQUER DES INSTABILITÉS DU SYSTÈME, UTILISEZ-LES À VOS RISQUES ET PÉRILS.\n"
 "SI VOUS CONTINUEZ, LE SYSTÈME REDÉMARRERA MAINTENANT."
 
 #: 
@@ -1730,7 +1730,7 @@ msgstr "Cette option vous permet de mettre le système sélectionné en mode fix
 
 #: 
 msgid "Always display the basic gamelist view, even if you have scraped your games."
-msgstr "Toujours afficher la vue liste de jeux basique, même si vous avez scrappé vos jeux."
+msgstr "Toujours afficher la vue liste de jeux basique, même si vous avez scrapé vos jeux."
 
 #: 
 msgid "Enable or disable Kodi, customize the Kodi startup, enable the X button to start Kodi"
@@ -1754,11 +1754,11 @@ msgstr "Affichez le taux de rafraîchissement dans EmulationStation et dans les 
 
 #: 
 msgid "Select which emulator to use when you start a game for this system."
-msgstr "Selectionnez quel émulateur utiliser quand vous lancer un jeu pour ce système."
+msgstr "Sélectionnez quel émulateur utiliser quand vous lancer un jeu pour ce système."
 
 #: 
 msgid "Select which core to use for the selected emulator. For example, the LIBRETRO emulator has many cores to run Super Nintendo games. The default core you choose here can also be overridden in game specific settings."
-msgstr "Selectionnez quel core utiliser pour l'émulateur sélectionné. Par exemple, l'émulateur LIBRETRO a plusieurs core pour les jeux Super Nintendo. Le core par défaut que vous choisissez peut aussi être outrepassé par les réglages spécifiques par jeu."
+msgstr "Sélectionnez quel core utiliser pour l'émulateur sélectionné. Par exemple, l'émulateur LIBRETRO a plusieurs core pour les jeux Super Nintendo. Le core par défaut que vous choisissez peut aussi être outrepassé par les réglages spécifiques par jeu."
 
 #: 
 msgid "USE COMPOSED VISUALS"
@@ -1906,7 +1906,7 @@ msgstr "Choisissez si le bandeau sera animé ou non durant les transitions."
 
 #: 
 msgid "Select the type of transition that occurs when you start a game. INSTANT will do nothing, FADE will fade to dark, and SLIDE will zoom on the game cover (or name if there is no scrape information)"
-msgstr "Sélectionnez le type de transition qui se produit lorsque vous lancez un jeu. FADE fera un fondu au noir et SLIDE zoomera sur l'image du jeu (ou le nom si il n'y a pas de metadatas)."
+msgstr "Sélectionnez le type de transition qui se produit lorsque vous lancez un jeu. FADE fera un fondu au noir et SLIDE zoomera sur l'image du jeu (ou le nom si il n'y a pas de métadonnées)."
 
 #: 
 msgid "Select exisiting colorset options for this theme."
@@ -1954,7 +1954,7 @@ msgstr "Changer entre rendre visible ou non les jeux favoris. Pour ajouter un je
 
 #: 
 msgid "Switch between seing or not the hidden games. To hide a game, edit its data and select 'Hide'."
-msgstr "Changer entre rendre visible ou non les jeux cachés. pour cacher un jeu, éditez ses données et sélectionnez 'Cacher'."
+msgstr "Changer entre rendre visible ou non les jeux cachés. Pour cacher un jeu, éditez ses données et sélectionnez 'Cacher'."
 
 #: 
 msgid "This option display a menu which allows to change game data and many others options."
