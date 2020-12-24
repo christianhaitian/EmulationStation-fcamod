@@ -180,6 +180,7 @@ git clone https://github.com/christianhaitian/EmulationStation-fcamod.git
 cd EmulationStation-fcamod
 git submodule update --init
 ```
+You will also need go2 headers files from [here](https://github.com/OtherCrashOverride/libgo2/tree/master/src) to be copied into a folder named go2 in your /usr/local/include folder.
 
 Then, generate and build the Makefile with CMake:
 ```bash
