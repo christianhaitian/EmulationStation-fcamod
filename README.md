@@ -6,7 +6,7 @@ This is a fork of EmulationStation FCAMOD by fabricecaruso containing additions 
 Building
 ========
 
-EmulationStation uses some C++11 code, which means you'll need to use at least g++-4.7 on Linux, or VS2010 on Windows, to compile.
+EmulationStation uses some C++11 code, which means you'll need to use at least g++-4.7 on Linux to compile.
 
 EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL and RapidJSON.  You also should probably install the `fonts-droid-fallback` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time).
 
@@ -175,7 +175,7 @@ Configuring
 ===========
 
 **~/.emulationstation/es_systems.cfg:**
-When first run, an example systems configuration file will be created at `~/.emulationstation/es_systems.cfg`.  `~` is `$HOME` on Linux, and `%HOMEPATH%` on Windows.  This example has some comments explaining how to write the configuration file. See the "Writing an es_systems.cfg" section for more information.
+When first run, an example systems configuration file will be created at `~/.emulationstation/es_systems.cfg`.  `~` is `$HOME` on Linux.  This example has some comments explaining how to write the configuration file. See the "Writing an es_systems.cfg" section for more information.
 
 **Keep in mind you'll have to set up your emulator separately from EmulationStation!**
 
@@ -205,7 +205,7 @@ You can use `--help` or `-h` to view a list of command-line options. Briefly out
 --draw-framerate                display the framerate
 --no-exit                       don't show the exit option in the menu
 --no-splash                     don't show the splash screen
---debug                         more logging, show console on Windows
+--debug                         more logging
 --scrape                        scrape using command line interface
 --windowed                      not fullscreen, may be used with --resolution
 --vsync [1/on or 0/off]         turn vsync on or off (default is on)
