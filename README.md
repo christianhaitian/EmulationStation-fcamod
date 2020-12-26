@@ -3,6 +3,47 @@ EmulationStation FCAMOD for rk3326 devices
 
 This is a fork of EmulationStation FCAMOD by fabricecaruso containing additions for the Odroid Go Advance device and clones. 
 
+Building
+========
+
+EmulationStation uses some C++11 code, which means you'll need to use at least g++-4.7 on Linux, or VS2010 on Windows, to compile.
+
+EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL and RapidJSON.  You also should probably install the `fonts-droid-fallback` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time).
+
+**On Odroid Go Advance Ubuntu 18.04, 19.10 or 20.04 distros or development OS:**
+All of this be easily installed with `apt-get`:
+```bash
+sudo apt update -y && sudo apt-get install -y libboost-system-dev libboost-filesystem-dev \
+  libboost-locale-dev libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev \
+  libboost-date-time-dev libasound2-dev cmake libsdl2-dev rapidjson-dev libvlc-dev \
+  libvlccore-dev vlc-bin libsdl2-mixer-dev
+```
+
+Note this Repository uses a git submodule - to checkout the source and all submodules, use
+
+```bash
+git clone --recursive https://github.com/christianhaitian/EmulationStation-fcamod.git
+```
+
+or 
+
+```bash
+git clone https://github.com/christianhaitian/EmulationStation-fcamod.git
+cd EmulationStation-fcamod
+git submodule update --init
+```
+If you don't have the go2 headers in either /usr/local/include/go2 or /usr/include/go2, you will also need go2 headers files from [here](https://github.com/OtherCrashOverride/libgo2/tree/master/src) to be copied into a folder named go2 in your /usr/local/include folder.
+
+Then, generate and build the Makefile with CMake:
+```bash
+cd EmulationStation-fcamod
+sudo dpkg -i --force-all libmali-rk-bifrost-g31-rxp0-wayland-gbm_1.7-2+deb10_arm64.deb
+dpkg -i libmali-rk-dev_1.7-1+deb10_arm64.deb
+cmake .
+make (or use make -j2 or -j3 if you have the additional core and memory to handle this to speed up the build)
+```
+
+
 Changes in my branch
 ====================
 
@@ -126,90 +167,8 @@ Changes in my branch
 - Case insensitive file extensions.
 - Stop using "sortname" in gamelists. It is useful.
 
-**Windows specific :** 	
-- Natively portable. If file ".emulationstation/es_systems.cfg" relative to the exe folder.
-- Simplified "Quit" menu item ( no more popup asking to restart or turn off Windows )
-- Windows is now "Windowed No border" by default. On Windows, Exclusive fullscreen can be annoying...
-- Stop using _wsystem for launching games. Run games with ShellExecuteEx instead ( avoids command window )
-- Add an option to leave ES open with a black screen "Loading..." when launching games ( avoids showing windows desktop )
-- Don't load all fields in Medadata Editor ( too tricky to use on windows, better use an external tool ).
-- With some Nvidia GPUs when VSYNC is active, SDL_GL_SwapWindow takes a lot of CPU : Introduce a smart calculation based on display frequency to reduce the time SDL_GL_SwapWindow has to wait. This saves a lot of CPU load.
-
 Je crois que c'est à peu près tout...
 
-Building
-========
-
-EmulationStation uses some C++11 code, which means you'll need to use at least g++-4.7 on Linux, or VS2010 on Windows, to compile.
-
-EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL and RapidJSON.  You also should probably install the `fonts-droid-fallback` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time).
-
-**On Odroid Go Advance Ubuntu 18.04, 19.10 or 20.04 distros or development OS:**
-All of this be easily installed with `apt-get`:
-```bash
-sudo apt update -y && sudo apt-get install -y libboost-system-dev libboost-filesystem-dev \
-  libboost-locale-dev libfreeimage-dev libfreetype6-dev libeigen3-dev libcurl4-openssl-dev \
-  libboost-date-time-dev libasound2-dev cmake libsdl2-dev rapidjson-dev libvlc-dev \
-  libvlccore-dev vlc-bin libsdl2-mixer-dev
-```
-**On Debian/Ubuntu:**
-All of this be easily installed with `apt-get`:
-```bash
-sudo apt-get install libsdl2-dev libfreeimage-dev libfreetype6-dev libcurl4-openssl-dev rapidjson-dev \
-  libasound2-dev libgl1-mesa-dev build-essential cmake fonts-droid-fallback libvlc-dev \
-  libvlccore-dev vlc-bin
-```
-**On Fedora:**
-All of this be easily installed with `dnf` (with rpmfusion activated) :
-```bash
-sudo dnf install SDL2-devel freeimage-devel freetype-devel curl-devel \
-  alsa-lib-devel mesa-libGL-devel cmake \
-  vlc-devel rapidjson-devel 
-```
-
-Note this Repository uses a git submodule - to checkout the source and all submodules, use
-
-```bash
-git clone --recursive https://github.com/christianhaitian/EmulationStation-fcamod.git
-```
-
-or 
-
-```bash
-git clone https://github.com/christianhaitian/EmulationStation-fcamod.git
-cd EmulationStation-fcamod
-git submodule update --init
-```
-You will also need go2 headers files from [here](https://github.com/OtherCrashOverride/libgo2/tree/master/src) to be copied into a folder named go2 in your /usr/local/include folder.
-
-Then, generate and build the Makefile with CMake:
-```bash
-cd YourEmulationStationDirectory
-cmake .
-make
-```
-
-**On the Raspberry Pi:**
-
-Complete Raspberry Pi build instructions at [emulationstation.org](http://emulationstation.org/gettingstarted.html#install_rpi_standalone).
-
-**On Windows:**
-
-[FreeImage](http://downloads.sourceforge.net/freeimage/FreeImage3154Win32.zip)
-
-[FreeType2](http://download.savannah.gnu.org/releases/freetype/freetype-2.4.9.tar.bz2) (you'll need to compile)
-
-[SDL2](http://www.libsdl.org/release/SDL2-devel-2.0.8-VC.zip)
-
-[cURL](http://curl.haxx.se/download.html) (you'll need to compile or get the pre-compiled DLL version)
-
-[RapisJSON](https://github.com/tencent/rapidjson) (you'll need the `include/rapidsjon` added to the include path)
-
-(Remember to copy necessary .DLLs into the same folder as the executable: probably FreeImage.dll, freetype6.dll, SDL2.dll, libcurl.dll, and zlib1.dll. Exact list depends on if you built your libraries in "static" mode or not.)
-
-[CMake](http://www.cmake.org/cmake/resources/software.html) (this is used for generating the Visual Studio project)
-
-(If you don't know how to use CMake, here are some hints: run cmake-gui and point it at your EmulationStation folder.  Point the "build" directory somewhere - I use EmulationStation/build.  Click configure, choose "Visual Studio [year] Project", fill in red fields as they appear and keep clicking Configure (you may need to check "Advanced"), then click Generate.)
 
 
 Configuring
