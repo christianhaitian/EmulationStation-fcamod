@@ -93,7 +93,7 @@ void GuiMenu::openDisplaySettings()
 	auto s = new GuiSettings(mWindow, "DISPLAY");
 
 	auto bright = std::make_shared<SliderComponent>(mWindow, 1.0f, 100.f, 1.0f, "%");
-	bright->setValue((float)go2_display_backlight_get(NULL));
+	bright->setValue((float)go2_display_backlight_get(NULL)+0.5);
 	s->addWithLabel("BRIGHTNESS", bright);
 	s->addSaveFunc([bright] { go2_display_backlight_set(NULL, (int)Math::round(bright->getValue())); });
 
