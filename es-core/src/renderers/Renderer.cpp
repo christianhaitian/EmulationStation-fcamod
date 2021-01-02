@@ -163,10 +163,10 @@ namespace Renderer
 #endif
 
 		display = go2_display_create();
-		windowWidth = 480;
-		windowHeight = 320;
-		screenWidth = 480;
-		screenHeight = 320 - 16;
+		windowWidth = go2_display_height_get(display);
+		windowHeight = go2_display_width_get(display);
+		screenWidth = windowWidth;
+		screenHeight = windowHeight - 16;
 		screenOffsetX = 0;
 		screenOffsetY = 0 + 16;
 		screenRotate = 0;

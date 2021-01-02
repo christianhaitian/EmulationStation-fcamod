@@ -113,10 +113,12 @@ namespace Renderer
 		attr.stencil_bits = 0;
 
 		go2_display_t* display = getDisplay();
+		int w = go2_display_height_get(display);
+		int h = go2_display_width_get(display);
 
-		titlebarSurface = go2_surface_create(display, 480, 16, DRM_FORMAT_RGB565);
+		titlebarSurface = go2_surface_create(display, w, 16, DRM_FORMAT_RGB565);
 
-		context = go2_context_create(display, 480, 320, &attr);
+		context = go2_context_create(display, w, h, &attr);
 		go2_context_make_current(context);
 
 		presenter = go2_presenter_create(display, DRM_FORMAT_RGB565, 0xff080808);
@@ -316,6 +318,10 @@ namespace Renderer
 
 		if (context)
 		{
+			go2_display_t* display = getDisplay();
+			int w = go2_display_height_get(display);
+			int h = go2_display_width_get(display);
+
 			{
 				// Battery level
 				const uint8_t* src = battery_image.pixel_data;
@@ -430,7 +436,7 @@ namespace Renderer
 				}
 
 				src += (batteryIndex * 16 * src_stride);
-				dst += (480 - 32) * sizeof(short);
+				dst += (w - 32) * sizeof(short);
 
 				for (int y = 0; y < 16; ++y)
 				{
@@ -560,7 +566,7 @@ namespace Renderer
 				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
 				int dst_stride = go2_surface_stride_get(titlebarSurface);
 
-				dst += ((480 / 2) - (header.width / 2)) * sizeof(short);
+				dst += ((w / 2) - (header.width / 2)) * sizeof(short);
 
 				for (int y = 0; y < 16; ++y)
 				{
@@ -728,7 +734,7 @@ namespace Renderer
 				if( wifiIndex == 1 )
 				{
 					src += (wifiIndex* 16 * src_stride);
-					dst += (480 - 100) * sizeof(short);
+					dst += (w - 100) * sizeof(short);
 
 					for (int y = 0; y < 16; ++y)
 					{
@@ -743,7 +749,7 @@ namespace Renderer
 				{
 					const uint8_t* src = blank_image.pixel_data;
 					src += (1 * 16 * src_stride);
-					dst += (480 - 100) * sizeof(short);
+					dst += (w - 100) * sizeof(short);
 
 					for (int y = 0; y < 16; ++y)
 					{
@@ -787,7 +793,7 @@ namespace Renderer
 				if( powerIndex == 1 )
 				{
 					src += (powerIndex * 16 * src_stride);
-					dst += (480 - 65) * sizeof(short);
+					dst += (w - 65) * sizeof(short);
 
 					for (int y = 0; y < 16; ++y)
 					{
@@ -802,7 +808,7 @@ namespace Renderer
 				{
 					const uint8_t* src = blank_image.pixel_data;
 					src += (1 * 16 * src_stride);
-					dst += (480 - 65) * sizeof(short);
+					dst += (w - 65) * sizeof(short);
 
 					for (int y = 0; y < 16; ++y)
 					{
@@ -819,14 +825,14 @@ namespace Renderer
 			go2_context_swap_buffers(context);
 			go2_surface_t* surface = go2_context_surface_lock(context);
 
-			go2_surface_blit(titlebarSurface, 0, 0, 480, 16,
-							 surface, 0, 0, 480, 16,
+			go2_surface_blit(titlebarSurface, 0, 0, w, 16,
+							 surface, 0, 0, w, 16,
 							 GO2_ROTATION_DEGREES_0);
 
 			go2_presenter_post(presenter,
 						surface,
-						0, 0, 480, 320,
-						0, 0, 320, 480,
+						0, 0, w, h,
+						0, 0, h, w,
 						GO2_ROTATION_DEGREES_270);
 			go2_context_surface_unlock(context, surface);
 		}
