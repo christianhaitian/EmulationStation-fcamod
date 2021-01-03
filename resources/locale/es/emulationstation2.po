@@ -659,7 +659,7 @@ msgstr "SALIR"
 
 #: 
 msgid "REALLY RESTART?"
-msgstr "¿SEGURO DE REINICIAR?"
+msgstr "¿REALMENTE QUIERE REINICIAR?"
 
 #: 
 msgid "RESTART SYSTEM"
@@ -667,11 +667,11 @@ msgstr "REINICIAR SISTEMA"
 
 #: 
 msgid "REALLY SHUTDOWN?"
-msgstr "¿SEGURO DE APAGAR?"
+msgstr "¿REALMENTE QUIERE APAGAR?"
 
 #: 
 msgid "SHUTDOWN SYSTEM"
-msgstr "SAPAGAR EL SISTEMA"
+msgstr "APAGAR EL SISTEMA"
 
 #: 
 msgid "Emulator"
