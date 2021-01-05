@@ -31,7 +31,7 @@
 #include "views/gamelist/IGameListView.h"
 
 #include <go2/display.h>
-//#include "SystemConf.h"
+#include "SystemConf.h"
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
