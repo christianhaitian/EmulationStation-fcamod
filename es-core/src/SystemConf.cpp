@@ -50,16 +50,8 @@ static std::map<std::string, std::string> defaults =
 	{ "global.ai_service_enabled", "0" },
 };
 
-#ifdef _ENABLEEMUELEC
-std::string systemConfFile = "/storage/.config/emuelec/configs/emuelec.conf";
-std::string systemConfFileTmp = "/storage/.config/emuelec/configs/emuelec.conf.tmp";
-#else if
-std::string systemConfFile = "/userdata/system/batocera.conf";
-std::string systemConfFileTmp = "/userdata/system/batocera.conf.tmp";
-#else
 std::string systemConfFile = "~/.emulationstation.conf";
 std::string systemConfFileTmp = "~/.emulationstation.conf.tmp";
-#endif
 
 SystemConf::SystemConf() 
 {
