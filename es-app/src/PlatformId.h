@@ -57,6 +57,7 @@ namespace PlatformIds
 		SEGA_MEGA_DRIVE,
 		SEGA_SATURN,
 		SEGA_SG1000,
+		SHARP_X1,
 		PLAYSTATION,
 		PLAYSTATION_2,
 		PLAYSTATION_3,
@@ -91,6 +92,7 @@ namespace PlatformIds
 		SATELLAVIEW,
 		SUFAMITURBO,
 		ZX81,
+		TIC80,
 
 		// Windows Specific
 		VISUALPINBALL,
@@ -106,7 +108,7 @@ namespace PlatformIds
 		APPLE2GS,
 		SPECTRAVIDEO,
 		PALMOS,
-		DAPHNEE,
+		DAPHNE,
 		SOLARUS,
 
 		PLATFORM_IGNORE, // do not allow scraping for this system

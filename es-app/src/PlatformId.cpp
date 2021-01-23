@@ -56,6 +56,7 @@ namespace PlatformIds
 		{ "megadrive",				SEGA_MEGA_DRIVE },
 		{ "saturn",					SEGA_SATURN },
 		{ "sg-1000",				SEGA_SG1000 },
+		{ "x1",					SHARP_X1 },
 		{ "psx",					PLAYSTATION },
 		{ "ps2",					PLAYSTATION_2 },
 		{ "ps3",					PLAYSTATION_3 },
@@ -90,6 +91,7 @@ namespace PlatformIds
 		{ "satellaview",			SATELLAVIEW },
 		{ "sufami",					SUFAMITURBO },
 		{ "zx81",					ZX81 },
+		{ "tic80",					TIC80 },
 
 		// batocera specific names
 		{ "gb2players", 			GAME_BOY },
@@ -115,7 +117,7 @@ namespace PlatformIds
 		{ "apple2gs",				APPLE2GS },			
 		{ "spectravideo",			SPECTRAVIDEO },
 		{ "palm",					PALMOS },
-		{ "daphne",					DAPHNEE },
+		{ "daphne",					DAPHNE },
 		{ "solarus",				SOLARUS },
 						
 		{ "ignore",					PLATFORM_IGNORE },

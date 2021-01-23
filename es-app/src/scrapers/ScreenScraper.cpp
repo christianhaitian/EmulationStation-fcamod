@@ -76,6 +76,7 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	{ SEGA_MEGA_DRIVE, 1 },
 	{ SEGA_SATURN, 22 },
 	{ SEGA_SG1000, 109 },
+	{ SHARP_X1, 220},	
 	{ SHARP_X6800, 79},
 	{ PLAYSTATION, 57 },
 	{ PLAYSTATION_2, 58 },
@@ -102,13 +103,14 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	{ GX4000, 87 },
 	{ LUTRO, 206 },
 	{ NAOMI, 56 },
-	{ NEOGEO_CD, 142 },
+	{ NEOGEO_CD, 70 },
 	{ PCFX, 72 },
 	{ POKEMINI, 211 },
 	{ PRBOOM, 135 },
 	{ SATELLAVIEW, 107 },
 	{ SUFAMITURBO, 108 },
 	{ ZX81, 77 },
+	{ TIC80, 222 },
 	{ MOONLIGHT, 138 }, // "PC Windows"
 
 	// Windows
@@ -125,7 +127,7 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	{ APPLE2GS, 217 },
 	{ SPECTRAVIDEO, 218 },
 	{ PALMOS, 219 },
-	{ DAPHNEE, 49 },
+	{ DAPHNE, 49 },
 	{ SOLARUS, 223 }
 	
 };
