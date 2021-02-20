@@ -38,6 +38,7 @@ namespace PlatformIds
 		{ "nds", 					NINTENDO_DS },
 		{ "fds", 					FAMICOM_DISK_SYSTEM },
 		{ "nes", 					NINTENDO_ENTERTAINMENT_SYSTEM },
+		{ "sgb",					SUPER_GAME_BOY },
 		{ "gb", 					GAME_BOY },
 		{ "gba", 					GAME_BOY_ADVANCE },
 		{ "gbc", 					GAME_BOY_COLOR },

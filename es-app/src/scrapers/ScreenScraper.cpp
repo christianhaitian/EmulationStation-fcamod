@@ -57,6 +57,7 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	{ NINTENDO_DS, 15 },
 	{ FAMICOM_DISK_SYSTEM, 106 },
 	{ NINTENDO_ENTERTAINMENT_SYSTEM, 3 },
+	{ SUPER_GAME_BOY, 127 },
 	{ GAME_BOY, 9 },
 	{ GAME_BOY_ADVANCE, 12 },
 	{ GAME_BOY_COLOR, 10 },
