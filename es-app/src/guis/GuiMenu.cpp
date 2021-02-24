@@ -35,6 +35,7 @@
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
+
 	addEntry("DISPLAY SETTINGS", true, [this] { openDisplaySettings(); });
 
 	auto theme = ThemeData::getMenuTheme();
@@ -73,6 +74,10 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 	}
 	
 	addEntry(_("QUIT"), !Settings::getInstance()->getBool("ShowOnlyExit"), [this] {openQuitMenu(); }, "iconQuit");
+
+	addEntry("BATTERY LEVEL: " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%", false, [this] {  });
+
+	addEntry("ArkOS Version: " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep ArkOS | cut -c 7-50)")), false, [this] {  });
 
 	addChild(&mMenu);
 	addVersionInfo();

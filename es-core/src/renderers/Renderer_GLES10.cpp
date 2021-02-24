@@ -24,8 +24,8 @@
 #include "ArkOS.h"
 
 static go2_input_t* input = nullptr;
-static go2_surface_t* titlebarSurface = nullptr;
-static unsigned int frame = 0;
+//static go2_surface_t* titlebarSurface = nullptr;
+//static unsigned int frame = 0;
 
 namespace Renderer
 {
@@ -116,7 +116,7 @@ namespace Renderer
 		int w = go2_display_height_get(display);
 		int h = go2_display_width_get(display);
 
-		titlebarSurface = go2_surface_create(display, w, 16, DRM_FORMAT_RGB565);
+		//titlebarSurface = go2_surface_create(display, w, 16, DRM_FORMAT_RGB565);
 
 		context = go2_context_create(display, w, h, &attr);
 		go2_context_make_current(context);
@@ -141,8 +141,8 @@ namespace Renderer
 		go2_presenter_destroy(presenter);
 		presenter = nullptr;
 
-		go2_surface_destroy(titlebarSurface);
-		titlebarSurface = nullptr;
+		//go2_surface_destroy(titlebarSurface);
+		//titlebarSurface = nullptr;
 
 		go2_input_destroy(input);
 		input = nullptr;
@@ -324,7 +324,7 @@ namespace Renderer
 
 			{
 				// Battery level
-				const uint8_t* src = battery_image.pixel_data;
+				/*const uint8_t* src = battery_image.pixel_data;
 				int src_stride = 32 * sizeof(short);
 
 				uint8_t* dst = (uint8_t*)go2_surface_map(titlebarSurface);
@@ -818,16 +818,16 @@ namespace Renderer
 						dst += dst_stride;
 					}
 
-				}
+				}*/
 
 			}
 
 			go2_context_swap_buffers(context);
 			go2_surface_t* surface = go2_context_surface_lock(context);
 
-			go2_surface_blit(titlebarSurface, 0, 0, w, 16,
+			/*go2_surface_blit(titlebarSurface, 0, 0, w, 16,
 							 surface, 0, 0, w, 16,
-							 GO2_ROTATION_DEGREES_0);
+							 GO2_ROTATION_DEGREES_0);*/
 
 			go2_presenter_post(presenter,
 						surface,
