@@ -77,7 +77,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 
 	addEntry("BATTERY LEVEL: " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%", false, [this] {  });
 
-	addEntry("ArkOS Version: " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep ArkOS | cut -c 7-50)")), false, [this] {  });
+	addEntry("Distro Version: " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep title | cut -c 7-50)")), false, [this] {  });
 
 	addChild(&mMenu);
 	addVersionInfo();
