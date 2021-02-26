@@ -43,6 +43,26 @@ cmake .
 make (or use make -j2 or -j3 if you have the additional core and memory to handle this to speed up the build)
 ```
 
+current brightness script for es-app/src/guis/GuiMenu.cpp line 78
+=================
+current_brightness
+```
+#!/bin/bash
+
+cursound=$(cat /sys/class/backlight/backlight/brightness);
+maxsound=255;
+
+echo $((200 * $cursound/$maxsound - 100 * $cursound/$maxsound ))
+```
+
+current volume script for es-app/src/guis/GuiMenu.cpp line 78
+============
+current_volume
+```
+#!/bin/bash
+
+awk -F'[][]' '/Left:/ { print $2 }' <(amixer sget Playback)
+```
 
 Changes in my branch
 ====================
