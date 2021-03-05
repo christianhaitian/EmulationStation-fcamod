@@ -121,6 +121,7 @@ namespace PlatformIds
 		{ "spectravideo",			SPECTRAVIDEO },
 		{ "palm",					PALMOS },
 		{ "daphne",					DAPHNE },
+		{ "easyrpg",				EASYRPG },
 		{ "solarus",				SOLARUS },
 						
 		{ "ignore",					PLATFORM_IGNORE },

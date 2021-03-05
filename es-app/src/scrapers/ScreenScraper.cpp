@@ -131,6 +131,7 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	{ SPECTRAVIDEO, 218 },
 	{ PALMOS, 219 },
 	{ DAPHNE, 49 },
+	{ EASYRPG, 231 },
 	{ SOLARUS, 223 }
 	
 };

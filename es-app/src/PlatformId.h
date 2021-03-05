@@ -112,6 +112,7 @@ namespace PlatformIds
 		SPECTRAVIDEO,
 		PALMOS,
 		DAPHNE,
+		EASYRPG,
 		SOLARUS,
 
 		PLATFORM_IGNORE, // do not allow scraping for this system
