@@ -30,13 +30,13 @@
 #include "ApiSystem.h"
 #include "views/gamelist/IGameListView.h"
 
-#include <go2/display.h>
+//#include <go2/display.h>
 #include "SystemConf.h"
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
 
-	addEntry("DISPLAY SETTINGS", true, [this] { openDisplaySettings(); });
+	//addEntry("DISPLAY SETTINGS", true, [this] { openDisplaySettings(); });
 
 	auto theme = ThemeData::getMenuTheme();
 
@@ -92,7 +92,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
 }
 
-void GuiMenu::openDisplaySettings()
+/*void GuiMenu::openDisplaySettings()
 {
 	// Brightness
 	auto s = new GuiSettings(mWindow, "DISPLAY");
@@ -103,7 +103,7 @@ void GuiMenu::openDisplaySettings()
 	s->addSaveFunc([bright] { go2_display_backlight_set(NULL, (int)Math::round(bright->getValue())); });
 
 	mWindow->pushGui(s);
-}
+}*/
 
 void GuiMenu::openScraperSettings()
 {
