@@ -30,7 +30,7 @@ void GuiGamelistFilter::initializeMenu()
 
 	mMenu.addButton(_("BACK"), _("BACK"), std::bind(&GuiGamelistFilter::applyFilters, this));
 
-	mMenu.setPosition((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.0f);
+	mMenu.setPosition((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, Renderer::getScreenHeight() * 0.15f);
 }
 
 void GuiGamelistFilter::resetAllFilters()
