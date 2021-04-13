@@ -12,13 +12,12 @@
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 
+#ifdef GAMESDB_APIKEY
 using namespace rapidjson;
 
 
 namespace
 {
-	constexpr char GamesDBAPIKey[] = "445fcbc3f32bb2474bc27016b99eb963d318ee3a608212c543b9a79de1041600";
-
 
 constexpr int MAX_WAIT_MS = 90000;
 constexpr int POLL_TIME_MS = 500;
@@ -53,7 +52,7 @@ std::string getScrapersResouceDir()
 		Utils::FileSystem::getHomePath() + "/.emulationstation/" + SCRAPER_RESOURCES_DIR);
 }
 
-std::string TheGamesDBJSONRequestResources::getApiKey() const { return GamesDBAPIKey; }
+   std::string TheGamesDBJSONRequestResources::getApiKey() const { return GAMESDB_APIKEY; }
 
 
 void TheGamesDBJSONRequestResources::prepare()
@@ -205,3 +204,4 @@ int TheGamesDBJSONRequestResources::loadResource(
 	}
 	return resource.empty();
 }
+#endif

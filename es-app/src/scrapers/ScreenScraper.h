@@ -5,6 +5,10 @@
 #include "scrapers/Scraper.h"
 #include "EmulationStation.h"
 
+#if defined(SCREENSCRAPER_DEV_LOGIN)
+
+#define VERSIONED_SOFT_NAME std::string(SCREENSCRAPER_SOFTNAME) + " " + static_cast<std::string>(PROGRAM_VERSION_STRING)
+
 namespace pugi { class xml_document; }
 
 
@@ -24,12 +28,8 @@ public:
 		std::string getGameSearchUrl(const std::string gameName, bool jeuRecherche=false) const;
 
 		// Access to the API
-		const std::string API_DEV_U = { 60, 10, 23, 6, 22, 69, 25, 23, 80, 21 };
-		const std::string API_DEV_P = { 104, 86, 49, 16, 32, 98, 49, 60, 47, 85, 87, 47, 81, 67, 10, 58 };
-		const std::string API_DEV_KEY = { 80, 101, 97, 99, 101, 32, 97, 110, 100, 32, 98, 101, 32, 119, 105, 108, 100 };
 
 		const std::string API_URL_BASE = "https://www.screenscraper.fr/api2";
-		const std::string API_SOFT_NAME = "Emulationstation " + static_cast<std::string>(PROGRAM_VERSION_STRING);
 
 		/** Which type of image artwork we need. Possible values (not a comprehensive list):
 		  - ss: in-game screenshot
@@ -72,7 +72,7 @@ private:
 	pugi::xml_node				findMedia(pugi::xml_node media_list, std::vector<std::string> mediaNames, std::string region);
 	pugi::xml_node				findMedia(pugi::xml_node media_list, std::string mediaName, std::string region);
 };
-
+#endif
 
 
 #endif // ES_APP_SCRAPERS_SCREEN_SCRAPER_H

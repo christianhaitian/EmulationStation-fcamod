@@ -4,6 +4,8 @@
 #include "scrapers/GamesDBJSONScraper.h"
 #include "scrapers/GamesDBJSONScraperResources.h"
 
+#ifdef GAMESDB_APIKEY
+
 #include "FileData.h"
 #include "Log.h"
 #include "PlatformId.h"
@@ -413,3 +415,4 @@ bool TheGamesDBJSONRequest::process(HttpReq* request, std::vector<ScraperSearchR
 
 	return true;
 }
+#endif
