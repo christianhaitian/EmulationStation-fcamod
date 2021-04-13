@@ -122,6 +122,11 @@ void GuiMenu::openScraperSettings()
 	s->addWithLabel(_("SCRAPE FROM"), scraper_list);
 	s->addSaveFunc([scraper_list] { Settings::getInstance()->setString("Scraper", scraper_list->getSelected()); });
 
+	if (!scraper_list->hasSelection())
+	{
+		scraper_list->selectFirstItem();
+		scraper = scraper_list->getSelected();
+	}
 
 	if (scraper == "ScreenScraper")
 	{
