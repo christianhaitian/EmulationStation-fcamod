@@ -78,6 +78,7 @@ namespace PlatformIds
 		{ "trs-80",					TRS80_COLOR_COMPUTER },
 		{ "coco",					TANDY },
 		{ "supergrafx",				SUPERGRAFX },
+		{ "supervision",			SUPERVISION },
 		{ "amigacd32",				AMIGACD32 },
 		{ "amigacdtv",				AMIGACDTV },
 		{ "atomiswave",				ATOMISWAVE },

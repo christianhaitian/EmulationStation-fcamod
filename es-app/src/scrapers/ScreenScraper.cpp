@@ -99,6 +99,7 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	{ TRS80_COLOR_COMPUTER, 144 },
 	{ TANDY, 144 },	
 	{ SUPERGRAFX, 105 },
+	{ SUPERVISION, 207 },
 
 	{ AMIGACD32, 130 },
 	{ AMIGACDTV, 129 },
