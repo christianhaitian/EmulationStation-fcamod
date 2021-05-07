@@ -75,7 +75,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 	
 	addEntry(_("QUIT"), !Settings::getInstance()->getBool("ShowOnlyExit"), [this] {openQuitMenu(); }, "iconQuit");
 
-	addEntry("BAT: " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | SND: " + std::string(getShOutput(R"(current_volume)")) + " | BRT: " + std::string(getShOutput(R"(current_brightness)")) + "% |" + " WIFI: " + std::string(getShOutput(R"(cat /sys/class/net/wlan0/operstate)")), false, [this] {  });
+	addEntry("BAT: " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | SND: " + std::string(getShOutput(R"(current_volume)")) + " | BRT: " + std::string(getShOutput(R"(current_brightness)")) + "% |" + " WIFI: " + std::string(getShOutput(R"(if [ -z $(cat /sys/class/net/wlan0/operstate) ]; then echo "Off"; else cat /sys/class/net/wlan0/operstate; fi)")), false, [this] {  });
 
 	addEntry("Distro Version: " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep title | cut -c 7-50)")), false, [this] {  });
 
