@@ -309,7 +309,14 @@ void Window::update(int deltaTime)
 		}
 	}
 	
-	mTimeSinceLastInput += deltaTime;
+	if(deltaTime < 5000)
+	{
+	  mTimeSinceLastInput += deltaTime;
+	}
+	else
+	{
+	  mTimeSinceLastInput = 0;
+	}
 
 	if(peekGui())
 		peekGui()->update(deltaTime);
