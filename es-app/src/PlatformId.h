@@ -113,6 +113,7 @@ namespace PlatformIds
 		APPLE2GS,
 		SPECTRAVIDEO,
 		PALMOS,
+		ALG,
 		DAPHNE,
 		EASYRPG,
 		SOLARUS,

@@ -123,6 +123,7 @@ namespace PlatformIds
 		{ "apple2gs",				APPLE2GS },			
 		{ "spectravideo",			SPECTRAVIDEO },
 		{ "palm",					PALMOS },
+		{ "alg",					ALG },
 		{ "daphne",					DAPHNE },
 		{ "easyrpg",				EASYRPG },
 		{ "solarus",				SOLARUS },
