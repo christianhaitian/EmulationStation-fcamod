@@ -110,7 +110,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 			row.addElement(mJumpToLetterList, false);
 			row.input_handler = [&](InputConfig* config, Input input)
 			{
-				if (config->isMappedTo("a", input) && input.value)
+				if (config->isMappedTo(BUTTON_OK, input) && input.value)
 				{
 					jumpToLetter();
 					return true;
@@ -520,7 +520,7 @@ void GuiGamelistOptions::jumpToLetter()
 
 bool GuiGamelistOptions::input(InputConfig* config, Input input)
 {
-	if((config->isMappedTo("b", input) || config->isMappedTo("select", input)) && input.value)
+	if((config->isMappedTo(BUTTON_BACK, input) || config->isMappedTo("select", input)) && input.value)
 	{
 		delete this;
 		return true;
@@ -539,7 +539,7 @@ HelpStyle GuiGamelistOptions::getHelpStyle()
 std::vector<HelpPrompt> GuiGamelistOptions::getHelpPrompts()
 {
 	auto prompts = mMenu.getHelpPrompts();
-	prompts.push_back(HelpPrompt("b", _("CLOSE")));
+	prompts.push_back(HelpPrompt(BUTTON_BACK, _("CLOSE")));
 	return prompts;
 }
 

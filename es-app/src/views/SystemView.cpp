@@ -425,7 +425,7 @@ bool SystemView::input(InputConfig* config, Input input)
 			break;
 		}
 
-		if(config->isMappedTo("a", input))
+		if(config->isMappedTo(BUTTON_OK, input))
 		{
 			stopScrolling();
 			ViewController::get()->goToGameList(getSelected());
@@ -692,7 +692,7 @@ std::vector<HelpPrompt> SystemView::getHelpPrompts()
 	else
 		prompts.push_back(HelpPrompt("left/right", _("CHOOSE")));
 
-	prompts.push_back(HelpPrompt("a", _("SELECT")));
+	prompts.push_back(HelpPrompt(BUTTON_OK, _("SELECT")));
 	prompts.push_back(HelpPrompt("x", _("RANDOM")));
 
 	if (!UIModeController::getInstance()->isUIModeKid() && Settings::getInstance()->getBool("ScreenSaverControls"))

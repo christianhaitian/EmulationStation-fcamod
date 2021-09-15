@@ -82,7 +82,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 
 	if (input.value != 0)
 	{
-		if (config->isMappedTo("a", input))
+		if (config->isMappedTo(BUTTON_OK, input))
 		{
 			// Don't launch game if transition is still running
 			if (ViewController::get()->isAnimationPlaying(0))
@@ -127,7 +127,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			}
 			return true;
 		}
-		else if(config->isMappedTo("b", input))
+		else if(config->isMappedTo(BUTTON_BACK, input))
 		{
 			if (mCursorStack.size())
 			{

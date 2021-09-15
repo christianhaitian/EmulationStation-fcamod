@@ -159,7 +159,7 @@ bool GuiScraperStart::input(InputConfig* config, Input input)
 	if(consumed)
 		return true;
 	
-	if(input.value != 0 && config->isMappedTo("b", input))
+	if(input.value != 0 && config->isMappedTo(BUTTON_BACK, input))
 	{
 		delete this;
 		return true;
@@ -180,7 +180,7 @@ bool GuiScraperStart::input(InputConfig* config, Input input)
 std::vector<HelpPrompt> GuiScraperStart::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
-	prompts.push_back(HelpPrompt("b", _("BACK")));
+	prompts.push_back(HelpPrompt(BUTTON_BACK, _("BACK")));
 	prompts.push_back(HelpPrompt("start", _("CLOSE")));
 	return prompts;
 }

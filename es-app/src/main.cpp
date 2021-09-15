@@ -8,6 +8,7 @@
 #include "CollectionSystemManager.h"
 #include "EmulationStation.h"
 #include "InputManager.h"
+#include "InputConfig.h"
 #include "Log.h"
 #include "MameNames.h"
 #include "platform.h"
@@ -535,6 +536,8 @@ int main(int argc, char* argv[])
 	if (Settings::getInstance()->getBool("updates.enabled"))
 		NetworkThread* nthread = new NetworkThread(&window);
 #endif
+
+	InputConfig::AssignActionButtons();
 
 	//dont generate joystick events while we're loading (hopefully fixes "automatically started emulator" bug)
 	SDL_JoystickEventState(SDL_DISABLE);

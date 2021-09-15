@@ -1328,6 +1328,20 @@ void GuiMenu::openOtherSettings()
 		SystemConf::getInstance()->set("system.timezone", es_timezones->getSelected());
 	});
 
+    //Switch A and B buttons
+    
+	auto invertJoy = std::make_shared<SwitchComponent>(mWindow);
+	invertJoy->setState(Settings::getInstance()->getBool("InvertButtons"));
+	s->addWithLabel(_("SWITCH A/B BUTTONS IN EMULATIONSTATION"), invertJoy);
+	s->addSaveFunc([this, s, invertJoy]
+	{
+		if (Settings::getInstance()->setBool("InvertButtons", invertJoy->getState()))
+		{
+			InputConfig::AssignActionButtons();
+			ViewController::get()->reloadAll(mWindow);
+		}
+	});
+
 	// power saver
 	auto power_saver = std::make_shared< OptionListComponent<std::string> >(mWindow, _("POWER SAVER MODES"), false);
 	std::vector<std::string> modes;
@@ -1814,7 +1828,7 @@ bool GuiMenu::input(InputConfig* config, Input input)
 	if(GuiComponent::input(config, input))
 		return true;
 
-	if((config->isMappedTo("b", input) || config->isMappedTo("start", input)) && input.value != 0)
+	if((config->isMappedTo(BUTTON_BACK, input) || config->isMappedTo("start", input)) && input.value != 0)
 	{
 		delete this;
 		return true;
@@ -1842,7 +1856,7 @@ std::vector<HelpPrompt> GuiMenu::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts;
 	prompts.push_back(HelpPrompt("up/down", _("CHOOSE")));
-	prompts.push_back(HelpPrompt("a", _("SELECT")));
+	prompts.push_back(HelpPrompt(BUTTON_OK, _("SELECT")));
 	prompts.push_back(HelpPrompt("start", _("CLOSE")));
 	return prompts;
 }
