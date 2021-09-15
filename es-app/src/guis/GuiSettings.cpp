@@ -55,7 +55,7 @@ void GuiSettings::save()
 
 bool GuiSettings::input(InputConfig* config, Input input)
 {
-	if (config->isMappedTo("b", input) && input.value != 0)
+	if (config->isMappedTo(BUTTON_BACK, input) && input.value != 0)
 	{
 		close();
 		return true;
@@ -84,7 +84,7 @@ std::vector<HelpPrompt> GuiSettings::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
 
-	prompts.push_back(HelpPrompt("b", _("BACK")));
+	prompts.push_back(HelpPrompt(BUTTON_BACK, _("BACK")));
 	prompts.push_back(HelpPrompt(mCloseButton, _("CLOSE")));
 
 	return prompts;

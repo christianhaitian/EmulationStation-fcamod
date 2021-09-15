@@ -99,7 +99,7 @@ bool GuiGamelistFilter::input(InputConfig* config, Input input)
 	if(consumed)
 		return true;
 
-	if(config->isMappedTo("b", input) && input.value != 0)
+	if(config->isMappedTo(BUTTON_BACK, input) && input.value != 0)
 	{
 		applyFilters();
 	}
@@ -111,6 +111,6 @@ bool GuiGamelistFilter::input(InputConfig* config, Input input)
 std::vector<HelpPrompt> GuiGamelistFilter::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
-	prompts.push_back(HelpPrompt("b", _("BACK")));
+	prompts.push_back(HelpPrompt(BUTTON_BACK, _("BACK")));
 	return prompts;
 }

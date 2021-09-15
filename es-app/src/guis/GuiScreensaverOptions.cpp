@@ -34,7 +34,7 @@ void GuiScreensaverOptions::save()
 
 bool GuiScreensaverOptions::input(InputConfig* config, Input input)
 {
-	if(config->isMappedTo("b", input) && input.value != 0)
+	if(config->isMappedTo(BUTTON_BACK, input) && input.value != 0)
 	{
 		delete this;
 		return true;
@@ -63,7 +63,7 @@ std::vector<HelpPrompt> GuiScreensaverOptions::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts = mMenu.getHelpPrompts();
 
-	prompts.push_back(HelpPrompt("b", _("BACK")));
+	prompts.push_back(HelpPrompt(BUTTON_BACK, _("BACK")));
 	prompts.push_back(HelpPrompt("start", _("CLOSE")));
 
 	return prompts;

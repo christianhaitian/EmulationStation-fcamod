@@ -26,7 +26,7 @@ void SwitchComponent::onSizeChanged()
 
 bool SwitchComponent::input(InputConfig* config, Input input)
 {
-	if(config->isMappedTo("a", input) && input.value)
+	if(config->isMappedTo(BUTTON_OK, input) && input.value)
 	{
 		mState = !mState;
 		onStateChanged();
@@ -85,6 +85,6 @@ void SwitchComponent::onStateChanged()
 std::vector<HelpPrompt> SwitchComponent::getHelpPrompts()
 {
 	std::vector<HelpPrompt> prompts;
-	prompts.push_back(HelpPrompt("a", "MODIFIER"));
+	prompts.push_back(HelpPrompt(BUTTON_OK, "MODIFIER"));
 	return prompts;
 }
