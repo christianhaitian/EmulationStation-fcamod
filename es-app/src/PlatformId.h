@@ -98,6 +98,7 @@ namespace PlatformIds
 		ZX81,
 		TIC80,
 		TI_99,
+		ASTROCADE,
 
 		// Windows Specific
 		VISUALPINBALL,
