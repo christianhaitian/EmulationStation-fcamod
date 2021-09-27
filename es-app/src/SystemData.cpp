@@ -907,3 +907,12 @@ SystemData* SystemData::getParentGroupSystem()
 
 	return this;
 }
+
+SystemData* SystemData::getSystem(const std::string name)
+{
+	for (auto sys : SystemData::sSystemVector)
+		if (sys->getName() == name)
+			return sys;
+
+	return nullptr;
+}

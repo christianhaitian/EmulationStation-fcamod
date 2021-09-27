@@ -12,6 +12,8 @@
 #include "components/VideoComponent.h"
 #include "components/VideoVlcComponent.h"
 #include <random>
+#include "guis/GuiTextEditPopupKeyboard.h"
+#include "guis/GuiTextEditPopup.h"
 
 // buffer values for scrolling velocity (left, stopped, right)
 const int logoBuffersLeft[] = { -5, -2, -1 };
@@ -327,10 +329,38 @@ void SystemView::goToSystem(SystemData* system, bool animate)
 		finishAnimation(0);
 }
 
+void SystemView::showQuickSearch()
+{
+	SystemData* all = SystemData::getSystem("all");
+	if (all != nullptr)
+	{
+		auto updateVal = [this, all](const std::string& newVal)
+		{
+			auto index = all->getIndex(true);
+
+			index->resetFilters();
+			index->setTextFilter(newVal);
+
+			ViewController::get()->reloadGameListView(all);
+			ViewController::get()->goToGameList(all, false);
+		};
+
+		//if (Settings::getInstance()->getBool("UseOSK"))
+			mWindow->pushGui(new GuiTextEditPopupKeyboard(mWindow, _("QUICK SEARCH"), "", updateVal, false));
+		//else
+			//mWindow->pushGui(new GuiTextEditPopup(mWindow, _("QUICK SEARCH"), "", updateVal, false));
+	}
+}
+
 bool SystemView::input(InputConfig* config, Input input)
 {
 	if(input.value != 0)
 	{
+		if (config->isMappedTo("y", input))
+		{
+			showQuickSearch();
+			return true;
+		}
 		if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_r && SDL_GetModState() & KMOD_LCTRL && Settings::getInstance()->getBool("Debug"))
 		{
 			LOG(LogInfo) << " Reloading all";
@@ -694,6 +724,8 @@ std::vector<HelpPrompt> SystemView::getHelpPrompts()
 
 	prompts.push_back(HelpPrompt(BUTTON_OK, _("SELECT")));
 	prompts.push_back(HelpPrompt("x", _("RANDOM")));
+	if (SystemData::getSystem("all") != nullptr)
+		prompts.push_back(HelpPrompt("y", _("SEARCH"))); // QUICK
 
 	if (!UIModeController::getInstance()->isUIModeKid() && Settings::getInstance()->getBool("ScreenSaverControls"))
 		prompts.push_back(HelpPrompt("select", _("LAUNCH SCREENSAVER")));

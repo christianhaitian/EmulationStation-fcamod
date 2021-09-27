@@ -77,6 +77,7 @@ private:
 	void	 activateExtras(int cursor, bool activate = true);	
 	void	 updateExtras(const std::function<void(GuiComponent*)>& func);
 	void	 clearEntries();
+	void	 showQuickSearch();
 
 	virtual void onScreenSaverActivate() override;
 	virtual void onScreenSaverDeactivate() override;
