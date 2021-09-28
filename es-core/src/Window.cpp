@@ -17,7 +17,8 @@
 #include "AudioManager.h"
 
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
-  mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false), mInfoPopup(NULL), mClockElapsed(0) // batocera
+  mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false), mInfoPopup(NULL), mClockElapsed(0),
+  mIgnoreKeys(false)// batocera
 {	
 	mHelp = new HelpComponent(this);
 	mBackgroundOverlay = new ImageComponent(this);	
@@ -165,6 +166,17 @@ void Window::textInput(const char* text)
 
 void Window::input(InputConfig* config, Input input)
 {
+	if (config->isMappedTo("system_hk", input))
+	{
+		if (input.value != 0)
+			mIgnoreKeys = true;
+		else
+			mIgnoreKeys = false;
+	}
+
+	if (mIgnoreKeys)
+		return;
+
 	if (mScreenSaver) {
 		if (mScreenSaver->isScreenSaverActive() && Settings::getInstance()->getBool("ScreenSaverControls") &&
 			((Settings::getInstance()->getString("ScreenSaverBehavior") == "slideshow") || 			

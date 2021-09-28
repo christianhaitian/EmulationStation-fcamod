@@ -146,6 +146,8 @@ private:
 	unsigned int mTimeSinceLastInput;
 
 	bool mRenderedHelpPrompts;
+
+	bool mIgnoreKeys;
 };
 
 #endif // ES_CORE_WINDOW_H
