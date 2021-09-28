@@ -1948,3 +1948,7 @@ msgstr "Núcleo proporcionado"
 
 msgid "Do not set"
 msgstr "No establecer"
+
+#:
+msgid "QUICK SEARCH"
+msgstr "BÚSQUEDA RÁPIDA"

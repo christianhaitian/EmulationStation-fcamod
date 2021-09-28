@@ -105,6 +105,8 @@ public:
 	SystemData(const std::string& name, const std::string& fullName, SystemEnvironmentData* envData, const std::string& themeFolder, bool CollectionSystem = false, bool groupedSystem = false);
 	~SystemData();
 
+	static SystemData* getSystem(const std::string name);
+
 	inline FolderData* getRootFolder() const { return mRootFolder; };
 	inline const std::string& getName() const { return mName; }
 	inline const std::string& getFullName() const { return mFullName; }

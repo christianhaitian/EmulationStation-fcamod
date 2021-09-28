@@ -3,6 +3,7 @@
 #include "utils/StringUtil.h"
 #include "Log.h"
 #include "EsLocale.h"
+#include "Settings.h"
 
 std::vector<std::vector<const char*>> kbUs {
 
@@ -169,7 +170,7 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 		else
 			setSize(Renderer::getScreenWidth() * 0.5f, mTitle->getFont()->getHeight() + textHeight + mKeyboardGrid->getSize().y() + 40);
 
-		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
+		//setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
 	}
 	else 
 	{
@@ -178,8 +179,14 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 		else // Set size based on ScreenHieght * .08f by the amount of keyboard rows there are.
 			setSize(Renderer::getScreenWidth() * 0.95f, mTitle->getFont()->getHeight() + textHeight + 40 + (Renderer::getScreenHeight() * 0.085f) * 6);
 
-		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
+		//setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
 	}
+
+	float new_y = (Renderer::getScreenHeight() - mSize.y()) / 2;
+	if (Settings::getInstance()->getBool("MenusOnDisplayTop"))
+		new_y = 0.f;
+
+	setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, new_y);
 }
 
 
@@ -224,7 +231,7 @@ bool GuiTextEditPopupKeyboard::input(InputConfig* config, Input input)
 		return true;
 	}
 
-	// For deleting a chara (Left Top Button)
+	// For deleting a char (Left Top Button)
 	if (config->isMappedTo("pageup", input) && input.value) {
 		mText->startEditing();
 		mText->textInput("\b");
