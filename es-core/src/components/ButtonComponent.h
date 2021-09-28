@@ -35,6 +35,9 @@ public:
 
 	void setRenderNonFocusedBackground(bool value) { mRenderNonFocusedBackground = value; }
 
+	Vector4f getPadding() { return mPadding; }
+	void setPadding(const Vector4f padding);
+
 private:
 	std::shared_ptr<Font> mFont;
 	std::function<void()> mPressedFunc;
@@ -43,6 +46,8 @@ private:
 	bool mEnabled;
 	bool mNewColor = false;
 	bool mRenderNonFocusedBackground;
+
+	Vector4f	mPadding;
 
 	unsigned int mTextColorFocused;
 	unsigned int mTextColorUnfocused;

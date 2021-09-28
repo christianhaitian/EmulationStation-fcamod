@@ -148,3 +148,12 @@ std::vector<HelpPrompt> ButtonComponent::getHelpPrompts()
 	prompts.push_back(HelpPrompt(BUTTON_OK, mHelpText.empty() ? mText.c_str() : mHelpText.c_str()));
 	return prompts;
 }
+
+void ButtonComponent::setPadding(const Vector4f padding)
+{
+	if (mPadding == padding)
+		return;
+
+	mPadding = padding;
+	onSizeChanged();
+}

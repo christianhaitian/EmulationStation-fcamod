@@ -293,8 +293,7 @@ bool ComponentGrid::moveCursor(Vector2i dir)
 
 		const GridEntry* cursorEntry;
 		//spread out on search axis+
-		while(mCursor.x() < mGridSize.x() && mCursor.y() < mGridSize.y()
-			&& mCursor.x() >= 0 && mCursor.y() >= 0)
+		while(mCursor.x() < mGridSize.x() && mCursor.y() < mGridSize.y() && mCursor.x() >= 0 && mCursor.y() >= 0)
 		{
 			cursorEntry = getCellAt(mCursor);
 			if(cursorEntry && cursorEntry->canFocus && cursorEntry != currentCursorEntry)
@@ -303,13 +302,12 @@ bool ComponentGrid::moveCursor(Vector2i dir)
 				return true;
 			}
 
-			mCursor += searchAxis;
+			mCursor += dir;
 		}
-
+        /*
 		//now again on search axis-
 		mCursor = curDirPos;
-		while(mCursor.x() >= 0 && mCursor.y() >= 0
-			&& mCursor.x() < mGridSize.x() && mCursor.y() < mGridSize.y())
+		while(mCursor.x() >= 0 && mCursor.y() >= 0 && mCursor.x() < mGridSize.x() && mCursor.y() < mGridSize.y())
 		{
 			cursorEntry = getCellAt(mCursor);
 			if(cursorEntry && cursorEntry->canFocus && cursorEntry != currentCursorEntry)
@@ -318,9 +316,9 @@ bool ComponentGrid::moveCursor(Vector2i dir)
 				return true;
 			}
 
-			mCursor -= searchAxis;
+			mCursor -= dir;
 		}
-
+        */
 		mCursor = curDirPos;
 	}
 
