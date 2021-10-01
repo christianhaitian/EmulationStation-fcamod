@@ -348,9 +348,14 @@ bool GuiTextEditPopupKeyboard::input(InputConfig* config, Input input)
 
 	if (config->isMappedTo("x", input) && input.value && mOkCallback != nullptr)
 	{
-		mOkCallback(""); 
-		delete this;
-		return true;
+		bool editing = mText->isEditing();
+		if (!editing)
+			mText->startEditing();
+
+		mText->setValue("");
+
+		if (!editing)
+			mText->stopEditing();
 	}
 
 	return false;
@@ -430,13 +435,13 @@ std::shared_ptr<ButtonComponent> GuiTextEditPopupKeyboard::makeButton(const std:
 {
 	std::shared_ptr<ButtonComponent> button = std::make_shared<ButtonComponent>(mWindow, key, key, [this, key, shiftedKey, altedKey]
 	{
-		if (key == _U("\uF058") || key.find("OK") != std::string::npos)
+		if (key == _U("\u23CE") || key.find("OK") != std::string::npos)
 		{
 			mOkCallback(mText->getValue());
 			delete this;
 			return;
 		}
-		else if (key == _U("\uF177") || key == "DEL")
+		else if (key == _U("\u232B") || key == "DEL")
 		{
 			mText->startEditing(); mText->textInput("\b"); mText->stopEditing();
 			return;
@@ -448,9 +453,10 @@ std::shared_ptr<ButtonComponent> GuiTextEditPopupKeyboard::makeButton(const std:
 		}
 		else if (key == _("RESET"))
 		{
-			mOkCallback(""); 
-			delete this;
-			return;
+			mText->startEditing();
+			mText->setValue("");
+			mText->stopEditing();
+            return;
 		}
 		else if (key == _("CANCEL"))
 		{
