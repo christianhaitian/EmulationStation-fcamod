@@ -98,6 +98,7 @@ namespace PlatformIds
 		ZX81,
 		TIC80,
 		TI_99,
+		MEGADUCK,
 		ASTROCADE,
 
 		// Windows Specific

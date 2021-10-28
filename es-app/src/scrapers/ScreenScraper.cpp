@@ -118,6 +118,7 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	{ ZX81, 77 },
 	{ TIC80, 222 },
 	{ TI_99, 205 },
+	{ MEGADUCK, 90 },
 	{ ASTROCADE, 44 },
 	{ MOONLIGHT, 138 }, // "PC Windows"
 
