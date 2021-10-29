@@ -137,11 +137,6 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 					upper = _U("\u23CE");
 					alted = _U("\u23CE");
 				}
-				else if (lower == "SPACE")
-				{
-					lower = "SPACE";
-					upper = "SPACE";
-				}
 				else if (lower != "SHIFT" && lower.length() > 1)
 				{
 					lower = _(lower.c_str());
