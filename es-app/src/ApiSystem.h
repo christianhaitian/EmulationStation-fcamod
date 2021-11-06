@@ -35,6 +35,15 @@ public:
 
 	static std::vector<ThemeDownloadInfo> getThemesList();
 	static std::pair<std::string, int> installTheme(std::string themeName, const std::function<void(const std::string)>& func = nullptr);
+
+    static ApiSystem* getInstance();
+	virtual void deinit() { };
+
+	bool	getBrighness(int& value);
+	void	setBrighness(int value);
+
+protected:
+    static ApiSystem* instance;
 };
 
 #endif

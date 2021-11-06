@@ -36,7 +36,7 @@
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
 
-	//addEntry("DISPLAY SETTINGS", true, [this] { openDisplaySettings(); });
+	addEntry("DISPLAY SETTINGS", true, [this] { openDisplaySettings(); });
 
 	auto theme = ThemeData::getMenuTheme();
 
@@ -92,18 +92,27 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
 }
 
-/*void GuiMenu::openDisplaySettings()
+void GuiMenu::openDisplaySettings()
 {
 	// Brightness
 	auto s = new GuiSettings(mWindow, "DISPLAY");
 
-	auto bright = std::make_shared<SliderComponent>(mWindow, 1.0f, 100.f, 1.0f, "%");
-	bright->setValue((float)go2_display_backlight_get(NULL)+1.0);
-	s->addWithLabel("BRIGHTNESS", bright);
-	s->addSaveFunc([bright] { go2_display_backlight_set(NULL, (int)Math::round(bright->getValue())); });
+    int brighness;
+    ApiSystem::getInstance()->getBrighness(brighness);
+   	auto brightnessComponent = std::make_shared<SliderComponent>(mWindow, 1.f, 100.f, 1.f, "%");
+    brightnessComponent->setValue(brighness);
+   	brightnessComponent->setOnValueChanged([](const float &newVal)
+    {
+    	ApiSystem::getInstance()->setBrighness((int)Math::round(newVal));
+   	});
+    s->addSaveFunc([this, brightnessComponent] {
+         SystemConf::getInstance()->set("brightness.level", std::to_string((int)Math::round(brightnessComponent->getValue())));
+    });
+
+	s->addWithLabel(_("BRIGHTNESS"), brightnessComponent);
 
 	mWindow->pushGui(s);
-}*/
+}
 
 void GuiMenu::openScraperSettings()
 {

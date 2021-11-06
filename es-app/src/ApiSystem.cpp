@@ -8,6 +8,27 @@
 #include "Log.h"
 #include "Window.h"
 #include "components/AsyncNotificationComponent.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+#include <unistd.h> 
+
+ApiSystem* ApiSystem::instance = nullptr;
+
+ApiSystem *ApiSystem::getInstance() 
+{
+	if (ApiSystem::instance == nullptr)
+#if WIN32
+		ApiSystem::instance = new Win32ApiSystem();
+#else
+		ApiSystem::instance = new ApiSystem();
+#endif
+
+	return ApiSystem::instance;
+}
 
 UpdateState::State ApiSystem::state = UpdateState::State::NO_UPDATE;
 
@@ -437,4 +458,97 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 #endif
 
 	return std::pair<std::string, int>(std::string("Theme not found"), 1);
+}
+
+const char* BACKLIGHT_BRIGHTNESS_NAME = "/sys/class/backlight/backlight/brightness";
+const char* BACKLIGHT_BRIGHTNESS_MAX_NAME = "/sys/class/backlight/backlight/max_brightness";
+#define BACKLIGHT_BUFFER_SIZE 127
+
+bool ApiSystem::getBrighness(int& value)
+{
+#if WIN32
+	return false;
+#else
+	value = 0;
+
+	int fd;
+	int max = 100;	
+	char buffer[BACKLIGHT_BUFFER_SIZE + 1];
+	ssize_t count;
+
+	fd = open(BACKLIGHT_BRIGHTNESS_MAX_NAME, O_RDONLY);
+	if (fd < 0)
+		return false;
+
+	memset(buffer, 0, BACKLIGHT_BUFFER_SIZE + 1);
+
+	count = read(fd, buffer, BACKLIGHT_BUFFER_SIZE);
+	if (count > 0)
+		max = atoi(buffer);
+
+	close(fd);
+
+	if (max == 0) 
+		return 0;
+
+	fd = open(BACKLIGHT_BRIGHTNESS_NAME, O_RDONLY);
+	if (fd < 0)
+		return false;
+
+	memset(buffer, 0, BACKLIGHT_BUFFER_SIZE + 1);
+
+	count = read(fd, buffer, BACKLIGHT_BUFFER_SIZE);
+	if (count > 0)
+		value = atoi(buffer);
+
+	close(fd);
+
+	value = (uint32_t) ((value / (float)max * 100.0f) + 0.5f);
+	return true;
+#endif
+}
+
+void ApiSystem::setBrighness(int value)
+{
+#if !WIN32	
+	if (value < 1)
+		value = 1;
+
+	if (value > 100)
+		value = 100;
+
+	int fd;
+	int max = 100;
+	char buffer[BACKLIGHT_BUFFER_SIZE + 1];
+	ssize_t count;
+
+	fd = open(BACKLIGHT_BRIGHTNESS_MAX_NAME, O_RDONLY);
+	if (fd < 0)
+		return;
+
+	memset(buffer, 0, BACKLIGHT_BUFFER_SIZE + 1);
+
+	count = read(fd, buffer, BACKLIGHT_BUFFER_SIZE);
+	if (count > 0)
+		max = atoi(buffer);
+
+	close(fd);
+
+	if (max == 0) 
+		return;
+
+	fd = open(BACKLIGHT_BRIGHTNESS_NAME, O_WRONLY);
+	if (fd < 0)
+		return;
+	
+	float percent = (value / 100.0f * (float)max) + 0.5f;
+	sprintf(buffer, "%d\n", (uint32_t)percent);
+
+	count = write(fd, buffer, strlen(buffer));
+	
+	if (count < 0)
+		LOG(LogError) << "ApiSystem::setBrighness failed";
+	
+	close(fd);
+#endif
 }
