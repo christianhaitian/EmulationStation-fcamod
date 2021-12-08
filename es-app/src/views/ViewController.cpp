@@ -726,7 +726,7 @@ std::vector<HelpPrompt> ViewController::getHelpPrompts()
 
 	prompts = mCurrentView->getHelpPrompts();
 	if(!UIModeController::getInstance()->isUIModeKid())
-		prompts.push_back(HelpPrompt("start", "menu"));
+		prompts.push_back(HelpPrompt("start", _("MENU")));
 
 	return prompts;
 }

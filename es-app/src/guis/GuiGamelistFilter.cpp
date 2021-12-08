@@ -4,7 +4,7 @@
 #include "views/UIModeController.h"
 #include "SystemData.h"
 
-GuiGamelistFilter::GuiGamelistFilter(Window* window, SystemData* system) : GuiComponent(window), mMenu(window, "FILTER GAMELIST BY"), mSystem(system)
+GuiGamelistFilter::GuiGamelistFilter(Window* window, SystemData* system) : GuiComponent(window), mMenu(window, _("FILTER GAMELIST BY")), mSystem(system)
 {
 	initializeMenu();
 }

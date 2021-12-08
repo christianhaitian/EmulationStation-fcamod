@@ -35,7 +35,7 @@
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
-	addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); });
+	addEntry("DISPLAY SETTINGS", true, [this] { openDisplaySettings(); });
 
 	auto theme = ThemeData::getMenuTheme();
 
@@ -90,7 +90,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 void GuiMenu::openDisplaySettings()
 {
 	// Brightness
-	auto s = new GuiSettings(mWindow, _("DISPLAY"));
+	auto s = new GuiSettings(mWindow, "DISPLAY");
 
 	auto bright = std::make_shared<SliderComponent>(mWindow, 1.0f, 100.f, 1.0f, "%");
 	bright->setValue((float)go2_display_backlight_get(NULL)+1.0);
@@ -258,7 +258,7 @@ void GuiMenu::openSoundSettings()
 	{
 #if defined(__linux__)
 		// audio card
-		auto audio_card = std::make_shared< OptionListComponent<std::string> >(mWindow, _("AUDIO CARD"), false);
+		auto audio_card = std::make_shared< OptionListComponent<std::string> >(mWindow, "AUDIO CARD", false);
 		std::vector<std::string> audio_cards;
 	#ifdef _RPI_
 		// RPi Specific  Audio Cards
@@ -301,7 +301,7 @@ void GuiMenu::openSoundSettings()
 		}
 		for(auto it = transitions.cbegin(); it != transitions.cend(); it++)
 			vol_dev->add(*it, *it, Settings::getInstance()->getString("AudioDevice") == *it);
-		s->addWithLabel(_("AUDIO DEVICE"), vol_dev);
+		s->addWithLabel("AUDIO DEVICE", vol_dev);
 		s->addSaveFunc([vol_dev] {
 			Settings::getInstance()->setString("AudioDevice", vol_dev->getSelected());
 			VolumeControl::getInstance()->deinit();
@@ -724,7 +724,7 @@ void GuiMenu::openUISettings()
 		if (selectedSet == themeSets.cend())
 			selectedSet = themeSets.cbegin();
 
-		auto theme_set = std::make_shared< OptionListComponent<std::string> >(mWindow, _("THEME"), false);
+		auto theme_set = std::make_shared< OptionListComponent<std::string> >(mWindow, "THEME", false);
 		for (auto it = themeSets.cbegin(); it != themeSets.cend(); it++)
 			theme_set->add(it->first, it->first, it == selectedSet);
 
@@ -1185,7 +1185,7 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 	});
 
 	row.elements.clear();
-	row.addElement(std::make_shared<TextComponent>(mWindow, _("CORE"), theme->Text.font, theme->Text.color), true);
+	row.addElement(std::make_shared<TextComponent>(mWindow, "CORE", theme->Text.font, theme->Text.color), true);
 	row.addElement(core_choice, false);
 	s->addRow(row);
 

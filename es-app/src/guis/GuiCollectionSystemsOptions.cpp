@@ -246,7 +246,7 @@ void GuiCollectionSystemsOptions::addSystemsToMenu()
 				hasGroup = true;
 			}
 
-			autoOptionList->add(it->second.decl.longName, it->second.decl.name, it->second.isEnabled);
+			autoOptionList->add(_(it->second.decl.longName.c_str()), it->second.decl.name, it->second.isEnabled);
 		}
 	}
 	addWithLabel(_("AUTOMATIC GAME COLLECTIONS"), autoOptionList);

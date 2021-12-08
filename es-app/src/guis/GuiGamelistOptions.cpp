@@ -176,7 +176,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 			if (sel)
 				found = true;
 
-			mViewMode->add(it->second, it->first, sel);
+			mViewMode->add(_(it->second.c_str()), it->first, sel);
 		}
 
 		if (!found)
