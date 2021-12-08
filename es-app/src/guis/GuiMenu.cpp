@@ -36,7 +36,7 @@
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
 
-	addEntry("DISPLAY SETTINGS", true, [this] { openDisplaySettings(); });
+	addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); });
 
 	auto theme = ThemeData::getMenuTheme();
 
@@ -75,9 +75,9 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 	
 	addEntry(_("QUIT"), !Settings::getInstance()->getBool("ShowOnlyExit"), [this] {openQuitMenu(); }, "iconQuit");
 
-	addEntry("BAT: " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | SND: " + std::string(getShOutput(R"(current_volume)")) + " | BRT: " + std::string(getShOutput(R"(current_brightness)")) + "% |" + " WIFI: " + std::string(getShOutput(R"(if [ -z $(cat /sys/class/net/wlan0/operstate) ]; then echo "Off"; else cat /sys/class/net/wlan0/operstate; fi)")), false, [this] {  });
+	addEntry(_("BAT") + ": " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | " + _("SND") + ": " + std::string(getShOutput(R"(current_volume)")) + " | " + _("BRT") + ": " + std::string(getShOutput(R"(current_brightness)")) + "% | " + _("WIFI") + ": " + std::string(getShOutput(R"(if [ -z $(cat /sys/class/net/wlan0/operstate) ]; then echo "Off"; else cat /sys/class/net/wlan0/operstate; fi)")), false, [this] {  });
 
-	addEntry("Distro Version: " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep title | cut -c 7-50)")), false, [this] {  });
+	addEntry(_("Distro Version") + ": " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep title | cut -c 7-50)")), false, [this] {  });
 
 	addChild(&mMenu);
 	addVersionInfo();
@@ -95,7 +95,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 void GuiMenu::openDisplaySettings()
 {
 	// Brightness
-	auto s = new GuiSettings(mWindow, "DISPLAY");
+	auto s = new GuiSettings(mWindow, _("DISPLAY"));
 
     int brighness;
     ApiSystem::getInstance()->getBrighness(brighness);
@@ -272,7 +272,7 @@ void GuiMenu::openSoundSettings()
 	{
 #if defined(__linux__)
 		// audio card
-		auto audio_card = std::make_shared< OptionListComponent<std::string> >(mWindow, "AUDIO CARD", false);
+		auto audio_card = std::make_shared< OptionListComponent<std::string> >(mWindow, _("AUDIO CARD"), false);
 		std::vector<std::string> audio_cards;
 	#ifdef _RPI_
 		// RPi Specific  Audio Cards
@@ -315,7 +315,7 @@ void GuiMenu::openSoundSettings()
 		}
 		for(auto it = transitions.cbegin(); it != transitions.cend(); it++)
 			vol_dev->add(*it, *it, Settings::getInstance()->getString("AudioDevice") == *it);
-		s->addWithLabel("AUDIO DEVICE", vol_dev);
+		s->addWithLabel(_("AUDIO DEVICE"), vol_dev);
 		s->addSaveFunc([vol_dev] {
 			Settings::getInstance()->setString("AudioDevice", vol_dev->getSelected());
 			VolumeControl::getInstance()->deinit();
@@ -738,7 +738,7 @@ void GuiMenu::openUISettings()
 		if (selectedSet == themeSets.cend())
 			selectedSet = themeSets.cbegin();
 
-		auto theme_set = std::make_shared< OptionListComponent<std::string> >(mWindow, "THEME", false);
+		auto theme_set = std::make_shared< OptionListComponent<std::string> >(mWindow, _("THEME"), false);
 		for (auto it = themeSets.cbegin(); it != themeSets.cend(); it++)
 			theme_set->add(it->first, it->first, it == selectedSet);
 
@@ -1199,7 +1199,7 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 	});
 
 	row.elements.clear();
-	row.addElement(std::make_shared<TextComponent>(mWindow, "CORE", theme->Text.font, theme->Text.color), true);
+	row.addElement(std::make_shared<TextComponent>(mWindow, _("CORE"), theme->Text.font, theme->Text.color), true);
 	row.addElement(core_choice, false);
 	s->addRow(row);
 

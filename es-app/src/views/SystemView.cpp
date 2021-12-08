@@ -552,7 +552,7 @@ void SystemView::onCursorChanged(const CursorState& /*state*/)
 		std::stringstream ss;
 
 		if (!getSelected()->isGameSystem() && !getSelected()->isGroupSystem())
-			ss << "CONFIGURATION";
+			ss << _("CONFIGURATION");
 		else
 		{
 			char strbuf[256];

@@ -140,7 +140,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 		//	core_choice->add(_("DEFAULT"), "", true);
 			core_choice->setTag(iter->key);
 
-			row.addElement(std::make_shared<TextComponent>(mWindow, "CORE", theme->Text.font, theme->Text.color), true);
+			row.addElement(std::make_shared<TextComponent>(mWindow, _("CORE"), theme->Text.font, theme->Text.color), true);
 			row.addElement(core_choice, false);
 
 			mList->addRow(row);
@@ -217,7 +217,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 				row.addElement(bracket, false);
 
 				bool multiLine = iter->type == MD_MULTILINE_STRING;
-				const std::string title = iter->displayPrompt;
+				const std::string title = _(iter->displayPrompt.c_str());
 				auto updateVal = [ed](const std::string& newVal) { ed->setValue(newVal); }; // ok callback (apply new value to ed)
 				row.makeAcceptInputHandler([this, title, ed, updateVal, multiLine] 
 				{
@@ -250,7 +250,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 	if(mDeleteFunc)
 	{
 		auto deleteFileAndSelf = [&] { mDeleteFunc(); delete this; };
-		auto deleteBtnFunc = [this, deleteFileAndSelf] { mWindow->pushGui(new GuiMsgBox(mWindow, "THIS WILL DELETE THE ACTUAL GAME FILE(S)!\nARE YOU SURE?", "YES", deleteFileAndSelf, "NO", nullptr)); };
+		auto deleteBtnFunc = [this, deleteFileAndSelf] { mWindow->pushGui(new GuiMsgBox(mWindow, _("THIS WILL DELETE THE ACTUAL GAME FILE(S)!\nARE YOU SURE?"), _("YES"), deleteFileAndSelf, _("NO"), nullptr)); };
 		buttons.push_back(std::make_shared<ButtonComponent>(mWindow, _("DELETE"), _("DELETE"), deleteBtnFunc));
 	}
 
