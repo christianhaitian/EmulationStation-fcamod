@@ -81,13 +81,16 @@ namespace Renderer
 		}
 
 //#if 0
-		initialCursorState = (SDL_ShowCursor(0) != 0);
+		static SDL_DisplayMode dispMode;
+
+		if (windowWidth == 0)
+		{
+			initialCursorState = (SDL_ShowCursor(0) != 0);
+			SDL_GetDesktopDisplayMode(0, &dispMode);
+		}
 
 		if (!Settings::getInstance()->getBool("Windowed"))
 			SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
-
-		SDL_DisplayMode dispMode;
-		SDL_GetDesktopDisplayMode(0, &dispMode);
 
 #if WIN32
 		if (!Settings::getInstance()->getBool("Windowed") && !Settings::getInstance()->getInt("WindowWidth"))
