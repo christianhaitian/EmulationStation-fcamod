@@ -29,6 +29,7 @@
 #include "scrapers/ThreadedScraper.h"
 #include "ApiSystem.h"
 #include "views/gamelist/IGameListView.h"
+#include "components/BatteryIndicatorComponent.h"
 
 //#include <go2/display.h>
 #include "SystemConf.h"
@@ -1073,6 +1074,16 @@ void GuiMenu::openUISettings()
 		if (Settings::getInstance()->setBool("ShowHelpPrompts", show_help->getState()))
 			s->setVariable("reloadAll", true);
 	});
+
+	// Battery indicator
+	if (mWindow->getBatteryIndicator() && mWindow->getBatteryIndicator()->hasBattery())
+	{
+		auto batteryStatus = std::make_shared<SwitchComponent>(mWindow);
+		batteryStatus->setState(Settings::getInstance()->getBool("ShowBatteryIndicator"));
+		s->addWithLabel(_("SHOW BATTERY STATUS"), batteryStatus);
+		s->addSaveFunc([batteryStatus] { Settings::getInstance()->setBool("ShowBatteryIndicator", batteryStatus->getState()); });
+	}
+
 
 	// filenames
 	auto hidden_files = std::make_shared<SwitchComponent>(mWindow);

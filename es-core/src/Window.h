@@ -21,6 +21,7 @@ class TextureResource;
 class AsyncNotificationComponent;
 class ThemeData;
 class TextComponent;
+class BatteryIndicatorComponent;
 
 struct HelpStyle;
 
@@ -97,6 +98,8 @@ public:
 
 	void onThemeChanged(const std::shared_ptr<ThemeData>& theme);
 
+	std::shared_ptr<BatteryIndicatorComponent>	getBatteryIndicator() { return mBatteryIndicator; }
+	
 private:
 	void processPostedFunctions();
 
@@ -138,7 +141,8 @@ private:
 	int mClockElapsed;
 	
 	std::shared_ptr<TextComponent>	mClock;
-
+	std::shared_ptr<BatteryIndicatorComponent>	mBatteryIndicator;
+	
 	bool mNormalizeNextUpdate;
 
 	bool mAllowSleep;
