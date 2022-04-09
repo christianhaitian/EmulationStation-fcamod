@@ -16,6 +16,9 @@
 #include <unistd.h>
 #endif
 
+#include <future>
+#include "utils/AsyncUtil.h"
+
 FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType type, std::unordered_map<std::string, FileData*>& fileMap)
 {
 	auto pGame = fileMap.find(path);
@@ -248,10 +251,9 @@ bool addFileDataNode(pugi::xml_node& parent, const FileData* file, const char* t
 	return true;
 }
 
-bool saveToGamelistRecovery(FileData* file)
+bool saveToGamelistRecoveryInternal(FileData* file)
 {
-	if (!Settings::getInstance()->getBool("SaveGamelistsOnExit"))
-		return false;
+    LOG(LogDebug) << "Gamelist::saveToGamelistRecoveryInternal() - Execute name: " << file->getName() << ", path: " << file->getPath();
 	
 	pugi::xml_document doc;
 	pugi::xml_node root = doc.append_child("gameList");
@@ -285,6 +287,22 @@ bool saveToGamelistRecovery(FileData* file)
 	}
 
 	return false;
+}
+
+bool saveToGamelistRecovery(FileData* file)
+{
+	if (!Settings::getInstance()->getBool("SaveGamelistsOnExit"))
+		return false;
+
+	if (Utils::Async::isCanRunAsync())
+	{
+		LOG(LogDebug) << "Gamelist::saveToGamelistRecovery() - Asynchronous execution!";
+		auto dummy= std::async(std::launch::async, saveToGamelistRecoveryInternal, file);
+		LOG(LogDebug) << "Gamelist::saveToGamelistRecovery() - exit Asynchronous execution!";
+		return false;
+	}
+	LOG(LogDebug) << "Gamelist::saveToGamelistRecovery() - normal execution!";
+	return saveToGamelistRecoveryInternal(file);
 }
 
 bool hasDirtyFile(SystemData* system)
