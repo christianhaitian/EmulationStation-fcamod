@@ -16,6 +16,7 @@
 #include "Gamelist.h"
 #include "FileSorts.h"
 #include "utils/ThreadPool.h"
+#include "utils/AsyncUtil.h"
 
 std::string myCollectionsName = "collections";
 
@@ -1024,9 +1025,9 @@ void CollectionSystemManager::removeCollectionsFromDisplayedSystems()
 void CollectionSystemManager::addEnabledCollectionsToDisplayedSystems(std::map<std::string, CollectionSystemData>* colSystemData, std::unordered_map<std::string, FileData*>* pMap)
 {
 	// add auto enabled ones
-	if (Settings::getInstance()->getBool("ThreadedLoading"))
+	if (Utils::Async::isCanRunAsync())
 	{
-		LOG(LogDebug) << "CollectionSystemManager::addEnabledCollectionsToDisplayedSystems() - Collection threaded loading";
+		LOG(LogInfo) << "CollectionSystemManager::addEnabledCollectionsToDisplayedSystems() - Collection threaded loading";
 		std::vector<CollectionSystemData*> collectionsToPopulate;
 		for (auto it = colSystemData->begin(); it != colSystemData->end(); it++)
 			if (it->second.isEnabled && !it->second.isPopulated)

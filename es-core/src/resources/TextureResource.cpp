@@ -3,8 +3,9 @@
 #include "utils/FileSystemUtil.h"
 #include "resources/TextureData.h"
 #include "ImageIO.h"
-#include "Settings.h"
+#include "utils/AsyncUtil.h"
 #include <cstring>
+#include "Log.h"
 
 TextureDataManager		TextureResource::sTextureDataManager;
 
@@ -36,8 +37,9 @@ TextureResource::TextureResource(const std::string& path, bool tile, bool linear
 
 			unsigned int width, height;
 			
-			if (allowAsync && Settings::getInstance()->getBool("ThreadedLoading") && ImageIO::getImageSize(fullpath.c_str(), &width, &height))
+			if (allowAsync && Utils::Async::isCanRunAsync() && ImageIO::getImageSize(fullpath.c_str(), &width, &height))
 			{
+                LOG(LogDebug) << "TextureResource::TextureResource() - Async texture loading!";
 				data->setTemporarySize(width, height);
 				async = true;
 			}

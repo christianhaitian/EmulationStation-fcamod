@@ -930,6 +930,9 @@ namespace Utils
 
 		bool isDirectory(const std::string& _path)
 		{
+			if (_path.empty())
+				return false;
+				
 			auto it = FileCache::get(_path);
 			if (it != nullptr && !it->isSymLink)
 				return it->exists && it->directory;
@@ -953,6 +956,9 @@ namespace Utils
 
 		bool isSymlink(const std::string& _path)
 		{		
+			if (_path.empty())
+				return false;
+
 			auto it = FileCache::get(_path);
 			if (it != nullptr)
 				return it->exists && it->isSymLink;
@@ -979,6 +985,9 @@ namespace Utils
 
 		bool isHidden(const std::string& _path)
 		{
+			if (_path.empty())
+				return false;
+				
 			auto it = FileCache::get(_path);
 			if (it != nullptr)
 				return it->exists && it->hidden;
