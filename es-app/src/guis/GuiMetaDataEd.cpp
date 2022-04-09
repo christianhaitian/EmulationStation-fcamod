@@ -273,9 +273,9 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 
 
 	// resize + center	
-	setSize(Renderer::getScreenWidth(), Renderer::getScreenHeight());
-	//float width = (float)Math::min(Renderer::getScreenHeight(), (int)(Renderer::getScreenWidth() * 3.0f));
-	//setSize(width, Renderer::getScreenHeight() * 1.0f);
+	//setSize(Renderer::getScreenWidth(), Renderer::getScreenHeight());
+	float width = (float)Math::min(Renderer::getScreenHeight(), (int)(Renderer::getScreenWidth() * 3.0f));
+	setSize(Renderer::getScreenWidth(), Renderer::getScreenHeight() * 1.0f);
 	setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
 }
 
