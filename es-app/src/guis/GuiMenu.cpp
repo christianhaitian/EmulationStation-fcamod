@@ -46,7 +46,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 	if (isFullUI)
 	{
 		addEntry(_("UI SETTINGS"), true, [this] { openUISettings(); }, "iconUI");
-		// addEntry(_("CONFIGURE INPUT"), true, [this] { openConfigInput(); }, "iconControllers");
+		addEntry(_("CONFIGURE INPUT"), true, [this] { openConfigInput(); }, "iconControllers");
 	}
 
 	addEntry(_("SOUND SETTINGS"), true, [this] { openSoundSettings(); }, "iconSound");
@@ -76,7 +76,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 	
 	addEntry(_("QUIT"), !Settings::getInstance()->getBool("ShowOnlyExit"), [this] {openQuitMenu(); }, "iconQuit");
 
-	addEntry(_("BAT") + ": " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | " + _("SND") + ": " + std::string(getShOutput(R"(current_volume)")) + " | " + _("BRT") + ": " + std::string(getShOutput(R"(current_brightness)")) + "% | " + _("WIFI") + ": " + std::string(getShOutput(R"(if [ -z $(cat /sys/class/net/wlan0/operstate) ]; then echo "Off"; else cat /sys/class/net/wlan0/operstate; fi)")), false, [this] {  });
+	addEntry(_("BAT") + ": " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | " + _("SND") + ": " + std::string(getShOutput(R"(current_volume)")) + " | " + _("BRT") + ": " + std::string(getShOutput(R"(current_brightness)")) + "% | " + _("WIFI") + ": " + std::string(getShOutput(R"(if [ -z $(cat /sys/class/net/wlan0/operstate) ]; then echo "Off"; else cat /sys/class/net/wlan0/operstate; fi)")) + " | " + _("SSID") + ": " + std::string(getShOutput(R"(iw dev wlan0 info | grep ssid | cut -c 7-30)")) + " | " + _("IP") + ": " + std::string(getShOutput(R"(ip -f inet addr show wlan0 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')")), false, [this] {  });
 
 	addEntry(_("Distro Version") + ": " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep title | cut -c 7-50)")), false, [this] {  });
 
@@ -266,8 +266,8 @@ void GuiMenu::openSoundSettings()
 	auto volume = std::make_shared<SliderComponent>(mWindow, 0.f, 100.f, 1.f, "%");
 	volume->setValue((float)VolumeControl::getInstance()->getVolume());
 	volume->setOnValueChanged([](const float &newVal) { VolumeControl::getInstance()->setVolume((int)Math::round(newVal)); });
-	s->addWithLabel(_("SYSTEM VOLUME"), volume);
-	//s->addSaveFunc([volume] { VolumeControl::getInstance()->setVolume((int)Math::round(volume->getValue())); });
+	//s->addWithLabel(_("SYSTEM VOLUME"), volume);
+	s->addSaveFunc([volume] { VolumeControl::getInstance()->setVolume((int)Math::round(volume->getValue())); });
 
 	if (UIModeController::getInstance()->isUIModeFull())
 	{
@@ -294,7 +294,7 @@ void GuiMenu::openSoundSettings()
 		}
 		for(auto ac = audio_cards.cbegin(); ac != audio_cards.cend(); ac++)
 			audio_card->add(*ac, *ac, Settings::getInstance()->getString("AudioCard") == *ac);
-		s->addWithLabel("AUDIO CARD", audio_card);
+		//s->addWithLabel("AUDIO CARD", audio_card);
 		s->addSaveFunc([audio_card] {
 			Settings::getInstance()->setString("AudioCard", audio_card->getSelected());
 			VolumeControl::getInstance()->deinit();
@@ -316,7 +316,7 @@ void GuiMenu::openSoundSettings()
 		}
 		for(auto it = transitions.cbegin(); it != transitions.cend(); it++)
 			vol_dev->add(*it, *it, Settings::getInstance()->getString("AudioDevice") == *it);
-		s->addWithLabel(_("AUDIO DEVICE"), vol_dev);
+		//s->addWithLabel(_("AUDIO DEVICE"), vol_dev);
 		s->addSaveFunc([vol_dev] {
 			Settings::getInstance()->setString("AudioDevice", vol_dev->getSelected());
 			VolumeControl::getInstance()->deinit();
@@ -1628,7 +1628,7 @@ void GuiMenu::openOtherSettings()
 void GuiMenu::openConfigInput()
 {
 	Window* window = mWindow;
-//	window->pushGui(new GuiDetectDevice(window, false, nullptr));
+	//window->pushGui(new GuiDetectDevice(window, false, nullptr));
 		
 	window->pushGui(new GuiMsgBox(window, _("ARE YOU SURE YOU WANT TO CONFIGURE INPUT?"), _("YES"),
 		[window] {
