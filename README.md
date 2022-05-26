@@ -10,6 +10,8 @@ EmulationStation uses some C++11 code, which means you'll need to use at least g
 
 EmulationStation has a few dependencies. For building, you'll need CMake, SDL2, FreeImage, FreeType, cURL and RapidJSON.  You also should probably install the `fonts-droid-fallback` package which contains fallback fonts for Chinese/Japanese/Korean characters, but ES will still work fine without it (this package is only used at run-time).
 
+Optional dependencies: libespeak-dev espeak(For Text to Speech capability)
+
 **On Odroid Go Advance Ubuntu 18.04, 19.10 or 20.04 distros or development OS:**
 All of this be easily installed with `apt-get`:
 ```bash
@@ -44,6 +46,8 @@ make (or use make -j2 or -j3 if you have the additional core and memory to handl
 ```
 
 **Special Note**
+
+If you'd like to enalbe Text to Speech capability, add -DENABLE_TTS=ON to the cmake line. (Ex. `cmake -DENABLE_TTS=ON .`)
 
 If you'd like to enable the ability to scrape games using TheGamesDB and/or ScreenScraper.fr, you'll need to provide a developer ID or API Key for the service(s) with a cmake command as follows:
 
