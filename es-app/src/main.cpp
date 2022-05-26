@@ -22,6 +22,7 @@
 #include <SDL_timer.h>
 #include <iostream>
 #include <time.h>
+#include "TextToSpeech.h"
 
 #if defined(_WIN32)
 #include <Windows.h>
@@ -567,6 +568,11 @@ int main(int argc, char* argv[])
 
 	if (Settings::getInstance()->getBool("audio.bgmusic"))
 		AudioManager::getInstance()->playRandomMusic();
+
+	// tts
+	if(Settings::getInstance()->getBool("TTS")) {
+	  TextToSpeech::getInstance()->enable(true);
+	}
 
 #ifdef WIN32	
 	DWORD displayFrequency = 60;

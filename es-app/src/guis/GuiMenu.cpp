@@ -30,6 +30,7 @@
 #include "ApiSystem.h"
 #include "views/gamelist/IGameListView.h"
 #include "components/BatteryIndicatorComponent.h"
+#include "TextToSpeech.h"
 
 //#include <go2/display.h>
 #include "SystemConf.h"
@@ -829,6 +830,20 @@ void GuiMenu::openUISettings()
 	screensaver_row.makeAcceptInputHandler(std::bind(&GuiMenu::openScreensaverOptions, this));
 	s->addRow(screensaver_row);
 
+#ifdef _ENABLE_TTS_
+	// tts
+	auto tts = std::make_shared<SwitchComponent>(mWindow);
+	tts->setState(Settings::getInstance()->getBool("TTS"));
+	s->addWithLabel(_("TEXT TO SPEECH"), tts);
+	s->addSaveFunc([tts] {
+			 TextToSpeech::getInstance()->enable(tts->getState());
+			 Settings::getInstance()->setBool("TTS", tts->getState());
+			 if(TextToSpeech::getInstance()->enabled() != tts->getState()) {
+			   TextToSpeech::getInstance()->enable(tts->getState());
+			   Settings::getInstance()->setBool("TTS", tts->getState());
+			 }
+		       });
+#endif
 
 	//#ifndef WIN32
 		//UI mode

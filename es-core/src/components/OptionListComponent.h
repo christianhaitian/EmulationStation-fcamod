@@ -8,6 +8,7 @@
 #include "EsLocale.h"
 #include "ThemeData.h"
 #include "components/MultiLineMenuEntry.h"
+#include "components/MenuComponent.h"
 
 //Used to display a list of options.
 //Can select one or multiple options.
@@ -302,6 +303,19 @@ public:
 		auto selected = getSelectedObjects();
 		assert(selected.size() == 1);
 		return selected.at(0);
+	}
+
+  	bool IsMultiSelect() { return mMultiSelect; }
+
+	std::string getSelectedName()
+	{
+		assert(mMultiSelect == false);
+
+		for (unsigned int i = 0; i < mEntries.size(); i++)
+			if (mEntries.at(i).selected)
+				return mEntries.at(i).name;
+
+		return "";
 	}
 
 	void addEx(const std::string name, const std::string description, const T& obj, bool selected)

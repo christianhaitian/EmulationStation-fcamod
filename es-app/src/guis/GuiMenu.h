@@ -27,6 +27,7 @@ private:
 	void addVersionInfo();
 	void openCollectionSystemSettings();
 	void openConfigInput();
+	void openInfoMenu();
 	void openOtherSettings();
 	void openQuitMenu();
 	void openScraperSettings();

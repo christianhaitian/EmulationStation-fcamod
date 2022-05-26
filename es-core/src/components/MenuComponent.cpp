@@ -1,6 +1,7 @@
 #include "components/MenuComponent.h"
-
 #include "components/ButtonComponent.h"
+#include "components/MultiLineMenuEntry.h"
+#include "TextToSpeech.h"
 
 #define BUTTON_GRID_VERT_PADDING  (Renderer::getScreenHeight()*0.0296296) //32
 #define BUTTON_GRID_HORIZ_PADDING (Renderer::getScreenWidth()*0.0052083333) //10
@@ -262,6 +263,13 @@ void MenuComponent::updateGrid()
 std::vector<HelpPrompt> MenuComponent::getHelpPrompts()
 {
 	return mGrid.getHelpPrompts();
+}
+
+void MenuComponent::onShow()
+{
+  GuiComponent::onShow();
+  //TextToSpeech::getInstance()->say(mTitle->getText());
+  getList()->saySelectedLine();
 }
 
 std::shared_ptr<ComponentGrid> makeMultiDimButtonGrid(Window* window, const std::vector< std::vector< std::shared_ptr<ButtonComponent> > >& buttons, float outerWidth)

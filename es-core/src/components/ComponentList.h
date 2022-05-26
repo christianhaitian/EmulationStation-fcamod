@@ -76,6 +76,8 @@ public:
 	inline void setCursorChangedCallback(const std::function<void(CursorState state)>& callback) { mCursorChangedCallback = callback; };
 	inline const std::function<void(CursorState state)>& getCursorChangedCallback() const { return mCursorChangedCallback; };
 
+	void saySelectedLine();
+
 protected:
 	void onCursorChanged(const CursorState& state) override;
 
@@ -94,6 +96,7 @@ protected:
 
 private:
 	bool mFocused;
+	int mOldCursor;
 
 	void updateCameraOffset();
 	void updateElementPosition(const ComponentListRow& row);

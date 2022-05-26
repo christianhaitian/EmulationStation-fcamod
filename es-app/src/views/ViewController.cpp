@@ -19,6 +19,7 @@
 #include "AudioManager.h"
 #include "utils/ThreadPool.h"
 #include <mutex>
+#include "TextToSpeech.h"
 
 ViewController* ViewController::sInstance = NULL;
 
@@ -478,7 +479,13 @@ bool ViewController::input(InputConfig* config, Input input)
 		mWindow->endRenderLoadingScreen();
 		return true;
 	}
-	
+
+	if (config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_F3)
+	  {
+	    Settings::getInstance()->setBool("TTS", TextToSpeech::getInstance()->toogle());
+	    Settings::getInstance()->saveFile();
+	  }
+
 	// open menu
 	if(!UIModeController::getInstance()->isUIModeKid() && config->isMappedTo("start", input) && input.value != 0)
 	{

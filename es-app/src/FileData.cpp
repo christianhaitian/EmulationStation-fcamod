@@ -17,6 +17,7 @@
 #include "views/UIModeController.h"
 #include <assert.h>
 #include "Gamelist.h"
+#include "TextToSpeech.h"
 
 FileData::FileData(FileType type, const std::string& path, SystemData* system)
 	: mType(type), mSystem(system), mParent(NULL), mMetadata(type == GAME ? GAME_METADATA : FOLDER_METADATA) // metadata is REALLY set in the constructor!
@@ -604,3 +605,7 @@ void FolderData::createChildrenByFilenameMap(std::unordered_map<std::string, Fil
 			map[(*it)->getKey()] = (*it);
 	}	
 }
+
+void FileData::speak() {
+  TextToSpeech::getInstance()->say(getName());
+};

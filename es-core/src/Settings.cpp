@@ -78,6 +78,7 @@ void Settings::setDefaults()
 #else
 	mBoolMap["ShowOnlyExit"] = false;
 	mBoolMap["FullscreenBorderless"] = false;
+	mBoolMap["TTS"] = false;
 #endif
 
 	mBoolMap["Windowed"] = false;

@@ -6,6 +6,7 @@
 #include "CollectionSystemManager.h"
 #include "Settings.h"
 #include "SystemData.h"
+#include "TextToSpeech.h"
 
 BasicGameListView::BasicGameListView(Window* window, FolderData* root)
 	: ISimpleGameListView(window, root), mList(window)
@@ -15,6 +16,11 @@ BasicGameListView::BasicGameListView(Window* window, FolderData* root)
 	mList.setSize(mSize.x(), mSize.y() * 0.8f);
 	mList.setPosition(0, mSize.y() * 0.2f);
 	mList.setDefaultZIndex(20);
+
+    FileData* file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
+    if (file != nullptr)
+       file->speak();
+
 	addChild(&mList);		
 
 	populateList(mRoot->getChildrenListToDisplay());
@@ -165,6 +171,7 @@ void BasicGameListView::setCursor(FileData* cursor)
 	
 		populateList(children);
 		mList.setCursor(cursor);
+		TextToSpeech::getInstance()->say(cursor->getName());
 	}
 }
 

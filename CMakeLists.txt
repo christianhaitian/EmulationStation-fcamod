@@ -4,6 +4,7 @@ option(GLES "Set to ON if targeting Embedded OpenGL" ${GLES})
 option(GL "Set to ON if targeting Desktop OpenGL" ${GL})
 option(RPI "Set to ON to enable the Raspberry PI video player (omxplayer)" ${RPI})
 option(CEC "Set to ON to enable CEC" ${CEC})
+option(ENABLE_TTS "Set to ON to enable text to speech" OFF)
 
 project(emulationstation-all)
 
@@ -63,6 +64,17 @@ find_package(CURL REQUIRED)
 find_package(VLC REQUIRED)
 find_package(RapidJSON REQUIRED)
 
+if(ENABLE_TTS)
+  MESSAGE("tts enabled")
+  find_library(LIBESPEAK_LIBRARIES NAMES espeak REQUIRED)
+  if("${LIBESPEAK_LIBRARIES}" STREQUAL "LIBESPEAK_LIBRARIES-NOTFOUND")
+    MESSAGE(FATAL_ERROR "espeak not found")
+  endif()
+  add_definitions(-D_ENABLE_TTS_)
+else()
+  MESSAGE("tts disabled")
+endif()
+
 #add libCEC support
 if(CEC)
     find_package(libCEC REQUIRED)
@@ -86,6 +98,13 @@ endif()
 
 if(DEFINED VERO4K)
     add_definitions(-D_VERO4K_)
+endif()
+
+if(ENABLE_TTS)
+ LIST(APPEND COMMON_LIBRARIES
+    ${LIBESPEAK_LIBRARIES}
+    espeak
+      )
 endif()
 
 if(DEFINED libCEC_FOUND)
@@ -116,7 +135,7 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O0")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-attributes -O2") #support C++11 for std::, optimize
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O2")  #-s = strip binary
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lespeak -O2")  #-s = strip binary
 endif()
 endif()
 

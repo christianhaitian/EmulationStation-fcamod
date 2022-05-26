@@ -44,6 +44,8 @@ public:
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 
+	void onShow() override;
+
 	float getButtonGridHeight() const;
 
 	void setMaxHeight(float maxHeight) 
@@ -54,6 +56,8 @@ public:
 		mMaxHeight = maxHeight; 
 		updateSize();
 	}
+
+	std::shared_ptr<ComponentList> getList() { return mList; };
 
 private:
 	void updateSize();

@@ -88,6 +88,8 @@ public:
 	std::string getMetadata(const std::string& key) { return getMetadata().get(key); }
 	void setMetadata(const std::string& key, const std::string& value) { getMetadata().set(key, value); }
 
+	void speak();
+
 private:
 	MetaDataList mMetadata;
 
