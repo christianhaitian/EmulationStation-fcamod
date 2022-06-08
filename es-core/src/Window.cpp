@@ -79,7 +79,7 @@ GuiComponent* Window::peekGui()
 	return mGuiStack.back();
 }
 
-bool Window::init(bool initRenderer)
+bool Window::init(bool initRenderer, bool initInputManager)
 {
 	LOG(LogInfo) << "Window::init";
 	

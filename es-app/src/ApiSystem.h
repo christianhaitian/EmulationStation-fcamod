@@ -39,11 +39,15 @@ public:
     static ApiSystem* getInstance();
 	virtual void deinit() { };
 
+    virtual bool launchKodi(Window *window);
+
 	bool	getBrighness(int& value);
 	void	setBrighness(int value);
 
 protected:
     static ApiSystem* instance;
+    void launchExternalWindow_before(Window *window);
+    void launchExternalWindow_after(Window *window);
 };
 
 #endif

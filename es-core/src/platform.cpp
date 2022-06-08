@@ -15,6 +15,7 @@
 #include "GuiComponent.h"
 #include "utils/FileSystemUtil.h"
 #include "utils/StringUtil.h"
+#include "Scripting.h"
 
 int runShutdownCommand()
 {
@@ -201,6 +202,25 @@ QuitMode quitMode = QuitMode::QUIT;
 int quitES(QuitMode mode)
 {
 	quitMode = mode;
+
+	switch (quitMode)
+	{
+		case QuitMode::QUIT:
+			Scripting::fireEvent("quit");
+			break;
+
+		case QuitMode::REBOOT:
+		case QuitMode::FAST_REBOOT:
+			Scripting::fireEvent("quit", "reboot");
+			Scripting::fireEvent("reboot");
+			break;
+
+		case QuitMode::SHUTDOWN:
+		case QuitMode::FAST_SHUTDOWN:
+			Scripting::fireEvent("quit", "shutdown");
+			Scripting::fireEvent("shutdown");
+			break;
+	}
 
 	SDL_Event *quit = new SDL_Event();
 	quit->type = SDL_QUIT;

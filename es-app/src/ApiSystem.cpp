@@ -1,5 +1,8 @@
 #include "ApiSystem.h"
+#include "AudioManager.h"
+#include "VolumeControl.h"
 #include "HttpReq.h"
+#include "platform.h"
 #include "utils/FileSystemUtil.h"
 #include "utils/StringUtil.h"
 #include <thread>
@@ -508,6 +511,63 @@ bool ApiSystem::getBrighness(int& value)
 #endif
 }
 
+void ApiSystem::launchExternalWindow_before(Window *window) 
+{
+	LOG(LogDebug) << "ApiSystem::launchExternalWindow_before";
+
+	AudioManager::getInstance()->deinit();
+	VolumeControl::getInstance()->deinit();
+	window->deinit();
+
+	LOG(LogDebug) << "ApiSystem::launchExternalWindow_before OK";
+}
+
+void ApiSystem::launchExternalWindow_after(Window *window) 
+{
+	LOG(LogDebug) << "ApiSystem::launchExternalWindow_after";
+
+	window->init();
+	VolumeControl::getInstance()->init();
+	AudioManager::getInstance()->init();
+	window->normalizeNextUpdate();
+	window->reactivateGui();
+
+	AudioManager::getInstance()->playRandomMusic();
+
+	LOG(LogDebug) << "ApiSystem::launchExternalWindow_after OK";
+}
+
+bool ApiSystem::launchKodi(Window *window) 
+{
+	LOG(LogDebug) << "ApiSystem::launchKodi";
+
+	std::string command = "Kodi.sh";
+
+	ApiSystem::launchExternalWindow_before(window);
+
+	int exitCode = system(command.c_str());
+
+	// WIFEXITED returns a nonzero value if the child process terminated normally with exit or _exit.
+	// https://www.gnu.org/software/libc/manual/html_node/Process-Completion-Status.html
+	if (WIFEXITED(exitCode))
+		exitCode = WEXITSTATUS(exitCode);
+
+	ApiSystem::launchExternalWindow_after(window);
+
+	// handle end of kodi
+	switch (exitCode) 
+	{
+	case 10: // reboot code
+		quitES(QuitMode::REBOOT);		
+		return true;
+		
+	case 11: // shutdown code
+		quitES(QuitMode::SHUTDOWN);		
+		return true;
+	}
+
+	return exitCode == 0;
+}
 void ApiSystem::setBrighness(int value)
 {
 #if !WIN32	
