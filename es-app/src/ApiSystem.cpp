@@ -18,6 +18,7 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h> 
+#include <SystemConf.h>
 
 ApiSystem* ApiSystem::instance = nullptr;
 
@@ -277,7 +278,7 @@ std::pair<std::string, int> ApiSystem::updateSystem(const std::function<void(con
 		auto files = Utils::FileSystem::getDirContent(path, true, true);
 		for (auto file : files)
 		{
-			
+
 			std::string relative = Utils::FileSystem::createRelativePath(file, path, false);
 			if (Utils::String::startsWith(relative, "./"))
 				relative = relative.substr(2);
@@ -347,7 +348,7 @@ std::vector<ThemeDownloadInfo> ApiSystem::getThemesList()
 					themeExists = Utils::FileSystem::isDirectory(path + "/" + themeName) ||
 						Utils::FileSystem::isDirectory(path + "/" + themeFolder) ||
 						Utils::FileSystem::isDirectory(path + "/" + themeFolder + "-master");
-					
+
 					if (themeExists)
 						break;
 				}
@@ -451,11 +452,11 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 				Utils::FileSystem::removeFile(zipFile);
 
 				return std::pair<std::string, int>(std::string("OK"), 0);
-			}			
+			}
 
 			return std::pair<std::string, int>(std::string("Invalid extraction folder"), 1);
 		}
-				
+
 		return std::pair<std::string, int>(std::string("An error occured while downloading"), 1);
 	}
 #endif
@@ -519,10 +520,13 @@ void ApiSystem::launchExternalWindow_before(Window *window)
 	VolumeControl::getInstance()->deinit();
 	window->deinit();
 
+	if(SystemConf::getInstance()->get("audio.bgmusic") != "0")
+		AudioManager::getInstance()->playRandomMusic();
+
 	LOG(LogDebug) << "ApiSystem::launchExternalWindow_before OK";
 }
 
-void ApiSystem::launchExternalWindow_after(Window *window) 
+void ApiSystem::launchExternalWindow_after(Window *window)
 {
 	LOG(LogDebug) << "ApiSystem::launchExternalWindow_after";
 
@@ -532,12 +536,10 @@ void ApiSystem::launchExternalWindow_after(Window *window)
 	window->normalizeNextUpdate();
 	window->reactivateGui();
 
-	AudioManager::getInstance()->playRandomMusic();
-
 	LOG(LogDebug) << "ApiSystem::launchExternalWindow_after OK";
 }
 
-bool ApiSystem::launchKodi(Window *window) 
+bool ApiSystem::launchKodi(Window *window)
 {
 	LOG(LogDebug) << "ApiSystem::launchKodi";
 
