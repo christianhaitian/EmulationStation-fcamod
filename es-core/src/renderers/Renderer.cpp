@@ -416,7 +416,7 @@ namespace Renderer
 
 	//go2_display_t* getDisplay()    { return display; }
 
-	bool        isSmallScreen()    { return screenWidth < 1024 || screenHeight < 768; };
+	bool        isSmallScreen()    { return screenWidth < 1280 || screenHeight < 720; };
 
 	unsigned int mixColors(unsigned int first, unsigned int second, float percent)
 	{
