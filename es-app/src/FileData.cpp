@@ -224,6 +224,10 @@ const std::string FileData::getImagePath()
 	// no image, try to use local image
 	if(image.empty())
 	{
+		auto romExt = Utils::String::toLower(Utils::FileSystem::getExtension(getPath()));
+		if (romExt == ".png" || (getSystemName() == "pico8" && romExt == ".p8"))
+			return getPath();
+			
 		const char* extList[2] = { ".png", ".jpg" };
 		for(int i = 0; i < 2; i++)
 		{
