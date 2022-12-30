@@ -106,7 +106,7 @@ void GridGameListView::createVideo()
 		mVideo = new VideoPlayerComponent(mWindow, "");
 	else
 #endif
-		mVideo = new VideoVlcComponent(mWindow,"");
+		mVideo = new VideoVlcComponent(mWindow);
 
 	mVideo->setSnapshotSource(IMAGE);
 	mVideo->setOrigin(0.5f, 0.5f);

@@ -36,7 +36,7 @@ VideoGameListView::VideoGameListView(Window* window, FolderData* root) :
 	else
 		mVideo = new VideoVlcComponent(window, "");
 #else
-	mVideo = new VideoVlcComponent(window, "");
+	mVideo = new VideoVlcComponent(window);
 #endif
 	
 	mVideo->setSnapshotSource(IMAGE);

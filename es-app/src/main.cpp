@@ -483,6 +483,7 @@ int main(int argc, char* argv[])
 	PowerSaver::init();
 	ViewController::init(&window);
 	CollectionSystemManager::init(&window);
+	VideoVlcComponent::init();
 	MameNames::init();
 	window.pushGui(ViewController::get());
 

@@ -59,7 +59,7 @@ static void display(void* data, void* id)
 		c->component->onVideoStarted();
 }
 
-VideoVlcComponent::VideoVlcComponent(Window* window, std::string subtitles) :
+VideoVlcComponent::VideoVlcComponent(Window* window) :
 	VideoComponent(window),
 	mMediaPlayer(nullptr),
 	mMedia(nullptr)
@@ -75,7 +75,7 @@ VideoVlcComponent::VideoVlcComponent(Window* window, std::string subtitles) :
 	mEffect = VideoVlcFlags::VideoVlcEffect::BUMP;
 
 	// Make sure VLC has been initialised
-	setupVLC(subtitles);
+	init();
 }
 
 VideoVlcComponent::~VideoVlcComponent()
@@ -420,7 +420,7 @@ void VideoVlcComponent::freeContext()
 	mContext.valid = false;
 }
 
-void VideoVlcComponent::setupVLC(std::string subtitles)
+void VideoVlcComponent::init()
 {
 	if (mVLC != nullptr)
 		return;
@@ -429,12 +429,7 @@ void VideoVlcComponent::setupVLC(std::string subtitles)
 	cmdline.push_back("--quiet");
 	cmdline.push_back("--no-video-title-show");
 
-	if (!subtitles.empty())
-	{
-		cmdline.push_back("--sub-file");
-		cmdline.push_back(subtitles);
-	}
-	const char* *theArgs = new const char*[10];
+	const char* *theArgs = new const char*[cmdline.size()];
 
 	for (int i = 0; i < cmdline.size(); i++)
 		theArgs[i] = cmdline[i].c_str();
