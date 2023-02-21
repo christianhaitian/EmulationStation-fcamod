@@ -3,6 +3,7 @@
 #define ES_CORE_SETTINGS_H
 
 #include <map>
+#include <vector>
 
 //This is a singleton for storing settings.
 class Settings
