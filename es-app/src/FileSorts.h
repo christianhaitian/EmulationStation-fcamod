@@ -67,5 +67,7 @@ namespace FileSorts
 	bool compareDeveloper(const FileData* file1, const FileData* file2);
 	bool comparePublisher(const FileData* file1, const FileData* file2);
 	bool compareSystem(const FileData* file1, const FileData* file2);
+
+    std::string stripLeadingArticle(const std::string &string, const std::vector<std::string> &articles);
 };
 #endif // ES_APP_FILE_SORTS_H

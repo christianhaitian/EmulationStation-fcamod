@@ -1109,6 +1109,17 @@ void GuiMenu::openUISettings()
 		}
 	});
 
+	auto ignoreArticles = std::make_shared<SwitchComponent>(mWindow);
+	ignoreArticles->setState(Settings::getInstance()->getBool("IgnoreLeadingArticles"));
+	s->addWithLabel(_("IGNORE LEADING ARTICLES WHEN SORTING"), ignoreArticles);
+	s->addSaveFunc([s, ignoreArticles]
+	{
+		if (Settings::getInstance()->setBool("IgnoreLeadingArticles", ignoreArticles->getState()))
+		{
+			s->setVariable("reloadAll", true);
+		}
+	});
+
 	// enable filters (ForceDisableFilters)
 	auto enable_filter = std::make_shared<SwitchComponent>(mWindow);
 	enable_filter->setState(!Settings::getInstance()->getBool("ForceDisableFilters"));

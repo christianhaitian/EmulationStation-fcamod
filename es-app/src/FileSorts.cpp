@@ -1,3 +1,4 @@
+#include <Settings.h>
 #include "FileSorts.h"
 #include "utils/StringUtil.h"
 #include "EsLocale.h"
@@ -64,27 +65,40 @@ namespace FileSorts
 	bool compareName(const FileData* file1, const FileData* file2)
 	{
 		if (file1->getType() != file2->getType())
+        {
 			return file1->getType() == FOLDER;
 
-		// we compare the actual metadata name, as collection files have the system appended which messes up the order		
-		std::string name1 = ((FileData*)file1)->getName();
-		std::string name2 = ((FileData*)file2)->getName();
-
-		for (auto ap = name1.c_str(), bp = name2.c_str(); ; ap++, bp++)
-		{
-			if (*ap == 0 & *bp != 0)
-				return true;
-
-			if (*ap == 0 || *bp == 0)
-				return false;
-
-			auto c1 = toupper(*ap);
-			auto c2 = toupper(*bp);
-			if (c1 != c2)
-				return c1 < c2;
 		}
+		// we compare the actual metadata name, as collection files have the system appended which messes up the order
+		auto name1 = ((FileData *) file1)->getName();
+		auto name2 = ((FileData *) file2)->getName();
+		const bool ignoreArticles = Settings::getInstance()->getBool("IgnoreLeadingArticles");
+		if (ignoreArticles)
+		{
+			const auto articles = Utils::String::commaStringToVector(_("A,AN,THE"));
+			name1 = stripLeadingArticle(name1, articles);
+			name2 = stripLeadingArticle(name2, articles);
+		}
+		return Utils::String::compareIgnoreCase(name1, name2) < 0;
+	}
 
-		return false;
+	std::string stripLeadingArticle(const std::string &string, const std::vector<std::string> &articles)
+	{
+		const auto candidate = Utils::String::trim(string);
+		const auto index = candidate.find_first_of(" \t\r\n");
+		if (index == std::string::npos)
+		{
+			return string;
+		}
+		const auto maybeArticle = candidate.substr(0, index);
+		for (auto &article: articles)
+		{
+			if (Utils::String::compareIgnoreCase(article, maybeArticle) == 0)
+			{
+				return Utils::String::trim(candidate.substr(article.length()));
+			}
+		}
+		return string;
 	}
 
 	bool compareRating(const FileData* file1, const FileData* file2)
