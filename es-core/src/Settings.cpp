@@ -7,6 +7,7 @@
 #include <pugixml/src/pugixml.hpp>
 #include <algorithm>
 #include <vector>
+#include "utils/StringUtil.h"
 
 Settings* Settings::sInstance = NULL;
 static std::string mEmptyString = "";
@@ -69,6 +70,7 @@ void Settings::setDefaults()
 	mBoolMap["BackgroundJoystickInput"] = false;
 	mBoolMap["ParseGamelistOnly"] = false;
 	mBoolMap["ShowHiddenFiles"] = false;
+    mBoolMap["IgnoreLeadingArticles"] = false;
 	mBoolMap["DrawFramerate"] = false;
 	mBoolMap["ShowExit"] = true;		
 
