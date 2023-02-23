@@ -42,8 +42,16 @@ public:
     virtual bool launchKodi(Window *window);
 
 	bool	getBrighness(int& value);
+	bool	getDBrightness(int& value);
+	bool	getDContrast(int& value);
+	bool	getDSaturation(int& value);
+	bool	getDHue(int& value);
 	void	setBrighness(int value);
-
+	void	setDBrightness(int value);
+	void	setDContrast(int value);
+	void	setDSaturation(int value);
+	void	setDHue(int value);
+	
 protected:
     static ApiSystem* instance;
     void launchExternalWindow_before(Window *window);
