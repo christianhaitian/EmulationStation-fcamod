@@ -123,6 +123,8 @@ void GuiMenu::openDisplaySettings()
 
 	s->addWithLabel(_("BRIGHTNESS"), brightnessComponent);
 
+  if (Utils::FileSystem::exists("/usr/local/bin/panel_set.sh"))
+  {
     // Panel Brightness
     int Dbrightness;
     ApiSystem::getInstance()->getDBrightness(Dbrightness);
@@ -182,7 +184,7 @@ void GuiMenu::openDisplaySettings()
     });
 
 	s->addWithLabel(_("PANEL HUE"), DhueComponent);
-
+  }
 	mWindow->pushGui(s);
 }
 
