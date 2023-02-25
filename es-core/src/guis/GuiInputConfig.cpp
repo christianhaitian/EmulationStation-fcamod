@@ -199,7 +199,8 @@ GuiInputConfig::GuiInputConfig(Window* window, InputConfig* target, bool reconfi
 	buttons.push_back(std::make_shared<ButtonComponent>(mWindow, "OK", "ok", [this, okFunction] {
 		// check if the hotkey enable button is set. if not prompt the user to use select or nothing.
 		Input input;
-		if (!mTargetConfig->getInputByName("HotKeyEnable", &input)) {
+		if (strstr(mTargetConfig->getDeviceName().c_str(),"retrogame_joypad")) {
+          if (!mTargetConfig->getInputByName("System_hk", &input)) {
 			/*mWindow->pushGui(new GuiMsgBox(mWindow,
 				"YOU DIDN'T CHOOSE A HOTKEY ENABLE BUTTON. THIS IS REQUIRED FOR EXITING GAMES WITH A CONTROLLER. DO YOU WANT TO USE THE SELECT BUTTON DEFAULT ? PLEASE ANSWER YES TO USE SELECT OR NO TO NOT SET A HOTKEY ENABLE BUTTON.",
 				"YES", [this, okFunction] {
@@ -211,10 +212,17 @@ GuiInputConfig::GuiInputConfig(Window* window, InputConfig* target, bool reconfi
 				"NO", [this, okFunction] {
 					// for a disabled hotkey enable button, set to a key with id 0,
 					// so the input configuration script can be backwards compatible.*/
-					mTargetConfig->mapInput("System_hk", Input(DEVICE_KEYBOARD, TYPE_BUTTON, 10, 1, true));
+                    if (Utils::FileSystem::exists("/boot/rk3566-OC.dtb.tony")){
+					  mTargetConfig->mapInput("System_hk", Input(DEVICE_KEYBOARD, TYPE_BUTTON, 10, 1, true));
+                    }else{
+					  mTargetConfig->mapInput("System_hk", Input(DEVICE_KEYBOARD, TYPE_BUTTON, 12, 1, true));
+					}
 					okFunction();
 				/*}
 			));*/
+		  } else {
+			  okFunction();
+		  }
 		} else {
 			okFunction();
 		}
