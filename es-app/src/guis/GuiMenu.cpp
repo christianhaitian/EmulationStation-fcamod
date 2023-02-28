@@ -46,8 +46,10 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 
 	}, "iconKodi");	
 
-	addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
-
+    if (Utils::FileSystem::exists("/var/run/drmConn")){
+	  addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
+    }
+    
 	auto theme = ThemeData::getMenuTheme();
 
 	bool isFullUI = UIModeController::getInstance()->isUIModeFull();	
