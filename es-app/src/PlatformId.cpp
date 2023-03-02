@@ -109,7 +109,8 @@ namespace PlatformIds
 		{ "sufami",          SUFAMITURBO },
 		{ "zx81",            ZX81 },
 		{ "tic80",           TIC80 },
-		{ "ti99",            TI99 },
+		{ "ti99", 					TI99 },
+		{ "pico", 			SEGA_PICO },
 
 		// batocera specific names
 		{ "gb2players",      GAME_BOY },
