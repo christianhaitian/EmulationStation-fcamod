@@ -46,8 +46,10 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 
 	}, "iconKodi");	
 
-	addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
-
+    if (Utils::FileSystem::exists("/var/run/drmConn")){
+	  addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
+    }
+    
 	auto theme = ThemeData::getMenuTheme();
 
 	bool isFullUI = UIModeController::getInstance()->isUIModeFull();	
@@ -106,7 +108,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 
 void GuiMenu::openDisplaySettings()
 {
-	// Brightness
+	// Display Brightness
 	auto s = new GuiSettings(mWindow, _("DISPLAY"));
 
     int brighness;
@@ -123,6 +125,68 @@ void GuiMenu::openDisplaySettings()
 
 	s->addWithLabel(_("BRIGHTNESS"), brightnessComponent);
 
+  if (Utils::FileSystem::exists("/usr/local/bin/panel_set.sh"))
+  {
+    // Panel Brightness
+    int Dbrightness;
+    ApiSystem::getInstance()->getDBrightness(Dbrightness);
+   	auto DbrightnessComponent = std::make_shared<SliderComponent>(mWindow, 1.f, 100.f, 1.f, "%");
+    DbrightnessComponent->setValue(Dbrightness);
+   	DbrightnessComponent->setOnValueChanged([](const float &newVal)
+    {
+    	ApiSystem::getInstance()->setDBrightness((int)Math::round(newVal));
+   	});
+    s->addSaveFunc([this, DbrightnessComponent] {
+         SystemConf::getInstance()->set("Dbrightness.level", std::to_string((int)Math::round(DbrightnessComponent->getValue())));
+    });
+
+	s->addWithLabel(_("PANEL BRIGHTNESS"), DbrightnessComponent);
+
+    //Panel Contrast
+    int Dcontrast;
+    ApiSystem::getInstance()->getDContrast(Dcontrast);
+   	auto DcontrastComponent = std::make_shared<SliderComponent>(mWindow, 1.f, 100.f, 1.f, "%");
+    DcontrastComponent->setValue(Dcontrast);
+   	DcontrastComponent->setOnValueChanged([](const float &newVal)
+    {
+    	ApiSystem::getInstance()->setDContrast((int)Math::round(newVal));
+   	});
+    s->addSaveFunc([this, DcontrastComponent] {
+         SystemConf::getInstance()->set("Dcontrast.level", std::to_string((int)Math::round(DcontrastComponent->getValue())));
+    });
+
+	s->addWithLabel(_("PANEL CONTRAST"), DcontrastComponent);
+
+    //Panel Saturation
+    int Dsaturation;
+    ApiSystem::getInstance()->getDSaturation(Dsaturation);
+   	auto DsaturationComponent = std::make_shared<SliderComponent>(mWindow, 1.f, 100.f, 1.f, "%");
+    DsaturationComponent->setValue(Dsaturation);
+   	DsaturationComponent->setOnValueChanged([](const float &newVal)
+    {
+    	ApiSystem::getInstance()->setDSaturation((int)Math::round(newVal));
+   	});
+    s->addSaveFunc([this, DsaturationComponent] {
+         SystemConf::getInstance()->set("Dsaturation.level", std::to_string((int)Math::round(DsaturationComponent->getValue())));
+    });
+
+	s->addWithLabel(_("PANEL SATURATION"), DsaturationComponent);
+
+    //Panel Hue
+    int Dhue;
+    ApiSystem::getInstance()->getDHue(Dhue);
+   	auto DhueComponent = std::make_shared<SliderComponent>(mWindow, 1.f, 100.f, 1.f, "%");
+    DhueComponent->setValue(Dhue);
+   	DhueComponent->setOnValueChanged([](const float &newVal)
+    {
+    	ApiSystem::getInstance()->setDHue((int)Math::round(newVal));
+   	});
+    s->addSaveFunc([this, DhueComponent] {
+         SystemConf::getInstance()->set("Dhue.level", std::to_string((int)Math::round(DhueComponent->getValue())));
+    });
+
+	s->addWithLabel(_("PANEL HUE"), DhueComponent);
+  }
 	mWindow->pushGui(s);
 }
 
@@ -1105,6 +1169,17 @@ void GuiMenu::openUISettings()
 		{
 			FileData::resetSettings();
 			s->setVariable("reloadCollections", true);
+			s->setVariable("reloadAll", true);
+		}
+	});
+
+	auto ignoreArticles = std::make_shared<SwitchComponent>(mWindow);
+	ignoreArticles->setState(Settings::getInstance()->getBool("IgnoreLeadingArticles"));
+	s->addWithLabel(_("IGNORE LEADING ARTICLES WHEN SORTING"), ignoreArticles);
+	s->addSaveFunc([s, ignoreArticles]
+	{
+		if (Settings::getInstance()->setBool("IgnoreLeadingArticles", ignoreArticles->getState()))
+		{
 			s->setVariable("reloadAll", true);
 		}
 	});
