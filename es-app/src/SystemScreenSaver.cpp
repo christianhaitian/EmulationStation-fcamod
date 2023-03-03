@@ -45,6 +45,9 @@ SystemScreenSaver::SystemScreenSaver(Window* window) :
 		Utils::FileSystem::createDirectory(path);
 	srand((unsigned int)time(NULL));
 	mVideoChangeTime = 30000;
+
+	mDefaultRandomEngine = new default_random_engine(mRandomDevice());
+
 }
 
 SystemScreenSaver::~SystemScreenSaver()
@@ -52,6 +55,13 @@ SystemScreenSaver::~SystemScreenSaver()
 	// Delete subtitle file, if existing
 	remove(getTitlePath().c_str());
 	mCurrentGame = NULL;
+
+	if( mDefaultRandomEngine != nullptr)
+	{
+		delete mDefaultRandomEngine;
+		mDefaultRandomEngine = nullptr;
+	}
+	
 }
 
 bool SystemScreenSaver::allowSleep()
@@ -344,7 +354,11 @@ std::string SystemScreenSaver::pickRandomVideo()
 	if (mVideoCount == 0)
 		return "";
 	
-	int video = (int)(((float)rand() / float(RAND_MAX)) * (float)mVideoCount);
+	//int video = (int)(((float)rand() / float(RAND_MAX)) * (float)mVideoCount);
+
+	uniform_int_distribution<int> uniform_dist(0, mVideoCount -1);
+	int video = uniform_dist(*mDefaultRandomEngine);
+
 	return pickGameListNode(video, "video");
 }
 
@@ -355,7 +369,10 @@ std::string SystemScreenSaver::pickRandomGameListImage()
 	if (mImageCount == 0)
 		return "";
 	
-	int image = (int)(((float)rand() / float(RAND_MAX)) * (float)mImageCount);
+	//int image = (int)(((float)rand() / float(RAND_MAX)) * (float)mImageCount);
+	uniform_int_distribution<int> uniform_dist(0, mImageCount -1);
+	int image = uniform_dist(*mDefaultRandomEngine);
+	
 	return pickGameListNode(image, "image");
 }
 
