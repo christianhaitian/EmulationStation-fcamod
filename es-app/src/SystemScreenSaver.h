@@ -5,6 +5,9 @@
 #include "Window.h"
 #include "GuiComponent.h"
 #include "renderers/Renderer.h"
+#include <random>
+
+using namespace std;
 
 class ImageComponent;
 class Sound;
@@ -31,6 +34,8 @@ protected:
 	ImageComponent*		mDecoration;
 
 	Renderer::Rect		mViewport;
+
+
 };
 
 class ImageScreenSaver : public GameScreenSaverBase
@@ -124,6 +129,9 @@ private:
 	
 	//std::shared_ptr<Sound>	mBackgroundAudio;
 	bool			mLoadingNext;
+
+	random_device 	mRandomDevice;
+	default_random_engine* mDefaultRandomEngine;
 
 };
 
