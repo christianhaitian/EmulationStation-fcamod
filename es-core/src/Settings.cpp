@@ -180,6 +180,7 @@ void Settings::setDefaults()
 	mIntMap["ScreenSaverSwapVideoTimeout"] = 30000;
 
 	mBoolMap["VideoAudio"] = true;
+	mBoolMap["VolumePopup"] = true;
 	mBoolMap["VideoLowersMusic"] = true;
 	mBoolMap["CaptionsCompatibility"] = true;
 	// Audio out device for Video playback using OMX player.
@@ -235,6 +236,8 @@ void Settings::setDefaults()
 	mBoolMap["updates.enabled"] = true;
 	
 	mBoolMap["DrawClock"] = true;
+
+	mBoolMap["UseOSK"] = true;
 
 	mDefaultBoolMap = mBoolMap;
 	mDefaultIntMap = mIntMap;
