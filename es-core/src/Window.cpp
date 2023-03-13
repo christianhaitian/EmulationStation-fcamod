@@ -16,6 +16,7 @@
 #include "components/BatteryIndicatorComponent.h"
 #include "guis/GuiMsgBox.h"
 #include "AudioManager.h"
+#include "components/VolumeInfoComponent.h"
 
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10),
   mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false), mInfoPopup(NULL), mClockElapsed(0),
@@ -119,6 +120,9 @@ bool Window::init(bool initRenderer, bool initInputManager)
 		mClock->setSize(Renderer::getScreenWidth()*0.05, 0);
 		mClock->setColor(0x777777FF);
 	}
+
+	if (Settings::getInstance()->getBool("VolumePopup") && (mVolumeInfo == nullptr))
+		mVolumeInfo = std::make_shared<VolumeInfoComponent>(this);
 
 	if (mBatteryIndicator == nullptr)
 		mBatteryIndicator = std::make_shared<BatteryIndicatorComponent>(this);
@@ -256,6 +260,9 @@ void Window::update(int deltaTime)
 		if(deltaTime > mAverageDeltaTime)
 			deltaTime = mAverageDeltaTime;
 	}
+
+	if (Settings::getInstance()->getBool("VolumePopup") && mVolumeInfo)
+		mVolumeInfo->update(deltaTime);
 
 	mFrameTimeElapsed += deltaTime;
 	mFrameCountElapsed++;
@@ -421,6 +428,9 @@ void Window::render()
 	
 	for (auto extra : mScreenExtras)
 		extra->render(transform);
+
+	if (mVolumeInfo)
+		mVolumeInfo->render(transform);
 
 	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
 	{
@@ -842,6 +852,9 @@ void Window::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 
 		mClock->applyTheme(theme, "screen", "clock", ThemeFlags::ALL ^ (ThemeFlags::TEXT));
 	}
+
+	if (Settings::getInstance()->getBool("VolumePopup"))
+		mVolumeInfo = std::make_shared<VolumeInfoComponent>(this);
 
 	if (mBatteryIndicator)
 		mBatteryIndicator->applyTheme(theme, "screen", "batteryIndicator", ThemeFlags::ALL);

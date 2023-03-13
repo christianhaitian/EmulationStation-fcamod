@@ -341,7 +341,7 @@ void GuiMenu::openSoundSettings()
 	auto volume = std::make_shared<SliderComponent>(mWindow, 0.f, 100.f, 1.f, "%");
 	volume->setValue((float)VolumeControl::getInstance()->getVolume());
 	volume->setOnValueChanged([](const float &newVal) { VolumeControl::getInstance()->setVolume((int)Math::round(newVal)); });
-	//s->addWithLabel(_("SYSTEM VOLUME"), volume);
+	s->addWithLabel(_("SYSTEM VOLUME"), volume);
 	s->addSaveFunc([volume] { VolumeControl::getInstance()->setVolume((int)Math::round(volume->getValue())); });
 
 	if (UIModeController::getInstance()->isUIModeFull())
@@ -398,6 +398,17 @@ void GuiMenu::openSoundSettings()
 			VolumeControl::getInstance()->init();
 		});
 #endif
+		auto volumePopup = std::make_shared<SwitchComponent>(mWindow);
+		volumePopup->setState(Settings::getInstance()->getBool("VolumePopup"));
+		s->addWithLabel(_("SHOW OVERLAY WHEN VOLUME CHANGES"), volumePopup);
+		s->addSaveFunc([volumePopup]
+			{
+				bool old_value = Settings::getInstance()->getBool("VolumePopup");
+				if (old_value != volumePopup->getState())
+					Settings::getInstance()->setBool("VolumePopup", volumePopup->getState());
+			}
+		);
+
 		// disable sounds
 		auto music_enabled = std::make_shared<SwitchComponent>(mWindow);
 		music_enabled->setState(Settings::getInstance()->getBool("audio.bgmusic"));
