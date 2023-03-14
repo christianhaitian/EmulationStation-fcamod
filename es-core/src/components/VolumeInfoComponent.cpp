@@ -13,7 +13,7 @@
 
 #define VISIBLE_TIME		2650
 #define FADE_TIME			350
-#define BASEOPACITY			200
+#define BASEOPACITY			100
 #define CHECKVOLUMEDELAY	40
 
 VolumeInfoComponent::VolumeInfoComponent(Window* window, bool actionLine)
