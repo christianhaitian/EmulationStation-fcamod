@@ -228,6 +228,47 @@ int quitES(QuitMode mode)
 	return 0;
 }
 
+bool executeSystemScript(const std::string command)
+{
+	LOG(LogInfo) << "Platform::executeSystemScript() - Running -> " << command;
+
+	if (system(command.c_str()) == 0)
+		return true;
+
+	LOG(LogError) << "Platform::executeSystemScript() - Error executing " << command;
+	return false;
+}
+
+std::pair<std::string, int> executeSystemScript(const std::string command, const std::function<void(const std::string)>& func)
+{
+	LOG(LogInfo) << "Platform::executeSystemScript() - Running -> " << command;
+
+	FILE *pipe = popen(command.c_str(), "r");
+	if (pipe == NULL)
+	{
+		LOG(LogError) << "Platform::executeSystemScript() - Error executing " << command;
+		return std::pair<std::string, int>("Error starting command : " + command, -1);
+	}
+
+	char line[1024];
+	while (fgets(line, 1024, pipe))
+	{
+		strtok(line, "\n");
+
+		// Long theme names/URL can crash the GUI MsgBox
+		// "48" found by trials and errors. Ideally should be fixed
+		// in es-core MsgBox -- FIXME
+		if (strlen(line) > 48)
+			line[47] = '\0';
+
+		if (func != nullptr)
+			func(std::string(line));
+	}
+
+	int exitCode = WEXITSTATUS(pclose(pipe));
+	return std::pair<std::string, int>(line, exitCode);
+}
+
 void touch(const std::string& filename)
 {
 #ifdef WIN32

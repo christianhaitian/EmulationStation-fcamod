@@ -88,6 +88,7 @@ void Settings::setDefaults()
 	mBoolMap["PreloadUI"] = false;
 	mBoolMap["StartupOnGameList"] = false;
 	mBoolMap["HideSystemView"] = false;
+	mBoolMap["BrightnessPopup"] = true;
 	
 	mStringMap["StartupSystem"] = "";
 

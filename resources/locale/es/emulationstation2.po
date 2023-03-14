@@ -1956,3 +1956,7 @@ msgstr "No establecer"
 #:
 msgid "QUICK SEARCH"
 msgstr "BÚSQUEDA RÁPIDA"
+
+#:
+msgid "SHOW OVERLAY WHEN BRIGHTNESS CHANGES"
+msgstr "MOSTRAR BARRA BRILLO AL CAMBIAR"

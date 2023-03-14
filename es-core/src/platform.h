@@ -3,6 +3,9 @@
 #define ES_CORE_PLATFORM_H
 
 #include <string>
+#include <vector>
+#include <map>
+#include <functional>
 
 //why the hell this naming inconsistency exists is well beyond me
 #ifdef WIN32
@@ -22,6 +25,11 @@ enum QuitMode
 };
 
 int runSystemCommand(const std::string& cmd_utf8, const std::string& name, Window* window); // run a utf-8 encoded in the shell (requires wstring conversion on Windows)
+bool executeSystemScript(const std::string command);
+std::pair<std::string, int> executeSystemScript(const std::string command, const std::function<void(const std::string)>& func);
+std::vector<std::string> executeSystemEnumerationScript(const std::string command);
+std::map<std::string,std::string> executeSystemMapScript(const std::string command, const char separator = ';');
+bool executeSystemBoolScript(const std::string command);
 int quitES(QuitMode mode = QuitMode::QUIT);
 void processQuitMode();
 

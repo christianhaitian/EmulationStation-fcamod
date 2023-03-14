@@ -615,6 +615,13 @@ namespace Utils
 
 			return output;
 		}
+		const std::string boolToString(bool value, bool uppercase)
+		{
+			if (uppercase)
+				return (value ? "TRUE" : "FALSE");
+
+			return (value ? "true" : "false");
+		}
 	} // String::
 
 } // Utils::
