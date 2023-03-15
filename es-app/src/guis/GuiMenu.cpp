@@ -112,6 +112,17 @@ void GuiMenu::openDisplaySettings()
 
 	s->addWithLabel(_("BRIGHTNESS"), brightnessComponent);
 
+		auto brightnessPopup = std::make_shared<SwitchComponent>(mWindow);
+		brightnessPopup->setState(Settings::getInstance()->getBool("BrightnessPopup"));
+		s->addWithLabel(_("SHOW OVERLAY WHEN BRIGHTNESS CHANGES"), brightnessPopup);
+		s->addSaveFunc([brightnessPopup]
+			{
+				bool old_value = Settings::getInstance()->getBool("BrightnessPopup");
+				if (old_value != brightnessPopup->getState())
+					Settings::getInstance()->setBool("BrightnessPopup", brightnessPopup->getState());
+			}
+		);
+
 	mWindow->pushGui(s);
 }
 

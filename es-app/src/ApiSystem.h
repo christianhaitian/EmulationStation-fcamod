@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include "platform.h"
 
 class Window;
 

@@ -23,6 +23,7 @@ class ThemeData;
 class TextComponent;
 class BatteryIndicatorComponent;
 class VolumeInfoComponent;
+class BrightnessInfoComponent;
 
 struct HelpStyle;
 
@@ -143,6 +144,7 @@ private:
 	
 	std::shared_ptr<TextComponent> mClock;
 	std::shared_ptr<VolumeInfoComponent> mVolumeInfo;
+	std::shared_ptr<BrightnessInfoComponent> mBrightnessInfo;
 	std::shared_ptr<BatteryIndicatorComponent>	mBatteryIndicator;
 	
 	bool mNormalizeNextUpdate;

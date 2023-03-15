@@ -30,6 +30,7 @@ namespace Utils
 		std::vector<std::string> split	(const std::string& s, char seperator);	
 		std::vector<std::string> splitAny(const std::string& s, const std::string& seperator);
         int			compareIgnoreCase(const std::string& name1, const std::string& name2);
+		const std::string boolToString(bool value, bool uppercase = false);
 
 #if defined(_WIN32)
 		const std::string convertFromWideString(const std::wstring wstring);

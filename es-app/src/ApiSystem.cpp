@@ -1,4 +1,5 @@
 #include "ApiSystem.h"
+#include "DisplayPanelControl.h"
 #include "HttpReq.h"
 #include "utils/FileSystemUtil.h"
 #include "utils/StringUtil.h"
@@ -460,8 +461,8 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 	return std::pair<std::string, int>(std::string("Theme not found"), 1);
 }
 
-const char* BACKLIGHT_BRIGHTNESS_NAME = "/sys/class/backlight/backlight/brightness";
-const char* BACKLIGHT_BRIGHTNESS_MAX_NAME = "/sys/class/backlight/backlight/max_brightness";
+const char* DBACKLIGHT_BRIGHTNESS_NAME = "/sys/class/backlight/backlight/brightness";
+const char* DBACKLIGHT_BRIGHTNESS_MAX_NAME = "/sys/class/backlight/backlight/max_brightness";
 #define BACKLIGHT_BUFFER_SIZE 127
 
 bool ApiSystem::getBrighness(int& value)
@@ -476,7 +477,7 @@ bool ApiSystem::getBrighness(int& value)
 	char buffer[BACKLIGHT_BUFFER_SIZE + 1];
 	ssize_t count;
 
-	fd = open(BACKLIGHT_BRIGHTNESS_MAX_NAME, O_RDONLY);
+	fd = open(DBACKLIGHT_BRIGHTNESS_MAX_NAME, O_RDONLY);
 	if (fd < 0)
 		return false;
 
@@ -491,7 +492,7 @@ bool ApiSystem::getBrighness(int& value)
 	if (max == 0) 
 		return 0;
 
-	fd = open(BACKLIGHT_BRIGHTNESS_NAME, O_RDONLY);
+	fd = open(DBACKLIGHT_BRIGHTNESS_NAME, O_RDONLY);
 	if (fd < 0)
 		return false;
 
@@ -522,7 +523,7 @@ void ApiSystem::setBrighness(int value)
 	char buffer[BACKLIGHT_BUFFER_SIZE + 1];
 	ssize_t count;
 
-	fd = open(BACKLIGHT_BRIGHTNESS_MAX_NAME, O_RDONLY);
+	fd = open(DBACKLIGHT_BRIGHTNESS_MAX_NAME, O_RDONLY);
 	if (fd < 0)
 		return;
 
@@ -537,7 +538,7 @@ void ApiSystem::setBrighness(int value)
 	if (max == 0) 
 		return;
 
-	fd = open(BACKLIGHT_BRIGHTNESS_NAME, O_WRONLY);
+	fd = open(DBACKLIGHT_BRIGHTNESS_NAME, O_WRONLY);
 	if (fd < 0)
 		return;
 	
