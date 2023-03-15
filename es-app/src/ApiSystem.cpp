@@ -1,4 +1,5 @@
 #include "ApiSystem.h"
+#include "DisplayPanelControl.h"
 #include "HttpReq.h"
 #include "utils/FileSystemUtil.h"
 #include "utils/StringUtil.h"
@@ -438,3 +439,52 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 
 	return std::pair<std::string, int>(std::string("Theme not found"), 1);
 }
+
+const char* DBACKLIGHT_BRIGHTNESS_NAME = "/sys/class/backlight/backlight/brightness";
+const char* DBACKLIGHT_BRIGHTNESS_MAX_NAME = "/sys/class/backlight/backlight/max_brightness";
+#define BACKLIGHT_BUFFER_SIZE 127
+
+bool ApiSystem::getBrighness(int& value)
+{
+#if WIN32
+	return false;
+#else
+	value = 0;
+
+	int fd;
+	int max = 100;	
+	char buffer[BACKLIGHT_BUFFER_SIZE + 1];
+	ssize_t count;
+
+	fd = open(DBACKLIGHT_BRIGHTNESS_MAX_NAME, O_RDONLY);
+	if (fd < 0)
+		return false;
+
+	memset(buffer, 0, BACKLIGHT_BUFFER_SIZE + 1);
+
+	count = read(fd, buffer, BACKLIGHT_BUFFER_SIZE);
+	if (count > 0)
+		max = atoi(buffer);
+
+	close(fd);
+
+	if (max == 0) 
+		return 0;
+
+	fd = open(DBACKLIGHT_BRIGHTNESS_NAME, O_RDONLY);
+	if (fd < 0)
+		return false;
+
+	memset(buffer, 0, BACKLIGHT_BUFFER_SIZE + 1);
+
+	count = read(fd, buffer, BACKLIGHT_BUFFER_SIZE);
+	if (count > 0)
+		value = atoi(buffer);
+
+	close(fd);
+
+	value = (uint32_t) ((value / (float)max * 100.0f) + 0.5f);
+	return true;
+#endif
+}
+

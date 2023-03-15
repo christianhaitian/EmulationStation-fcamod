@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include "platform.h"
 
 class Window;
 
@@ -35,6 +36,8 @@ public:
 
 	static std::vector<ThemeDownloadInfo> getThemesList();
 	static std::pair<std::string, int> installTheme(std::string themeName, const std::function<void(const std::string)>& func = nullptr);
+
+	bool	getBrighness(int& value);
 };
 
 #endif

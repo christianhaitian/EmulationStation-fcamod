@@ -1,12 +1,13 @@
-#include "VolumeInfoComponent.h"
+#include "BrightnessInfoComponent.h"
 #include "ThemeData.h"
 #include "PowerSaver.h"
 #include "components/ComponentGrid.h"
 #include "components/NinePatchComponent.h"
 #include "components/TextComponent.h"
 #include "EsLocale.h"
-#include "VolumeControl.h"
+#include "BrightnessControl.h"
 #include "Window.h"
+#include "DisplayPanelControl.h"
 
 #define PADDING_PX			(Renderer::getScreenWidth()*0.006)
 #define PADDING_BAR			(Renderer::isSmallScreen() ? Renderer::getScreenWidth()*0.02 : Renderer::getScreenWidth()*0.006)
@@ -14,13 +15,13 @@
 #define VISIBLE_TIME		2650
 #define FADE_TIME			350
 #define BASEOPACITY			100
-#define CHECKVOLUMEDELAY	40
+#define CHECKBRIGHTNESSDELAY	40
 
-VolumeInfoComponent::VolumeInfoComponent(Window* window, bool actionLine)
+BrightnessInfoComponent::BrightnessInfoComponent(Window* window, bool actionLine)
 	: GuiComponent(window)
 {
 	mDisplayTime = -1;
-	mVolume = -1;
+	mBrightness = -1;
 	mCheckTime = 0;
 
 	auto theme = ThemeData::getMenuTheme();	
@@ -32,7 +33,7 @@ VolumeInfoComponent::VolumeInfoComponent(Window* window, bool actionLine)
 	Vector2f fullSize(
 		2 * PADDING_PX + font->sizeText("100%").x(),
 		2 * PADDING_PX + Renderer::getScreenHeight() * 0.20f);
-	
+
 	fullSize.y() = fullSize.x() * 2.5f;
 
 	setSize(fullSize);
@@ -47,28 +48,28 @@ VolumeInfoComponent::VolumeInfoComponent(Window* window, bool actionLine)
 
 
 	mLabel = new TextComponent(mWindow, "", font, theme->Text.color, ALIGN_CENTER);
-	
+
 	int h = font->sizeText("100%").y() + PADDING_PX;
 	mLabel->setPosition(0, fullSize.y() - h);
 	mLabel->setSize(fullSize.x(), h);
 	addChild(mLabel);
 
 
-	// FCA TopLeft
-	float posX = Renderer::getScreenWidth() * 0.02f;
+	// FCA TopRight
+	float posX = Renderer::getScreenWidth() - (Renderer::getScreenWidth() * 0.12f);
 	float posY = Renderer::getScreenHeight() * 0.04f;
 
 	setPosition(posX, posY, 0);
 	setOpacity(BASEOPACITY);
 }
 
-VolumeInfoComponent::~VolumeInfoComponent()
+BrightnessInfoComponent::~BrightnessInfoComponent()
 {
 	delete mLabel;
 	delete mFrame;
 }
 
-void VolumeInfoComponent::update(int deltaTime)
+void BrightnessInfoComponent::update(int deltaTime)
 {
 	GuiComponent::update(deltaTime);
 
@@ -88,22 +89,22 @@ void VolumeInfoComponent::update(int deltaTime)
 	}
 
 	mCheckTime += deltaTime;
-	if (mCheckTime < CHECKVOLUMEDELAY)
+	if (mCheckTime < CHECKBRIGHTNESSDELAY)
 		return;
 
 	mCheckTime = 0;
 
-	int volume = VolumeControl::getInstance()->getVolume();
-	if (volume != mVolume)
+	int brightness = DisplayPanelControl::getInstance()->getBrightnessLevel();
+	if (brightness != mBrightness)
 	{
-		bool firstTime = (mVolume < 0);
+		bool firstTime = (mBrightness < 0);
 
-		mVolume = volume;
+		mBrightness = brightness;
 
-		if (mVolume == 0)
+		if (mBrightness == 0)
 			mLabel->setText("X");
 		else
-			mLabel->setText(std::to_string(mVolume) + "%");
+			mLabel->setText(std::to_string(mBrightness) + "%");
 
 		if (!firstTime)
 		{
@@ -118,7 +119,7 @@ void VolumeInfoComponent::update(int deltaTime)
 	}
 }
 
-void VolumeInfoComponent::render(const Transform4x4f& parentTrans)
+void BrightnessInfoComponent::render(const Transform4x4f& parentTrans)
 {
 	if (!mVisible || mDisplayTime < 0)
 		return;
@@ -135,11 +136,11 @@ void VolumeInfoComponent::render(const Transform4x4f& parentTrans)
 	float y = PADDING_PX * 2;
 	float w = getSize().x() - 2 * PADDING_PX - 2 * PADDING_BAR;
 	float h = getSize().y() - mLabel->getSize().y() - PADDING_PX - PADDING_PX;
-	
+
 	auto theme = ThemeData::getMenuTheme();
 
 	Renderer::drawRect(x, y, w, h, (theme->Text.color & 0xFFFFFF00) | (opacity / 2));
 
-	float px = (h*mVolume) / 100;
+	float px = (h*mBrightness) / 100;
 	Renderer::drawRect(x, y + h - px, w, px, (theme->TextSmall.color & 0xFFFFFF00) | opacity);
 }

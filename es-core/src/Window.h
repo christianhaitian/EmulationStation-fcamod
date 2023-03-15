@@ -22,6 +22,7 @@ class AsyncNotificationComponent;
 class ThemeData;
 class TextComponent;
 class VolumeInfoComponent;
+class BrightnessInfoComponent;
 
 struct HelpStyle;
 
@@ -140,6 +141,7 @@ private:
 	
 	std::shared_ptr<TextComponent>	mClock;
 	std::shared_ptr<VolumeInfoComponent> mVolumeInfo;
+	std::shared_ptr<BrightnessInfoComponent> mBrightnessInfo;
 
 	bool mNormalizeNextUpdate;
 
