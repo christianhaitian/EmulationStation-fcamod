@@ -40,6 +40,7 @@ public:
     static ApiSystem* getInstance();
 	virtual void deinit() { };
 
+	int	getBrightnessLevel();
 	bool	getBrighness(int& value);
 	void	setBrighness(int value);
 
