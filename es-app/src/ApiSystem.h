@@ -42,6 +42,7 @@ public:
 
     virtual bool launchKodi(Window *window);
 
+	int	getBrightnessLevel();
 	bool	getBrighness(int& value);
 	bool	getDBrightness(int& value);
 	bool	getDContrast(int& value);

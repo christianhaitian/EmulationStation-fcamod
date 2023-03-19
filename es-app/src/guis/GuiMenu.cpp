@@ -87,7 +87,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 	
 	addEntry(_("QUIT"), !Settings::getInstance()->getBool("ShowOnlyExit"), [this] {openQuitMenu(); }, "iconQuit");
 
-	addEntry(_("BAT") + ": " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | " + _("SND") + ": " + std::string(getShOutput(R"(current_volume)")) + " | " + _("BRT") + ": " + std::string(getShOutput(R"(current_brightness)")) + "% | " + _("BT") + ": " + std::string(getShOutput(R"(if [ -z $(pidof rtk_hciattach) ]; then echo "Off"; else echo "On"; fi)")) + " | " + _("WIFI") + ": " + std::string(getShOutput(R"(if [ -z $(cat /sys/class/net/wlan0/operstate) ]; then echo "Off"; else cat /sys/class/net/wlan0/operstate; fi)")), false, [this] {  });
+	addEntry(_("BAT") + ": " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | " + _("SND") + ": " + std::string(getShOutput(R"(current_volume)")) + " | " + _("BRT") + ": " + std::to_string(ApiSystem::getInstance()->getBrightnessLevel()) + "% | " + _("BT") + ": " + std::string(getShOutput(R"(if [ -z $(pidof rtk_hciattach) ]; then echo "Off"; else echo "On"; fi)")) + " | " + _("WIFI") + ": " + std::string(getShOutput(R"(if [ -z $(cat /sys/class/net/wlan0/operstate) ]; then echo "Off"; else cat /sys/class/net/wlan0/operstate; fi)")), false, [this] {  });
 
 	addEntry(_("SSID") + ": " + std::string(getShOutput(R"(iw dev wlan0 info | grep ssid | cut -c 7-30)")), false, [this] {  });
 
@@ -113,8 +113,8 @@ void GuiMenu::openDisplaySettings()
 
     int brighness;
     ApiSystem::getInstance()->getBrighness(brighness);
-   	auto brightnessComponent = std::make_shared<SliderComponent>(mWindow, 1.f, 100.f, 1.f, "%");
-    brightnessComponent->setValue(brighness);
+   	auto brightnessComponent = std::make_shared<SliderComponent>(mWindow, 1.0f, 100.f, 1.0f, "%");
+    brightnessComponent->setValue((float) ApiSystem::getInstance()->getBrightnessLevel());
    	brightnessComponent->setOnValueChanged([](const float &newVal)
     {
     	ApiSystem::getInstance()->setBrighness((int)Math::round(newVal));

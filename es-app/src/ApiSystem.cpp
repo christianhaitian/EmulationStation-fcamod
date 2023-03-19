@@ -469,6 +469,13 @@ const char* DBACKLIGHT_BRIGHTNESS_NAME = "/sys/class/backlight/backlight/brightn
 const char* DBACKLIGHT_BRIGHTNESS_MAX_NAME = "/sys/class/backlight/backlight/max_brightness";
 #define BACKLIGHT_BUFFER_SIZE 127
 
+int ApiSystem::getBrightnessLevel()
+{
+	LOG(LogInfo) << "ApiSystem::getBrightnessLevel()";
+
+	return DisplayPanelControl::getInstance()->getBrightnessLevel();
+}
+
 bool ApiSystem::getBrighness(int& value)
 {
 #if WIN32
