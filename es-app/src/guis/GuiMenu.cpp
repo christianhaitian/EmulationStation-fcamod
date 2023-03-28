@@ -89,9 +89,13 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 
 	addEntry(_("BAT") + ": " + std::string(getShOutput(R"(cat /sys/class/power_supply/battery/capacity)")) + "%" + " | " + _("SND") + ": " + std::string(getShOutput(R"(current_volume)")) + " | " + _("BRT") + ": " + std::to_string(ApiSystem::getInstance()->getBrightnessLevel()) + "% | " + _("BT") + ": " + std::string(getShOutput(R"(if [ ! -f "/opt/system/Bluetooth.sh" ]; then echo "N/A"; elif [ -z $(pidof rtk_hciattach) ]; then echo "Off"; else echo "On"; fi)")) + " | " + _("WIFI") + ": " + std::string(getShOutput(R"(if [ -z $(cat /sys/class/net/wlan0/operstate) ]; then echo "Off"; else cat /sys/class/net/wlan0/operstate; fi)")), false, [this] {  });
 
-	addEntry(_("SSID") + ": " + std::string(getShOutput(R"(iw dev wlan0 info | grep ssid | cut -c 7-30)")), false, [this] {  });
+    if (!std::string(getShOutput(R"(cat /sys/class/net/wlan0/operstate)")).empty()) {
+	    addEntry(_("SSID") + ": " + std::string(getShOutput(R"(iw dev wlan0 info | grep ssid | cut -c 7-30)")), false, [this] {  });
 
-	addEntry(_("Distro Version") + ": " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep title | cut -c 7-50)")) + " | " + _("IP") + ": " + std::string(getShOutput(R"(ip -f inet addr show wlan0 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')")), false, [this] {  });
+	    addEntry(_("Distro Version") + ": " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep title | cut -c 7-50)")) + " | " + _("IP") + ": " + std::string(getShOutput(R"(ip -f inet addr show wlan0 | sed -En -e 's/.*inet ([0-9.]+).*/\1/p')")), false, [this] {  });
+	} else {
+	    addEntry(_("Distro Version") + ": " + std::string(getShOutput(R"(cat /usr/share/plymouth/themes/text.plymouth | grep title | cut -c 7-50)")), false, [this] {  });
+	}
 
 	addChild(&mMenu);
 	addVersionInfo();
