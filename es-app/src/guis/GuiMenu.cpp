@@ -47,7 +47,7 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 	}, "iconKodi");	
 
     if (Utils::FileSystem::exists("/var/run/drmConn")){
-	  addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
+	  addEntry(_("DISPLAY SETTINGS AND INFO"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
     }
     
 	auto theme = ThemeData::getMenuTheme();
@@ -206,6 +206,14 @@ void GuiMenu::openDisplaySettings()
     });
 
 	s->addWithLabel(_("PANEL HUE"), DhueComponent);
+
+    if (!std::string(getShOutput(R"(grep 353 ~/.config/.DEVICE)")).empty())
+    {
+        //s->addEntry(_(""), false, [this] {  });
+	    s->addEntry(_("PANEL VERSION") + ": " + std::string(getShOutput(R"(panel_id.sh version)")), false, [this] {  });
+	    s->addEntry(_("PANEL ID") + ": " + std::string(getShOutput(R"(panel_id.sh id)")), false, [this] {  });
+    }
+
   }
 	mWindow->pushGui(s);
 }
