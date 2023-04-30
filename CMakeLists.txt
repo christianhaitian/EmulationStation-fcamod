@@ -217,7 +217,6 @@ set(COMMON_LIBRARIES
     ${VLC_LIBRARIES}
     pugixml
     nanosvg
-    go2
 )
 
 # if(MSVC)
