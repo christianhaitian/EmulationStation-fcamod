@@ -180,6 +180,8 @@ std::map<std::string, std::map<std::string, ThemeData::ElementPropertyType>> The
 	{ "batteryIndicator", {
 		{ "pos", NORMALIZED_PAIR },
 		{ "size", NORMALIZED_PAIR },		
+		{ "itemSpacing", FLOAT },
+		{ "horizontalAlignment", STRING },
 		{ "incharge", PATH },
 		{ "full", PATH },
 		{ "at75", PATH },

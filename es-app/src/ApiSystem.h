@@ -53,6 +53,7 @@ public:
 	void	setDContrast(int value);
 	void	setDSaturation(int value);
 	void	setDHue(int value);
+    BatteryInformation getBatteryInformation(bool summary = true);
 	
 protected:
     static ApiSystem* instance;

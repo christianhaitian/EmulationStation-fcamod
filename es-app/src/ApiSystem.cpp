@@ -758,3 +758,11 @@ void ApiSystem::setBrighness(int value)
 	close(fd);
 #endif
 }
+
+BatteryInformation ApiSystem::getBatteryInformation(bool summary)
+{
+	LOG(LogDebug) << "ApiSystem::getBatteryInformation()";
+
+	return queryBatteryInformation(summary); // platform.h
+}
+

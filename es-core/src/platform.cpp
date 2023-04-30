@@ -303,6 +303,80 @@ void processQuitMode()
 	}
 }
 
+std::string queryBatteryRootPath()
+{
+	static std::string batteryRootPath;
+
+	if (batteryRootPath.empty())
+	{
+		auto files = Utils::FileSystem::getDirContent("/sys/class/power_supply");
+		for (auto file : files)
+		{
+			if (Utils::String::toLower(file).find("/bat") != std::string::npos)
+			{
+				batteryRootPath = file;
+				break;
+			}
+		}
+	}
+	return batteryRootPath;
+}
+
+BatteryInformation queryBatteryInformation(bool summary)
+{
+	BatteryInformation ret;
+
+	std::string batteryRootPath = queryBatteryRootPath();
+
+	// Find battery path - only at the first call
+	if (!queryBatteryRootPath().empty())
+	{
+		try
+		{
+			ret.hasBattery = true;
+			ret.level = queryBatteryLevel();
+			ret.isCharging = queryBatteryCharging();
+			if (!summary)
+			{
+				ret.health = Utils::String::toLower( Utils::String::replace( Utils::FileSystem::readAllText(batteryRootPath + "/health"), "\n", "" ) );
+				ret.max_capacity = std::atoi(Utils::FileSystem::readAllText(batteryRootPath + "/charge_full").c_str()) / 1000; // milli amperes
+				ret.voltage = queryBatteryVoltage();
+			}
+		} catch (...) {
+			LOG(LogError) << "Platform::queryBatteryInformation() - Error reading battery data!!!";
+		}
+	}
+
+	return ret;
+}
+
+int queryBatteryLevel()
+{
+	std::string batteryCapacityPath = queryBatteryRootPath() + "/capacity";
+	if ( Utils::FileSystem::exists(batteryCapacityPath) )
+		return std::atoi(Utils::FileSystem::readAllText(batteryCapacityPath).c_str());
+
+	return 0;
+}
+
+bool queryBatteryCharging()
+{
+	std::string batteryStatusPath = queryBatteryRootPath() + "/status";
+	if ( Utils::FileSystem::exists(batteryStatusPath) )
+		return Utils::String::compareIgnoreCase( Utils::String::replace(Utils::FileSystem::readAllText(batteryStatusPath), "\n", ""), "discharging" );
+
+	return false;
+}
+
+float queryBatteryVoltage()
+{
+	std::string batteryVoltagePath = queryBatteryRootPath() + "/voltage_now";
+	if ( Utils::FileSystem::exists(batteryVoltagePath) )
+		return std::atof(Utils::FileSystem::readAllText(batteryVoltagePath).c_str()) / 1000000; // volts
+
+	return false;
+}
+
 // Adapted from emuelec
 std::string getShOutput(const std::string& mStr) 
 {
