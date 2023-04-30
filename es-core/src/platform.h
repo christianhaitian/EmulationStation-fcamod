@@ -31,6 +31,31 @@ bool executeSystemBoolScript(const std::string command);
 int quitES(QuitMode mode = QuitMode::QUIT);
 void processQuitMode();
 
+struct BatteryInformation
+{
+	BatteryInformation()
+	{
+		hasBattery = false;
+		level = 0;
+		isCharging = false;
+		std::string health("Good");
+		max_capacity = 0;
+		voltage = 0.f;
+	}
+
+	bool hasBattery;
+	int  level;
+	bool isCharging;
+	std::string health;
+	int max_capacity;
+	float voltage;
+};
+
+BatteryInformation queryBatteryInformation(bool summary);
+int queryBatteryLevel();
+bool queryBatteryCharging();
+float queryBatteryVoltage();
+
 #if defined(WIN32)
 #include <Windows.h>
 #include <intrin.h>

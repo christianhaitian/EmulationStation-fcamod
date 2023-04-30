@@ -21,6 +21,7 @@ class TextureResource;
 class AsyncNotificationComponent;
 class ThemeData;
 class TextComponent;
+class ControllerActivityComponent;
 class BatteryIndicatorComponent;
 class VolumeInfoComponent;
 class BrightnessInfoComponent;

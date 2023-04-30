@@ -13,6 +13,8 @@ namespace pugi { class xml_node; }
 
 #define DEVICE_KEYBOARD -1
 #define DEVICE_CEC      -2
+// batocera
+#define MAX_PLAYERS 1
 
 extern char* BUTTON_OK;
 extern char* BUTTON_BACK;

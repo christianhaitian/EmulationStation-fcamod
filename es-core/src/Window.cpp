@@ -13,6 +13,7 @@
 #include <SDL_events.h>
 #include "guis/GuiInfoPopup.h"
 #include "components/AsyncNotificationComponent.h"
+#include "components/ControllerActivityComponent.h"
 #include "components/BatteryIndicatorComponent.h"
 #include "guis/GuiMsgBox.h"
 #include "AudioManager.h"

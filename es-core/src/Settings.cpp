@@ -104,6 +104,7 @@ void Settings::setDefaults()
 	mBoolMap["MoveCarousel"] = true;
 	mBoolMap["SaveGamelistsOnExit"] = true;
 	mBoolMap["ShowBatteryIndicator"] = true;
+	mStringMap["ShowBattery"] = "text";
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;	
 	mBoolMap["MusicTitles"] = true;

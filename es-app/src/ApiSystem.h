@@ -43,6 +43,7 @@ public:
 	int	getBrightnessLevel();
 	bool	getBrighness(int& value);
 	void	setBrighness(int value);
+    BatteryInformation getBatteryInformation(bool summary = true);
 
 protected:
     static ApiSystem* instance;

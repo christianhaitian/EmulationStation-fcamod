@@ -37,7 +37,7 @@
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
 
-	addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); });
+	addEntry(_("DISPLAY SETTINGS AND INFO"), true, [this] { openDisplaySettings(); });
 
 	auto theme = ThemeData::getMenuTheme();
 
@@ -1098,14 +1098,21 @@ void GuiMenu::openUISettings()
 	});
 
 	// Battery indicator
-	if (mWindow->getBatteryIndicator() && mWindow->getBatteryIndicator()->hasBattery())
+	if (ApiSystem::getInstance()->getBatteryInformation().hasBattery)
 	{
-		auto batteryStatus = std::make_shared<SwitchComponent>(mWindow);
-		batteryStatus->setState(Settings::getInstance()->getBool("ShowBatteryIndicator"));
+		auto batteryStatus = std::make_shared<OptionListComponent<std::string> >(mWindow, _("SHOW BATTERY STATUS"), false);
+		batteryStatus->addRange({ { _("NO"), "" },{ _("ICON"), "icon" },{ _("ICON AND TEXT"), "text" } }, Settings::getInstance()->getString("ShowBattery"));
 		s->addWithLabel(_("SHOW BATTERY STATUS"), batteryStatus);
-		s->addSaveFunc([batteryStatus] { Settings::getInstance()->setBool("ShowBatteryIndicator", batteryStatus->getState()); });
+		s->addSaveFunc([s, batteryStatus]
+		{
+			std::string old_value = Settings::getInstance()->getString("ShowBattery");
+			if (old_value != batteryStatus->getSelected())
+            {
+				Settings::getInstance()->setString("ShowBattery", batteryStatus->getSelected());
+				s->setVariable("reloadAll", true);
+			}
+		});
 	}
-
 
 	// filenames
 	auto hidden_files = std::make_shared<SwitchComponent>(mWindow);
