@@ -238,7 +238,11 @@ void screenscraper_generate_scraper_requests(const ScraperSearchParams& params,
 	// FCA Fix for names override not working on Retropie
 	if (params.nameOverride.length() == 0)
 	{
-		path = ssConfig.getGameSearchUrl(params.game->getFileName());
+		if (Utils::FileSystem::isDirectory(params.game->getPath()))
+			path = ssConfig.getGameSearchUrl(params.game->getDisplayName());
+		else
+			path = ssConfig.getGameSearchUrl(params.game->getFileName());
+		    
 		path = Utils::String::replace(path, "%20-%20", "%20");
 		path += "&romtype=rom";
 
