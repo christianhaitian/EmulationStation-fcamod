@@ -306,7 +306,7 @@ void Window::update(int deltaTime)
 
 			if (clockTstruct.tm_year > 100) 
 			{ 
-				// Display the clock only if year is more than 1900+100 ; rpi have no internal clock and out of the networks, the date time information has no value */
+				// Display the clock only if year is more than 1900+100 ; rpi have no internal clock and out of the networks, the date time information has no value
 				// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime for more information about date/time format
 				
 				char       clockBuf[32];
@@ -322,8 +322,12 @@ void Window::update(int deltaTime)
 					strftime(clockBuf, sizeof(clockBuf), "%I:%M %p", &clockTstruct);
 				else
 #endif
+
+				if (Settings::getInstance()->getBool("ClockMode12"))
+					strftime(clockBuf, sizeof(clockBuf), "%I:%M %p", &clockTstruct);
+				else
 					strftime(clockBuf, sizeof(clockBuf), "%H:%M", &clockTstruct);
-				
+
 #if WIN32
 				setlocale(LC_TIME, oldLocale.c_str());
 #endif
