@@ -1392,6 +1392,12 @@ void GuiMenu::openOtherSettings()
 		SystemConf::getInstance()->set("system.timezone", es_timezones->getSelected());
 	});
 
+	// Clock time format (14:42 or 2:42 pm)
+	auto tmFormat = std::make_shared<SwitchComponent>(mWindow);
+	tmFormat->setState(Settings::getInstance()->getBool("ClockMode12"));
+	s->addWithLabel(_("SHOW CLOCK IN 12-HOUR FORMAT"), tmFormat);
+	s->addSaveFunc([tmFormat] { Settings::getInstance()->setBool("ClockMode12", tmFormat->getState()); });
+
     //Switch A and B buttons
     
 	auto invertJoy = std::make_shared<SwitchComponent>(mWindow);
