@@ -614,8 +614,13 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 			if (cursor != nullptr && !cursor->isPlaceHolder() && system->getName() != "recent")
 				newView->setCursor(cursor);
 			
+            Vector3f position = view->getPosition();
+
 			if(isCurrent)
+            {
 				mCurrentView = newView;
+                mCurrentView->setPosition(position);
+            }
 
 			break;
 		}
