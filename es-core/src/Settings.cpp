@@ -102,6 +102,8 @@ void Settings::setDefaults()
 	mBoolMap["HideConsole"] = true;
 	mBoolMap["QuickSystemSelect"] = true;
 	mBoolMap["MoveCarousel"] = true;
+	mStringMap["VerbalBatteryVoice"] = "male1";
+	mStringMap["VerbalBatteryWarning"] = "on";
 	mBoolMap["SaveGamelistsOnExit"] = true;
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;	

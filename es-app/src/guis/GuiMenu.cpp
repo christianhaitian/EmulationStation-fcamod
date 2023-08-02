@@ -394,6 +394,49 @@ void GuiMenu::openSoundSettings()
 		s->addWithLabel(_("LOWER MUSIC WHEN PLAYING VIDEO"), videolowermusic);
 		s->addSaveFunc([videolowermusic] { Settings::getInstance()->setBool("VideoLowersMusic", videolowermusic->getState()); });
 
+	// Verbal Battery Voices
+	auto VerbalbatteryVoice = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Verbal BATTERY Voice"), false);
+	VerbalbatteryVoice->addRange({ { _("MALE 1"), "male1" },{ _("MALE 2"), "male2" },{ _("FEMALE"), "female" } }, Settings::getInstance()->getString("VerbalBatteryVoice"));
+	s->addWithLabel(_("VERBAL BATTERY VOICE"), VerbalbatteryVoice);
+	s->addSaveFunc([s, VerbalbatteryVoice]
+	{
+		std::string old_value = Settings::getInstance()->getString("VerbalBatteryVoice");
+		if (old_value != VerbalbatteryVoice->getSelected())
+           {
+            if (strstr(VerbalbatteryVoice->getSelected().c_str(),"male1")) {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.MBROLA_VOICE*) ] && rm /home/ark/.config/.MBROLA_VOICE*", "", nullptr);
+            }
+            else if (strstr(VerbalbatteryVoice->getSelected().c_str(),"male2")) {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.MBROLA_VOICE*) ] && rm /home/ark/.config/.MBROLA_VOICE*", "", nullptr);
+              runSystemCommand("touch /home/ark/.config/.MBROLA_VOICE_MALE3", "", nullptr);
+            }
+            else {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.MBROLA_VOICE*) ] && rm /home/ark/.config/.MBROLA_VOICE*", "", nullptr);
+              runSystemCommand("touch /home/ark/.config/.MBROLA_VOICE_FEMALE", "", nullptr);
+            }
+			Settings::getInstance()->setString("VerbalBatteryVoice", VerbalbatteryVoice->getSelected());
+		   }
+	});
+
+	// Verbal Battery Warning indicator
+	auto VerbalbatteryStatus = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Verbal BATTERY Warning"), false);
+	VerbalbatteryStatus->addRange({ { _("OFF"), "no" },{ _("ON"), "yes" } }, Settings::getInstance()->getString("VerbalBatteryWarning"));
+	s->addWithLabel(_("VERBAL BATTERY WARNING"), VerbalbatteryStatus);
+	s->addSaveFunc([s, VerbalbatteryStatus]
+	{
+		std::string old_value = Settings::getInstance()->getString("VerbalBatteryWarning");
+		if (old_value != VerbalbatteryStatus->getSelected())
+           {
+            if (strstr(VerbalbatteryStatus->getSelected().c_str(),"no")) {
+              runSystemCommand("[ -z $(find /home/ark/.config/.NOVERBALBATTERYWARNING) ] && touch /home/ark/.config/.NOVERBALBATTERYWARNING", "", nullptr);
+            }
+            else {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.NOVERBALBATTERYWARNING) ] && rm /home/ark/.config/.NOVERBALBATTERYWARNING", "", nullptr);
+            }
+			Settings::getInstance()->setString("VerbalBatteryWarning", VerbalbatteryStatus->getSelected());
+		   }
+	});
+
 #ifdef _RPI_
 		// OMX player Audio Device
 		auto omx_audio_dev = std::make_shared< OptionListComponent<std::string> >(mWindow, "OMX PLAYER AUDIO DEVICE", false);
