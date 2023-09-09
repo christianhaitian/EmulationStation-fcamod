@@ -79,7 +79,9 @@ Font::Font(int size, const std::string& path) : mSize(size), mPath(path)
 	if (Renderer::isSmallScreen())
 	{
 		float sz = Math::min(Renderer::getScreenWidth(), Renderer::getScreenHeight());
-		if (sz >= 320) // ODROID 480x320;
+		if (sz >= 720) // RGB30 720x720
+			mSize = size * 1.11;
+		else if (sz >= 320) // ODROID 480x320;
 			mSize = size * 1.31;
 		else // GPI 320x240
 			mSize = size * 1.5;
