@@ -1806,7 +1806,7 @@ void GuiMenu::openOtherSettings()
              //{
               //if (Settings::getInstance()->getBool("EnableRumble")) {
               if (strstr(RumbleStatus->getSelected().c_str(),"yes")) {
-                runSystemCommand("[ -z $(sudo grep enable_vibration /var/spool/cron/crontabs/root) ] && /usr/local/bin/enable_vibration.sh && echo '@reboot /usr/local/bin/enable_vibration.sh &' | sudo tee -a /var/spool/cron/crontabs/root &", "", nullptr);
+                runSystemCommand("[ -z $(sudo grep enable_vibration /var/spool/cron/crontabs/root) ] && /usr/local/bin/enable_vibration.sh && echo '@reboot /usr/local/bin/enable_vibration.sh &' | sudo tee -a /var/spool/cron/crontabs/root && sleep 0.5 && echo 0 | sudo tee /sys/class/pwm/pwmchip1/pwm0/enable && sleep 0.1 && echo 1 | sudo tee /sys/class/pwm/pwmchip1/pwm0/enable && echo 0 | sudo tee /sys/class/pwm/pwmchip1/pwm0/enable && sleep 0.1 && echo 1 | sudo tee /sys/class/pwm/pwmchip1/pwm0/enable && echo 0 | sudo tee /sys/class/pwm/pwmchip1/pwm0/enable && sleep 0.2 && echo 1 | sudo tee /sys/class/pwm/pwmchip1/pwm0/enable &", "", nullptr);
               }
               else {
                 runSystemCommand("sudo sed -i '/@reboot \\/usr\\/local\\/bin\\/enable_vibration.sh/d' /var/spool/cron/crontabs/root", "", nullptr);
