@@ -1552,6 +1552,22 @@ void GuiMenu::openOtherSettings()
 		}
 	});
 
+    //Flip power button suspend/poweroff function
+    
+	auto powerBtn = std::make_shared<SwitchComponent>(mWindow);
+	powerBtn->setState(Settings::getInstance()->getBool("InvertPwrBtn"));
+	s->addWithLabel(_("SWITCH POWER BUTTON TAP TO OFF"), powerBtn);
+	s->addSaveFunc([this, s, powerBtn]
+	{
+		if (Settings::getInstance()->setBool("InvertPwrBtn", powerBtn->getState()))
+		{
+          if (Settings::getInstance()->getBool("InvertPwrBtn") == 1)
+            runSystemCommand("[ -z $(find /home/ark/.config/.SWAPPOWERANDSUSPEND) ] && touch /home/ark/.config/.SWAPPOWERANDSUSPEND", "", nullptr);
+		  else
+            runSystemCommand("[ ! -z $(find /home/ark/.config/.SWAPPOWERANDSUSPEND) ] && rm /home/ark/.config/.SWAPPOWERANDSUSPEND", "", nullptr);
+		}
+	});
+
 	// power saver
 	auto power_saver = std::make_shared< OptionListComponent<std::string> >(mWindow, _("POWER SAVER MODES"), false);
 	std::vector<std::string> modes;
