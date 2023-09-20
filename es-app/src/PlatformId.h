@@ -108,6 +108,7 @@ namespace PlatformIds
 		ZX81,
 		TIC80,
 		TI99,
+		WASM4,
 		SEGA_PICO,
 
 		// Windows Specific
