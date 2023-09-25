@@ -305,6 +305,20 @@ void FileData::launchGame(Window* window)
 	command = Utils::String::replace(command, "%SYSTEM%", getSystemName());
 	command = Utils::String::replace(command, "%HOME%", Utils::FileSystem::getHomePath());
 
+	if (Utils::FileSystem::exists("/usr/local/bin/quickmode.sh"))
+	{
+	    FileData* gameToUpdate = getSourceFileData();
+
+    	int timesPlayed = gameToUpdate->getMetadata().getInt("playcount") + 1;
+	    gameToUpdate->getMetadata().set("playcount", std::to_string(static_cast<long long>(timesPlayed)));
+
+	    //update last played time
+	    gameToUpdate->getMetadata().set("lastplayed", Utils::Time::DateTime(Utils::Time::now()));
+	    CollectionSystemManager::get()->refreshCollectionSystems(gameToUpdate);
+
+	    saveToGamelistRecovery(gameToUpdate);
+    }
+
 	Scripting::fireEvent("game-start", rom, basename);
 
 	LOG(LogInfo) << "	" << command;
@@ -324,7 +338,7 @@ void FileData::launchGame(Window* window)
 	window->normalizeNextUpdate();
 
 	//update number of times the game has been launched
-	if (exitCode == 0)
+	if ((exitCode == 0) && !(Utils::FileSystem::exists("/usr/local/bin/quickmode.sh")))
 	{
 		FileData* gameToUpdate = getSourceFileData();
 
