@@ -50,8 +50,8 @@ static std::map<std::string, std::string> defaults =
 	{ "global.ai_service_enabled", "0" },
 };
 
-std::string systemConfFile = "~/.emulationstation.conf";
-std::string systemConfFileTmp = "~/.emulationstation.conf.tmp";
+std::string systemConfFile = "/home/ark/.emulationstation.conf";
+std::string systemConfFileTmp = "/home/ark/.emulationstation.conf.tmp";
 
 SystemConf::SystemConf() 
 {
