@@ -1569,7 +1569,7 @@ void GuiMenu::openOtherSettings()
 	});
 
 	// power saver
-	auto power_saver = std::make_shared< OptionListComponent<std::string> >(mWindow, _("POWER SAVER MODES"), false);
+	/*auto power_saver = std::make_shared< OptionListComponent<std::string> >(mWindow, _("POWER SAVER MODES"), false);
 	std::vector<std::string> modes;
 	modes.push_back("disabled");
 	modes.push_back("default");
@@ -1578,7 +1578,7 @@ void GuiMenu::openOtherSettings()
 	for (auto it = modes.cbegin(); it != modes.cend(); it++)
 		power_saver->add(_(it->c_str()), *it, Settings::getInstance()->getString("PowerSaverMode") == *it);
 
-	//s->addWithLabel(_("POWER SAVER MODES"), power_saver);
+	s->addWithLabel(_("POWER SAVER MODES"), power_saver);
 	s->addSaveFunc([this, power_saver] {
 		if (Settings::getInstance()->getString("PowerSaverMode") != "instant" && power_saver->getSelected() == "instant") {
 			Settings::getInstance()->setString("TransitionStyle", "instant");
@@ -1591,7 +1591,7 @@ void GuiMenu::openOtherSettings()
 
 		Settings::getInstance()->setString("PowerSaverMode", power_saver->getSelected());
 		PowerSaver::init();
-	});
+	});*/
 
 	// LANGUAGE
 
