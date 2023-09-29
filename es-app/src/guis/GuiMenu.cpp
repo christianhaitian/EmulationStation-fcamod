@@ -1578,7 +1578,7 @@ void GuiMenu::openOtherSettings()
 	for (auto it = modes.cbegin(); it != modes.cend(); it++)
 		power_saver->add(_(it->c_str()), *it, Settings::getInstance()->getString("PowerSaverMode") == *it);
 
-	s->addWithLabel(_("POWER SAVER MODES"), power_saver);
+	//s->addWithLabel(_("POWER SAVER MODES"), power_saver);
 	s->addSaveFunc([this, power_saver] {
 		if (Settings::getInstance()->getString("PowerSaverMode") != "instant" && power_saver->getSelected() == "instant") {
 			Settings::getInstance()->setString("TransitionStyle", "instant");
