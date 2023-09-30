@@ -17,10 +17,13 @@
 #include "components/TextComponent.h"
 #include <unordered_map>
 #include <time.h>
+#include "ApiSystem.h"
+#include "DisplayPanelControl.h"
 #include "AudioManager.h"
 #include "math/Vector2i.h"
 
 #define FADE_TIME 			500
+
 
 SystemScreenSaver::SystemScreenSaver(Window* window) :
 	mVideoScreensaver(NULL),
@@ -61,7 +64,7 @@ SystemScreenSaver::~SystemScreenSaver()
 		delete mDefaultRandomEngine;
 		mDefaultRandomEngine = nullptr;
 	}
-	
+
 }
 
 bool SystemScreenSaver::allowSleep()
@@ -165,15 +168,45 @@ void SystemScreenSaver::startScreenSaver()
 			return;
 		}	
 	}
+	else if ( screensaver_behavior == "black" )
+	{
+        auto sysbright = ApiSystem::getInstance()->getBrightnessLevel();
+        if ( sysbright > 0 )
+		{
+		  DisplayPanelControl::getInstance()->setBrightnessLevel(0);
+		}
+		PowerSaver::runningScreenSaver(true);
+		mTimer = 0;
+		return;
+	}
 
 	// No videos. Just use a standard screensaver
 	mState = STATE_SCREENSAVER_ACTIVE;
 	mCurrentGame = NULL;
 }
 
+int SystemScreenSaver::curBrightnessLevel()
+{
+
+    sysbrighttmp = ApiSystem::getInstance()->getBrightnessLevel();
+
+    return sysbrighttmp;
+}
+
 void SystemScreenSaver::stopScreenSaver()
 {
 	bool isExitingScreenSaver = !mLoadingNext;
+
+    std::string screensaver_behavior = Settings::getInstance()->getString("ScreenSaverBehavior");
+	if ( screensaver_behavior == "black" )
+	{
+        auto sysbright = ApiSystem::getInstance()->getBrightnessLevel();
+        if ( sysbright > 0 )
+		{
+			curBrightnessLevel();
+		}
+		DisplayPanelControl::getInstance()->setBrightnessLevel(sysbrighttmp);
+	}
 
 	if (mLoadingNext)
 		mFadingImageScreensaver = mImageScreensaver;
