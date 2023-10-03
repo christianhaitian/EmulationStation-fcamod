@@ -93,7 +93,6 @@ private:
 	unsigned long countGameListNodes(const char *nodeName);
 	void countVideos();
 	void countImages();
-    int curBrightnessLevel();
 
 	std::string pickGameListNode(unsigned long index, const char *nodeName);
 	std::string pickRandomVideo();
@@ -127,8 +126,7 @@ private:
 	std::string		mGameName;
 	std::string		mSystemName;
 	int 			mVideoChangeTime;
-	int             sysbrighttmp;
-
+	
 	//std::shared_ptr<Sound>	mBackgroundAudio;
 	bool			mLoadingNext;
 
