@@ -168,7 +168,7 @@ void SystemScreenSaver::startScreenSaver()
 			return;
 		}	
 	}
-	else if ( screensaver_behavior == "black" )
+	else if ( (screensaver_behavior == "black") && (getShOutput(R"(cat /home/ark/.config/.DEVICE)") != "RG503") )
 	{
         auto sysbright = ApiSystem::getInstance()->getBrightnessLevel();
         if ( sysbright > 0 )
@@ -198,7 +198,7 @@ void SystemScreenSaver::stopScreenSaver()
 	bool isExitingScreenSaver = !mLoadingNext;
 
     std::string screensaver_behavior = Settings::getInstance()->getString("ScreenSaverBehavior");
-	if ( screensaver_behavior == "black" )
+	if ( (screensaver_behavior == "black") && (getShOutput(R"(cat /home/ark/.config/.DEVICE)") != "RG503") )
 	{
         auto sysbright = ApiSystem::getInstance()->getBrightnessLevel();
         if ( sysbright > 0 )
