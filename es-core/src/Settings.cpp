@@ -107,7 +107,7 @@ void Settings::setDefaults()
 	mStringMap["VerbalBatteryVoice"] = "male1";
 	mStringMap["VerbalBatteryWarning"] = "on";
 	mBoolMap["EnableRumble"] = false;
-	//mStringMap["EnableRumble"] = "off";
+	mBoolMap["EnableKodi"] = true;
 	mBoolMap["ShowBatteryIndicator"] = true;
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;	

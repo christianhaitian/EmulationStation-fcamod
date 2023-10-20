@@ -36,15 +36,16 @@
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
+    if (Settings::getInstance()->getBool("EnableKodi") == 1){
+	   addEntry(_("KODI MEDIA CENTER").c_str(), false, [this] 
+	   { 
+		   Window *window = mWindow;
+		   delete this;
+		   if (!ApiSystem::getInstance()->launchKodi(window))
+			   LOG(LogWarning) << "Shutdown terminated with non-zero result!";
 
-	addEntry(_("KODI MEDIA CENTER").c_str(), false, [this] 
-	{ 
-		Window *window = mWindow;
-		delete this;
-		if (!ApiSystem::getInstance()->launchKodi(window))
-			LOG(LogWarning) << "Shutdown terminated with non-zero result!";
-
-	}, "iconKodi");	
+	   }, "iconKodi");	
+    }
 
     if (Utils::FileSystem::exists("/var/run/drmConn")){
 	  addEntry(_("DISPLAY SETTINGS AND INFO"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
@@ -1289,6 +1290,14 @@ void GuiMenu::openUISettings()
 			s->setVariable("reloadAll", true);		
 	});
 
+    // disable kodi
+	auto showKodi = std::make_shared<SwitchComponent>(mWindow);
+	showKodi->setState(Settings::getInstance()->getBool("EnableKodi"));
+	s->addWithLabel(_("Show Kodi in Start Menu"), showKodi);
+	s->addSaveFunc([s, showKodi]
+	{
+        Settings::getInstance()->setBool("EnableKodi", showKodi->getState());
+	});
 
 	s->onFinalize([s, pthis, window]
 	{
