@@ -289,6 +289,37 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		mMenu.addRow(row);
 	}
 
+	// Game List Update
+	mMenu.addEntry(_("UPDATE GAMES LISTS"), false, [this, window]
+	{
+		window->pushGui(new GuiMsgBox(window, _("REALLY UPDATE GAMES LISTS ?"), _("YES"), [this, window]
+		{
+			std::string systemName = mSystem->getName();
+
+			mSystem = nullptr;
+
+			ViewController::get()->goToStart(true);
+
+			delete ViewController::get();
+			ViewController::init(window);
+			CollectionSystemManager::deinit();
+			CollectionSystemManager::init(window);
+			SystemData::loadConfig(window);
+			window->endRenderLoadingScreen();
+			GuiComponent *gui;
+			while ((gui = window->peekGui()) != NULL) {
+				window->removeGui(gui);
+				delete gui;
+			}
+			ViewController::get()->reloadAll();
+			window->pushGui(ViewController::get());
+
+			if (!ViewController::get()->goToGameList(systemName, true))
+				ViewController::get()->goToStart(true);			
+
+		}, _("NO"), nullptr));
+	});
+
 	// center the menu
 	setSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());	
 	mMenu.animateTo(Vector2f((Renderer::getScreenWidth() - mMenu.getSize().x()) / 2, (Renderer::getScreenHeight() - mMenu.getSize().y()) / 2));
