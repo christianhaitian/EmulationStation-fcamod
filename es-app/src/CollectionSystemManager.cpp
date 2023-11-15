@@ -759,7 +759,15 @@ SystemData* CollectionSystemManager::addNewCustomCollection(std::string name)
 // creates a new, empty Collection system, based on the name and declaration
 SystemData* CollectionSystemManager::createNewCollectionEntry(std::string name, CollectionSystemDecl sysDecl, bool index)
 {
-	SystemData* newSys = new SystemData(name, sysDecl.longName, mCollectionEnvData, sysDecl.themeFolder, true);
+	SystemMetadata md;
+	md.name = name;
+	md.fullName = sysDecl.longName;
+	md.themeFolder = sysDecl.themeFolder;
+	md.manufacturer = "Collections";
+	md.hardwareType = sysDecl.isCustom ? "custom collection" : "auto collection";
+	md.releaseYear = 0;
+
+	SystemData* newSys = new SystemData(md, mCollectionEnvData, true);
 
 	CollectionSystemData newCollectionData;
 	newCollectionData.system = newSys;
