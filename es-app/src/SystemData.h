@@ -126,6 +126,7 @@ public:
 	inline SystemEnvironmentData* getSystemEnvData() const { return mEnvData; }
 	inline const std::vector<PlatformIds::PlatformId>& getPlatformIds() const { return mEnvData->mPlatformIds; }
 	inline bool hasPlatformId(PlatformIds::PlatformId id) { if (!mEnvData) return false; return std::find(mEnvData->mPlatformIds.cbegin(), mEnvData->mPlatformIds.cend(), id) != mEnvData->mPlatformIds.cend(); }
+	inline const SystemMetadata& getSystemMetadata() const { return mMetadata; }
 
 	inline const std::shared_ptr<ThemeData>& getTheme() const { return mTheme; }
 
@@ -143,6 +144,7 @@ public:
 	int getDisplayedGameCount();
 	void updateDisplayedGameCount();
 
+	static bool isManufacturerSupported();
 	static bool hasDirtySystems();
 	static void deleteSystems();
 	static bool loadConfig(Window* window); //Load the system config file at getConfigPath(). Returns true if no errors were encountered. An example will be written if the file doesn't exist.
