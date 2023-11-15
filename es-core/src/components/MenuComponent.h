@@ -31,6 +31,7 @@ public:
 	inline void addRow(const ComponentListRow& row, bool setCursorHere = false) { mList->addRow(row, setCursorHere); updateSize(); }
 
 	void addWithLabel(const std::string& label, const std::shared_ptr<GuiComponent>& comp, const std::string iconName = "", bool setCursorHere = false, bool invert_when_selected = true);
+	void addWithDescription(const std::string& label, const std::string& description, const std::shared_ptr<GuiComponent>& comp, const std::function<void()>& func = nullptr, const std::string iconName = "", bool setCursorHere = false, bool invert_when_selected = true, bool multiLine = false);
 	void addEntry(const std::string name, bool add_arrow, const std::function<void()>& func, const std::string iconName="", bool setCursorHere = false, bool invert_when_selected = true);
 	void addGroup(const std::string& label) { mList->addGroup(label); updateSize(); }
 
