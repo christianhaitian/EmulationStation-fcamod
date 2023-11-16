@@ -2,6 +2,7 @@
 
 #include "animations/LambdaAnimation.h"
 #include "guis/GuiMsgBox.h"
+#include "guis/GuiSettings.h"
 #include "views/UIModeController.h"
 #include "views/ViewController.h"
 #include "Log.h"
@@ -461,6 +462,32 @@ bool SystemView::input(InputConfig* config, Input input)
 			ViewController::get()->goToGameList(getSelected());
 			return true;
 		}
+
+		if (config->isMappedTo(BUTTON_BACK, input) && SystemData::isManufacturerSupported())
+		{
+			auto sortMode = Settings::getInstance()->getString("SortSystems");
+			if (sortMode == "alpha")
+			{
+				showNavigationBar(_("GO TO LETTER"), [](SystemData* meta) { if (meta->isCollection()) return _("COLLECTIONS"); return Utils::String::toUpper(meta->getFullName().substr(0, 1)); });
+				return true;
+			}
+			else if (sortMode == "manufacturer")
+			{
+				showNavigationBar(_("GO TO MANUFACTURER"), [](SystemData* meta) { return meta->getSystemMetadata().manufacturer; });
+				return true;
+			}
+			else if (sortMode == "hardware")
+			{
+				showNavigationBar(_("GO TO HARDWARE"), [](SystemData* meta) { return meta->getSystemMetadata().hardwareType; });
+				return true;
+			}
+			else if (sortMode == "releaseDate")
+			{
+				showNavigationBar(_("GO TO DECADE"), [](SystemData* meta) { if (meta->getSystemMetadata().releaseYear == 0) return _("Unknown"); return std::to_string((meta->getSystemMetadata().releaseYear / 10) * 10) + "'s"; });
+				return true;
+			}
+		}
+
 		if (config->isMappedTo("x", input))
 		{
 			// get random system
@@ -485,6 +512,62 @@ bool SystemView::input(InputConfig* config, Input input)
 	}
 
 	return GuiComponent::input(config, input);
+}
+
+void SystemView::showNavigationBar(const std::string& title, const std::function<std::string(SystemData* system)>& selector)
+{
+	stopScrolling();
+	
+	GuiSettings* gs = new GuiSettings(mWindow, title);
+
+	int idx = 0;
+	std::string sel = selector(getSelected());
+
+	std::string man = "*-*";
+	for (int i = 0; i < SystemData::sSystemVector.size(); i++)
+	{
+		auto system = SystemData::sSystemVector[i];
+		if (!system->isVisible())
+			continue;
+		
+		auto mf = selector(system);
+		if (man != mf)
+		{
+			std::vector<std::string> names;
+			for (auto sy : SystemData::sSystemVector)
+				if (sy->isVisible() && selector(sy) == mf)
+					names.push_back(sy->getFullName());
+
+			gs->getMenu().addWithDescription(mf, Utils::String::join(names, ", "), nullptr, [this, gs, system, idx]
+			{
+				listInput(idx - mCursor);
+				listInput(0);
+
+				auto pthis = this;
+
+				delete gs;
+
+				pthis->mLastCursor = -1;
+				pthis->onCursorChanged(CURSOR_STOPPED);
+
+			}, "", sel == mf);
+
+			man = mf;
+		}
+
+		idx++;
+	}
+	
+	float w = Math::min(Renderer::getScreenWidth() * 0.5, ThemeData::getMenuTheme()->Text.font->sizeText("S").x() * 31.0f);
+	w = Math::max(w, Renderer::getScreenWidth() / 3.0f);
+
+	gs->getMenu().setSize(w, Renderer::getScreenHeight());
+
+	gs->getMenu().animateTo(
+		Vector2f(-w, 0),
+		Vector2f(0, 0), AnimateFlags::OPACITY | AnimateFlags::POSITION);
+
+	mWindow->pushGui(gs);
 }
 
 void SystemView::update(int deltaTime)
