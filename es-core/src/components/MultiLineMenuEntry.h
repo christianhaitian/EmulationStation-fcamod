@@ -11,7 +11,7 @@
 class MultiLineMenuEntry : public ComponentGrid
 {
 public:
-	MultiLineMenuEntry(Window* window, const std::string& text, const std::string& substring) :
+	MultiLineMenuEntry(Window* window, const std::string& text, const std::string& substring, bool multiLine = false) :
 		ComponentGrid(window, Vector2i(1, 2))
 	{
 		auto theme = ThemeData::getMenuTheme();

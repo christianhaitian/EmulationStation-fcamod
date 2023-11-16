@@ -62,6 +62,7 @@ public:
 	void goToSystem(SystemData* system, bool animate);
 
 	bool input(InputConfig* config, Input input) override;
+	void showNavigationBar(const std::string& title, const std::function<std::string(SystemData* system)>& selector);
 	void update(int deltaTime) override;
 	void render(const Transform4x4f& parentTrans) override;
 

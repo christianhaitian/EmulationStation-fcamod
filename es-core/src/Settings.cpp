@@ -116,6 +116,7 @@ void Settings::setDefaults()
 
 	mBoolMap["InvertButtons"] = false;
 	mBoolMap["InvertPwrBtn"] = false;
+	mBoolMap["ScanPorts"] = false;
 	mIntMap["ScreenSaverTime"] = 5*60*1000; // 5 minutes
 	mIntMap["ScraperResizeWidth"] = 400;
 	mIntMap["ScraperResizeHeight"] = 0;

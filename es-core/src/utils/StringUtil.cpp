@@ -12,7 +12,7 @@ namespace Utils
 {
 	namespace String
 	{
-		static wchar_t unicode_lowers[] = 
+		static wchar_t unicode_lowers[] =
 		{
 			(wchar_t)0x0061, (wchar_t)0x0062, (wchar_t)0x0063, (wchar_t)0x0064, (wchar_t)0x0065, (wchar_t)0x0066, (wchar_t)0x0067, (wchar_t)0x0068, (wchar_t)0x0069,
 			(wchar_t)0x006A, (wchar_t)0x006B, (wchar_t)0x006C, (wchar_t)0x006D, (wchar_t)0x006E, (wchar_t)0x006F, (wchar_t)0x0070, (wchar_t)0x0071, (wchar_t)0x0072,
@@ -89,7 +89,7 @@ namespace Utils
 			(wchar_t)0xFF49, (wchar_t)0xFF4A, (wchar_t)0xFF4B, (wchar_t)0xFF4C, (wchar_t)0xFF4D, (wchar_t)0xFF4E, (wchar_t)0xFF4F, (wchar_t)0xFF50, (wchar_t)0xFF51,
 			(wchar_t)0xFF52, (wchar_t)0xFF53, (wchar_t)0xFF54, (wchar_t)0xFF55, (wchar_t)0xFF56, (wchar_t)0xFF57, (wchar_t)0xFF58, (wchar_t)0xFF59, (wchar_t)0xFF5A};
 
-		static const wchar_t unicode_uppers[] = 
+		static const wchar_t unicode_uppers[] =
 		{
 			(wchar_t)0x0041, (wchar_t)0x0042, (wchar_t)0x0043, (wchar_t)0x0044, (wchar_t)0x0045, (wchar_t)0x0046, (wchar_t)0x0047, (wchar_t)0x0048, (wchar_t)0x0049,
 			(wchar_t)0x004A, (wchar_t)0x004B, (wchar_t)0x004C, (wchar_t)0x004D, (wchar_t)0x004E, (wchar_t)0x004F, (wchar_t)0x0050, (wchar_t)0x0051, (wchar_t)0x0052,
@@ -338,9 +338,9 @@ namespace Utils
 
 				int pos = i;
 				wchar_t character = (wchar_t)chars2Unicode(text, i);
-				wchar_t unicode = toUpper ? toupperUnicode(character) : tolowerUnicode(character);				
+				wchar_t unicode = toUpper ? toupperUnicode(character) : tolowerUnicode(character);
 				if (unicode != character)
-				{					
+				{
 					int charSize = i - pos;
 
 					if (charSize == 2)
@@ -375,7 +375,7 @@ namespace Utils
 			return _string.substr(strBegin, strEnd - strBegin + 1);
 
 		} // trim
-		
+
 		std::string replace(const std::string& _string, const std::string& _replace, const std::string& _with)
 		{
 			std::string string = _string;
@@ -543,14 +543,14 @@ namespace Utils
 		{
 			std::string buffer = _input;
 
-			for (size_t i = 0; i < _input.size(); ++i) 
-			{               
+			for (size_t i = 0; i < _input.size(); ++i)
+			{
 				buffer[i] = _input[i] ^ key[i];
 			}
 
 			return buffer;
 
-		} // scramble	
+		} // scramble
 
 		std::vector<std::string> split(const std::string& s, char seperator)
 		{
@@ -615,6 +615,21 @@ namespace Utils
 
 			return output;
 		}
+		std::string join(const std::vector<std::string>& items, std::string separator)
+		{
+			std::string data;
+
+			for (auto line : items)
+			{
+				if (!data.empty())
+					data += separator;
+
+				data += line;
+			}
+
+			return data;
+		}
+
 		const std::string boolToString(bool value, bool uppercase)
 		{
 			if (uppercase)

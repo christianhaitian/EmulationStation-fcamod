@@ -108,12 +108,27 @@ void GuiCollectionSystemsOptions::initializeMenu()
 			setVariable("reloadAll", true);
 	});
 
-	std::shared_ptr<SwitchComponent> sortAllSystemsSwitch = std::make_shared<SwitchComponent>(mWindow);
-	sortAllSystemsSwitch->setState(Settings::getInstance()->getBool("SortAllSystems"));
-	addWithLabel(_("SORT CUSTOM COLLECTIONS AND SYSTEMS"), sortAllSystemsSwitch);
-	addSaveFunc([this, sortAllSystemsSwitch]
+	// SORT COLLECTIONS AND SYSTEMS
+	std::string sortMode = Settings::getInstance()->getString("SortSystems");
+
+	auto sortType = std::make_shared< OptionListComponent<std::string> >(mWindow, _("SORT COLLECTIONS AND SYSTEMS"), false);
+	sortType->add(_("NO"), "", sortMode.empty());
+	sortType->add(_("ALPHABETICALLY"), "alpha", sortMode == "alpha");
+
+	if (SystemData::isManufacturerSupported())
 	{
-		if (Settings::getInstance()->setBool("SortAllSystems", sortAllSystemsSwitch->getState()))
+		sortType->add(_("BY MANUFACTURER"), "manufacturer", sortMode == "manufacturer");
+		sortType->add(_("BY HARDWARE TYPE"), "hardware", sortMode == "hardware");
+		sortType->add(_("BY RELEASE YEAR"), "releaseDate", sortMode == "releaseDate");
+	}
+
+	if (!sortType->hasSelection())
+		sortType->selectFirstItem();
+	
+	addWithLabel(_("SORT SYSTEMS"), sortType);
+	addSaveFunc([this, sortType]
+	{
+		if (Settings::getInstance()->setString("SortSystems", sortType->getSelected()))
 			setVariable("reloadAll", true);
 	});
 
