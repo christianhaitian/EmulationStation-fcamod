@@ -1138,6 +1138,15 @@ void GuiMenu::openUISettings()
 			s->setVariable("reloadAll", true);		
 	});
 
+	// scan ports
+	auto scanPorts = std::make_shared<SwitchComponent>(mWindow);
+	scanPorts->setState(Settings::getInstance()->getBool("ScanPorts"));
+	s->addWithLabel(_("Scan Ports folder on boot"), scanPorts);
+	s->addSaveFunc([scanPorts, this]
+	{
+		if (Settings::getInstance()->setBool("ScanPorts", scanPorts->getState()))
+			mWindow->displayNotificationMessage("Please restart Emulationstation for your changes to take affect");
+	});
 
 	s->onFinalize([s, pthis, window]
 	{
