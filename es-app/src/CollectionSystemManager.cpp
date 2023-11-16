@@ -115,6 +115,71 @@ CollectionSystemManager::~CollectionSystemManager()
 	sInstance = NULL;
 }
 
+bool systemSortByAlpha(SystemData* sys1, SystemData* sys2)
+{
+	std::string name1 = Utils::String::toUpper(sys1->getFullName());
+	std::string name2 = Utils::String::toUpper(sys2->getFullName());
+	return name1.compare(name2) < 0;
+}
+
+bool systemSortByManufacturer(SystemData* sys1, SystemData* sys2)
+{
+	// Move collections to end
+	if (sys1->isCollection() != sys2->isCollection())
+		return sys2->isCollection();
+	
+	// Order by Manufacturer
+	std::string mf1 = Utils::String::toUpper(sys1->getSystemMetadata().manufacturer);
+	std::string mf2 = Utils::String::toUpper(sys2->getSystemMetadata().manufacturer);
+	if (mf1 != mf2)
+		return mf1.compare(mf2) < 0;
+
+	// Then by release date 
+	if (sys1->getSystemMetadata().releaseYear < sys2->getSystemMetadata().releaseYear)
+		return true;
+	else if (sys1->getSystemMetadata().releaseYear > sys2->getSystemMetadata().releaseYear)
+		return false;
+
+	// Then by name
+	return systemSort(sys1, sys2);
+}
+
+bool systemSortByReleaseDate(SystemData* sys1, SystemData* sys2)
+{
+	// Order by hardware
+	int mf1 = sys1->getSystemMetadata().releaseYear;
+	int mf2 = sys2->getSystemMetadata().releaseYear;
+	if (mf1 != mf2)
+		return mf1 < mf2;
+
+	// Move collection at Begin
+	if (sys1->isCollection() != sys2->isCollection())
+		return !sys2->isCollection();
+
+	// Then by name
+	std::string name1 = Utils::String::toUpper(sys1->getName());
+	std::string name2 = Utils::String::toUpper(sys2->getName());
+	return name1.compare(name2) < 0;
+}
+
+bool systemSortByHardware(SystemData* sys1, SystemData* sys2)
+{
+	// Move collection at End
+	if (sys1->isCollection() != sys2->isCollection())
+		return sys2->isCollection();
+
+	// Order by hardware
+	std::string mf1 = Utils::String::toUpper(sys1->getSystemMetadata().hardwareType);
+	std::string mf2 = Utils::String::toUpper(sys2->getSystemMetadata().hardwareType);
+	if (mf1 != mf2)
+		return mf1.compare(mf2) < 0;
+
+	// Then by name
+	std::string name1 = Utils::String::toUpper(sys1->getName());
+	std::string name2 = Utils::String::toUpper(sys2->getName());
+	return name1.compare(name2) < 0;
+}
+
 CollectionSystemManager* CollectionSystemManager::get()
 {
 	assert(sInstance);
@@ -213,6 +278,12 @@ void CollectionSystemManager::loadEnabledListFromSettings()
 // updates enabled system list in System View
 void CollectionSystemManager::updateSystemsList()
 {
+	auto sortMode = Settings::getInstance()->getString("SortSystems");
+	// isManufacturerSupported() seems to be used as a proxy for "is extra metadata available" even though it only checks for manufacturer
+	bool sortByManufacturer = SystemData::isManufacturerSupported() && sortMode == "manufacturer";
+	bool sortByHardware = SystemData::isManufacturerSupported() && sortMode == "hardware";
+	bool sortByReleaseDate = SystemData::isManufacturerSupported() && sortMode == "releaseDate";
+
 	// remove all Collection Systems
 	removeCollectionsFromDisplayedSystems();
 
@@ -222,26 +293,15 @@ void CollectionSystemManager::updateSystemsList()
 	// add custom enabled ones
 	addEnabledCollectionsToDisplayedSystems(&mCustomCollectionSystemsData, &map);
 
-	if (Settings::getInstance()->getBool("SortAllSystems"))
-	{
-		// sort custom individual systems with other systems
-		std::sort(SystemData::sSystemVector.begin(), SystemData::sSystemVector.end(), systemSort);
-
-		// move RetroPie system to end, before auto collections
-		for(auto sysIt = SystemData::sSystemVector.cbegin(); sysIt != SystemData::sSystemVector.cend(); )
-		{
-			if ((*sysIt)->getName() == "retropie")
-			{
-				SystemData* retroPieSystem = (*sysIt);
-				sysIt = SystemData::sSystemVector.erase(sysIt);
-				SystemData::sSystemVector.push_back(retroPieSystem);
-				break;
-			}
-			else
-			{
-				sysIt++;
-			}
-		}
+	if (!sortMode.empty()) {
+		if (sortByManufacturer)
+			std::sort(SystemData::sSystemVector.begin(), SystemData::sSystemVector.end(), systemSortByManufacturer);
+		else if (sortByHardware)
+			std::sort(SystemData::sSystemVector.begin(), SystemData::sSystemVector.end(), systemSortByHardware);
+		else if (sortByReleaseDate)
+			std::sort(SystemData::sSystemVector.begin(), SystemData::sSystemVector.end(), systemSortByReleaseDate);
+		else if (sortMode == "alpha")
+			std::sort(SystemData::sSystemVector.begin(), SystemData::sSystemVector.end(), systemSortByAlpha);
 	}
 
 	if(mCustomCollectionsBundle->getRootFolder()->getChildren().size() > 0)
@@ -759,7 +819,15 @@ SystemData* CollectionSystemManager::addNewCustomCollection(std::string name)
 // creates a new, empty Collection system, based on the name and declaration
 SystemData* CollectionSystemManager::createNewCollectionEntry(std::string name, CollectionSystemDecl sysDecl, bool index)
 {
-	SystemData* newSys = new SystemData(name, sysDecl.longName, mCollectionEnvData, sysDecl.themeFolder, true);
+	SystemMetadata md;
+	md.name = name;
+	md.fullName = sysDecl.longName;
+	md.themeFolder = sysDecl.themeFolder;
+	md.manufacturer = "Collections";
+	md.hardwareType = sysDecl.isCustom ? "custom collection" : "auto collection";
+	md.releaseYear = 0;
+
+	SystemData* newSys = new SystemData(md, mCollectionEnvData, true);
 
 	CollectionSystemData newCollectionData;
 	newCollectionData.system = newSys;
