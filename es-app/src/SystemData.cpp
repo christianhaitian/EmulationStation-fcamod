@@ -172,14 +172,26 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 		if (!isGame && fileInfo.directory)
 		{
 			// Don't loose time looking in downloaded_images, downloaded_videos & media folders
-			if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
-				fileInfo.path.rfind("media") != std::string::npos || 
-				fileInfo.path.rfind("images") != std::string::npos ||
-				fileInfo.path.rfind("videos") != std::string::npos ||
-				fileInfo.path.rfind("ports") != std::string::npos ||
-				fileInfo.path.rfind("ppsspp") != std::string::npos ||
-				fileInfo.path.rfind(".") != std::string::npos)
-				continue;
+
+            if (Settings::getInstance()->getBool("ScanPorts") == 1){
+			  if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
+				  fileInfo.path.rfind("media") != std::string::npos || 
+				  fileInfo.path.rfind("images") != std::string::npos ||
+				  fileInfo.path.rfind("videos") != std::string::npos ||
+				  fileInfo.path.rfind("ppsspp") != std::string::npos ||
+				  fileInfo.path.rfind(".") != std::string::npos)
+		          continue;
+			}
+			else {
+			  if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
+				  fileInfo.path.rfind("media") != std::string::npos || 
+				  fileInfo.path.rfind("images") != std::string::npos ||
+				  fileInfo.path.rfind("videos") != std::string::npos ||
+				  fileInfo.path.rfind("ports") != std::string::npos ||
+				  fileInfo.path.rfind("ppsspp") != std::string::npos ||
+				  fileInfo.path.rfind(".") != std::string::npos)
+		          continue;
+		    }
 
 			FolderData* newFolder = new FolderData(fileInfo.path, this);
 			populateFolder(newFolder, fileMap);
