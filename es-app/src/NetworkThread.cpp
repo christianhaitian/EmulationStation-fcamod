@@ -26,7 +26,7 @@ NetworkThread::~NetworkThread()
 
 void NetworkThread::run() 
 {
-	while (mRunning) 
+	/*while (mRunning) 
 	{
 		if (mFirstRun) 
 		{
@@ -51,5 +51,5 @@ void NetworkThread::run()
 				LOG(LogDebug) << "NetworkThread : No update found";				
 			}
 		}
-	}
+	}*/
 }
