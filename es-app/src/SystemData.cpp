@@ -171,17 +171,17 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 		//add directories that also do not match an extension as folders
 		if (!isGame && fileInfo.directory)
 		{
-            std::string fn = Utils::String::toLower(Utils::FileSystem::getFileName(fileInfo.path));
+			std::string fn = Utils::String::toLower(Utils::FileSystem::getFileName(fileInfo.path));
 			// Don't loose time looking in downloaded_images, downloaded_videos & media folders
 
-            if (Settings::getInstance()->getBool("ScanPorts") == 1){
+			if (Settings::getInstance()->getBool("ScanPorts") == 1){
 			  if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
 				  fileInfo.path.rfind("media") != std::string::npos || 
 				  fileInfo.path.rfind("images") != std::string::npos ||
 				  fileInfo.path.rfind("videos") != std::string::npos ||
 				  fileInfo.path.rfind("ppsspp") != std::string::npos ||
 				  Utils::String::startsWith(fn, "."))
-		          continue;
+				  continue;
 			}
 			else {
 			  if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
@@ -191,8 +191,8 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 				  fileInfo.path.rfind("ports") != std::string::npos ||
 				  fileInfo.path.rfind("ppsspp") != std::string::npos ||
 				  Utils::String::startsWith(fn, "."))
-		          continue;
-		    }
+				  continue;
+			}
 
 			FolderData* newFolder = new FolderData(fileInfo.path, this);
 			populateFolder(newFolder, fileMap);
