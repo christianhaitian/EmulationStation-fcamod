@@ -54,6 +54,7 @@ public:
 
 	virtual const std::string getCore() const;
 	virtual const std::string getEmulator() const;
+	virtual const std::string getGovernor() const;
 
 	virtual const bool getHidden();
 	virtual const bool getFavorite();
