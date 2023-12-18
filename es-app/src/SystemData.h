@@ -26,6 +26,7 @@ struct EmulatorData
 	std::string mName;
 	std::string mCommandLine;
 	std::vector<std::string> mCores;
+	std::vector<std::string> mGovernors = {"performance", "ondemand", "powersave"};
 };
 
 struct SystemMetadata
@@ -65,6 +66,17 @@ struct SystemEnvironmentData
 		return list;
 	}
 
+	std::vector<std::string> getGovernors(std::string emulatorName) 
+	{
+
+		std::vector<std::string> list;
+
+		for (auto& emulator : mEmulators)
+			return emulator.mGovernors;
+
+		return list;
+	}
+
 	std::string getDefaultEmulator()
 	{
 		std::string currentEmul = Settings::getInstance()->getString(mSystemName + ".emulator");
@@ -93,6 +105,26 @@ struct SystemEnvironmentData
 
 				for (auto core : emulator.mCores)
 					return core;
+			}
+		}
+
+		return "";
+	}
+
+	std::string getDefaultGovernor(std::string emulatorName)
+	{
+		std::string currentGovernor = Settings::getInstance()->getString(mSystemName + ".governor");
+
+		for (auto& emulator : mEmulators)
+		{
+			if (emulatorName == emulator.mName)
+			{
+				for (auto governor : emulator.mGovernors)
+					if (governor == currentGovernor)
+						return governor;
+
+				for (auto governor : emulator.mGovernors)
+					return governor;
 			}
 		}
 

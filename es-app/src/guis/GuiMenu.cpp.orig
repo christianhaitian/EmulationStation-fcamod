@@ -1255,39 +1255,11 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 	// force change event to load core list
 	emul_choice->invalidate();
 
-	// set governor
-	auto gov_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _("PERFORMANCE GOVERNOR"), false);
 
-	gov_choice->clear();
-
-	gov_choice->add(_("AUTO"), "", false);
-
-	std::vector<std::string> governors = {"performance", "ondemand", "powersave"};
-	std::string currentGovernor = Settings::getInstance()->getString(system->getName() + ".governor");
-
-	bool foundgov = false;
-
-	for (auto it = governors.begin(); it != governors.end(); it++)
-	{
-		std::string govena = *it;
-		gov_choice->add(govena, govena, currentGovernor == govena);
-		if (currentGovernor == govena)
-			foundgov = true;
-	}
-
-	if (!foundgov)
-		gov_choice->selectFirstItem();
-	else
-		gov_choice->invalidate();
-
-
-	s->addWithLabel(_("PERFORMANCE GOVERNOR"), gov_choice);
-
-	s->addSaveFunc([system, emul_choice, core_choice, gov_choice]
+	s->addSaveFunc([system, emul_choice, core_choice]
 	{		
 		Settings::getInstance()->setString(system->getName() + ".emulator", emul_choice->getSelected());
 		Settings::getInstance()->setString(system->getName() + ".core", core_choice->getSelected());
-		Settings::getInstance()->setString(system->getName() + ".governor", gov_choice->getSelected());
 	});
 
 	mWindow->pushGui(s);
@@ -1305,11 +1277,11 @@ void GuiMenu::openEmulatorSettings()
 		if (system->isCollection())
 			continue;
 
-		/*if (system->getSystemEnvData()->mEmulators.size() == 0)
-			continue;*/
+		if (system->getSystemEnvData()->mEmulators.size() == 0)
+			continue;
 
-		/*if (system->getSystemEnvData()->mEmulators.size() == 1 && system->getSystemEnvData()->mEmulators[0].mCores.size() <= 1)
-			continue;*/
+		if (system->getSystemEnvData()->mEmulators.size() == 1 && system->getSystemEnvData()->mEmulators[0].mCores.size() <= 1)
+			continue;
 		
 		configuration->addEntry(system->getFullName(), true, [this, system] { openSystemEmulatorSettings(system); });
 	}

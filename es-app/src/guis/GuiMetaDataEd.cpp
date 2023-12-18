@@ -59,6 +59,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 
 	auto emul_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _("EMULATOR"), false);
 	auto core_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _("CORE"), false);
+	auto gov_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _("GOVERNOR"), false);
 
 	// populate list
 	for(auto iter = mdd.cbegin(); iter != mdd.cend(); iter++)
@@ -100,7 +101,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 			emul_choice->setTag(iter->key);
 			mEditors.push_back(emul_choice);
 			
-			emul_choice->setSelectedChangedCallback([this, system, core_choice, file](std::string emulatorName)
+			emul_choice->setSelectedChangedCallback([this, system, core_choice, gov_choice, file](std::string emulatorName)
 			{
 				std::string currentCore = file->getCore();
 
@@ -130,8 +131,38 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 					core_choice->selectFirstItem();
 				else 
 					core_choice->invalidate();
+
+				std::string currentGovernor = file->getGovernor();
+
+				std::string defaultGovernor = system->getSystemEnvData()->getDefaultGovernor(emulatorName);
+				if (emulatorName.length() == 0)
+					defaultGovernor = system->getSystemEnvData()->getDefaultGovernor(system->getSystemEnvData()->getDefaultEmulator());
+
+				gov_choice->clear();
+				if (defaultGovernor.length() == 0)
+					gov_choice->add(_("DEFAULT"), "", false);
+				else 
+					gov_choice->add(_("DEFAULT")+" ("+ defaultGovernor+")", "", false);
+							
+				std::vector<std::string> govs = system->getSystemEnvData()->getGovernors(emulatorName);				
+
+				bool govfound = false;
+
+				for (auto it = govs.begin(); it != govs.end(); it++)
+				{
+					std::string gov = *it;
+					gov_choice->add(gov, gov, currentGovernor == gov);
+					if (currentGovernor == gov)
+						govfound = true;
+				}
+
+				if (!govfound)
+					gov_choice->selectFirstItem();
+				else 
+					gov_choice->invalidate();
+
 			});
-			
+
 			continue;
 		}
 		
@@ -152,7 +183,24 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 			emul_choice->invalidate();
 			continue;
 		}
-		
+
+		if (iter->displayName == "governor")
+		{
+			gov_choice->setTag(iter->key);
+
+			row.addElement(std::make_shared<TextComponent>(mWindow, _("PERFORMANCE GOVERNOR"), theme->Text.font, theme->Text.color), true);
+			row.addElement(gov_choice, false);
+
+			mList->addRow(row);
+			ed = gov_choice;
+
+			mEditors.push_back(gov_choice);
+
+			// force change event to load core list
+			emul_choice->invalidate();
+			continue;
+		}
+
 		auto lbl = std::make_shared<TextComponent>(mWindow, _(Utils::String::toUpper(iter->displayName)), theme->Text.font, theme->Text.color);
 		row.addElement(lbl, true); // label
 
@@ -312,7 +360,7 @@ void GuiMetaDataEd::save()
 		auto val = ed->getValue();
 		auto key = ed->getTag();
 
-		if (key == "core" || key == "emulator")
+		if (key == "governor" || key == "core" || key == "emulator")
 		{			
 			std::shared_ptr<OptionListComponent<std::string>> list = std::static_pointer_cast<OptionListComponent<std::string>>(ed);
 			val = list->getSelected();

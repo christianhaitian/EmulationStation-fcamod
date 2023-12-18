@@ -259,9 +259,10 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 {
 	std::vector<EmulatorData> emulatorList;
 	
-	std::string path, cmd, defaultCore;
+	std::string path, cmd, defaultCore, defaultGovernor;
 	path = system.child("path").text().get();
 	defaultCore = system.child("defaultCore").text().get();
+	defaultGovernor = "performance";
 
 	SystemMetadata md;
 	md.name = system.child("name").text().get();
@@ -291,6 +292,20 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 						defaultCore = corename;
 
 					emulatorData.mCores.push_back(corename);
+				}
+			}
+
+			pugi::xml_node governors = emulator.child("governors");
+			if (governors != NULL)
+			{
+				for (pugi::xml_node governor : governors.children())
+				{
+					const std::string& governorname = governor.text().get();
+
+					if (defaultGovernor.length() == 0)
+						defaultGovernor = governorname;
+
+					emulatorData.mGovernors.push_back(governorname);
 				}
 			}
 
