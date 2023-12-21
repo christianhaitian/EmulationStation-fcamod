@@ -298,6 +298,12 @@ void FileData::launchGame(Window* window)
 	std::string governor = getGovernor();
 	if (governor.length() == 0)
 		governor = getSystemEnvData()->getDefaultGovernor(emulator);
+		if (governor.length() == 0)
+			governor = Settings::getInstance()->getString(getName() + ".governor");
+			if (governor.length() == 0)
+				governor = Settings::getInstance()->getString(getSystemName() + ".governor");
+			if (governor.length() == 0)
+				governor = getSystemEnvData()->defaultGovernor();
 
 	std::string customCommandLine = getSystemEnvData()->getEmulatorCommandLine(emulator);
 	if (customCommandLine.length() > 0)
