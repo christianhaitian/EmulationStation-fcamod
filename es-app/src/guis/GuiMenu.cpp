@@ -1441,8 +1441,7 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 
 	gov_choice->add(_("AUTO"), "", false);
 
-	std::vector<std::string> governors = {"performance", "ondemand", "powersave"};
-	//std::vector<std::string> governors = system->getSystemEnvData()->allGovernors();
+	std::vector<std::string> governors = system->getSystemEnvData()->allGovernors();
 	std::string currentGovernor = Settings::getInstance()->getString(system->getName() + ".governor");
 
 	bool foundgov = false;
@@ -1459,7 +1458,6 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 		gov_choice->selectFirstItem();
 	else
 		gov_choice->invalidate();
-
 
 	s->addWithLabel(_("PERFORMANCE GOVERNOR"), gov_choice);
 
@@ -1483,6 +1481,9 @@ void GuiMenu::openEmulatorSettings()
 	for (auto system : SystemData::sSystemVector)
 	{
 		if (system->isCollection())
+			continue;
+
+		if (system->getName() == "options")
 			continue;
 
 		/*if (system->getSystemEnvData()->mEmulators.size() == 0)
