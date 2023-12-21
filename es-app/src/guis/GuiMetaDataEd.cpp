@@ -101,7 +101,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 			emul_choice->setTag(iter->key);
 			mEditors.push_back(emul_choice);
 			
-			emul_choice->setSelectedChangedCallback([this, system, core_choice, gov_choice, file](std::string emulatorName)
+			emul_choice->setSelectedChangedCallback([this, system, core_choice, file](std::string emulatorName)
 			{
 				std::string currentCore = file->getCore();
 
@@ -131,40 +131,39 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 					core_choice->selectFirstItem();
 				else 
 					core_choice->invalidate();
-
-				std::string currentGovernor = file->getGovernor();
-
-				std::string defaultGovernor = system->getSystemEnvData()->getDefaultGovernor(emulatorName);
-				if (emulatorName.length() == 0)
-					defaultGovernor = system->getSystemEnvData()->getDefaultGovernor(system->getSystemEnvData()->getDefaultEmulator());
-
-				gov_choice->clear();
-				if (defaultGovernor.length() == 0)
-					gov_choice->add(_("DEFAULT"), "", false);
-				else 
-					gov_choice->add(_("DEFAULT")+" ("+ defaultGovernor+")", "", false);
-							
-				std::vector<std::string> govs = system->getSystemEnvData()->getGovernors(emulatorName);				
-
-				bool govfound = false;
-
-				for (auto it = govs.begin(); it != govs.end(); it++)
-				{
-					std::string gov = *it;
-					gov_choice->add(gov, gov, currentGovernor == gov);
-					if (currentGovernor == gov)
-						govfound = true;
-				}
-
-				if (!govfound)
-					gov_choice->selectFirstItem();
-				else 
-					gov_choice->invalidate();
-
 			});
 
 			continue;
 		}
+
+			std::string currentGovernor = file->getGovernor();
+
+			std::string defaultGovernor = Settings::getInstance()->getString(system->getName() + ".governor");
+			if (defaultGovernor.length() == 0)
+				defaultGovernor = system->getSystemEnvData()->defaultGovernor();
+
+			gov_choice->clear();
+			if (defaultGovernor.length() == 0)
+				gov_choice->add(_("DEFAULT"), "", false);
+			else 
+				gov_choice->add(_("DEFAULT")+" ("+ defaultGovernor+")", "", false);
+							
+			std::vector<std::string> govs = system->getSystemEnvData()->allGovernors();				
+
+			bool govfound = false;
+
+			for (auto it = govs.begin(); it != govs.end(); it++)
+			{
+				std::string gov = *it;
+				gov_choice->add(gov, gov, currentGovernor == gov);
+				if (currentGovernor == gov)
+					govfound = true;
+			}
+
+			if (!govfound)
+				gov_choice->selectFirstItem();
+			else 
+				gov_choice->invalidate();
 		
 		if (iter->displayName == "core")
 		{

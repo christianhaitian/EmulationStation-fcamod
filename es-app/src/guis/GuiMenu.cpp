@@ -1317,6 +1317,7 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 	gov_choice->add(_("AUTO"), "", false);
 
 	std::vector<std::string> governors = {"performance", "ondemand", "powersave"};
+	//std::vector<std::string> governors = system->getSystemEnvData()->allGovernors();
 	std::string currentGovernor = Settings::getInstance()->getString(system->getName() + ".governor");
 
 	bool foundgov = false;
