@@ -140,7 +140,9 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 
 			std::string defaultGovernor = Settings::getInstance()->getString(system->getName() + ".governor");
 			if (defaultGovernor.length() == 0)
-				defaultGovernor = system->getSystemEnvData()->defaultGovernor();
+				defaultGovernor = system->getSystemEnvData()->getDefaultGovernor(system->getSystemEnvData()->getDefaultEmulator());
+				if (defaultGovernor.length() == 0)
+					defaultGovernor = system->getSystemEnvData()->defaultGovernor();
 
 			gov_choice->clear();
 			if (defaultGovernor.length() == 0)
@@ -164,7 +166,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 				gov_choice->selectFirstItem();
 			else 
 				gov_choice->invalidate();
-		
+
 		if (iter->displayName == "core")
 		{
 		//	core_choice->add(_("DEFAULT"), "", true);
@@ -187,13 +189,17 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 		{
 			gov_choice->setTag(iter->key);
 
-			row.addElement(std::make_shared<TextComponent>(mWindow, _("PERFORMANCE GOVERNOR"), theme->Text.font, theme->Text.color), true);
-			row.addElement(gov_choice, false);
+			if (system->getName() != "options")
+			{
+				row.addElement(std::make_shared<TextComponent>(mWindow, _("PERFORMANCE GOVERNOR"), theme->Text.font, theme->Text.color), true);
+				row.addElement(gov_choice, false);
+			}
 
 			mList->addRow(row);
 			ed = gov_choice;
 
-			mEditors.push_back(gov_choice);
+			if (system->getName() != "options")
+				mEditors.push_back(gov_choice);
 
 			// force change event to load core list
 			emul_choice->invalidate();
