@@ -262,7 +262,7 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 	std::string path, cmd, defaultCore, defaultGovernor;
 	path = system.child("path").text().get();
 	defaultCore = system.child("defaultCore").text().get();
-	defaultGovernor = "performance";
+	defaultGovernor = system.child("defaultGov").text().get();
 
 	SystemMetadata md;
 	md.name = system.child("name").text().get();
