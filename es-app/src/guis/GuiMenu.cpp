@@ -1256,7 +1256,7 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 	emul_choice->invalidate();
 
 	// set governor
-	auto gov_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _("PERFORMANCE GOVERNOR"), false);
+	auto gov_choice = std::make_shared<OptionListComponent<std::string>>(mWindow, _("GOVERNOR"), false);
 
 	gov_choice->clear();
 
@@ -1280,7 +1280,7 @@ void GuiMenu::openSystemEmulatorSettings(SystemData* system)
 	else
 		gov_choice->invalidate();
 
-	s->addWithLabel(_("PERFORMANCE GOVERNOR"), gov_choice);
+	s->addWithLabel(_("GOVERNOR"), gov_choice);
 
 	s->addSaveFunc([system, emul_choice, core_choice, gov_choice]
 	{		
@@ -1660,6 +1660,23 @@ void GuiMenu::openOtherSettings()
 	threadedLoading->setState(Settings::getInstance()->getBool("ThreadedLoading"));
 	s->addWithLabel(_("THREADED LOADING"), threadedLoading);
 	s->addSaveFunc([threadedLoading] { Settings::getInstance()->setBool("ThreadedLoading", threadedLoading->getState()); });
+
+	// global default emualtor performance governor
+	auto gdepg = std::make_shared< OptionListComponent<std::string> >(mWindow, _("Default Emulator Governor"), false);
+	std::vector<std::string> ggovs;
+	ggovs.push_back("performance");
+	ggovs.push_back("ondemand");
+	ggovs.push_back("powersave");
+
+	auto ggov = Settings::getInstance()->getString("GlobalPerformanceGovernor");
+	if (ggov.empty())
+		ggov = "performance";
+
+	for (auto it = ggovs.cbegin(); it != ggovs.cend(); it++)
+		gdepg->add(_(it->c_str()), *it, ggov == *it);
+
+	s->addWithLabel(_("Default Emulator Governor"), gdepg);
+	s->addSaveFunc([this, gdepg] { Settings::getInstance()->setString("GlobalPerformanceGovernor", gdepg->getSelected()); });
 
 #ifndef _RPI_
 	// full exit

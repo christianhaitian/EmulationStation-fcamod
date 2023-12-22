@@ -104,6 +104,7 @@ void Settings::setDefaults()
 	mBoolMap["SaveGamelistsOnExit"] = true;
 	mStringMap["VerbalBatteryVoice"] = "male1";
 	mStringMap["VerbalBatteryWarning"] = "on";
+	mStringMap["GlobalPerformanceGovernor"] = "performance";
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;	
 	mBoolMap["MusicTitles"] = true;
