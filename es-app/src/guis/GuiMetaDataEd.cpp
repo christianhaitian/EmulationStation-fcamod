@@ -191,7 +191,7 @@ GuiMetaDataEd::GuiMetaDataEd(Window* window, MetaDataList* md, const std::vector
 
 			if (system->getName() != "options")
 			{
-				row.addElement(std::make_shared<TextComponent>(mWindow, _("PERFORMANCE GOVERNOR"), theme->Text.font, theme->Text.color), true);
+				row.addElement(std::make_shared<TextComponent>(mWindow, _("GOVERNOR"), theme->Text.font, theme->Text.color), true);
 				row.addElement(gov_choice, false);
 			}
 
