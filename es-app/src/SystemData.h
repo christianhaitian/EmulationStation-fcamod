@@ -27,7 +27,7 @@ struct EmulatorData
 	std::string mCommandLine;
 	std::vector<std::string> mCores;
 	std::vector<std::string> mGovernors = {"performance", "ondemand", "powersave"};
-	std::string defaultGov = "performance";
+	std::string defaultGov = Settings::getInstance()->getString("GlobalPerformanceGovernor");
 };
 
 struct SystemMetadata
@@ -144,8 +144,8 @@ struct SystemEnvironmentData
 					if (governor == currentGovernor)
 						return governor;
 
-				for (auto governor : emulator.mGovernors)
-					return governor;
+				/*for (auto governor : emulator.mGovernors)
+					return governor;*/
 			}
 		}
 
