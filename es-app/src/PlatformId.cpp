@@ -110,6 +110,7 @@ namespace PlatformIds
 		{ "zx81",            ZX81 },
 		{ "tic80",           TIC80 },
 		{ "ti99", 					TI99 },
+		{ "palm", 			palm },
 		{ "wasm4", 			WASM4 },
 		{ "pico", 			SEGA_PICO },
 
