@@ -35,7 +35,7 @@
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
-	addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); });
+	addEntry(_("DISPLAY SETTINGS"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
 
 	auto theme = ThemeData::getMenuTheme();
 
@@ -292,7 +292,7 @@ void GuiMenu::openSoundSettings()
 		}
 		for(auto ac = audio_cards.cbegin(); ac != audio_cards.cend(); ac++)
 			audio_card->add(*ac, *ac, Settings::getInstance()->getString("AudioCard") == *ac);
-		s->addWithLabel("AUDIO CARD", audio_card);
+		s->addWithLabel(_("AUDIO CARD"), audio_card);
 		s->addSaveFunc([audio_card] {
 			Settings::getInstance()->setString("AudioCard", audio_card->getSelected());
 			VolumeControl::getInstance()->deinit();
@@ -300,7 +300,7 @@ void GuiMenu::openSoundSettings()
 		});
 
 		// volume control device
-		auto vol_dev = std::make_shared< OptionListComponent<std::string> >(mWindow, "AUDIO DEVICE", false);
+		auto vol_dev = std::make_shared< OptionListComponent<std::string> >(mWindow, _("AUDIO DEVICE"), false);
 		std::vector<std::string> transitions;
 		transitions.push_back("PCM");
 		transitions.push_back("Speaker");
