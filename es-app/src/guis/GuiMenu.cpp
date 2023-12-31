@@ -1663,10 +1663,9 @@ void GuiMenu::openOtherSettings()
 
 	// global default emualtor performance governor
 	auto gdepg = std::make_shared< OptionListComponent<std::string> >(mWindow, _("Default Emulator Governor"), false);
-	std::vector<std::string> ggovs;
-	ggovs.push_back("performance");
-	ggovs.push_back("ondemand");
-	ggovs.push_back("powersave");
+
+	EmulatorData GOVs;
+	std::vector<std::string> ggovs = GOVs.mGovernors;
 
 	auto ggov = Settings::getInstance()->getString("GlobalPerformanceGovernor");
 	if (ggov.empty())
