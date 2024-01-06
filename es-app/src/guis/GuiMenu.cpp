@@ -2077,6 +2077,9 @@ void GuiMenu::addVersionInfo()
 	}
 	else
 #endif
+	if (!std::string(getShOutput(R"(blkid | grep mmcblk0)")).empty())
+		mVersion.setText("EMMC | EMULATIONSTATION V" + Utils::String::toUpper(PROGRAM_VERSION_STRING) + " BUILD " + buildDate);
+    else
 		mVersion.setText("EMULATIONSTATION V" + Utils::String::toUpper(PROGRAM_VERSION_STRING) + " BUILD " + buildDate);
 
 	mVersion.setHorizontalAlignment(ALIGN_CENTER);	
