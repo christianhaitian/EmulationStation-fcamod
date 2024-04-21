@@ -1731,6 +1731,39 @@ void GuiMenu::openOtherSettings()
 	s->addWithLabel(_("Default Emulator Governor"), gdepg);
 	s->addSaveFunc([this, gdepg] { Settings::getInstance()->setString("GlobalPerformanceGovernor", gdepg->getSelected()); });
 
+	// Auto Suspend Timeout
+	auto Tout = std::make_shared< OptionListComponent<std::string> >(mWindow, _("Auto Suspend Timeout (mins)"), false);
+	std::vector<std::string> asuspend;
+	asuspend.push_back("Off");
+	asuspend.push_back("5");
+	asuspend.push_back("10");
+	asuspend.push_back("15");
+	asuspend.push_back("20");
+	asuspend.push_back("25");
+	asuspend.push_back("30");
+	asuspend.push_back("35");
+	asuspend.push_back("40");
+	asuspend.push_back("45");
+	asuspend.push_back("50");
+	asuspend.push_back("55");
+	asuspend.push_back("60");
+
+	auto suspend = Settings::getInstance()->getString("AutoSuspendTimeout");
+	if (suspend.empty())
+		suspend = "Off";
+
+	for (auto it = asuspend.cbegin(); it != asuspend.cend(); it++)
+		Tout->add(_(it->c_str()), *it, suspend == *it);
+
+	s->addWithLabel(_("Auto Suspend Timeout (mins)"), Tout);
+	s->addSaveFunc([this, Tout] { Settings::getInstance()->setString("AutoSuspendTimeout", Tout->getSelected()); 
+		if (Tout->changed()) {
+		    runSystemCommand("echo " + Settings::getInstance()->getString("AutoSuspendTimeout") + " > /home/ark/.config/.TIMEOUT", "", nullptr);
+		    runSystemCommand("/usr/local/bin/auto_suspend_update.sh", "", nullptr);
+		}
+	});
+	     
+
 #ifndef _RPI_
 	// full exit
 	auto fullExitMenu = std::make_shared<SwitchComponent>(mWindow);
