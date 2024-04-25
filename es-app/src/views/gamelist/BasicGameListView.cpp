@@ -91,7 +91,7 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 				if (showFavoriteIcon)
 					mList.add(_U("\u2605 ") + file->getName(), file, file->getType() == FOLDER);
 				else if (file->getType() == FOLDER)
-					mList.add(_U("\u2605 ") + file->getName(), file, true);
+					mList.add(_U("\u272B ") + file->getName(), file, true);
 				else
 					mList.add(file->getName(), file, false);
 			}
@@ -112,7 +112,7 @@ void BasicGameListView::populateList(const std::vector<FileData*>& files)
 			}
 
 			if (file->getType() == FOLDER)
-				mList.add(_U("\u2605 ") + file->getName(), file, true);
+				mList.add(_U("\u279C ") + file->getName(), file, true);
 			else
 				mList.add(file->getName(), file, false);
 		}
