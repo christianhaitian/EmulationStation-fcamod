@@ -1190,6 +1190,59 @@ void GuiMenu::openUISettings()
 		}
 	});
 
+	// Game Loading Image
+	auto GameLoadingImage = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Game Loading Image"), false);
+	GameLoadingImage->addRange({ { _("DEFAULT"), "default" },{ _("MARQUEE"), "marquee" },{ _("IMAGE"), "image" },{ _("THUMB"), "thumb" } }, Settings::getInstance()->getString("GameLoadingImage"));
+	s->addWithLabel(_("GAME LOADING IMAGE"), GameLoadingImage);
+	s->addSaveFunc([s, GameLoadingImage]
+	{
+		std::string old_value = Settings::getInstance()->getString("GameLoadingImage");
+		if (old_value != GameLoadingImage->getSelected())
+           {
+            if (strstr(GameLoadingImage->getSelected().c_str(),"default")) {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.LOADING_IMAGE*) ] && rm /home/ark/.config/.LOADING_IMAGE*", "", nullptr);
+            }
+            else if (strstr(GameLoadingImage->getSelected().c_str(),"marquee")) {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.LOADING_IMAGE*) ] && rm /home/ark/.config/.LOADING_IMAGE*", "", nullptr);
+              runSystemCommand("touch /home/ark/.config/.LOADING_IMAGE_MARQUEE", "", nullptr);
+            }
+            else if (strstr(GameLoadingImage->getSelected().c_str(),"image")) {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.LOADING_IMAGE*) ] && rm /home/ark/.config/.LOADING_IMAGE*", "", nullptr);
+              runSystemCommand("touch /home/ark/.config/.LOADING_IMAGE_IMAGE", "", nullptr);
+            }
+            else {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.LOADING_IMAGE*) ] && rm /home/ark/.config/.LOADING_IMAGE*", "", nullptr);
+              runSystemCommand("touch /home/ark/.config/.LOADING_IMAGE_THUMB", "", nullptr);
+            }
+			Settings::getInstance()->setString("GameLoadingImage", GameLoadingImage->getSelected());
+		   }
+	});
+
+	// Game Loading Image Mode
+	auto GameLoadingImageMode = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Game Loading Image Mode"), false);
+	GameLoadingImageMode->addRange({ { _("PIC"), "pic" },{ _("ASCII"), "ascii" },{ _("NONE"), "none" } }, Settings::getInstance()->getString("GameLoadingIMode"));
+	s->addWithLabel(_("GAME LOADING IMAGE MODE"), GameLoadingImageMode);
+	s->addSaveFunc([s, GameLoadingImageMode]
+	{
+		std::string old_value = Settings::getInstance()->getString("GameLoadingIMode");
+		if (old_value != GameLoadingImageMode->getSelected())
+           {
+            if (strstr(GameLoadingImageMode->getSelected().c_str(),"ascii")) {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.GameLoadingIMode*) ] && rm /home/ark/.config/.GameLoadingIMode*", "", nullptr);
+              runSystemCommand("touch /home/ark/.config/.GameLoadingIModeASCII", "", nullptr);
+            }
+            else if (strstr(GameLoadingImageMode->getSelected().c_str(),"pic")) {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.GameLoadingIMode*) ] && rm /home/ark/.config/.GameLoadingIMode*", "", nullptr);
+              runSystemCommand("touch /home/ark/.config/.GameLoadingIModePIC", "", nullptr);
+            }
+            else {
+              runSystemCommand("[ ! -z $(find /home/ark/.config/.GameLoadingIMode*) ] && rm /home/ark/.config/.GameLoadingIMode*", "", nullptr);
+              runSystemCommand("touch /home/ark/.config/.GameLoadingIModeNO", "", nullptr);
+            }
+			Settings::getInstance()->setString("GameLoadingIMode", GameLoadingImageMode->getSelected());
+		   }
+	});
+
 	s->updatePosition();
 	mWindow->pushGui(s);
 }
