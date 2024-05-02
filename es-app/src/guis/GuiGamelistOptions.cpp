@@ -218,7 +218,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		auto subsetNames = system->getTheme()->getSubSetNames(viewName);
 		if (subsetNames.size() > 0)
 		{
-			mMenu.addEntry(_("VIEW CUSTOMISATION"), true, [this, system]() { GuiMenu::openThemeConfiguration(mWindow, this, nullptr, system->getThemeFolder()); });
+			mMenu.addEntry(_("VIEW CUSTOMIZATION"), true, [this, system]() { GuiMenu::openThemeConfiguration(mWindow, this, nullptr, system->getThemeFolder()); });
 		}
 		else if (showGridFeatures)		// Grid size override
 		{

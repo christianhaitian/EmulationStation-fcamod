@@ -283,7 +283,7 @@ void ScraperSearchComponent::onSearchDone(const std::vector<ScraperSearchResult>
 void ScraperSearchComponent::onSearchError(const std::string& error)
 {
 	LOG(LogInfo) << "ScraperSearchComponent search error: " << error;
-	mWindow->pushGui(new GuiMsgBox(mWindow, _("AN ERROR HAS OCCURED") + " :\n" + Utils::String::toUpper(error),
+	mWindow->pushGui(new GuiMsgBox(mWindow, _("AN ERROR HAS OCCURRED") + " :\n" + Utils::String::toUpper(error),
 		_("RETRY"), std::bind(&ScraperSearchComponent::search, this, mLastSearch), // batocera
 		_("SKIP"), mSkipCallback, // batocera
 		_("CANCEL"), mCancelCallback, ICON_ERROR)); // batocera
