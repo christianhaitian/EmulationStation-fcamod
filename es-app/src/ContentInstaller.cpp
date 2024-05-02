@@ -122,7 +122,7 @@ void ContentInstaller::threadUpdate()
 				mWindow->displayNotificationMessage(ICONINDEX + data.second + " : " + _("THEME INSTALLED SUCCESSFULLY"));
 			else
 			{
-				std::string error = _("AN ERROR OCCURED") + std::string(": ") + updateStatus.first;
+				std::string error = _("AN ERROR OCCURRED") + std::string(": ") + updateStatus.first;
 				mWindow->displayNotificationMessage(ICONINDEX + error);
 			}
 

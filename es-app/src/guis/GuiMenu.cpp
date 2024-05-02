@@ -617,7 +617,7 @@ void GuiMenu::openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shar
 	auto system = ViewController::get()->getState().getSystem();
 	auto theme = system->getTheme();
 
-	auto themeconfig = new GuiSettings(mWindow, (systemTheme.empty() ? _("THEME CONFIGURATION") : _("VIEW CUSTOMISATION")).c_str());
+	auto themeconfig = new GuiSettings(mWindow, (systemTheme.empty() ? _("THEME CONFIGURATION") : _("VIEW CUSTOMIZATION")).c_str());
 
 	auto themeSubSets = theme->getSubSets();
 
@@ -801,7 +801,7 @@ void GuiMenu::openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shar
 
 	if (systemTheme.empty())
 	{
-		themeconfig->addEntry(_("RESET GAMELIST CUSTOMISATIONS"), false, [s, themeconfig, window]
+		themeconfig->addEntry(_("RESET GAMELIST CUSTOMIZATIONS"), false, [s, themeconfig, window]
 		{
 			Settings::getInstance()->setString("GamelistViewStyle", "");
 			Settings::getInstance()->setString("DefaultGridSize", "");
