@@ -106,6 +106,8 @@ void Settings::setDefaults()
 	mStringMap["VerbalBatteryWarning"] = "on";
 	mStringMap["GlobalPerformanceGovernor"] = "performance";
 	mStringMap["AutoSuspendTimeout"] = "Off";
+	mStringMap["GameLoadingImage"] = "default";
+	mStringMap["GameLoadingIMode"] = "pic";
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;	
 	mBoolMap["MusicTitles"] = true;
