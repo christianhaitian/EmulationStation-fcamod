@@ -108,6 +108,8 @@ void Settings::setDefaults()
 	mStringMap["VerbalBatteryWarning"] = "on";
 	mStringMap["GlobalPerformanceGovernor"] = "performance";
 	mStringMap["AutoSuspendTimeout"] = "Off";
+	mStringMap["GameLoadingImage"] = "default";
+	mStringMap["GameLoadingIMode"] = "pic";
 	mBoolMap["EnableRumble"] = false;
 	mBoolMap["EnableKodi"] = true;
 	mBoolMap["ShowBatteryIndicator"] = true;
