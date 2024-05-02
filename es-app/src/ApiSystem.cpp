@@ -94,7 +94,7 @@ public:
 		{
 			ApiSystem::state = UpdateState::State::NO_UPDATE;
 
-			std::string error = _("AN ERROR OCCURED") + std::string(": ") + updateStatus.first;
+			std::string error = _("AN ERROR OCCURRED") + std::string(": ") + updateStatus.first;
 			mWindow->displayNotificationMessage(error);
 		}
 
@@ -434,7 +434,7 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 				func(_("Extracting") + " " + themeName);
 
 			if (!unzipFile(zipFile, Utils::String::replace(Utils::FileSystem::getHomePath() + "/.emulationstation/themes", "/", "\\")))
-				return std::pair<std::string, int>(std::string("An error occured while extracting"), 1);
+				return std::pair<std::string, int>(std::string("An error OCCURRED while extracting"), 1);
 
 			std::string folderName = Utils::FileSystem::getHomePath() + "/.emulationstation/themes/" + themeFileName + "-master";
 			if (Utils::FileSystem::isDirectory(folderName))
@@ -454,7 +454,7 @@ std::pair<std::string, int> ApiSystem::installTheme(std::string themeName, const
 			return std::pair<std::string, int>(std::string("Invalid extraction folder"), 1);
 		}
 				
-		return std::pair<std::string, int>(std::string("An error occured while downloading"), 1);
+		return std::pair<std::string, int>(std::string("An error occurred while downloading"), 1);
 	}
 #endif
 
