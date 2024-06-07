@@ -174,7 +174,7 @@ public:
 	inline const std::string& getName() const { return mMetadata.name; }
 	inline const std::string& getFullName() const { return mMetadata.fullName; }
 	inline const std::string& getStartPath() const { return mEnvData->mStartPath; }
-	//inline const std::vector<std::string>& getExtensions() const { return mEnvData->mSearchExtensions; }
+	inline const std::unordered_set<std::string>& getExtensions() const { return mEnvData->mSearchExtensions; }
 	inline const std::string& getThemeFolder() const { return mMetadata.themeFolder; }
 	inline SystemEnvironmentData* getSystemEnvData() const { return mEnvData; }
 	inline const std::vector<PlatformIds::PlatformId>& getPlatformIds() const { return mEnvData->mPlatformIds; }

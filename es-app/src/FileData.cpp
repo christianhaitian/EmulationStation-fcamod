@@ -17,6 +17,7 @@
 #include "views/UIModeController.h"
 #include <assert.h>
 #include "Gamelist.h"
+#include <algorithm>
 
 FileData::FileData(FileType type, const std::string& path, SystemData* system)
 	: mType(type), mSystem(system), mParent(NULL), mMetadata(type == GAME ? GAME_METADATA : FOLDER_METADATA) // metadata is REALLY set in the constructor!
@@ -456,6 +457,10 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 
 	auto sys = CollectionSystemManager::get()->getSystemToView(mSystem);
 
+	std::vector<std::string> hiddenExts;
+	if (!mSystem->isGroupSystem() && !mSystem->isCollection())
+		hiddenExts = Utils::String::split(Utils::String::toLower(Settings::getInstance()->getString(mSystem->getName() + ".HiddenExt")), ';');
+
 	FileFilterIndex* idx = sys->getIndex(false);
 	if (idx != nullptr && !idx->isFiltered())
 		idx = nullptr;
@@ -481,6 +486,14 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 
 		if (filterKidGame && !(*it)->getKidGame())
 			continue;
+
+		if (hiddenExts.size() > 0 && (*it)->getType() == GAME)
+		{
+			std::string extlow = Utils::String::toLower(Utils::FileSystem::getExtension((*it)->getFileName(), false));
+			if (std::find(hiddenExts.cbegin(), hiddenExts.cend(), extlow) != hiddenExts.cend())
+				continue;
+		}
+
 
 		if ((*it)->getType() == FOLDER && refactorUniqueGameFolders)
 		{

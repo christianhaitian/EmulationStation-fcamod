@@ -34,6 +34,8 @@ private:
 	void openSoundSettings();
 	void openUISettings();
 
+	static void reloadAllGames(Window* window, bool deleteCurrentGui = false);
+
 	void openUpdateSettings();
 	void openEmulatorSettings();
 	void openSystemEmulatorSettings(SystemData* system);

@@ -657,7 +657,24 @@ namespace Utils
 
 		} // getStem
 
-		std::string getExtension(const std::string& _path)
+		std::string getExtension(const std::string& _path, bool withPoint)
+		{
+			const char* path = _path.c_str();
+			const char* ptr = path + _path.length();
+
+			do
+			{
+				if (ptr[-1] == '.')
+					return withPoint ? ptr -1 : ptr;
+
+				--ptr;
+			} 
+			while (ptr > path);
+
+			return "";
+		}
+
+		/*std::string getExtension(const std::string& _path)
 		{
 			std::string fileName = getFileName(_path);
 			size_t      offset   = std::string::npos;
@@ -673,7 +690,7 @@ namespace Utils
 			// no '.' found, filename has no extension
 			return ".";
 
-		} // getExtension
+		} */ // getExtension
 
 		std::string resolveRelativePath(const std::string& _path, const std::string& _relativeTo, const bool _allowHome)
 		{

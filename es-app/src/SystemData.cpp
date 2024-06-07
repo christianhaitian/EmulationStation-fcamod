@@ -17,6 +17,7 @@
 #include "GuiComponent.h"
 #include "Window.h"
 #include "views/ViewController.h"
+#include <algorithm>
 
 using namespace Utils;
 
@@ -154,8 +155,8 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 		isGame = false;
 		if (mEnvData->isValidExtension(extension)) //std::find(mEnvData->mSearchExtensions.cbegin(), mEnvData->mSearchExtensions.cend(), extension) != mEnvData->mSearchExtensions.cend())
 		{
-			if (fileMap.find(fileInfo.path) == fileMap.end())
-			{
+			//if (fileMap.find(fileInfo.path) == fileMap.end())
+			//{
 				FileData* newGame = new FileData(GAME, fileInfo.path, this);
 
 				// preventing new arcade assets to be added
@@ -165,7 +166,7 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 					fileMap[fileInfo.path] = newGame;
 					isGame = true;
 				}
-			}
+			//}
 		}
 		
 		//add directories that also do not match an extension as folders
@@ -175,22 +176,27 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 			// Don't loose time looking in downloaded_images, downloaded_videos & media folders
 
 			if (Settings::getInstance()->getBool("ScanPorts") == 1){
-			  if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
+				if (Utils::String::startsWith(fn, "downloaded_") || fn == "media" || fn == "images" ||
+				  fn == "videos" || fn == "ppsspp" || Utils::String::startsWith(fn, "."))
+			  /*if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
 				  fileInfo.path.rfind("media") != std::string::npos || 
 				  fileInfo.path.rfind("images") != std::string::npos ||
 				  fileInfo.path.rfind("videos") != std::string::npos ||
 				  fileInfo.path.rfind("ppsspp") != std::string::npos ||
-				  Utils::String::startsWith(fn, "."))
+				  Utils::String::startsWith(fn, "."))*/
 				  continue;
 			}
 			else {
-			  if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
+				if (Utils::String::startsWith(fn, "downloaded_") || fn == "media" || fn == "images" ||
+				  fn == "videos" || fn == "ports" || fn == "ppsspp" ||
+				  Utils::String::startsWith(fn, "."))
+			  /*if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
 				  fileInfo.path.rfind("media") != std::string::npos || 
 				  fileInfo.path.rfind("images") != std::string::npos ||
 				  fileInfo.path.rfind("videos") != std::string::npos ||
 				  fileInfo.path.rfind("ports") != std::string::npos ||
 				  fileInfo.path.rfind("ppsspp") != std::string::npos ||
-				  Utils::String::startsWith(fn, "."))
+				  Utils::String::startsWith(fn, "."))*/
 				  continue;
 			}
 
@@ -321,13 +327,14 @@ SystemData* SystemData::loadSystem(pugi::xml_node system)
 	// convert extensions list from a string into a vector of strings
 
 	std::vector<std::string> list = readList(system.child("extension").text().get());
+
 	std::unordered_set<std::string> extensions;
 
-	for (auto extension = list.cbegin(); extension != list.cend(); extension++)
+	for (auto ext : readList(system.child("extension").text().get()))
 	{
-		std::string xt = Utils::String::toLower(*extension);
-		if (std::find(extensions.begin(), extensions.end(), xt) == extensions.end())
-			extensions.insert(xt);
+		std::string extlow = Utils::String::toLower(ext);
+		if (extensions.find(extlow) == extensions.cend())
+			extensions.insert(extlow);
 	}
 
 	cmd = system.child("command").text().get();
