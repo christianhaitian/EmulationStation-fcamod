@@ -695,6 +695,52 @@ void GuiMenu::openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shar
 			themeconfig->setVariable("reloadAll", true);
 			themeconfig->close();
 		});
+
+
+		// File extensions
+		if (!system->isCollection() && !system->isGroupSystem())
+		{
+			auto hiddenExts = Utils::String::split(Settings::getInstance()->getString(system->getName() + ".HiddenExt"), ';');
+
+			auto hiddenCtrl = std::make_shared<OptionListComponent<std::string>>(mWindow, _("FILE EXTENSIONS"), true);
+
+			for (auto ext : system->getExtensions())
+			{
+				std::string extid = Utils::String::toLower(Utils::String::replace(ext, ".", ""));
+				hiddenCtrl->add(ext, extid, std::find(hiddenExts.cbegin(), hiddenExts.cend(), extid) == hiddenExts.cend());
+			}
+
+			themeconfig->addWithLabel(_("FILE EXTENSIONS"), hiddenCtrl);
+			themeconfig->addSaveFunc([themeconfig, system, hiddenCtrl]
+			{
+				std::string hiddenSystems;
+
+				std::vector<std::string> sel = hiddenCtrl->getSelectedObjects();
+
+				for (auto ext : system->getExtensions())
+				{
+					std::string extid = Utils::String::toLower(Utils::String::replace(ext, ".", ""));
+					if (std::find(sel.cbegin(), sel.cend(), extid) == sel.cend())
+					{
+						if (hiddenSystems.empty())
+							hiddenSystems = extid;
+						else
+							hiddenSystems = hiddenSystems + ";" + extid;
+					}
+				}
+
+				if ((Settings::getInstance()->getString(system->getName() + ".HiddenExt") != hiddenSystems))
+				{
+					if (Settings::getInstance()->setString(system->getName() + ".HiddenExt", hiddenSystems))
+					{
+						Settings::getInstance()->saveFile();
+						themeconfig->setVariable("reloadAll", true);
+						//themeconfig->setVariable("forceReloadGames", true);
+						themeconfig->setVariable("reloadGuiMenu", true);
+					}
+				}
+			});
+		}
 	}
 
 	//  theme_colorset, theme_iconset, theme_menu, theme_systemview, theme_gamelistview, theme_region,
@@ -762,8 +808,12 @@ void GuiMenu::openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shar
 
 		if (reloadAll || themeconfig->getVariable("reloadAll"))
 		{	
-			if (systemTheme.empty())
+			if (themeconfig->getVariable("forceReloadGames"))
 			{
+				reloadAllGames(window, false);
+			}
+			else if (systemTheme.empty())
+			{				
 				CollectionSystemManager::get()->updateSystemsList();
 				ViewController::get()->reloadAll(window);
 				window->endRenderLoadingScreen();
@@ -784,6 +834,34 @@ void GuiMenu::openThemeConfiguration(Window* mWindow, GuiComponent* s, std::shar
 	});
 
 	mWindow->pushGui(themeconfig);
+}
+
+void GuiMenu::reloadAllGames(Window* window, bool deleteCurrentGui)
+{
+	window->renderLoadingScreen(_("Loading..."));
+
+	if (!deleteCurrentGui)
+	{
+		GuiComponent* topGui = window->peekGui();
+		window->removeGui(topGui);
+	}
+
+	GuiComponent *gui;
+	while ((gui = window->peekGui()) != NULL)
+	{
+		window->removeGui(gui);
+		delete gui;
+	}
+
+	ViewController::init(window);
+	CollectionSystemManager::deinit();
+	CollectionSystemManager::init(window);
+	SystemData::loadConfig(window);
+
+	ViewController::get()->reloadAll(window);
+	//ViewController::get()->reloadAll(nullptr, false); // Avoid reloading themes a second time
+
+	window->pushGui(ViewController::get());
 }
 
 void GuiMenu::openUISettings()
@@ -1196,10 +1274,12 @@ void GuiMenu::openUISettings()
 	auto scanPorts = std::make_shared<SwitchComponent>(mWindow);
 	scanPorts->setState(Settings::getInstance()->getBool("ScanPorts"));
 	s->addWithLabel(_("Scan Ports folder on boot"), scanPorts);
-	s->addSaveFunc([scanPorts, this]
+	s->addSaveFunc([scanPorts, s]
 	{
 		if (Settings::getInstance()->setBool("ScanPorts", scanPorts->getState()))
-			mWindow->displayNotificationMessage("Please restart Emulationstation for your changes to take affect");
+			s->setVariable("reloadAll", true);
+			s->setVariable("reloadGuiMenu", true);
+			//mWindow->displayNotificationMessage("Please restart Emulationstation for your changes to take affect");
 	});
 
 	s->onFinalize([s, pthis, window]
@@ -1708,6 +1788,15 @@ void GuiMenu::openOtherSettings()
 	s->addWithLabel(_("SEARCH FOR LOCAL ART"), local_art);
 	s->addSaveFunc([local_art] { Settings::getInstance()->setBool("LocalArt", local_art->getState()); });
 #endif
+
+	s->addEntry(_("RESET FILE EXTENSIONS"), false, [this, s]
+	{
+		for (auto system : SystemData::sSystemVector)
+			Settings::getInstance()->setString(system->getName() + ".HiddenExt", "");
+
+		Settings::getInstance()->saveFile();
+		reloadAllGames(mWindow, false);		
+	});
 
 #ifdef _RPI_
 	// Video Player - VideoOmxPlayer
