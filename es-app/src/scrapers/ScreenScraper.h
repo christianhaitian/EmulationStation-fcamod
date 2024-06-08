@@ -4,6 +4,7 @@
 
 #include "scrapers/Scraper.h"
 #include "EmulationStation.h"
+#include "Settings.h"
 
 #if defined(SCREENSCRAPER_DEV_LOGIN)
 
@@ -29,7 +30,7 @@ public:
 
 		// Access to the API
 
-		const std::string API_URL_BASE = "https://www.screenscraper.fr/api2";
+		const std::string API_URL_BASE = "https://api.screenscraper.fr/api2";
 
 		/** Which type of image artwork we need. Possible values (not a comprehensive list):
 		  - ss: in-game screenshot
@@ -48,7 +49,7 @@ public:
 
 		// Which Region to use when selecting the artwork
 		// Applies to: artwork, name of the game, date of release 
-		std::string region = "US";
+		std::string region = Settings::getInstance()->getString("ScrapperRegionSrc");
 
 		// Which Language to use when selecting the textual information
 		// Applies to: description, genre
