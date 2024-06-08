@@ -306,6 +306,20 @@ void GuiMenu::openScraperSettings()
 		s->addWithLabel(_("LOGO SOURCE"), logoSource);
 		s->addSaveFunc([logoSource] { Settings::getInstance()->setString("ScrapperLogoSrc", logoSource->getSelected()); });
 
+		// Region source
+		std::string regionName = Settings::getInstance()->getString("ScrapperRegionSrc");
+		auto regionSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _("REGION SOURCE"), false);
+		regionSource->add(_("US"), "US", regionName == "US");
+		regionSource->add(_("EU"), "EU", regionName == "EU");
+		regionSource->add(_("FR"), "FR", regionName == "FR");
+		regionSource->add(_("JP"), "JP", regionName == "JP");
+
+		if (!regionSource->hasSelection())
+			regionSource->selectFirstItem();
+
+		s->addWithLabel(_("REGION SOURCE"), regionSource);
+		s->addSaveFunc([regionSource] { Settings::getInstance()->setString("ScrapperRegionSrc", regionSource->getSelected()); });
+
 		// scrape ratings
 		auto scrape_ratings = std::make_shared<SwitchComponent>(mWindow);
 		scrape_ratings->setState(Settings::getInstance()->getBool("ScrapeRatings"));

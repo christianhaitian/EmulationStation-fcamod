@@ -237,7 +237,8 @@ void Settings::setDefaults()
 	mStringMap["ScrapperImageSrc"] = "ss";
 	mStringMap["ScrapperThumbSrc"] = "box-2D";
 	mStringMap["ScrapperLogoSrc"] = "wheel";
-	
+	mStringMap["ScrapperRegionSrc"] = "US";
+
 	mBoolMap["ScrapeVideos"] = false;
 	
 	mBoolMap["audio.bgmusic"] = true;
