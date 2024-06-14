@@ -147,7 +147,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 				window->removeGui(gui);
 				delete gui;
 			}
-			ViewController::get()->reloadAll();
+			//ViewController::get()->reloadAll();
 			window->pushGui(ViewController::get());
 
 			if (!ViewController::get()->goToGameList(systemName, true))
