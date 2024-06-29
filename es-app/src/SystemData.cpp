@@ -176,27 +176,11 @@ void SystemData::populateFolder(FolderData* folder, std::unordered_map<std::stri
 			// Don't loose time looking in downloaded_images, downloaded_videos & media folders
 
 			if (Settings::getInstance()->getBool("ScanPorts") == 1){
-				if (Utils::String::startsWith(fn, "downloaded_") || fn == "media" || fn == "images" ||
-				  fn == "videos" || fn == "ppsspp" || Utils::String::startsWith(fn, "."))
-			  /*if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
-				  fileInfo.path.rfind("media") != std::string::npos || 
-				  fileInfo.path.rfind("images") != std::string::npos ||
-				  fileInfo.path.rfind("videos") != std::string::npos ||
-				  fileInfo.path.rfind("ppsspp") != std::string::npos ||
-				  Utils::String::startsWith(fn, "."))*/
+				if (Utils::String::startsWith(fn, "downloaded_") || fn == "media" || fn == "images" || fn == "videos" || fn == "ppsspp" || Utils::String::startsWith(fn, "."))
 				  continue;
 			}
 			else {
-				if (Utils::String::startsWith(fn, "downloaded_") || fn == "media" || fn == "images" ||
-				  fn == "videos" || fn == "ports" || fn == "ppsspp" ||
-				  Utils::String::startsWith(fn, "."))
-			  /*if (fileInfo.path.rfind("downloaded_") != std::string::npos || 
-				  fileInfo.path.rfind("media") != std::string::npos || 
-				  fileInfo.path.rfind("images") != std::string::npos ||
-				  fileInfo.path.rfind("videos") != std::string::npos ||
-				  fileInfo.path.rfind("ports") != std::string::npos ||
-				  fileInfo.path.rfind("ppsspp") != std::string::npos ||
-				  Utils::String::startsWith(fn, "."))*/
+				if (Utils::String::startsWith(fn, "downloaded_") || fn == "media" || fn == "images" || fn == "videos" || fileInfo.path.rfind("/ports") != std::string::npos || fn == "ppsspp" || Utils::String::startsWith(fn, "."))
 				  continue;
 			}
 
