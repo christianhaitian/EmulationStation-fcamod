@@ -466,6 +466,9 @@ namespace Utils
 
 		std::string getGenericPath(const std::string& _path)
 		{
+			if (_path.empty())
+				return _path;
+
 			std::string path   = _path;
 			size_t      offset = std::string::npos;
 
