@@ -494,7 +494,6 @@ const std::vector<FileData*> FolderData::getChildrenListToDisplay()
 				continue;
 		}
 
-
 		if ((*it)->getType() == FOLDER && refactorUniqueGameFolders)
 		{
 			FolderData* pFolder = (FolderData*)(*it);
@@ -567,10 +566,18 @@ std::vector<FileData*> FolderData::getFilesRecursive(unsigned int typeMask, bool
 {
 	std::vector<FileData*> out;
 
+	SystemData* pSystem = (system != nullptr ? system : mSystem);
+
+	std::vector<std::string> hiddenExts;
+	if (!pSystem->isGroupSystem() && !pSystem->isCollection())
+		for (auto ext : Utils::String::split(Settings::getInstance()->getString(pSystem->getName() + ".HiddenExt"), ';'))
+			hiddenExts.push_back("." + Utils::String::toLower(ext));
+
 	bool showHiddenFiles = Settings::getInstance()->getBool("ShowHiddenFiles") && !UIModeController::getInstance()->isUIModeKiosk();
 	bool filterKidGame = UIModeController::getInstance()->isUIModeKid();
 
-	FileFilterIndex* idx = (system != nullptr ? system : mSystem)->getIndex(false);
+	//FileFilterIndex* idx = (system != nullptr ? system : mSystem)->getIndex(false);
+	FileFilterIndex* idx = pSystem->getIndex(false);
 
 	for (auto it : mChildren)
 	{
@@ -585,6 +592,13 @@ std::vector<FileData*> FolderData::getFilesRecursive(unsigned int typeMask, bool
 
 					if (filterKidGame && it->getKidGame())
 						continue;
+
+					if (hiddenExts.size() > 0 && it->getType() == GAME)
+					{
+						std::string extlow = Utils::String::toLower(Utils::FileSystem::getExtension(it->getFileName()));
+						if (std::find(hiddenExts.cbegin(), hiddenExts.cend(), extlow) != hiddenExts.cend())
+							continue;
+					}
 				}
 
 				out.push_back(it);
