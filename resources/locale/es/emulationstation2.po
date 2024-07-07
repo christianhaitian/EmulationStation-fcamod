@@ -37,6 +37,470 @@ msgid "VSYNC"
 msgstr "VSYNC"
 
 #: 
+msgid "DISPLAY SETTINGS AND INFO"
+msgstr "AJUSTES DE PANTALLA E INFO"
+
+#: 
+msgid "BRIGHTNESS"
+msgstr "BRILLO"
+
+#: 
+msgid "SHOW OVERLAY WHEN BRIGHTNESS CHANGES"
+msgstr "MOSTRAR BARRA CUANDO EL BRILLO CAMBIE "
+
+#: 
+msgid "RESET GAMELIST CUSTOMIZATIONS"
+msgstr "RESTABLECER PERSONALIZACIONES DE LISTAS"
+
+#: 
+msgid "VIDEO SCREENSAVER SETTINGS"
+msgstr "AJUSTES DE VIDEO DE SALVAPANTALLAS"
+
+#: 
+msgid "SWAP VIDEO AFTER (SECS)"
+msgstr "CAMBIAR VIDEO DESPUES DE (SEGUNDOS):"
+
+#: 
+msgid "SHOW GAME INFO ON SCREENSAVER"
+msgstr "MOSTRAR INFO DEL JUEGO EN EL SALVAPANTALLAS"
+
+#: 
+msgid "USE MARQUEE AS GAME INFO"
+msgstr "USAR MARQUESINA COMO INFORMACION DE JUEGO"
+
+#: 
+msgid "STRETCH VIDEO ON SCREENSAVER"
+msgstr "AJUSTAR VIDEOS EN SALVAPANTALLAS"
+
+#: 
+msgid "SLIDESHOW SCREENSAVER SETTINGS"
+msgstr "AJUSTES DE DIAPOSITIVAS DE SALVAPANTALLAS"
+
+#: 
+msgid "SWAP IMAGE AFTER"
+msgstr "CAMBIAR IMAGEN DESPUES DE (SEGUNDOS):"
+
+#: 
+msgid "SHOW GAME INFO"
+msgstr "MOSTRAR INFO DEL JUEGO"
+
+#: 
+msgid "STRETCH IMAGES"
+msgstr "AJUSTAR IMAGENES EN SALVAPANTALLAS"
+
+#: 
+msgid "USE CUSTOM IMAGES"
+msgstr "USAR IMAGENES PERSONALIZADAS"
+
+#: 
+msgid "CUSTOM IMAGE DIR"
+msgstr "DIRECTORIO DE IMAGENES PERSONALIZADAS"
+
+#: 
+msgid "CUSTOM IMAGE DIR RECURSIVE"
+msgstr "DIRECTORIO RECURSIVO DE IMAGENES PERSONALIZADAS"
+
+#: 
+msgid "CUSTOM IMAGE FILTER"
+msgstr "EXTENSION DE IMAGENES PERSONALIZADAS"
+
+#: 
+msgid "always"
+msgstr "siempre"
+
+#: 
+msgid "start & end"
+msgstr "inicio y final"
+
+#: 
+msgid "dim"
+msgstr "atenuar"
+
+#: 
+msgid "black"
+msgstr "pantalla negra"
+
+#: 
+msgid "random video"
+msgstr "video aleatorio"
+
+#: 
+msgid "slideshow"
+msgstr "diapositivas"
+
+#: 
+msgid "all"
+msgstr "todos"
+
+#: 
+msgid "recent"
+msgstr "recientes"
+
+#: 
+msgid "games available"
+msgstr "juegos disponibles"
+
+#: 
+msgid "Games Available"
+msgstr "juegos disponibles"
+
+#: 
+msgid "GAMES AVAILABLE"
+msgstr "JUEGOS DISPONIBLES"
+
+#: 
+msgid "RESTART EMULATIONSTATION"
+msgstr "REINICIAR EMULATIONSTATION"
+
+#: 
+msgid "QUIT EMULATIONSTATION"
+msgstr "SALIR DE EMULATIONSTATION"
+
+#: 
+msgid "SCREENSAVER CONTROLS"
+msgstr "CONTROLES DE SALVAPANTALLAS"
+
+#: 
+msgid "SHOW CLOCK"
+msgstr "MOSTRAR RELOJ"
+
+#: 
+msgid "SHOW BATTERY STATUS"
+msgstr "MOSTRAR ESTADO DE BATERIA"
+
+#: 
+msgid "ICON & TEXT"
+msgstr "ICONO Y TEXTO"
+
+#: 
+msgid "ICON AND TEXT"
+msgstr "ICONO Y TEXTO"
+
+#: 
+msgid "ICON"
+msgstr "ICONO"
+
+#: 
+msgid "SHOW FILENAMES IN LISTS"
+msgstr "MOSTRAR NOMBRES DE ARCHIVOS EN LISTA"
+
+#: 
+msgid "Scan Ports folder on boot"
+msgstr "ESCANEAR CARPETA PORTS EN EL ARRANQUE"
+
+#: 
+msgid "IGNORE LEADING ARTICLES WHEN SORTING"
+msgstr "IGNORAR LOS ARTICULOS AL ORDENAR (EL/LOS/LAS/LOS)"
+
+#: 
+msgid "GAME LOADING IMAGE MODE"
+msgstr "MODO DE IMAGEN DE CARGA DE JUEGOS"
+
+#: 
+msgid "Pic"
+msgstr "Imagen"
+
+#: 
+msgid "Ascii"
+msgstr "Ascii"
+
+#: 
+msgid "GAME LOADING IMAGE"
+msgstr "IMAGEN DE CARGA DE JUEGOS"
+
+#: 
+msgid "MARQUEE"
+msgstr "MARQUESINA"
+
+#: 
+msgid "IMAGE"
+msgstr "IMAGEN"
+
+#: 
+msgid "THUMB"
+msgstr "MINIATURA"
+
+#: 
+msgid "DEFAULT"
+msgstr "POR DEFECTO"
+
+#: 
+msgid "SORT SYSTEMS"
+msgstr "ORDENAR SISTEMAS"
+
+#: 
+msgid "SHOW SYSTEM NAME IN COLLECTIONS"
+msgstr "MOSTRAR NOMBRE DEL SISTEMA EN COLECCIONES"
+
+#: 
+msgid "ALPHABETICALLY"
+msgstr "ORDEN ALFABETICO"
+
+#: 
+msgid "All Games"
+msgstr "TODOS LOS JUEGOS"
+
+#: 
+msgid "Last Played"
+msgstr "ULTIMOS JUGADOS"
+
+#: 
+msgid "Favorites"
+msgstr "FAVORITOS"
+
+#: 
+msgid "2 Players"
+msgstr "2 JUGADORES"
+
+#: 
+msgid "4 Players"
+msgstr "4 JUGADORES"
+
+#: 
+msgid "Never Played"
+msgstr "NUNCA JUGADOS"
+
+#: 
+msgid "AUDIO CARD"
+msgstr "TARJETA DE SONIDO"
+
+#: 
+msgid "Default"
+msgstr "POR DEFECTO"
+
+#: 
+msgid "Null"
+msgstr "NULO"
+
+#: 
+msgid "SHOW OVERLAY WHEN VOLUME CHANGES"
+msgstr "MOSTRAR BARRA CUANDO EL VOLUMEN CAMBIE"
+
+#: 
+msgid "AUDIO DEVICE"
+msgstr "DISPOSITIVO DE AUDIO"
+
+#: 
+msgid "Speaker"
+msgstr "ALTAVOZ"
+
+#: 
+msgid "Master"
+msgstr "MAESTRO"
+
+#: 
+msgid "Analogue"
+msgstr "ANALOGICO"
+
+#: 
+msgid "DISPLAY SONG TITLES"
+msgstr "MOSTRAR NOMBRE DE CANCIONES"
+
+#: 
+msgid "ONLY PLAY SYSTEM-SPECIFIC MUSIC FOLDER"
+msgstr "REPRODUCIR CANCIONES ESPECIFICAS DEL TEMA"
+
+#: 
+msgid "PLAY THEME MUSICS"
+msgstr "REPRODUCIR MUSICA DEL TEMA"
+
+#: 
+msgid "LOWER MUSIC WHEN PLAYING VIDEO"
+msgstr "ATENUAR MUSICA DURANTE LOS VIDEOS"
+
+#: 
+msgid "VERBAL BATTERY VOICE"
+msgstr "TIPO DE VOZ DE AVISO DE BATERIA BAJA"
+
+#: 
+msgid "MALE 1"
+msgstr "HOMBRE 1"
+
+#: 
+msgid "MALE 2"
+msgstr "HOMBRE 2"
+
+#: 
+msgid "FEMALE"
+msgstr "MUJER"
+
+#: 
+msgid "ON"
+msgstr "ACTIVADO"
+
+#: 
+msgid "OFF"
+msgstr "DESACTIVADO"
+
+#: 
+msgid "VERBAL BATTERY WARNING"
+msgstr "AVISO POR VOZ DE BATERIA BAJA"
+
+#: 
+msgid "EMULATOR SETTINGS"
+msgstr "AJUSTES POR EMULADOR"
+
+#: 
+msgid "IMAGE SOURCE"
+msgstr "TIPO DE IMAGEN"
+
+#: 
+msgid "BOX SOURCE"
+msgstr "TIPO DE CAJA"
+
+#: 
+msgid "LOGO SOURCE"
+msgstr "TIPO DE LOGO"
+
+#: 
+msgid "REGION SOURCE"
+msgstr "REGION"
+
+#: 
+msgid "SCRAPE VIDEOS"
+msgstr "ESCRAPEAR VIDEOS"
+
+#: 
+msgid "SCREENSHOT"
+msgstr "CAPTURA"
+
+#: 
+msgid "TITLE SCREENSHOT"
+msgstr "CAPTURA CON TITULO"
+
+#: 
+msgid "BOX 2D"
+msgstr "CAJA 2D"
+
+#: 
+msgid "BOX 3D"
+msgstr "CAJA 3D"
+
+#: 
+msgid "WHEEL"
+msgstr "RUEDA"
+
+#: 
+msgid "SHOW CLOCK IN 12-HOUR FORMAT"
+msgstr "MOSTRAR RELOJ EN FORMATO 12 HORAS"
+
+#: 
+msgid "TIMEZONE"
+msgstr "ZONA HORARIA"
+
+#: 
+msgid "SWITCH POWER BUTTON TAP TO OFF"
+msgstr "HABILITAR APAGADO CON BOTON DE ENCENDIDO"
+
+#: 
+msgid "SEARCH FOR LOCAL ART"
+msgstr "BUSQUEDA DE ARTE LOCAL"
+
+#: 
+msgid "RESET FILE EXTENSIONS"
+msgstr "RESETEAR EXTENSIONES DE ARCHIVOS"
+
+#: 
+msgid "disabled"
+msgstr "DESACTIVADO"
+
+#: 
+msgid "default"
+msgstr "POR DEFECTO"
+
+#: 
+msgid "enhanced"
+msgstr "MEJORADO"
+
+#: 
+msgid "THREADED LOADING"
+msgstr "CARGA DE HILOS"
+
+#: 
+msgid "DEFAULT EMULATOR GOVERNOR"
+msgstr "GOBERNADOR DEL EMULADOR POR DEFECTO"
+
+#: 
+msgid "Default Emulator Governor"
+msgstr "GOBERNADOR DEL EMULADOR POR DEFECTO"
+
+#: 
+msgid "performance"
+msgstr "DESEMPEÑO"
+
+#: 
+msgid "ondemand"
+msgstr "BAJO DEMANDA"
+
+#: 
+msgid "powersave"
+msgstr "AHORRO ENERGETICO"
+
+#: 
+msgid "off"
+msgstr "DESACTIVADO"
+
+#: 
+msgid "Off"
+msgstr "DESACTIVADO"
+
+#: 
+msgid "Options"
+msgstr "Opciones"
+
+#: 
+msgid "AUTO SUSPEND TIMEOUT (MINS)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "AUTO SUSPEND TIMEOUT(MINS)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto Suspend Timeout (Mins)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto Suspend Timeout(Mins)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto Suspend Timeout (MINS)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto Suspend Timeout (mins)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto Suspend Timeout (MINS)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto suspend timeout (mins)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto suspend timeout (Mins)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto suspend timeout (MINS)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "Auto Suspend Timeout (MINS)"
+msgstr "AUTOSUSPENDER TRAS (MINS):"
+
+#: 
+msgid "COMPLETE QUIT MENU"
+msgstr "MENU DE APAGADO COMPLETO"
+
+#: 
+msgid "LOG LEVEL"
+msgstr "NIVEL LOG"
+
+#: 
 msgid "DISPLAY FAVORITES FIRST IN GAMELIST"
 msgstr "MOSTRAR JUEGOS FAVORITOS PRIMERO"
 
@@ -564,6 +1028,10 @@ msgstr "OCULTAR AL LANZAR JUEGO"
 #: 
 msgid "QUICK SYSTEM SELECT"
 msgstr "SELECCIÓN RAPIDA DE SISTEMA"
+
+#: 
+msgid "VISIBLE SYSTEMS"
+msgstr "SISTEMAS A MOSTRAR"
 
 #: 
 msgid "THEME"
