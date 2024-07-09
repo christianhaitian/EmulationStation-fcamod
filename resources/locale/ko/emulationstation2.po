@@ -36,6 +36,7 @@ msgid "%i SELECTED"
 msgid_plural "%i SELECTED"
 msgstr[0] "%i 선택됨"
 msgstr[1] "%i 선택됨"
+
 msgid "VIDEO SCREENSAVER SETTINGS"
 msgstr "동영상 화면보호기 설정"
 
@@ -167,10 +168,10 @@ msgid "UI MODE"
 msgstr "UI 모드"
 
 msgid "PRELOAD UI"
-msgstr "UI 미리읽기"
+msgstr "UI 사전 불러오기"
 
 msgid "VSYNC"
-msgstr "VSYNC"
+msgstr "수직동기화"
 
 msgid "DISPLAY FAVORITES FIRST IN GAMELIST"
 msgstr "게임록록 앞쪽에 즐겨찾기 표시"
@@ -236,25 +237,25 @@ msgid "SELECT COLLECTIONS"
 msgstr "컬렉션 선택"
 
 msgid "CUSTOM GAME COLLECTIONS"
-msgstr "사용자 게임 컬렉션"
+msgstr "커스텀 게임 컬렉션"
 
 msgid "CREATE NEW CUSTOM COLLECTION FROM THEME"
-msgstr "테마에서 새 사용자 컬렉션 만들기"
+msgstr "테마에서 새 커스텀 컬렉션 만들기"
 
 msgid "SELECT THEME FOLDER"
 msgstr "테마 폴더 선택"
 
 msgid "CREATE NEW CUSTOM COLLECTION"
-msgstr "새 사용자 컬렉션 생성"
+msgstr "새 커스텀 컬렉션 생성"
 
 msgid "New Collection Name"
 msgstr "새 컬렉션 이름"
 
 msgid "GROUP UNTHEMED CUSTOM COLLECTIONS"
-msgstr "테마가 없는 사용자 컬렉션 묶기"
+msgstr "테마가 없는 커스텀 컬렉션 묶기"
 
 msgid "SORT CUSTOM COLLECTIONS AND SYSTEMS"
-msgstr "사용자 컬렉션 및 시스템 정렬"
+msgstr "커스텀 컬렉션 및 시스템 정렬"
 
 msgid "FINISH EDITING COLLECTION"
 msgstr "컬렉션 편집 종료"
@@ -269,7 +270,7 @@ msgid "SAVE METADATA ON EXIT"
 msgstr "종료시 메타데이터 저장"
 
 msgid "SHOW HIDDEN FILES"
-msgstr "숨김파일 표시"
+msgstr "숨긴 파일 표시"
 
 msgid "VRAM LIMIT"
 msgstr "VRAM 제한"
@@ -281,7 +282,7 @@ msgid "GAMELIST VIEW STYLE"
 msgstr "게임목록 보기 스타일"
 
 msgid "GAME LAUNCH TRANSITION"
-msgstr "게임 실행 전환효과"
+msgstr "게임 실행 전환 효과"
 
 msgid "THREADED LOADING"
 msgstr "스레드된 로딩"
@@ -366,7 +367,7 @@ msgid "OK"
 msgstr "확인"
 
 msgid "EDIT METADATA"
-msgstr "메타데이터 수정"
+msgstr "메타데이터 편집"
 
 msgid "SCRAPE"
 msgstr "스크랩"
@@ -896,22 +897,22 @@ msgid "FILENAME, DESCENDING"
 msgstr "파일명 내림차순"
 
 msgid "RATING, ASCENDING"
-msgstr "평점 오름차순"
+msgstr "평점, 높은순"
 
 msgid "RATING, DESCENDING"
-msgstr "평점 내림차순"
+msgstr "평점, 낮은순"
 
 msgid "TIMES PLAYED, ASCENDING"
-msgstr "실행 횟수 오름차순"
+msgstr "플레이 시간, 높은순"
 
 msgid "TIMES PLAYED, DESCENDING"
-msgstr "실행 횟수 내림차순"
+msgstr "플레이 시간, 낮은순"
 
 msgid "LAST PLAYED, ASCENDING"
-msgstr "최근 실행 오름차순"
+msgstr "최근 플레이, 높은순"
 
 msgid "LAST PLAYED, DESCENDING"
-msgstr "최근 실행 내림차순"
+msgstr "최근 플레이, 낮은순"
 
 msgid "WORKING..."
 msgstr "작업 중..."
@@ -1766,3 +1767,248 @@ msgstr "즐겨찾기"
 
 msgid "PLAYERS"
 msgstr "플레이어"
+
+##추가
+
+msgid "DISPLAY SETTINGS AND INFO"
+msgstr "디스플레이 설정과 정보"
+
+msgid "BRIGHTNESS"
+msgstr "화면밝기"
+
+msgid "SHOW OVERLAY WHEN BRIGHTNESS CHANGES"
+msgstr "밝기 변화시 오버레이 보이기"
+
+msgid "PANEL BRIGHTNESS"
+msgstr "패널 밝기"
+
+msgid "PANEL CONTRAST"
+msgstr "패널 대비"
+
+msgid "PANEL SATURATION"
+msgstr "패널 포화도"
+
+msgid "PANEL HUE"
+msgstr "패널 휴"
+
+msgid "auto"
+msgstr "자동"
+
+msgid "BOOT ON GAMELIST"
+msgstr "게임목록으로 시작"
+
+msgid "RESET GAMELIST CUSTOMIZATIONS"
+msgstr "커스텀 게임 목록 초기화"
+
+msgid "FILE EXTENSIONS"
+msgstr "파일 확장자"
+
+msgid "VISIBLE SYSTEMS"
+msgstr "시스템 표시"
+
+msgid "SHOW BATTERY STATUS"
+msgstr "배터리 상태 표시"
+
+msgid "ICON"
+msgstr "아이콘"
+
+msgid "ICON AND TEXT"
+msgstr "아이콘 및 텍스트"
+
+msgid "SHOW FILENAMES IN LISTS"
+msgstr "목록에 파일이름 표시"
+
+msgid "IGNORE LEADING ARTICLES WHEN SORTING"
+msgstr "정렬할 때 주요 규칙 무시"
+
+msgid "Scan Ports folder on boot"
+msgstr "부팅시에 포트 폴더 스캔"
+
+msgid "Show Kodi in Start Menu"
+msgstr "KODI 스타트 메뉴에 보이기"
+
+msgid "GAME LOADING IMAGE MODE"
+msgstr "게임 로딩 이미지 모드"
+
+msgid "GAME LOADING IMAGE"
+msgstr "게임 로딩 이미지"
+
+msgid "THUMB"
+msgstr "썸네일"
+
+msgid "SHOW OVERLAY WHEN VOLUME CHANGES"
+msgstr "볼륨 변경 시 오버레이 표시"
+
+msgid "LOWER MUSIC WHEN PLAYING VIDEO"
+msgstr "비디오 재생 시 음악 볼륨 줄임"
+
+msgid "VERBAL BATTERY VOICE"
+msgstr "배터리 경고 음성 종류"
+
+msgid "Verbal BATTERY Voice"
+msgstr "배터리 경고 음성 종류"
+
+msgid "VERBAL BATTERY WARNING"
+msgstr "배터리 경고 음성 알림"
+
+msgid "Verbal BATTERY Warning"
+msgstr "배터리 경고 음성 알림"
+
+msgid "MALE 1"
+msgstr "남성 1"
+
+msgid "MALE 2"
+msgstr "남성 2"
+
+msgid "FEMALE"
+msgstr "여성"
+
+msgid "ON"
+msgstr "켜짐"
+
+msgid "OFF"
+msgstr "꺼짐"
+
+msgid "AUDIO CARD"
+msgstr "오디오 카드"
+
+msgid "AUDIO DEVICE"
+msgstr "오디오 디바이스"
+
+msgid "AudioDevice"
+msgstr "오디오 디바이스"
+
+msgid "SORT SYSTEMS"
+msgstr "시스템 정렬"
+
+msgid "ALPHABETICALLY"
+msgstr "사전(알파벳) 순"
+
+msgid "IMAGE SOURCE"
+msgstr "이미지 소스"
+
+msgid "SCREENSHOT"
+msgstr "스크린샷"
+
+msgid "TITLE SCREENSHOT"
+msgstr "타이틀 스크린샷"
+
+msgid "MIX V1"
+msgstr "혼합 V1"
+
+msgid "MIX V2"
+msgstr "혼합 V2"
+
+msgid "BOX 2D"
+msgstr "박스 2D"
+
+msgid "BOX 3D"
+msgstr "박스 3D"
+
+msgid "BOX SOURCE"
+msgstr "박스 출처"
+
+msgid "LOGO SOURCE"
+msgstr "로고 출처"
+
+msgid "WHEEL"
+msgstr "휠"
+
+msgid "REGION SOURCE"
+msgstr "지역 출처"
+
+msgid "ARCADE SYSTEM"
+msgstr "아케이드 시스템"
+
+msgid "TIMEZONE"
+msgstr "시간대"
+
+msgid "SHOW CLOCK IN 12-HOUR FORMAT"
+msgstr "시간을 12시간 형식으로 표시"
+
+msgid "SWITCH A/B BUTTONS IN EMULATIONSTATION"
+msgstr "에뮬레이션스테이션에서 A/B 버튼 교체"
+
+msgid "SWITCH POWER BUTTON TAP TO OFF"
+msgstr "전원버튼 탭으로 끄기"
+
+msgid "FLIP VOLUME BUTTONS"
+msgstr "볼륨 조절 버튼 +- 바꾸기"
+
+msgid "SEARCH FOR LOCAL ART"
+msgstr "내부 이미지 검색"
+
+msgid "RESET FILE EXTENSIONS"
+msgstr "파일 확장자 초기화"
+
+msgid  "GOVERNOR"
+msgstr "거버너"
+
+msgid  "Default Emulator Governor"
+msgstr "기본 에뮬레이터 거버너"
+
+msgid "performance"
+msgstr "퍼포먼스"
+
+msgid "ondemand"
+msgstr "온디맨드"
+
+msgid "powersave"
+msgstr "절전"
+
+msgid "OPTIONAL RUMBLE MOTOR"
+msgstr "진동 모터 옵션"
+
+msgid "debug"
+msgstr "디버그"
+
+msgid "Auto Suspend Timeout (mins)"
+msgstr "자동 절전 타임아웃 (분)"
+
+msgid "off"
+msgstr "꺼짐"
+
+msgid "default"
+msgstr "기본"
+
+msgid "NUMBER PLAYERS, ASCENDING"
+msgstr "플레이어 수, 높은순"
+
+msgid "NUMBER PLAYERS, DESCENDING"
+msgstr "플레이어 수, 낮은순"
+
+msgid "RELEASE DATE, ASCENDING"
+msgstr "발매일, 오름차순"
+
+msgid "RELEASE DATE, DESCENDING"
+msgstr "발매일, 내림차순"
+
+msgid "GENRE, ASCENDING"
+msgstr "장르, 오름차순"
+
+msgid "GENRE, DESCENDING"
+msgstr "장르, 내림차순"
+
+msgid "DEVELOPER, ASCENDING"
+msgstr "개발사, 오름차순"
+
+msgid "DEVELOPER, DESCENDING"
+msgstr "개발사, 내림차순"
+
+msgid "PUBLISHER, ASCENDING"
+msgstr "공급사, 오름차순"
+
+msgid "PUBLISHER, DESCENDING"
+msgstr "공급사, 내림차순"
+
+msgid "SYSTEM, ASCENDING"
+msgstr "시스템, 오름차순"
+
+msgid "SYSTEM, DESCENDING"
+msgstr "시스템, 내림차순"
+
+msgid "video"
+msgstr "비디오"
+
+msgid "having multiple games"
+msgstr "게임이 다수 있을 시"
