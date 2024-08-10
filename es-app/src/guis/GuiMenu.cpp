@@ -2096,7 +2096,31 @@ void GuiMenu::openOtherSettings()
 		  }
 	  }); }
 
+	// Undervolt
+	auto Uvolt = std::make_shared< OptionListComponent<std::string> >(mWindow, _("CPU Undervolt"), false);
+	std::vector<std::string> cundervolt;
+	cundervolt.push_back("STOCK");
+	cundervolt.push_back("LIGHT");
+	cundervolt.push_back("MEDIUM");
+	cundervolt.push_back("MAX");
 
+	std::string undervolt = std::string(getShOutput(R"(/usr/local/bin/dtbcheck_change.sh check)"));
+
+	for (auto it = cundervolt.cbegin(); it != cundervolt.cend(); it++)
+		Uvolt->add(_(it->c_str()), *it, undervolt == *it);
+
+	s->addWithLabel(_("CPU Undervolt"), Uvolt);
+	s->addSaveFunc([Uvolt, this] {
+		if (Uvolt->changed()) {
+		    Window* window = mWindow;
+		    window->pushGui(new GuiMsgBox(window, _("ARE YOU SURE YOU WANT TO CHANGE THE UNDERVOLT VALUE? IF YES, SYSTEM WILL REBOOT AFTER THE CHANGE.  THIS CAN ALSO LEAD TO FAIL BOOTING OF YOUR DEVICE.  THIS CAN BE REVERTED BUT WILL REQUIRE ACCESS TO A COMPUTER WITH A SD CARD READER TO DO SO."), _("YES"),
+					[Uvolt, window] {
+					runSystemCommand("sudo /usr/local/bin/dtbcheck_change.sh set " + Uvolt->getSelected(), "", nullptr);
+					window->pushGui(new GuiMsgBox(window, _("IF SYSTEM FAILS TO BOOT, JUST REMOVE THE .UNDERVOLT." + Uvolt->getSelected() + " FROM THE END OF THE FDT /rk3566-OC.dtb line in the EXTLINUX.CONF TEXT FILE LOCATED IN YOUR FAT32 BOOT PARTITION IN THE EXTLINUX FOLDER TO REVERT TO THE STOCK CPU VOLTAGE SETTINGS."), _("OK"), [] {runSystemCommand("sudo reboot", "", nullptr);} ));
+			}, _("NO"), nullptr)
+			);
+		}
+	});
 
 	s->updatePosition();
 
