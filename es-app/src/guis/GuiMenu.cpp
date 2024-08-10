@@ -2099,10 +2099,10 @@ void GuiMenu::openOtherSettings()
 	// Undervolt
 	auto Uvolt = std::make_shared< OptionListComponent<std::string> >(mWindow, _("CPU Undervolt"), false);
 	std::vector<std::string> cundervolt;
-	cundervolt.push_back("STOCK");
-	cundervolt.push_back("LIGHT");
-	cundervolt.push_back("MEDIUM");
-	cundervolt.push_back("MAX");
+	cundervolt.push_back(_("STOCK"));
+	cundervolt.push_back(_("LIGHT"));
+	cundervolt.push_back(_("MEDIUM"));
+	cundervolt.push_back(_("MAXIMUM"));
 
 	std::string undervolt = std::string(getShOutput(R"(/usr/local/bin/dtbcheck_change.sh check)"));
 
