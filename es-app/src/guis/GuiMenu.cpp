@@ -1468,7 +1468,7 @@ void GuiMenu::openUISettings()
     if (strstr(GameLoadingImageMode->getSelected().c_str(),"pic")){
 	 auto GameLoadingImage = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Game Loading Image"), false);
 	 GameLoadingImage->addRange({ { _("DEFAULT"), "default" },{ _("MARQUEE"), "marquee" },{ _("IMAGE"), "image" },{ _("THUMB"), "thumb" } }, Settings::getInstance()->getString("GameLoadingImage"));
-	 s->addWithLabel(_("GAME LOADING IMAGE"), GameLoadingImage);
+	 s->addWithLabel(_("  GAME LOADING IMAGE"), GameLoadingImage);
 	 s->addSaveFunc([s, GameLoadingImage]
 	 {
 		std::string old_value = Settings::getInstance()->getString("GameLoadingImage");
@@ -1491,6 +1491,32 @@ void GuiMenu::openUISettings()
             }
 			Settings::getInstance()->setString("GameLoadingImage", GameLoadingImage->getSelected());
 		   }
+	 });
+
+	// Game Loading Image delay
+	 auto ITime = std::make_shared< OptionListComponent<std::string> >(mWindow, _("Game Loading Image Delay (secs)"), false);
+	 std::vector<std::string> adelay;
+	 adelay.push_back("1.5");
+	 adelay.push_back("2");
+	 adelay.push_back("2.5");
+	 adelay.push_back("3");
+	 adelay.push_back("3.5");
+	 adelay.push_back("4");
+	 adelay.push_back("4.5");
+	 adelay.push_back("5");
+
+	 auto delay = Settings::getInstance()->getString("ImagedelayTime");
+	 if (delay.empty())
+		delay = "1.5";
+
+	 for (auto it = adelay.cbegin(); it != adelay.cend(); it++)
+		ITime->add(_(it->c_str()), *it, delay == *it);
+
+	 s->addWithLabel(_("  Game Loading Image delay (secs)"), ITime);
+	 s->addSaveFunc([this, ITime] { Settings::getInstance()->setString("ImagedelayTime", ITime->getSelected()); 
+		if (ITime->changed()) {
+		    runSystemCommand("echo " + Settings::getInstance()->getString("ImagedelayTime") + " > /home/ark/.config/.IMAGEDELAYTIME", "", nullptr);
+		}
 	 });
 	}
 	s->updatePosition();

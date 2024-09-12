@@ -110,6 +110,7 @@ void Settings::setDefaults()
 	mStringMap["AutoSuspendTimeout"] = "Off";
 	mStringMap["GameLoadingImage"] = "default";
 	mStringMap["GameLoadingIMode"] = "pic";
+	mStringMap["ImagedelayTime"] = "1.5";
 	mBoolMap["EnableRumble"] = false;
 	mBoolMap["EnableKodi"] = true;
 	mBoolMap["ShowBatteryIndicator"] = true;
