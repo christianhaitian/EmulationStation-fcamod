@@ -111,6 +111,7 @@ void Settings::setDefaults()
 	mStringMap["AutoSuspendTimeout"] = "Off";
 	mStringMap["GameLoadingImage"] = "default";
 	mStringMap["GameLoadingIMode"] = "pic";
+	mStringMap["ImagedelayTime"] = "1.5";
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;	
 	mBoolMap["MusicTitles"] = true;
