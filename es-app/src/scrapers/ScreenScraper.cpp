@@ -417,6 +417,8 @@ std::vector<std::string> ScreenScraperRequest::getRipList(std::string imageSourc
 		return { "screenmarqueesmall", "screenmarquee", "wheel", "wheel-hd", "wheel-steel", "wheel-carbon" };
 	if (imageSource == "video")
 		return { "video-normalized", "video" };
+	if (imageSource == "none")
+		return { "" };
 
 	return { imageSource };
 }

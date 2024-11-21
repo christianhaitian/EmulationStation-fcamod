@@ -253,13 +253,13 @@ void GuiMenu::openScraperSettings()
 		// Image source : <image> tag
 		std::string imageSourceName = Settings::getInstance()->getString("ScrapperImageSrc");
 		auto imageSource = std::make_shared< OptionListComponent<std::string> >(mWindow, _("IMAGE SOURCE"), false);
-		//imageSource->add(_("NONE"), "", imageSourceName.empty());
 		imageSource->add(_("SCREENSHOT"), "ss", imageSourceName == "ss");
 		imageSource->add(_("TITLE SCREENSHOT"), "sstitle", imageSourceName == "sstitle");
 		imageSource->add(_("MIX V1"), "mixrbv1", imageSourceName == "mixrbv1");
 		imageSource->add(_("MIX V2"), "mixrbv2", imageSourceName == "mixrbv2");
 		imageSource->add(_("BOX 2D"), "box-2D", imageSourceName == "box-2D");
 		imageSource->add(_("BOX 3D"), "box-3D", imageSourceName == "box-3D");
+		imageSource->add(_("NONE"), "none", imageSourceName == "none");
 
 		if (!imageSource->hasSelection())
 			imageSource->selectFirstItem();
@@ -1833,6 +1833,24 @@ void GuiMenu::openOtherSettings()
 		Settings::getInstance()->setString("PowerSaverMode", power_saver->getSelected());
 		PowerSaver::init();
 	});*/
+
+    //Power LED Status during sleep
+    std::string isitpowkiddy=(getShOutput(R"(cat /home/ark/.config/.DEVICE)"));
+    if (isitpowkiddy.compare("RGB20PRO")==0) {
+      auto pwrLEDsleep = std::make_shared<SwitchComponent>(mWindow);
+      pwrLEDsleep->setState(Settings::getInstance()->getBool("PowerLEDSleep"));
+      s->addWithLabel(_("Power LED Status during Sleep"), pwrLEDsleep);
+      s->addSaveFunc([this, s, pwrLEDsleep]
+      {
+        if (Settings::getInstance()->setBool("PowerLEDSleep", pwrLEDsleep->getState()))
+          {
+            if (Settings::getInstance()->getBool("PowerLEDSleep") == 1)
+              runSystemCommand("echo 1 > /home/ark/.config/.PowerLEDSleep", "", nullptr);
+            else
+              runSystemCommand("echo 0 > /home/ark/.config/.PowerLEDSleep", "", nullptr);
+          }
+      });
+    }
 
 	// LANGUAGE
 
