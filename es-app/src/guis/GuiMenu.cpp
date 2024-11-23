@@ -1835,22 +1835,29 @@ void GuiMenu::openOtherSettings()
 	});*/
 
     //Power LED Status during sleep
-    std::string isitpowkiddy=(getShOutput(R"(cat /home/ark/.config/.DEVICE)"));
-    if (isitpowkiddy.compare("RGB20PRO")==0) {
-      auto pwrLEDsleep = std::make_shared<SwitchComponent>(mWindow);
-      pwrLEDsleep->setState(Settings::getInstance()->getBool("PowerLEDSleep"));
-      s->addWithLabel(_("Power LED Status during Sleep"), pwrLEDsleep);
-      s->addSaveFunc([this, s, pwrLEDsleep]
-      {
-        if (Settings::getInstance()->setBool("PowerLEDSleep", pwrLEDsleep->getState()))
-          {
-            if (Settings::getInstance()->getBool("PowerLEDSleep") == 1)
-              runSystemCommand("echo 1 > /home/ark/.config/.PowerLEDSleep", "", nullptr);
-            else
-              runSystemCommand("echo 0 > /home/ark/.config/.PowerLEDSleep", "", nullptr);
-          }
-      });
-    }
+	auto pwrLEDsleep = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Verbal BATTERY Voice"), false);
+	pwrLEDsleep->addRange({ { _("Red"), "Red" },{ _("Dim Red"), "low_power" },{ _("Green"), "Green" },{ _("Off"), "Off" } }, Settings::getInstance()->getString("PowerLEDSleep"));
+	s->addWithLabel(_("Power LED Status during Sleep"), pwrLEDsleep);
+	s->addSaveFunc([s, pwrLEDsleep]
+	{
+		std::string old_value = Settings::getInstance()->getString("PowerLEDSleep");
+		if (old_value != pwrLEDsleep->getSelected())
+           {
+            if (strstr(pwrLEDsleep->getSelected().c_str(),"Red")) {
+              runSystemCommand("echo Red > /home/ark/.config/.PowerLEDSleep", "", nullptr);
+            }
+            else if (strstr(pwrLEDsleep->getSelected().c_str(),"low_power")) {
+              runSystemCommand("echo low_power > /home/ark/.config/.PowerLEDSleep", "", nullptr);
+            }
+            else if (strstr(pwrLEDsleep->getSelected().c_str(),"Green")) {
+              runSystemCommand("echo Green > /home/ark/.config/.PowerLEDSleep", "", nullptr);
+			}
+            else {
+              runSystemCommand("rm -f /home/ark/.config/.PowerLEDSleep", "", nullptr);
+            }
+			Settings::getInstance()->setString("PowerLEDSleep", pwrLEDsleep->getSelected());
+		   }
+	});
 
 	// LANGUAGE
 
