@@ -359,6 +359,24 @@ void GuiMenu::openSoundSettings()
 			}
 		);
 
+        //Flip volume button function primarily for RGB10X unit
+        std::string isitpowkiddy=(getShOutput(R"(if [ -f "/boot/rk3326-rg351mp-linux.dtb" ]; then echo "YES"; else echo "NO"; fi)"));
+        if (isitpowkiddy.compare("YES")==0) {
+          auto volBtns = std::make_shared<SwitchComponent>(mWindow);
+          volBtns->setState(Settings::getInstance()->getBool("InvertVolBtns"));
+          s->addWithLabel(_("FLIP VOLUME BUTTONS"), volBtns);
+          s->addSaveFunc([this, s, volBtns]
+          {
+            if (Settings::getInstance()->setBool("InvertVolBtns", volBtns->getState()))
+              {
+                if (Settings::getInstance()->getBool("InvertVolBtns") == 1)
+                  runSystemCommand("[ -z $(find /home/ark/.config/.SWAPVOLUMEBUTTONS) ] && touch /home/ark/.config/.SWAPVOLUMEBUTTONS", "", nullptr);
+                else
+                  runSystemCommand("[ ! -z $(find /home/ark/.config/.SWAPVOLUMEBUTTONS) ] && rm /home/ark/.config/.SWAPVOLUMEBUTTONS", "", nullptr);
+              }
+          });
+        }
+
 		// disable sounds
 		auto music_enabled = std::make_shared<SwitchComponent>(mWindow);
 		music_enabled->setState(Settings::getInstance()->getBool("audio.bgmusic"));
