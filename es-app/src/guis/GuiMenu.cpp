@@ -1116,17 +1116,17 @@ void GuiMenu::openUISettings()
 		std::string selectedMode = UImodeSelection->getSelected();
 		if (selectedMode != "Full")
 		{
-			std::string msg = "You are changing the UI to a restricted mode:\n" + selectedMode + "\n";
-			msg += "This will hide most menu-options to prevent changes to the system.\n";
-			msg += "To unlock and return to the full UI, enter this code: \n";
+			std::string msg = _("You are changing the UI to a restricted mode:") + "\n" + selectedMode + "\n";
+			msg += _("This will hide most menu-options to prevent changes to the system.") + "\n";
+			msg += _("To unlock and return to the full UI, enter this code:") + "\n";
 			msg += "\"" + UIModeController::getInstance()->getFormattedPassKeyStr() + "\"\n\n";
-			msg += "Do you want to proceed?";
+			msg += _("Do you want to proceed?");
 			window->pushGui(new GuiMsgBox(window, msg,
-				"YES", [selectedMode] {
+				_("YES"), [selectedMode] {
 				LOG(LogDebug) << "Setting UI mode to " << selectedMode;
 				Settings::getInstance()->setString("UIMode", selectedMode);
 				Settings::getInstance()->saveFile();
-			}, "NO", nullptr));
+			}, _("NO"), nullptr));
 		}
 	});
 	//#endif
@@ -1835,9 +1835,11 @@ void GuiMenu::openOtherSettings()
 	});*/
 
     //Power LED Status during sleep
-	auto pwrLEDsleep = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Verbal BATTERY Voice"), false);
+    std::string isitpowkiddy=(getShOutput(R"(cat /home/ark/.config/.DEVICE)"));
+    if (isitpowkiddy.compare("RGB20PRO")==0) {
+	auto pwrLEDsleep = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Power LED Status during Sleep"), false);
 	pwrLEDsleep->addRange({ { _("Red"), "Red" },{ _("Dim Red"), "low_power" },{ _("Green"), "Green" },{ _("Off"), "Off" } }, Settings::getInstance()->getString("PowerLEDSleep"));
-	s->addWithLabel(_("Power LED Status during Sleep"), pwrLEDsleep);
+	s->addWithLabel(_("POWER LED STATUS DURING SLEEP"), pwrLEDsleep);
 	s->addSaveFunc([s, pwrLEDsleep]
 	{
 		std::string old_value = Settings::getInstance()->getString("PowerLEDSleep");
@@ -1858,7 +1860,8 @@ void GuiMenu::openOtherSettings()
 			Settings::getInstance()->setString("PowerLEDSleep", pwrLEDsleep->getSelected());
 		   }
 	});
-
+    }
+	    
 	// LANGUAGE
 
 	std::vector<std::string> langues;
