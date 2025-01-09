@@ -36,7 +36,7 @@ GuiGeneralScreensaverOptions::GuiGeneralScreensaverOptions(Window* window, std::
 			&& screensaver_behavior->getSelected() == "random video") {
 			// if before it wasn't risky but now there's a risk of problems, show warning
 			mWindow->pushGui(new GuiMsgBox(mWindow,
-				_("THE \"RANDOM VIDEO\" SCREENSAVER SHOWS VIDEOS FROM YOUR GAMELIST.\nIF YOU DON'T HAVE VIDEOS, OR IF NONE OF THEM CAN BE PLAYED AFTER A FEW ATTEMPTS, IT WILL DEFAULT TO \"BLACK\".\nMORE OPTIONS IN THE \"UI SETTINGS\" -> \"RANDOM VIDEO SCREENSAVER SETTINGS\" MENU."),
+				_("THE 'RANDOM VIDEO' SCREENSAVER SHOWS VIDEOS FROM YOUR GAMELIST.") + "\n" + _("IF YOU DON'T HAVE VIDEOS, OR IF NONE OF THEM CAN BE PLAYED AFTER A FEW ATTEMPTS, IT WILL DEFAULT TO 'BLACK'.") + "\n" + _("MORE OPTIONS IN THE 'UI SETTINGS' -> 'VIDEO SCREENSAVER SETTINGS' MENU."),
 				_("OK"), [] { return; }));
 		}
 		Settings::getInstance()->setString("ScreenSaverBehavior", screensaver_behavior->getSelected());
