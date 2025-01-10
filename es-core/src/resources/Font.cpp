@@ -281,9 +281,9 @@ std::vector<std::string> getFallbackFontPaths()
 	// Linux
 
 	const char* paths[] = { 
-		"/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-		"/usr/share/fonts/truetype/freefont/FreeMono.ttf",
-		"/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf" // japanese, chinese, present on Debian
+		":/fontawesome-webfont.ttf",
+		"/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf", // japanese, chinese, present on Debian
+		":/fallback.ttf" // fallback font of your language
 	};
 
 	std::vector<std::string> fontPaths;
