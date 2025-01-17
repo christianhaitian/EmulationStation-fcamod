@@ -2135,7 +2135,7 @@ void GuiMenu::openOtherSettings()
 	});
 
 	// rumble
-    if (getShOutput(R"(cat /home/ark/.config/.DEVICE)") == "RGB30") {
+    if (isitpowkiddy.compare("RGB30")==0 || isitpowkiddy.compare("RK2023")==0) {
 	  auto RumbleStatus = std::make_shared<SwitchComponent>(mWindow);
 	  RumbleStatus->setState(Settings::getInstance()->getBool("EnableRumble"));
 	  s->addWithLabel(_("OPTIONAL RUMBLE MOTOR"), RumbleStatus);
