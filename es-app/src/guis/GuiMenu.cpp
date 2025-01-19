@@ -451,6 +451,40 @@ void GuiMenu::openSoundSettings()
 		   }
 	});
 
+	// Verbal Battery Warning threshold
+	auto Thold = std::make_shared< OptionListComponent<std::string> >(mWindow, _("Verbal BATTERY Warning Threshold (%)"), false);
+	std::vector<std::string> athreshold;
+	athreshold.push_back("Default");
+	athreshold.push_back("5");
+	athreshold.push_back("10");
+	athreshold.push_back("15");
+	athreshold.push_back("20");
+	athreshold.push_back("25");
+	athreshold.push_back("30");
+	athreshold.push_back("35");
+	athreshold.push_back("40");
+	athreshold.push_back("45");
+	athreshold.push_back("50");
+
+	auto threshold = Settings::getInstance()->getString("VerbalBatteryThreshold");
+	if (threshold.empty())
+		threshold = "Default";
+
+	for (auto it = athreshold.cbegin(); it != athreshold.cend(); it++)
+		Thold->add(_(it->c_str()), *it, threshold == *it);
+
+	s->addWithLabel(_("Verbal BATTERY Warning Threshold (%)"), Thold);
+	s->addSaveFunc([this, Thold] { Settings::getInstance()->setString("VerbalBatteryThreshold", Thold->getSelected());
+		if (Thold->changed()) {
+		    if (strstr(Thold->getSelected().c_str(),"Default")) {
+		      runSystemCommand("[ ! -z $(find /home/ark/.config/.CUSTOM_BATT_LIFE_WARNING) ] && rm -f /home/ark/.config/.CUSTOM_BATT_LIFE_WARNING", "", nullptr);
+		    }
+		    else {
+		      runSystemCommand("echo " + Settings::getInstance()->getString("VerbalBatteryThreshold") + " > /home/ark/.config/.CUSTOM_BATT_LIFE_WARNING", "", nullptr);
+		    }
+		}
+	});
+
 #ifdef _RPI_
 		// OMX player Audio Device
 		auto omx_audio_dev = std::make_shared< OptionListComponent<std::string> >(mWindow, "OMX PLAYER AUDIO DEVICE", false);

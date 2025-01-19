@@ -104,6 +104,7 @@ void Settings::setDefaults()
 	mBoolMap["MoveCarousel"] = true;
 	mStringMap["VerbalBatteryVoice"] = "male1";
 	mStringMap["VerbalBatteryWarning"] = "on";
+	mStringMap["VerbalBatteryThreshold"] = "Default";
 	mStringMap["GlobalPerformanceGovernor"] = "performance";
 	mStringMap["AutoSuspendTimeout"] = "Off";
 	mStringMap["GameLoadingImage"] = "default";
