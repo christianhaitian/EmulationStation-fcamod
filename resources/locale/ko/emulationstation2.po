@@ -1261,6 +1261,15 @@ msgstr "시스템 정렬"
 msgid "ALPHABETICALLY"
 msgstr "사전(알파벳) 순"
 
+msgid "BY MANUFACTURER"
+msgstr "제조사 순"
+
+msgid "BY HARDWARE TYPE"
+msgstr "하드웨어 순"
+
+msgid "BY RELEASE YEAR"
+msgstr "출시 년도 순"
+
 msgid "IMAGE SOURCE"
 msgstr "이미지 출처"
 
