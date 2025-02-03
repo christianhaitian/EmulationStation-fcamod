@@ -35,7 +35,6 @@ namespace Utils
 		const std::string boolToString(bool value, bool uppercase = false);
 
 		bool           isKorean(const unsigned int uni);
-		bool           isKorean(const char* _string);
 
 #if defined(_WIN32)
 		const std::string convertFromWideString(const std::wstring wstring);
