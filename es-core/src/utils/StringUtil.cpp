@@ -631,6 +631,31 @@ namespace Utils
 			return data;
 		}
 
+		bool isKorean(const unsigned int uni)
+		{
+			return (uni >= 0x3131 && uni <= 0x3163) ||  // Unicode range for Hangul consonants and vowels (ㄱ to ㅣ)
+				(uni >= 0xAC00 && uni <= 0xD7A3);       // Unicode range for Hangul syllables (가 to 힣)
+		}
+
+		bool isKorean(const char* _string)
+		{
+			if (!_string)
+				return false;
+
+			size_t len = strlen(_string);
+			if (len < 3)
+				return false;
+
+			const char* target = _string;
+			if (len > 3)
+				target = _string + len - 3;
+
+			size_t cursor = 0;
+			unsigned int uni = chars2Unicode(std::string(target, 3), cursor);
+
+			return isKorean(uni);
+		} // isKorean
+
 		const std::string boolToString(bool value, bool uppercase)
 		{
 			if (uppercase)

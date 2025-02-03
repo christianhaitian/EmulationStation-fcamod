@@ -3,6 +3,7 @@
 #define ES_CORE_UTILS_STRING_UTIL_H
 
 #include <string>
+#include <cstring>
 #include <vector>
 
 namespace Utils
@@ -32,6 +33,9 @@ namespace Utils
 		std::string join(const std::vector<std::string>& items, std::string separator);
         int			compareIgnoreCase(const std::string& name1, const std::string& name2);
 		const std::string boolToString(bool value, bool uppercase = false);
+
+		bool           isKorean(const unsigned int uni);
+		bool           isKorean(const char* _string);
 
 #if defined(_WIN32)
 		const std::string convertFromWideString(const std::wstring wstring);
