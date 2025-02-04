@@ -32,6 +32,8 @@ namespace Utils
 		std::string join(const std::vector<std::string>& items, std::string separator);
         int			compareIgnoreCase(const std::string& name1, const std::string& name2);
 
+		bool           isKorean(const unsigned int uni);
+
 #if defined(_WIN32)
 		const std::string convertFromWideString(const std::wstring wstring);
 		const std::wstring convertToWideString(const std::string string);
