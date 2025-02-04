@@ -630,6 +630,12 @@ namespace Utils
 			return data;
 		}
 
+		bool isKorean(const unsigned int uni)
+		{
+			return (uni >= 0x3131 && uni <= 0x3163) ||  // Unicode range for Hangul consonants and vowels (ㄱ to ㅣ)
+				(uni >= 0xAC00 && uni <= 0xD7A3);       // Unicode range for Hangul syllables (가 to 힣)
+		}
+
 		const std::string boolToString(bool value, bool uppercase)
 		{
 			if (uppercase)
