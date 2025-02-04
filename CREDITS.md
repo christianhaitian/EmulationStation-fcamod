@@ -31,3 +31,12 @@ Resources
 
 Open Sans font
 	http://www.google.com/fonts/specimen/Open+Sans
+
+fallback.ttf (reference korean font)
+	font name SeoulNamsanCM (서울 남산 장체 M)
+	Source 
+	https://www.seoul.go.kr/seoul/font.do
+	License
+	https://www.kogl.or.kr/info/licenseType1.do
+	https://www.kogl.or.kr/info/license.do#01-tab
+
