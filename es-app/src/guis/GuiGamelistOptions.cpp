@@ -98,13 +98,29 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system, bool 
 		{
 			mJumpToLetterList = std::make_shared<LetterList>(mWindow, _("JUMP TO..."), false); // batocera
 
-			char curChar = (char)toupper(getGamelist()->getCursor()->getName()[0]);
+			const std::string& cursorName = getGamelist()->getCursor()->getName();
+			std::string curChar;
 
-			if (std::find(letters.begin(), letters.end(), std::string(1, curChar)) == letters.end())
-				curChar = letters.at(0)[0];
+			if (Utils::String::isKorean(cursorName.c_str()))
+			{
+				const char* koreanLetter = nullptr;
 
-			for (auto letter : letters)
-				mJumpToLetterList->add(letter, letter[0], letter[0] == curChar);
+				std::string nameChar = cursorName.substr(0, 3);
+				if (!Utils::String::splitHangulSyllable(nameChar.c_str(), &koreanLetter) || !koreanLetter)
+					curChar = std::string(letters.at(0)); // Korean supports chosung search only. set default.
+				else
+					curChar = std::string(koreanLetter, 3);
+			}
+			else
+			{
+				curChar = std::string(1, toupper(cursorName[0]));
+			}
+
+			if (std::find(letters.begin(), letters.end(), curChar) == letters.end())
+				curChar = letters.at(0);
+
+			for (const auto& letter : letters)
+				mJumpToLetterList->add(letter, letter, letter == curChar);
 
 			row.addElement(std::make_shared<TextComponent>(mWindow, _("JUMP TO..."), theme->Text.font, theme->Text.color), true); // batocera
 			row.addElement(mJumpToLetterList, false);
@@ -516,35 +532,54 @@ void GuiGamelistOptions::openMetaDataEd()
 
 void GuiGamelistOptions::jumpToLetter()
 {
-	char letter = mJumpToLetterList->getSelected();
+	std::string letter = mJumpToLetterList->getSelected();
 	IGameListView* gamelist = getGamelist();
 
-	// this is a really shitty way to get a list of files
-	const std::vector<FileData*>& files = gamelist->getCursor()->getParent()->getChildrenListToDisplay();
-
-	long min = 0;
-	long max = (long)files.size() - 1;
-	long mid = 0;
-
-	while(max >= min)
+	if (mListSort->getSelected() != 0)
 	{
-		mid = ((max - min) / 2) + min;
+		mListSort->selectFirstItem();
+		mSystem->setSortId(0);
 
-		// game somehow has no first character to check
-		if(files.at(mid)->getName().empty())
-			continue;
-
-		char checkLetter = (char)toupper(files.at(mid)->getName()[0]);
-
-		if(checkLetter < letter)
-			min = mid + 1;
-		else if(checkLetter > letter || (mid > 0 && (letter == toupper(files.at(mid - 1)->getName()[0]))))
-			max = mid - 1;
-		else
-			break; //exact match found
+		FolderData* root = mSystem->getRootFolder();
+		if (root != nullptr)
+			gamelist->onFileChanged(root, FILE_SORTED);
 	}
 
-	gamelist->setCursor(files.at(mid));
+	long letterIndex = -1;
+
+	auto files = gamelist->getFileDataEntries();
+	for (int i = files.size() - 1; i >= 0; i--)
+	{
+		const std::string& name = files.at(i)->getName();
+		if (name.empty())
+			continue;
+
+		std::string checkLetter;
+
+		if (Utils::String::isKorean(name.c_str()))
+		{
+			const char* koreanLetter = nullptr;
+
+			std::string nameChar = name.substr(0, 3);
+			if (!Utils::String::splitHangulSyllable(nameChar.c_str(), &koreanLetter) || !koreanLetter)
+				continue;
+
+			checkLetter = std::string(koreanLetter, 3);
+		}
+		else
+		{
+			checkLetter = std::string(1, toupper(name[0]));
+		}
+
+		if (letterIndex >= 0 && checkLetter != letter)
+			break;
+
+		if (checkLetter == letter)
+			letterIndex = i;
+	}
+
+	if (letterIndex >= 0)
+		gamelist->setCursor(files.at(letterIndex));
 
 	delete this;
 }

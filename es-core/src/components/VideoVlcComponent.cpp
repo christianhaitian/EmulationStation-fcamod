@@ -528,7 +528,11 @@ void VideoVlcComponent::startVideo()
 
 			unsigned track_count;
 			// Get the media metadata so we can find the aspect ratio
-			libvlc_media_parse(mMedia);
+
+			libvlc_media_parse_with_options(mMedia, libvlc_media_parse_local, 0);
+			while (libvlc_media_get_parsed_status(mMedia) != libvlc_media_parsed_status_done)
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
 			libvlc_media_track_t** tracks;
 			track_count = libvlc_media_tracks_get(mMedia, &tracks);
 			for (unsigned track = 0; track < track_count; ++track)

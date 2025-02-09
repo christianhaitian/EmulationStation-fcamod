@@ -47,6 +47,31 @@ GuiVideoScreensaverOptions::GuiVideoScreensaverOptions(Window* window, const cha
 	addWithLabel(_("SHOW GAME INFO ON SCREENSAVER"), ss_info);
 	addSaveFunc([ss_info, this] { Settings::getInstance()->setString("ScreenSaverGameInfo", ss_info->getSelected()); });
 
+	// SHOW DATE TIME
+	bool showDateTime = Settings::getInstance()->getBool("ScreenSaverDateTime");
+	auto datetime_screensaver = std::make_shared<SwitchComponent>(mWindow);
+	datetime_screensaver->setState(showDateTime);
+	addWithLabel(_("SHOW DATE TIME"), datetime_screensaver);
+	datetime_screensaver->setOnChangedCallback([this, datetime_screensaver]() {
+		if (Settings::getInstance()->setBool("ScreenSaverDateTime", datetime_screensaver->getState()))
+		{
+			Window* pw = mWindow;
+			delete this;
+			pw->pushGui(new GuiVideoScreensaverOptions(pw, _("VIDEO SCREENSAVER").c_str()));
+		}
+	});
+	if (showDateTime)
+	{
+		auto sss_date_format = std::make_shared< OptionListComponent<std::string> >(mWindow, _("DATE FORMAT"), false);
+		sss_date_format->addRange({ "%Y-%m-%d", "%d-%m-%Y", "%A, %B %d", "%b %d, %Y" }, Settings::getInstance()->getString("ScreenSaverDateFormat"));
+		addWithLabel(_("DATE FORMAT"), sss_date_format);
+		addSaveFunc([sss_date_format] { Settings::getInstance()->setString("ScreenSaverDateFormat", sss_date_format->getSelected()); });
+
+		auto sss_time_format = std::make_shared< OptionListComponent<std::string> >(mWindow, _("TIME FORMAT"), false);
+		sss_time_format->addRange({ "%H:%M:%S", "%I:%M %p", "%p %I:%M" }, Settings::getInstance()->getString("ScreenSaverTimeFormat"));
+		addWithLabel(_("TIME FORMAT"), sss_time_format);
+		addSaveFunc([sss_time_format] { Settings::getInstance()->setString("ScreenSaverTimeFormat", sss_time_format->getSelected()); });
+	}
 
 	bool advancedOptions = true;
 
