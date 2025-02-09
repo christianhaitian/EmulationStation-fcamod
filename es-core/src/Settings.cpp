@@ -158,6 +158,9 @@ void Settings::setDefaults()
 	mStringMap["ThemeGamelistView"] = "";
 	mStringMap["ThemeRegionName"] = "eu";
 
+	mBoolMap["ScreenSaverDateTime"] = false;
+	mStringMap["ScreenSaverDateFormat"] = "%Y-%m-%d";
+	mStringMap["ScreenSaverTimeFormat"] = "%H:%M:%S";
 	mBoolMap["ScreenSaverControls"] = true;
 	mStringMap["ScreenSaverGameInfo"] = "never";
 	mBoolMap["StretchVideoOnScreenSaver"] = false;

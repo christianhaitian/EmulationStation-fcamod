@@ -1,5 +1,6 @@
 #include "guis/GuiSlideshowScreensaverOptions.h"
 
+#include "components/OptionListComponent.h"
 #include "components/SliderComponent.h"
 #include "components/SwitchComponent.h"
 #include "guis/GuiTextEditPopupKeyboard.h"
@@ -26,6 +27,32 @@ GuiSlideshowScreensaverOptions::GuiSlideshowScreensaverOptions(Window* window, c
 	ss_controls->setState(Settings::getInstance()->getBool("SlideshowScreenSaverGameName"));
 	addWithLabel(row, _("SHOW GAME INFO"), ss_controls);
 	addSaveFunc([ss_controls] { Settings::getInstance()->setBool("SlideshowScreenSaverGameName", ss_controls->getState()); });
+
+	// SHOW DATE TIME
+	bool showDateTime = Settings::getInstance()->getBool("ScreenSaverDateTime");
+	auto datetime_screensaver = std::make_shared<SwitchComponent>(mWindow);
+	datetime_screensaver->setState(showDateTime);
+	addWithLabel(row, _("SHOW DATE TIME"), datetime_screensaver);
+	datetime_screensaver->setOnChangedCallback([this, datetime_screensaver]() {
+		if (Settings::getInstance()->setBool("ScreenSaverDateTime", datetime_screensaver->getState()))
+		{
+			Window* pw = mWindow;
+			delete this;
+			pw->pushGui(new GuiSlideshowScreensaverOptions(pw, _("SLIDESHOW SCREENSAVER").c_str()));
+		}
+	});
+	if (showDateTime)
+	{
+		auto sss_date_format = std::make_shared< OptionListComponent<std::string> >(mWindow, _("DATE FORMAT"), false);
+		sss_date_format->addRange({ "%Y-%m-%d", "%d-%m-%Y", "%A, %B %d", "%b %d, %Y" }, Settings::getInstance()->getString("ScreenSaverDateFormat"));
+		addWithLabel(row, _("DATE FORMAT"), sss_date_format);
+		addSaveFunc([sss_date_format] { Settings::getInstance()->setString("ScreenSaverDateFormat", sss_date_format->getSelected()); });
+
+		auto sss_time_format = std::make_shared< OptionListComponent<std::string> >(mWindow, _("TIME FORMAT"), false);
+		sss_time_format->addRange({ "%H:%M:%S", "%I:%M %p", "%p %I:%M" }, Settings::getInstance()->getString("ScreenSaverTimeFormat"));
+		addWithLabel(row, _("TIME FORMAT"), sss_time_format);
+		addSaveFunc([sss_time_format] { Settings::getInstance()->setString("ScreenSaverTimeFormat", sss_time_format->getSelected()); });
+	}
 
 	auto marquee_screensaver = std::make_shared<SwitchComponent>(mWindow);
 	marquee_screensaver->setState(Settings::getInstance()->getBool("ScreenSaverMarquee"));
