@@ -23,6 +23,7 @@ public:
 	virtual void setGame(FileData* mCurrentGame);
 
 	void render(const Transform4x4f& transform) override;
+	void update(int deltaTime) override;
 
 	void setOpacity(unsigned char opacity) override;
 
@@ -30,12 +31,15 @@ protected:
 	ImageComponent*		mMarquee;
 	TextComponent*		mLabelGame;
 	TextComponent*		mLabelSystem;
+	TextComponent*		mLabelDate;
+	TextComponent*		mLabelTime;
 
 	ImageComponent*		mDecoration;
 
 	Renderer::Rect		mViewport;
 
-
+	int 				mDateTimeUpdateAccumulator;
+	time_t				mDateTimeLastUpdate;
 };
 
 class ImageScreenSaver : public GameScreenSaverBase
