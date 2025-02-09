@@ -28,9 +28,14 @@ public:
 	virtual void launch(FileData* game) = 0;
 
 	virtual std::vector<std::string> getEntriesLetters() override;
+	// virtual std::vector<FileData*> getFileDataEntries() = 0;
+
+	virtual bool moveToLetter(const std::string& letter);
+	virtual void moveToLetterByOffset(int offset);
+	virtual void moveToNextLetter();
+	virtual void moveToPreviousLetter();
 
 protected:
-	virtual std::vector<FileData*> getFileDataEntries() = 0;
 
 	virtual std::string getQuickSystemSelectRightButton() = 0;
 	virtual std::string getQuickSystemSelectLeftButton() = 0;

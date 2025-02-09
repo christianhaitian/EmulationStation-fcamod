@@ -28,13 +28,12 @@ public:
 
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 	virtual void launch(FileData* game) override;
+	virtual std::vector<FileData*> getFileDataEntries() override;
 
 	virtual void	setThemeName(std::string name);
 	virtual void onShow() override;
 
 protected:
-	virtual std::vector<FileData*> getFileDataEntries() override;
-
 	virtual std::string getQuickSystemSelectRightButton() override;
 	virtual std::string getQuickSystemSelectLeftButton() override;
 	virtual void populateList(const std::vector<FileData*>& files) override;
