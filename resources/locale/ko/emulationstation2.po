@@ -117,6 +117,15 @@ msgstr "게임 정보 표시"
 msgid "SHOW GAME INFO ON SCREENSAVER"
 msgstr "화면보호기에 게임 정보 표시"
 
+msgid "SHOW DATE TIME"
+msgstr "화면보호기에 날짜 시간 표시"
+
+msgid "DATE FORMAT"
+msgstr "날짜 형식"
+
+msgid "TIME FORMAT"
+msgstr "시간 형식"
+
 msgid "USE MARQUEE AS GAME INFO"
 msgstr "게임 정보에 마키 사용"
 
@@ -354,17 +363,17 @@ msgstr " / "
 msgid " GAME"
 msgstr " 개의 게임"
 
-msgid "S"
-msgstr "들"
+msgid "S "
+msgstr "들 "
 
 msgid "NO GAMES WERE SCRAPED."
 msgstr "스크랩된 게임이 없음."
 
-msgid " SUCCESSFULLY SCRAPED!"
-msgstr " 성공적으로 스크랩됨!"
+msgid "SUCCESSFULLY SCRAPED!"
+msgstr "성공적으로 스크랩됨!"
 
-msgid " SKIPPED."
-msgstr " 건너뜀."
+msgid "SKIPPED."
+msgstr "건너뜀."
 
 msgid "%i GAME SUCCESSFULLY SCRAPED!"
 msgid_plural "%i GAMES SUCCESSFULLY SCRAPED!"
@@ -1397,6 +1406,18 @@ msgid "CPU Undervolt"
 msgstr "CPU 언더볼트"
 
 # "STOCK" "LIGHT" "MEDIUM" "MAXIMUM : Please do not translate these. Then, changes to CPU undervolt settings will not be applied.
+#msgid "STOCK"
+#msgstr "스톡"
+
+#msgid "LIGHT"
+#msgstr "라이트"
+
+#msgid "MEDIUM"
+#msgstr "미디엄"
+
+#msgid "MAXIMUM"
+#msgstr "맥시멈"
+
 msgid "ARE YOU SURE YOU WANT TO CHANGE THE UNDERVOLT VALUE? IF YES, SYSTEM WILL REBOOT AFTER THE CHANGE.  THIS CAN ALSO LEAD TO FAIL BOOTING OF YOUR DEVICE.  THIS CAN BE REVERTED BUT WILL REQUIRE ACCESS TO A COMPUTER WITH A SD CARD READER TO DO SO."
 msgstr "언더볼트 값을 변경하시겠습니까? 예를 선택하면 변경 후 시스템이 재부팅됩니다. 이로 인해 장치 부팅이 실패할 수도 있습니다. 이 작업은 되돌릴 수 있지만 이를 위해서는 SD 카드 리더기로 컴퓨터에 액세스해야 합니다."
 
