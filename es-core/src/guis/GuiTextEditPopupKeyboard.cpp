@@ -251,7 +251,8 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 		{		
 			if (mGrid.getSelectedComponent() == mKeyboardGrid)
 			{
-				mKeyboardGrid->moveCursor(Vector2i(kbUs[0].size() - 1, 0));
+				Vector2i curCursor = mKeyboardGrid->getCursor();
+				mKeyboardGrid->setCursorTo(Vector2i(kbUs[0].size() - 1, curCursor.y()));
 				return true;
 			}
 		}
@@ -259,7 +260,8 @@ GuiTextEditPopupKeyboard::GuiTextEditPopupKeyboard(Window* window, const std::st
 		{
 			if (mGrid.getSelectedComponent() == mKeyboardGrid)
 			{
-				mKeyboardGrid->moveCursor(Vector2i(-kbUs[0].size() + 1, 0));
+				Vector2i curCursor = mKeyboardGrid->getCursor();
+				mKeyboardGrid->setCursorTo(Vector2i(0, curCursor.y()));
 				return true;
 			}
 		}
