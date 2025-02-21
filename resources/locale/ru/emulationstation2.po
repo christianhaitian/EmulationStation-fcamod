@@ -1,57 +1,63 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: r36s-emulationstation\n"
+"Project-Id-Version: ArkOS-emulationstation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-07 16:02-0500\n"
+"POT-Creation-Date: 2025-02-21 01:55-0500\n"
 "PO-Revision-Date: \n"
-"Last-Translator: optimyzato 4pda\n"
+"Last-Translator: ShadyTiger(old)/SerjGeek \n"
+"Language-Team: Russian <https://4pda.to/forum/index.php?showuser=936901>\n"
 "Language: ru\n"
+"Motivation: STOP THE WAR AND NEVER AGAIN!"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-msgid "Scan Ports folder on boot"
-msgstr "СКАНИРОВАТЬ ПАПКУ PORTS"
-
-msgid "GAME LOADING IMAGE"
-msgstr "ИЗОБРАЖЕНИЕ ПРИ ЗАГРУЗКЕ ИГРЫ"
-
-msgid "GAME LOADING IMAGE MODE"
-msgstr "РКЕЖИМ ПРИ ЗАГРУЗКЕ ИГРЫ"
+msgid "Distro Version"
+msgstr "Версия сборки"
 
 msgid "DISPLAY SETTINGS AND INFO"
-msgstr "НАСТРОЙКИ ДИСПЛЕЯ"
+msgstr "НАСТРОЙКИ ДИСПЛЕЯ/ВЕРСИЯ"
 
 msgid "SHOW OVERLAY WHEN BRIGHTNESS CHANGES"
-msgstr "ШКАЛА ПРИ ИЗМЕНЕНИИ ЯРКОСТИ"
+msgstr "ПОКАЗАТЬ ОВЕРЛЕЙ ИЗМЕНЕНИЯ ЯРКОСТИ"
 
 msgid "PANEL BRIGHTNESS"
-msgstr "ЯРКОСТЬ ЭКРАНА"
+msgstr "ЯРКОСТЬ ПАНЕЛИ"
 
 msgid "PANEL CONTRAST"
-msgstr "КОНТРАСТНОСТЬ ЭКРАНА"
+msgstr "КОНТРАСТНОСТЬ ПАНЕЛИ"
 
 msgid "PANEL SATURATION"
-msgstr "НАСЫЩЕННОСТЬ ЭКРАНА"
+msgstr "НАСЫЩЕННОСТЬ ПАНЕЛИ"
 
 msgid "PANEL HUE"
-msgstr "ЦВЕТОВОЙ ТОН"
+msgstr "ЦВЕТОВОЙ ТОН ПАНЕЛИ"
 
 msgid "PANEL VERSION"
-msgstr "РЕВИЗИЯ ЭКРАНА"
+msgstr "ВЕРСИЯ ПАНЕЛИ"
 
 msgid "PANEL ID"
 msgstr "ИДЕНТИФИКАТОР ПАНЕЛИ"
 
 msgid "IGNORE LEADING ARTICLES WHEN SORTING"
-msgstr "ИГНОРИРОВАТЬ АРТИКЛИ ПРИ СОРТИРОВКЕ"
+msgstr "ИГНОРИРОВАТЬ СТРОКИ ПРИ СОРТИРОВКЕ"
 
 msgid "VERBAL BATTERY VOICE"
-msgstr "СОСТОЯНИЕ БАТАРЕИ ГОЛОСОМ"
+msgstr "ОЗВУЧИВАТЬ БАТАРЕЮ ГОЛОСОМ"
+
+msgid "Verbal BATTERY Voice"
+msgstr "ОЗВУЧИВАТЬ БАТАРЕЮ ГОЛОСОМ"
 
 msgid "VERBAL BATTERY WARNING"
-msgstr "ПРЕДУПРЕЖДЕНИЕ ПРИ РАЗРЯДЕ"
+msgstr "ПРЕДУПРЕЖДЕНИЕ О РАЗРЯДЕ БАТАРЕИ"
+
+msgid "Verbal BATTERY Warning"
+msgstr "ПРЕДУПРЕЖДЕНИЕ О РАЗРЯДЕ БАТАРЕИ"
+
+msgid "Verbal BATTERY Warning Threshold (%)"
+msgstr "ПОРОГ ПРЕДУПРЕЖДЕНИЯ ГОЛОСОМ (%)"
+
 
 msgid "MALE 1"
 msgstr "МУЖСКОЙ 1"
@@ -66,10 +72,10 @@ msgid "UPDATE AVAILABLE"
 msgstr "ДОСТУПНО ОБНОВЛЕНИЕ"
 
 msgid "FILENAME, ASCENDING"
-msgstr "ИМЯ ФАЙЛА, ПО ВОЗРАСТАНИЮ"
+msgstr "НАЗВАНИЕ ФАЙЛА, ПО ВОЗРАСТАНИЮ"
 
 msgid "FILENAME, DESCENDING"
-msgstr "ИМЯ ФАЙЛА, ПО УБЫВАНИЮ"
+msgstr "НАЗВАНИЕ ФАЙЛА, ПО УБЫВАНИЮ"
 
 msgid "RATING, ASCENDING"
 msgstr "РЕЙТИНГ, ПО ВОЗРАСТАНИЮ"
@@ -159,7 +165,7 @@ msgid "FAMILY"
 msgstr "СЕМЕЙСТВО"
 
 msgid "PLAYERS"
-msgstr "ИГРОКОВ"
+msgstr "ИГРОКИ"
 
 msgid "PUBLISHER / DEVELOPER"
 msgstr "ИЗДАТЕЛЬ / РАЗРАБОТЧИК"
@@ -273,7 +279,7 @@ msgid "SEARCHING WIFI NETWORKS"
 msgstr "ПОИСК WIFI СЕТИ"
 
 msgid "SCRAPE NOW"
-msgstr "НАЧАТЬ ЗАГРУЗКУ"
+msgstr "ЗАГРУЗИТЬ ДАННЫЕ"
 
 msgid "SCRAPE THESE GAMES"
 msgstr "ЗАГРУЗИТЬ ДАННЫЕ ИГР"
@@ -321,10 +327,10 @@ msgid "Unlocked on"
 msgstr "Получено"
 
 msgid "LAUNCH"
-msgstr "Запуск"
+msgstr "ПУСК"
 
 msgid "go back"
-msgstr ""
+msgstr "назад"
 
 msgid "THIS GAME HAS NO ACHIEVEMENT YET"
 msgstr "ИГРА НЕ ИМЕЕТ ДОСТИЖЕНИЙ"
@@ -366,6 +372,8 @@ msgstr "ОТОБРАЖАТЬ КОЛЛЕКЦИИ"
 msgid "SYSTEMS DISPLAYED"
 msgstr "ОТОБРАЖЕНИЕ СИСТЕМ"
 
+
+
 msgid "GROUPED SYSTEMS"
 msgstr "СГРУППИРОВАННЫЕ СИСТЕМЫ"
 
@@ -388,7 +396,7 @@ msgid "CREATE NEW DYNAMIC COLLECTION"
 msgstr "СОЗДАТЬ ДИНАМИЧЕСКУЮ КОЛЛЕКЦИЮ"
 
 msgid "OPTIONS"
-msgstr " "
+msgstr "ОПЦИИ"
 
 msgid "SORT COLLECTIONS AND SYSTEMS"
 msgstr "СОРТИРОВКА КОЛЛЕКЦИЙ И СИСТЕМ"
@@ -409,7 +417,7 @@ msgid "SORT SYSTEMS"
 msgstr "СОРТИРОВКА СИСТЕМ"
 
 msgid "START ON SYSTEM"
-msgstr "СИСТЕМА ПРИ ЗАГРУЗКЕ"
+msgstr "СИСТЕМА ПО УМОЛЧАНИЮ"
 
 msgid "NONE"
 msgstr "НЕТ"
@@ -468,9 +476,6 @@ msgstr "Эмулятор"
 msgid "Core"
 msgstr "Ядро"
 
-msgid "GOVERNOR"
-msgstr "ПОЛИТИКА БЫСТРОДЕЙСТВИЯ"
-
 msgid "AUTO"
 msgstr "АВТО"
 
@@ -482,6 +487,24 @@ msgstr "СОХРАНИТЬ"
 
 msgid "SCRAPE"
 msgstr "ЗАГРУЗИТЬ ДАННЫЕ"
+
+msgid "THE 'RANDOM VIDEO' SCREENSAVER SHOWS VIDEOS FROM YOUR GAMELIST."
+msgstr "Настройка заставки «Случайное видео» показывает видео из вашего списка игр."
+
+msgid "IF YOU DON'T HAVE VIDEOS, OR IF NONE OF THEM CAN BE PLAYED AFTER A FEW ATTEMPTS, IT WILL DEFAULT TO 'BLACK'."
+msgstr "Если после нескольких попыток видео отсутствует или ничего не воспроизводится, по умолчанию отображается «черный экран»."
+
+msgid "MORE OPTIONS IN THE 'UI SETTINGS' -> 'VIDEO SCREENSAVER SETTINGS' MENU."
+msgstr "Дополнительные параметры доступны в меню «Настройки пользовательского интерфейса» -> «Настройки видеозаставки»."
+
+msgid "SHOW DATE TIME"
+msgstr "ПОКАЗАТЬ ДАТУ/ВРЕМЯ"
+
+msgid "DATE FORMAT"
+msgstr "ФОРМАТ ДАТЫ"
+
+msgid "TIME FORMAT"
+msgstr "ФОРМАТ ВРЕМЕНИ"
 
 msgid ""
 "THIS WILL DELETE THE ACTUAL GAME FILE(S)!\n"
@@ -501,7 +524,7 @@ msgstr ""
 "ИГР.\n"
 "ВЫ ХОТИТЕ СОЗДАТЬ КОПИЮ ЭТИХ ФАЙЛОВ В ПАПКУ СО СПИСКОМ ИГР ?"
 
-msgid "SAVE CHANGES?"
+msgid "SAVE CHANGES ?"
 msgstr "СОХРАНИТЬ ИЗМЕНЕНИЯ?"
 
 msgid "ADD COMBINATION KEY"
@@ -750,7 +773,7 @@ msgid "CONTROLLERS SETTINGS"
 msgstr "НАСТРОЙКИ КОНТРОЛЛЕРОВ"
 
 msgid "UI SETTINGS"
-msgstr "ИНТЕРФЕЙС"
+msgstr "НАСТРОЙКИ ИНТЕРФЕЙСА"
 
 msgid "SOUND SETTINGS"
 msgstr "НАСТРОЙКИ ЗВУКА"
@@ -921,7 +944,7 @@ msgid ""
 msgstr "ПРОДОЛЖИТЬ ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ?"
 
 msgid "SCRAPER"
-msgstr "ЗАГРУЗЧИК ОБЛОЖЕК"
+msgstr "СКРАПЕР"
 
 msgid "SCRAPE FROM"
 msgstr "ЗАГРУЗКА ИЗ"
@@ -931,9 +954,6 @@ msgstr "СТИЛЬ ИЗОБРАЖЕНИЯ"
 
 msgid "SCREENSHOT"
 msgstr "СКРИНШОТ"
-
-msgid "REGION SOURCE"
-msgstr "РЕГИОН"
 
 msgid "TITLE SCREENSHOT"
 msgstr "СКРИНШОТ ГЛАВНОГО МЕНЮ"
@@ -996,7 +1016,10 @@ msgid "ARE YOU SURE YOU WANT TO CONFIGURE INPUT?"
 msgstr "ВЫ УВЕРЕНЫ, ЧТО ХОТИТЕ НАСТРОИТЬ УПРАВЛЕНИЕ?"
 
 msgid "CHOOSE"
-msgstr " "
+msgstr "ЛИСТАТЬ"
+
+msgid "MENU"
+msgstr "МЕНЮ"
 
 msgid "UI MODE IS NOW UNLOCKED"
 msgstr "ИНТЕРФЕЙС ЗАБЛОКИРОВАН"
@@ -1026,23 +1049,7 @@ msgid "VIDEO OPTIONS"
 msgstr "НАСТРОЙКИ ВИДЕО"
 
 msgid "VRAM LIMIT"
-msgstr "ЛИМИТ ПАМЯТИ ДЛЯ МЕНЮ"
-
-msgid "Default Emulator Governor"
-msgstr "ПОЛИТИКА БЫСТРОДЕЙСТВИЯ"
-
-#: governor
-msgid "PERFORMANCE"
-msgstr "БЫСТРОДЕЙСТВИЕ"
-
-msgid "ONDEMAND"
-msgstr "БАЛАНС"
-
-msgid "POWERSAVE"
-msgstr "ЭКОНОМ"
-
-msgid "Auto Suspend Timeout (mins)"
-msgstr "СПЯЩИЙ РЕЖИМ ЧЕРЕЗ (МИН)"
+msgstr "ЛИМИТ VRAM"
 
 msgid "SHOW FRAMERATE"
 msgstr "ПОКАЗАТЬ ЧАСТОТУ КАДРОВ"
@@ -1120,14 +1127,38 @@ msgstr "ИГНОР. СОДЕРЖИМОЕ МНОГОДИСКОВЫХ ФАЙЛОВ
 msgid "ENABLE FILTERS"
 msgstr "ВКЛЮЧИТЬ ФИЛЬТРЫ"
 
+msgid "Scan Ports folder on boot"
+msgstr "СКАНИРОВАТЬ ПАПКИ ПОРТОВ ПРИ ЗАГРУЗКЕ"
+
+msgid "Show Kodi in Start Menu"
+msgstr "ПОКАЗАТЬ KODI В МЕНЮ ПУСК"
+
+msgid "thumb"
+msgstr "ЭСКИЗ"
+
+msgid "GAME LOADING IMAGE MODE"
+msgstr "РЕЖИМ ЗАГРУЗКИ ЛОГО ИГРЫ"
+
+msgid "  GAME LOADING IMAGE"
+msgstr "  ЛОГО ЗАГРУЗКИ ИГРЫ"
+
+msgid "Game Loading Image"
+msgstr "ЛОГО ЗАГРУЗКИ ИГРЫ"
+
+msgid "  Game Loading Image delay (secs)"
+msgstr "  ЗАДЕРЖКА ЗАГРУЗКИ ЛОГО ИГРЫ (СЕК)"
+
+msgid "Game Loading Image Delay (secs)"
+msgstr "ЗАДЕРЖКА ЗАГРУЗКИ ЛОГО ИГРЫ (СЕК)"
+
 msgid "SAVE METADATA ON EXIT"
-msgstr "СОХРАНЯТЬ НАСТРОЙКИ ПРИ ВЫХОДЕ"
+msgstr "СОХРАНИТЬ МЕТАДАННЫЕ ПРИ ВЫХОДЕ"
 
 msgid "PARSE GAMESLISTS ONLY"
 msgstr "АНАЛИЗИРОВАТЬ ТОЛЬКО СПИСОК ИГР"
 
 msgid "SEARCH FOR LOCAL ART"
-msgstr "ПОИСК ОБЛОЖЕК ЛОКАЛЬНО"
+msgstr "ПОИСК ЛОКАЛЬНЫХ ИЗОБРАЖЕНИЙ"
 
 msgid "UI"
 msgstr "ИНТЕРФЕЙС"
@@ -1154,7 +1185,7 @@ msgid "AUTOCONFIGURE EMULATORS CONTROLLERS"
 msgstr "АВТОНАСТРОЙКА КОНТРОЛЛЕРОВ"
 
 msgid "SWITCH A/B BUTTONS IN EMULATIONSTATION"
-msgstr "ПОМЕНЯТЬ КНОПКИ A/B В МЕНЮ"
+msgstr "ПОМЕНЯТЬ КНОПКИ A/B В EMULATIONSTATION"
 
 msgid "ACCESS GAME OPTIONS WITH NORTH BUTTON"
 msgstr "ДОСТУП К ПАРАМЕТРАМ ИГРЫ СЕВЕРНОЙ КНОПКОЙ"
@@ -1177,6 +1208,34 @@ msgstr "ПРЕДЗАГРУЗКА ИНТЕРФЕЙСА"
 
 msgid "THREADED LOADING"
 msgstr "МНОГОПОТОЧНАЯ ЗАГРУЗКА"
+
+msgid "GOVERNOR"
+msgstr "РЕГУЛЯТОР"
+
+msgid "Default Emulator Governor"
+msgstr "РЕГУЛЯТОР ЭМУЛЯТОРА ПО УМОЛЧАНИЮ"
+
+msgid "Auto Suspend Timeout (mins)"
+msgstr "ТАЙМ-АУТ АВТО ПРИОСТАНОВКИ (МИН)"
+
+msgid "CPU Undervolt"
+msgstr "ПОНИЖЕНИЕ НАПРЯЖЕНИЯ ЦП"
+
+# "STOCK" "LIGHT" "MEDIUM" "MAXIMUM : Please do not translate these. Then, changes to CPU undervolt settings will not be applied.
+msgid "ARE YOU SURE YOU WANT TO CHANGE THE UNDERVOLT VALUE? IF YES, SYSTEM WILL REBOOT AFTER THE CHANGE.  THIS CAN ALSO LEAD TO FAIL BOOTING OF YOUR DEVICE.  THIS CAN BE REVERTED BUT WILL REQUIRE ACCESS TO A COMPUTER WITH A SD CARD READER TO DO SO."
+msgstr "Хотите изменить значение пониженного напряжения? Если вы выберете ДА, система перезагрузится после внесения изменений. Это может привести к невозможности загрузки устройства. Это действие обратимо, но для этого вам понадобится доступ к компьютеру с устройством для чтения SD-карт."
+
+msgid "IF SYSTEM FAILS TO BOOT, JUST REMOVE THE .UNDERVOLT.LIGHT FROM THE END OF THE FDT /rk3566-OC.dtb line in the EXTLINUX.CONF TEXT FILE LOCATED IN YOUR FAT32 BOOT PARTITION IN THE EXTLINUX FOLDER TO REVERT TO THE STOCK CPU VOLTAGE SETTINGS."
+msgstr "Если ваша система не загружается, вернитесь к стандартному напряжению процессора, удалив .UNDERVOLT.LIGHT из конца строки FDT /rk3566-OC.dtb в текстовом файле EXTLINUX.CONF в папке EXTLINUX на загрузочном разделе FAT32."
+
+msgid "IF SYSTEM FAILS TO BOOT, JUST REMOVE THE .UNDERVOLT.MEDIUM FROM THE END OF THE FDT /rk3566-OC.dtb line in the EXTLINUX.CONF TEXT FILE LOCATED IN YOUR FAT32 BOOT PARTITION IN THE EXTLINUX FOLDER TO REVERT TO THE STOCK CPU VOLTAGE SETTINGS."
+msgstr "Если ваша система не загружается, вернитесь к стандартному напряжению процессора, удалив .UNDERVOLT.MEDIUM из конца строки FDT /rk3566-OC.dtb в текстовом файле EXTLINUX.CONF в папке EXTLINUX на загрузочном разделе FAT32."
+
+msgid "IF SYSTEM FAILS TO BOOT, JUST REMOVE THE .UNDERVOLT.MAXIMUM FROM THE END OF THE FDT /rk3566-OC.dtb line in the EXTLINUX.CONF TEXT FILE LOCATED IN YOUR FAT32 BOOT PARTITION IN THE EXTLINUX FOLDER TO REVERT TO THE STOCK CPU VOLTAGE SETTINGS."
+msgstr "Если ваша система не загружается, вернитесь к стандартному напряжению процессора, удалив .UNDERVOLT.MAXIMUM из конца строки FDT /rk3566-OC.dtb в текстовом файле EXTLINUX.CONF в папке EXTLINUX на загрузочном разделе FAT32."
+
+msgid "IF SYSTEM FAILS TO BOOT, JUST REMOVE THE .UNDERVOLT.STOCK FROM THE END OF THE FDT /rk3566-OC.dtb line in the EXTLINUX.CONF TEXT FILE LOCATED IN YOUR FAT32 BOOT PARTITION IN THE EXTLINUX FOLDER TO REVERT TO THE STOCK CPU VOLTAGE SETTINGS."
+msgstr "Если ваша система не загружается, проверьте настройку в строке FDT /rk3566-OC.dtb текстового файла EXTLINUX.CONF в папке EXTLINUX на загрузочном разделе FAT32."
 
 msgid "ASYNC IMAGES LOADING"
 msgstr "АСИНХРОННАЯ ЗАГРУЗКА ИЗОБРАЖЕНИЙ"
@@ -1224,7 +1283,7 @@ msgid "SELECT YOUR TIMEZONE"
 msgstr "ВЫБРАТЬ ЧАСОВОЙ ПОЯС"
 
 msgid "SHOW CLOCK IN 12-HOUR FORMAT"
-msgstr "ЧАСЫ В 12-ЧАСОВОМ ФОРМАТЕ "
+msgstr "ПОКАЗАТЬ ЧАСЫ В 12-ЧАСОВОМ ФОРМАТЕ "
 
 msgid "POWER SAVER MODES"
 msgstr "РЕЖИМ ЭНЕРГОСБЕРЕЖЕНИЯ"
@@ -1238,9 +1297,56 @@ msgid ""
 "To unlock and return to the full UI, enter this code:"
 msgstr ""
 "Вы переводите интерфейс в ограниченный режим:\n"
-"Это скроет большинство пунктов меню, чтобы предотвратить изменения в "
-"системе.\n"
+"Это скроет большинство пунктов меню, чтобы предотвратить изменения в системе.\n"
 "Чтобы разблокировать и вернуться к полному интерфейсу, введите этот код:"
+
+msgid "You are changing the UI to a restricted mode:"
+msgstr "Вы переводите интерфейс в ограниченный режим:"
+
+msgid "This will hide most menu-options to prevent changes to the system."
+msgstr "Это скроет большинство пунктов меню, чтобы предотвратить изменения в системе."
+
+msgid "To unlock and return to the full UI, enter this code:"
+msgstr "Чтобы разблокировать и вернуться к полному интерфейсу, введите этот код:"
+
+msgid "Do you want to proceed?"
+msgstr "Хотите продолжить?"
+
+# main.cpp errorString not yet
+msgid ""
+"WE CAN'T FIND ANY SYSTEMS!\n"
+"CHECK THAT YOUR PATHS ARE CORRECT IN THE SYSTEMS CONFIGURATION FILE, AND "
+"YOUR GAME DIRECTORY HAS AT LEAST ONE GAME WITH THE CORRECT EXTENSION.\n"
+"\n"
+"VISIT EMULATIONSTATION.ORG FOR MORE INFORMATION."
+msgstr ""
+"Система не найдена!\n"
+"Убедитесь, что в файле настроек системы указан правильный путь и что есть хотя бы одна правильная папка"
+"Убедитесь, что у вас игра с другим расширением.\n"
+"\n"
+"ДЛЯ ДОПОЛНИТЕЛЬНОЙ ИНФОРМАЦИИ ПОСЕТИТЕ EMULATIONSTATION.ORG"
+
+# main.cpp errorString not yet
+msgid ""
+"IT LOOKS LIKE YOUR SYSTEMS CONFIGURATION FILE HAS NOT BEEN SET UP OR IS "
+"INVALID. YOU'LL NEED TO DO THIS BY HAND, UNFORTUNATELY.\n"
+"\n"
+"VISIT EMULATIONSTATION.ORG FOR MORE INFORMATION."
+msgstr ""
+"Похоже, файл конфигурации системы не установлен или недействителен. К сожалению "
+"Вы должны сделать это сами.\n"
+"\n"
+"ДЛЯ ДОПОЛНИТЕЛЬНОЙ ИНФОРМАЦИИ ПОСЕТИТЕ EMULATIONSTATION.ORG"
+
+# GuiScraperStart.cpp not yet
+msgid ""
+"WARNING: SOME OF YOUR SELECTED SYSTEMS DO NOT HAVE A PLATFORM SET. RESULTS "
+"MAY BE EVEN MORE INACCURATE THAN USUAL!\n"
+"CONTINUE ANYWAY?"
+msgstr ""
+"ВНИМАНИЕ: Для некоторых из выбранных систем платформа не установлена. Результаты могут быть неточными "
+"есть!\n"
+"Хотите продолжить?"
 
 msgid "KODI SETTINGS"
 msgstr "НАСТРОЙКИ KODI"
@@ -1258,7 +1364,7 @@ msgid "DISPLAY SETTINGS"
 msgstr "НАСТРОЙКА ЭКРАНА"
 
 msgid "DISPLAY"
-msgstr "ЭКРАН"
+msgstr "ДИСПЛЕЙ"
 
 msgid "BRIGHTNESS"
 msgstr "ЯРКОСТЬ"
@@ -1441,7 +1547,7 @@ msgid "PAUSE ON TRANSLATED SCREEN"
 msgstr "ПАУЗА В ОКНЕ ПЕРЕВОДА"
 
 msgid "PER SYSTEM ADVANCED CONFIGURATION"
-msgstr "ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ"
+msgstr "ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ СИСТЕМЫ"
 
 msgid "GAME HASHING IS RUNNING. DO YOU WANT TO STOP IT ?"
 msgstr "ЗАПУЩЕНО ХЕШИРОВАНИЕ ИГР. ОСТАНОВИТЬ?"
@@ -1518,13 +1624,7 @@ msgid "tiles"
 msgstr "ПЛИТКА"
 
 msgid "DEFAULT GRID SIZE"
-msgstr "РАЗМЕР СЕТКИ"
-
-msgid "SHOW CONTROLLERS IN SYSTEM VIEW"
-msgstr "ОТОБРАЖАТЬ ИКОНКИ КОНТРОЛЛЕРОВ"
-
-msgid "RESET GAMELIST CUSTOMIZATIONS"
-msgstr "СБРОСИТЬ НАСТРОЙКИ СПИСКА"
+msgstr "РАЗМЕР СЕТКИ ПО УМОЛЧАНИЮ"
 
 msgid "GAMELIST THEME OPTIONS"
 msgstr "НАСТРОЙКИ ТЕМЫ СПИСКА ИГР"
@@ -1575,10 +1675,10 @@ msgid "SHOW MANUAL ICON IN LISTS"
 msgstr "ПОКАЗАТЬ ИКОНКУ РУКОВОДСТВА В СПИСКАХ"
 
 msgid "SHOW FILENAMES IN LISTS"
-msgstr "ПОКАЗЫВАТЬ ИМЕНА ФАЙЛОВ"
+msgstr "ПОКАЗАТЬ НАСТОЯЩЕЕ НАЗВАНИЕ ФАЙЛА"
 
 msgid "FILE EXTENSIONS"
-msgstr "РАСШИРЕНИЯ ФАЙЛОВ"
+msgstr "РАСШИРЕНИЕ ФАЙЛА"
 
 msgid "RESET CUSTOMISATIONS"
 msgstr "СБРОСИТЬ НАСТРОЙКИ"
@@ -1617,10 +1717,7 @@ msgid "ON-SCREEN HELP"
 msgstr "ЭКРАННЫЕ ПОДСКАЗКИ"
 
 msgid "SHOW BATTERY STATUS"
-msgstr "СОСТОЯНИЕ БАТАРЕИ"
-
-msgid "GAME LOADING IMAGE MODE"
-msgstr "ЗАСТАВКА ПРИ ЗАГРУЗКЕ ИГРЫ"
+msgstr "ПОКАЗАТЬ СОСТОЯНИЕ БАТАРЕИ"
 
 msgid "ICON"
 msgstr "ИКОНКА"
@@ -1638,7 +1735,7 @@ msgid "MUSIC VOLUME"
 msgstr "ГРОМКОСТЬ МУЗЫКИ"
 
 msgid "SHOW OVERLAY WHEN VOLUME CHANGES"
-msgstr "ШКАЛА ПРИ ИЗМИНЕНИИ ГРОМКОСТИ"
+msgstr "ПОКАЗАТЬ ОВЕРЛЕЙ ИЗМЕНЕНИЯ ГРОМКОСТИ"
 
 msgid "MUSIC"
 msgstr "МУЗЫКА"
@@ -1656,10 +1753,10 @@ msgid "ONLY PLAY SYSTEM-SPECIFIC MUSIC FOLDER"
 msgstr "МУЗЫКА ТОЛЬКО ИЗ СИСТЕМНОЙ ПАПКИ"
 
 msgid "PLAY THEME MUSICS"
-msgstr "МУЗЫКА ТЕМЫ"
+msgstr "МУЗЫКА ИЗ ТЕМЫ"
 
 msgid "LOWER MUSIC WHEN PLAYING VIDEO"
-msgstr "УМЕНЬШИТЬ ГРОМКОСТЬ МУЗЫКИ В ВИДЕО"
+msgstr "УМЕНЬШИТЬ ГР. МУЗЫКИ ПРИ ВОСПР. ВИДЕО"
 
 msgid "SOUNDS"
 msgstr "ЗВУКИ"
@@ -1737,16 +1834,16 @@ msgid "REALLY REBOOT FROM NAND?"
 msgstr "Уверены в перезагрузке В NAND"
 
 msgid "RESTART SYSTEM"
-msgstr "ПЕРЕЗАГРУЗИТЬ"
+msgstr "ПЕРЕЗАГРУЗИТЬ СИСТЕМУ"
 
 msgid "REALLY RESTART?"
-msgstr "ПЕРЕЗАГРУЗИТЬ?"
+msgstr "ПЕРЕЗАГРУЗИТЬ СИСТЕМУ?"
 
 msgid "SHUTDOWN SYSTEM"
-msgstr "ВЫКЛЮЧИТЬ УСТРОЙСТВО"
+msgstr "ВЫКЛЮЧИТЬ СИСТЕМУ"
 
 msgid "REALLY SHUTDOWN?"
-msgstr "ТОЧНО ВЫКЛЮЧИТЬ?"
+msgstr "ВЫКЛЮЧИТЬ СИСТЕМУ?"
 
 msgid "FAST SHUTDOWN SYSTEM"
 msgstr "БЫСТРОЕ ВЫКЛЮЧЕНИЕ СИСТЕМЫ"
@@ -1788,7 +1885,7 @@ msgid "SGB"
 msgstr "SGB"
 
 msgid "Best Guess"
-msgstr "Лцчшая догадка"
+msgstr "Лучшая догадка"
 
 msgid "FULL BOOT"
 msgstr "ПОЛНАЯ ЗАГРУЗКА"
@@ -1933,7 +2030,7 @@ msgid "SELECT RANDOM GAME"
 msgstr "ВЫБРАТЬ СЛУЧАЙНУЮ ИГРУ"
 
 msgid "SORT GAMES BY"
-msgstr "СОРТИРОВКА"
+msgstr "СОРТИРОВКА ПО"
 
 msgid "OTHER FILTERS"
 msgstr "ДРУГИЕ ФИЛЬТРЫ"
@@ -1942,7 +2039,7 @@ msgid "COLLECTION"
 msgstr "КОЛЛЕКЦИЯ"
 
 msgid "ADVANCED SYSTEM OPTIONS"
-msgstr "ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ"
+msgstr "ДОПОЛНИТЕЛЬНЫЕ НАСТРОЙКИ СИСТЕМЫ"
 
 msgid "RESET FILTERS"
 msgstr "СБРОСИТЬ ФИЛЬТРЫ"
@@ -2062,7 +2159,7 @@ msgid "SHOW GAME INFO"
 msgstr "ПОКАЗАТЬ ИНФОРМАЦИЮ ОБ ИГРЕ"
 
 msgid "SHOW GAME INFO ON SCREENSAVER"
-msgstr "ИНФ. О ИГРЕ НА ЗАСТАВКЕ"
+msgstr "ИНФО ОБ ИГРЕ НА ЗАСТАВКЕ"
 
 msgid "USE MARQUEE AS GAME INFO"
 msgstr "ИСПОЛЬЗОВАТЬ БАНЕР КАК ИНФОРМАЦИЮ О ИГРЕ"
@@ -2083,13 +2180,13 @@ msgid "USE CUSTOM VIDEOS"
 msgstr "ИСПОЛЬЗОВАТЬ ПОЛЬЗ. ВИДЕО"
 
 msgid "CUSTOM VIDEO DIR"
-msgstr "ПАПКА ВИДЕО"
+msgstr "ПАПКА ПОЛЬЗ. ВИДЕО"
 
 msgid "CUSTOM VIDEO DIR RECURSIVE"
-msgstr "ПАПКА ВИДЕО РЕКУРСИВНО"
+msgstr "ПАПКА ПОЛЬЗ. ВИДЕО РЕКУРСИВНО"
 
 msgid "CUSTOM VIDEO FILTER"
-msgstr "ФИЛЬР ВИДЕО"
+msgstr "ФИЛЬР ПОЛЬЗ. ВИДЕО"
 
 msgid "SLIDESHOW SCREENSAVER SETTINGS"
 msgstr "НАСТРОЙКИ СЛАЙДШОУ ЗАСТАВКИ"
@@ -2104,13 +2201,13 @@ msgid "USE CUSTOM IMAGES"
 msgstr "ПОЛЬЗОВАТЕЛЬСКИЕ ИЗОБРАЖЕНИЯ"
 
 msgid "CUSTOM IMAGE DIR"
-msgstr "ПАПКА ИЗОБРАЖЕНИЙ"
+msgstr "ПАПКА ПОЛЬЗ. ИЗОБР."
 
 msgid "CUSTOM IMAGE DIR RECURSIVE"
-msgstr "ПАПКА ИЗОБРАЖЕНИЙ РЕКУРСИВНО"
+msgstr "ПАПКА ПОЛЬЗ. ИЗОБРАЖЕНИЙ РЕКУРСИВНО"
 
 msgid "CUSTOM IMAGE FILTER"
-msgstr "ФИЛЬТР ИЗОБРАЖЕНИЙ"
+msgstr "ФИЛЬТР ПОЛЬЗ. ИЗОБР."
 
 msgid "Extracting"
 msgstr "Распаковка"
@@ -2158,8 +2255,8 @@ msgstr "ИНДЕКСАЦИЯ ЗАВЕРШЕНА"
 msgid "Searching"
 msgstr "Поиск"
 
-msgid "Publisher"
-msgstr "Издатель"
+msgid "PUBLISHER"
+msgstr "ИЗДАТЕЛЬ"
 
 msgid "Developer"
 msgstr "Разработчик"
@@ -2318,10 +2415,10 @@ msgid "GAME OPTIONS"
 msgstr "ПАРАМЕТРЫ"
 
 msgid "FAVORITE"
-msgstr "ИЗБРАННАЯ"
+msgstr "ХИТ"
 
 msgid "RANDOM"
-msgstr "ЛЮБАЯ"
+msgstr "ЛЮБОЕ"
 
 msgid "No Entries Found"
 msgstr "Игр не найдено"
@@ -2336,7 +2433,7 @@ msgid "Game time"
 msgstr "Время игры"
 
 msgid "Favorite"
-msgstr "Избранная"
+msgstr "Избранное"
 
 #, c-format
 msgid "This folder contains %i game, including :%s"
@@ -2402,14 +2499,14 @@ msgstr[2] "%i ИГР"
 msgid "FILES"
 msgstr "ФАЙЛЫ"
 
-msgid "Name"
-msgstr "Название"
+msgid "NAME"
+msgstr "НАЗВАНИЕ"
 
 msgid "enter game name"
 msgstr "введите название игры"
 
-msgid "Description"
-msgstr "Описание"
+msgid "DESCRIPTION"
+msgstr "ОПИСАНИЕ"
 
 msgid "enter description"
 msgstr "введите описание"
@@ -2420,8 +2517,8 @@ msgstr "эмулятор"
 msgid "core"
 msgstr "ядро"
 
-msgid "Image"
-msgstr "Изображение"
+msgid "IMAGE"
+msgstr "ИЗОБРАЖЕНИЕ"
 
 msgid "enter path to image"
 msgstr "введите путь к изображению"
@@ -2495,6 +2592,9 @@ msgstr "введите путь к фону обложки"
 msgid "Wheel"
 msgstr "Колесо"
 
+msgid "REGION SOURCE"
+msgstr "РЕГИОН ИСТОЧНИК"
+
 msgid "enter path to wheel"
 msgstr "введите путь к колесу"
 
@@ -2507,8 +2607,8 @@ msgstr "введите путь к миксу"
 msgid "enter rating"
 msgstr "введите рейтинг"
 
-msgid "Release date"
-msgstr "Дата релиза"
+msgid "RELEASE DATE"
+msgstr "ДАТА РЕЛИЗА"
 
 msgid "enter release date"
 msgstr "введите дату релиза"
@@ -2526,7 +2626,7 @@ msgid "Game family"
 msgstr "Семейство игры"
 
 msgid "enter game family"
-msgstr "введите семейство и гры"
+msgstr "введите семейство игры"
 
 msgid "Genres"
 msgstr "Жанры"
@@ -2534,10 +2634,10 @@ msgstr "Жанры"
 msgid "enter game genres"
 msgstr "введите жанры игры"
 
-msgid "Arcade system"
-msgstr "Аркадная система"
+msgid "ARCADE SYSTEM"
+msgstr "АРКАДНАЯ СИСТЕМА"
 
-msgid "enter game arcade system"
+msgid "enter arcade system name"
 msgstr "введите аркадную систему"
 
 msgid "enter number of players"
@@ -2546,8 +2646,8 @@ msgstr "введите количество игроков"
 msgid "enter favorite"
 msgstr "избранные"
 
-msgid "Hidden"
-msgstr "Скрыть"
+msgid "HIDDEN"
+msgstr "СКРЫТЬ"
 
 msgid "enter hidden"
 msgstr "скрытые"
@@ -2629,7 +2729,7 @@ msgid "NO GAMEPADS DETECTED"
 msgstr "КОНТРОЛЛЕРЫ НЕ ОБНАРУЖЕНЫ"
 
 msgid "HOLD A BUTTON ON YOUR DEVICE TO CONFIGURE IT."
-msgstr "УДЕРЖИВАЙТЕ КНОПКУ НА УСТРОЙСТВЕ ДЛЯ НАСТРОЙКИ."
+msgstr "ЗАЖМИТЕ КН. ДЛЯ НАСТРОЙКИ."
 
 msgid "SHIFTS FOR UPPER,LOWER, AND SPECIAL"
 msgstr "SHIFT ДЛЯ РЕГИСТРА И СИМВОЛОВ"
@@ -2695,11 +2795,14 @@ msgstr "CEC"
 msgid "GAMEPAD %i"
 msgstr "КОНТРОЛЛЕР %i"
 
+msgid "PRESS ESC TO CANCEL."
+msgstr "ДЛЯ ОТМЕНЫ НАЖМИТЕ ESC."
+
 msgid "HOLD ANY BUTTON TO SKIP"
-msgstr "УДЕРЖИВАЙТЕ КНОПКУ ДЛЯ ПРОПУСКА"
+msgstr "ЗАЖМИТЕ КН. ДЛЯ ПРОПУСКА"
 
 msgid "-NOT DEFINED-"
-msgstr "-НЕ НАЗНАЧЕНО-"
+msgstr "-ПУСТО-"
 
 msgid ""
 "YOU DIDN'T CHOOSE A HOTKEY ENABLE BUTTON. THIS IS REQUIRED FOR EXITING GAMES "
@@ -2719,10 +2822,10 @@ msgstr[1] "ЗАЖМИТЕ %iS ДЛЯ ПРОПУСКА"
 msgstr[2] "ЗАЖМИТЕ %iS ДЛЯ ПРОПУСКА"
 
 msgid "PRESS ANYTHING"
-msgstr "НАЖМИТЕ ЛЮБУЮ КНОПКУ"
+msgstr "НАЖАТЬ"
 
 msgid "ALREADY TAKEN"
-msgstr "УЖЕ ЗАНЯТО"
+msgstr "ЗАНЯТО"
 
 #, c-format
 msgid "%s connected"
@@ -2818,7 +2921,7 @@ msgstr "Разрешить публичный доступ API, использу
 msgid "USE RETROARCH RGUI MENU"
 msgstr "ИСП. МЕНЮ RETROARCH RGUI"
 
-msgid "RESET GAMELIST CUSTOMISATIONS"
+msgid "RESET GAMELIST CUSTOMIZATIONS"
 msgstr "СБРОСИТЬ НАСТРОЙКИ СПИСКА ИГР"
 
 msgid "SCRAPING IN PROGRESS"
@@ -3018,8 +3121,8 @@ msgstr "Банер"
 msgid "enter path to marquee"
 msgstr "введите путь к банеру"
 
-msgid "Thumbnail"
-msgstr "Эскиз"
+msgid "THUMBNAIL"
+msgstr "ЭСКИЗ"
 
 msgid "enter path to thumbnail"
 msgstr "введите путь к эскизу"
@@ -3065,9 +3168,9 @@ msgstr[2] "Коллекция содержит %1$i игр, включая %2$s 
 
 msgid "%i GAME AVAILABLE"
 msgid_plural "%i GAMES AVAILABLE"
-msgstr[0] "%i ИГРА"
-msgstr[1] "%i ИГРЫ"
-msgstr[2] "%i ИГР"
+msgstr[0] "%i ИГРА ДОСТУПНА"
+msgstr[1] "%i ИГРЫ ДОСТУПНО"
+msgstr[2] "%i ИГР ДОСТУПНО"
 
 msgid "GRID SIZE"
 msgstr "РАЗМЕР СЕТКИ"
@@ -3232,7 +3335,7 @@ msgid "theme region"
 msgstr "РЕГИОН ТЕМЫ"
 
 msgid "THEME"
-msgstr "ТЕМА"
+msgstr "ТЕМЫ"
 
 msgid "REGION"
 msgstr "РЕГИОН"
@@ -3286,10 +3389,10 @@ msgid "VISIBLE SYSTEMS"
 msgstr "ВИДИМЫЕ СИСТЕМЫ"
 
 msgid "HIDE SYSTEM VIEW"
-msgstr "УБРАТЬ ВЫБОР СИСТЕМЫ"
+msgstr "СПРЯТАТЬ СКРЫТЫЕ СИСТЕМЫ"
 
 msgid "BOOT ON GAMELIST"
-msgstr "ЗАГРУЖАТЬСЯ В СПИСОК ИГР"
+msgstr "ЗАГРУЖАТЬ GAMELIST"
 
 msgid "BAT:"
 msgstr "Уровень батареи"
@@ -3342,24 +3445,33 @@ msgstr[2] "Коллекция содержит %1$i игр, включая %2$s 
 
 msgid "%i GAME AVAILABLE"
 msgid_plural "%i GAMES AVAILABLE"
-msgstr[0] "%i ИГРА"
-msgstr[1] "%i ИГРЫ"
-msgstr[2] "%i ИГР"
+msgstr[0] "%i ИГРА ДОСТУПНА"
+msgstr[1] "%i ИГРЫ ДОСТУПНО"
+msgstr[2] "%i ИГР ДОСТУПНО"
+
+msgid "%i GAMES AVAILABLE"
+msgid_plural "%i GAMES AVAILABLE"
+msgstr[0] "%i ИГРА ДОСТУПНА"
+msgstr[1] "%i ИГРЫ ДОСТУПНО"
+msgstr[2] "%i ИГР ДОСТУПНО"
 
 msgid "%i CONFIGURATION"
-msgid_plural "%i КонфигурациИ"
+msgid_plural "%i КОНФИГУРАЦИИ"
+
+msgid "MENU"
+msgstr "МЕНЮ"
 
 msgid "APPLY FILTER"
 msgstr "ПРИМЕНИТЬ ФИЛЬТР"
 
 msgid "JUMP TO..."
-msgstr "ПЕРЕХОД К БУКВЕ"
+msgstr "ПЕРЕХОД К..."
 
 msgid "BAT"
-msgstr "БАТАРЕЯ"
+msgstr "БАТ"
 
 msgid "SND"
-msgstr "ГРОМК"
+msgstr "ГРО"
 
 msgid "BRT"
 msgstr "ЯРК"
@@ -3443,7 +3555,7 @@ msgid "yes"
 msgstr "ДА"
 
 msgid "warning"
-msgstr "ПРЕДУПРЕЖДЕНИЙ"
+msgstr "ПРЕДУПРЕЖДЕНИЕ"
 
 msgid "error"
 msgstr "ОШИБОК"
@@ -3461,7 +3573,7 @@ msgid "THEME VIDEOTILES"
 msgstr "ВИДЕО ПЛИТКИ ТЕМЫ"
 
 msgid "SWITCH POWER BUTTON TAP TO OFF"
-msgstr "ВЫКЛЮЧЕНИЕ КНОПКОЙ ПИТАНИЯ"
+msgstr "КНОПКА ПИТАНИЯ ВЫКЛЮЧАЕТ УСТРОЙСТВО"
 
 msgid "THEME COLOR"
 msgstr "ЦВЕТ ТЕМЫ"
@@ -3486,7 +3598,6 @@ msgstr "ТЕМА ВЕРХНЯЯ И НИЖНЯЯ ПАНЕЛЬ"
 
 msgid "THEME FORCE UPPERCASE"
 msgstr "ТЕМА ВЕРХНИЙ РЕГИСТР НАПИСАНИЯ"
-
 
 
 
