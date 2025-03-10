@@ -346,9 +346,9 @@ namespace Utils
 
 		} // getDirContent
 
-		stringList getPathList(const std::string& _path)
+		std::vector<std::string> getPathList(const std::string& _path)
 		{
-			stringList  pathList;
+			std::vector<std::string> pathList;
 			std::string path  = getGenericPath(_path);
 			size_t      start = 0;
 			size_t      end   = 0;
@@ -548,12 +548,12 @@ namespace Utils
 			bool scan = true;
 			while(scan)
 			{
-				stringList pathList = getPathList(path);
+				auto pathList = getPathList(path);
 
 				path.clear();
 				scan = false;
 
-				for(stringList::const_iterator it = pathList.cbegin(); it != pathList.cend(); ++it)
+				for(auto it = pathList.cbegin(); it != pathList.cend(); ++it)
 				{
 					// ignore empty
 					if((*it).empty())
@@ -1051,16 +1051,15 @@ namespace Utils
 				if (count > 0)
 				{
 					auto list = getPathList(gp);
-					std::vector<std::string> p(list.begin(), list.end());
 
 					std::string result;
 
-					for (int i = 0; i < p.size() - count; i++)
+					for (int i = 0; i < list.size() - count; i++)
 					{
 						if (result.empty())
-							result = p.at(i);
+							result = list.at(i);
 						else
-							result = result + "/" + p.at(i);
+							result = result + "/" + list.at(i);
 					}
 
 					std::vector<std::string> fn(f.begin(), f.end());

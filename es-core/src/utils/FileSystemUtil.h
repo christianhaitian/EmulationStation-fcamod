@@ -4,6 +4,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 namespace Utils
 {
@@ -12,7 +13,7 @@ namespace Utils
 		typedef std::list<std::string> stringList;
 
 		stringList  getDirContent      (const std::string& _path, const bool _recursive = false, const bool includeHidden = true);
-		stringList  getPathList        (const std::string& _path);
+		std::vector<std::string> getPathList (const std::string& _path);
 		void        setHomePath        (const std::string& _path);
 		std::string getHomePath        ();
 		std::string getCWDPath         ();
