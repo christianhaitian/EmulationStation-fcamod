@@ -632,7 +632,7 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 				ISimpleGameListView* view = dynamic_cast<ISimpleGameListView*>(newView.get());
 				if (view != nullptr)
 				{
-					for (auto file : view->getFileDataEntries())
+					for (auto file : system->getRootFolder()->getFilesRecursive(GAME, true))
 					{
 						if (file->getPath() == cursorPath)
 						{
