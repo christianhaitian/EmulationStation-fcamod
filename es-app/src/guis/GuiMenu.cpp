@@ -36,7 +36,7 @@
 
 GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(window, _("MAIN MENU")), mVersion(window)
 {
-    if (Settings::getInstance()->getBool("EnableKodi") == 1){
+    if (Settings::getInstance()->getBool("EnableKodi") == 1 && (Utils::FileSystem::exists("/usr/local/bin/Kodi.sh"))){
 	   addEntry(_("KODI MEDIA CENTER").c_str(), false, [this] 
 	   { 
 		   Window *window = mWindow;
@@ -1447,16 +1447,17 @@ void GuiMenu::openUISettings()
 	});
 
     // disable kodi
-	auto showKodi = std::make_shared<SwitchComponent>(mWindow);
-	showKodi->setState(Settings::getInstance()->getBool("EnableKodi"));
-	s->addWithLabel(_("Show Kodi in Start Menu"), showKodi);
-	s->addSaveFunc([s, showKodi]
-	{
+    if (Utils::FileSystem::exists("/usr/local/bin/Kodi.sh")){
+	  auto showKodi = std::make_shared<SwitchComponent>(mWindow);
+	  showKodi->setState(Settings::getInstance()->getBool("EnableKodi"));
+	  s->addWithLabel(_("Show Kodi in Start Menu"), showKodi);
+	  s->addSaveFunc([s, showKodi]
+	  {
         Settings::getInstance()->setBool("EnableKodi", showKodi->getState());
-	});
+	  });
 
-	s->onFinalize([s, pthis, window]
-	{
+	  s->onFinalize([s, pthis, window]
+	  {
 		if (s->getVariable("reloadCollections"))
 			CollectionSystemManager::get()->updateSystemsList();
 
@@ -1471,8 +1472,8 @@ void GuiMenu::openUISettings()
 			delete pthis;
 			window->pushGui(new GuiMenu(window, false));
 		}
-	});
-
+	  });
+	}
 	// Game Loading Image Mode
 	auto GameLoadingImageMode = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Game Loading Image Mode"), false);
 	GameLoadingImageMode->addRange({ { _("PIC"), "pic" },{ _("ASCII"), "ascii" },{ _("NONE"), "none" } }, Settings::getInstance()->getString("GameLoadingIMode"));
