@@ -7,6 +7,7 @@
 #include "guis/GuiDetectDevice.h"
 #include "guis/GuiGeneralScreensaverOptions.h"
 #include "guis/GuiMsgBox.h"
+#include "guis/GuiTools.h"
 #include "guis/GuiScraperStart.h"
 #include "guis/GuiSettings.h"
 #include "views/UIModeController.h"
@@ -82,6 +83,8 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 #if WIN32
 		addEntry(_("DOWNLOADS AND UPDATES"), true, [this] { openUpdateSettings(); }, "iconUpdates");
 #endif
+
+		addEntry("TOOLS", true, [this] { mWindow->pushGui(new GuiTools(mWindow)); });
 
 		addEntry(_("ADVANCED SETTINGS"), true, [this] { openOtherSettings(); }, "iconAdvanced");
 	}
