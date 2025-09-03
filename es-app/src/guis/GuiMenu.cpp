@@ -1455,7 +1455,7 @@ void GuiMenu::openUISettings()
 	  {
         Settings::getInstance()->setBool("EnableKodi", showKodi->getState());
 	  });
-
+    }
 	  s->onFinalize([s, pthis, window]
 	  {
 		if (s->getVariable("reloadCollections"))
@@ -1473,7 +1473,6 @@ void GuiMenu::openUISettings()
 			window->pushGui(new GuiMenu(window, false));
 		}
 	  });
-	}
 	// Game Loading Image Mode
 	auto GameLoadingImageMode = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Game Loading Image Mode"), false);
 	GameLoadingImageMode->addRange({ { _("PIC"), "pic" },{ _("ASCII"), "ascii" },{ _("NONE"), "none" } }, Settings::getInstance()->getString("GameLoadingIMode"));
