@@ -1,5 +1,5 @@
 #include "guis/GuiMenu.h"
-#include "guis/GuiTools.h"
+
 #include "components/OptionListComponent.h"
 #include "components/SliderComponent.h"
 #include "components/SwitchComponent.h"
@@ -70,12 +70,6 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 #if WIN32
 		addEntry(_("DOWNLOADS AND UPDATES"), true, [this] { openUpdateSettings(); }, "iconUpdates");
 #endif
-
-    // Tools Menu
-    mMenu.addEntry("OPTIONS", false, [this, window] {
-        window->pushGui(new GuiTools(window));
-    });
-
 
 		addEntry(_("ADVANCED SETTINGS"), true, [this] { openOtherSettings(); }, "iconAdvanced");
 	}
