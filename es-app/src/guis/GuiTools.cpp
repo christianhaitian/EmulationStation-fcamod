@@ -163,14 +163,14 @@ void GuiTools::addScriptsToMenu(MenuComponent& menu, const std::string& folderPa
 
 void GuiTools::launchTool(const std::string& script)
 {
-    mWindow->deinit();  // free framebuffer
+    mWindow->deinit(true);  // free framebuffer
 
     std::string cmd = "/bin/bash \"" + script + "\" > /dev/tty1 2>&1";
     system(cmd.c_str());
 
     system("setterm -clear all > /dev/tty1");
 
-    mWindow->init();    // restore ES
+    mWindow->init(true);    // restore ES
 }
 
 bool GuiTools::input(InputConfig* config, Input input)
