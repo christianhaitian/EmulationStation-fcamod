@@ -165,7 +165,9 @@ void GuiTools::launchTool(const std::string& script)
 {
     mWindow->deinit(true);  // free framebuffer
 
-    std::string cmd = "/bin/bash \"" + script + "\" > /dev/tty1 2>&1";
+    system("sudo chmod 666 /dev/tty1");
+
+    std::string cmd = "/bin/bash \"" + script + "\" 2>&1 > /dev/tty1";
     system(cmd.c_str());
 
     system("setterm -clear all > /dev/tty1");
