@@ -16,7 +16,7 @@ public:
     void render(const Transform4x4f& parentTrans) override;   // ✅ render override
 
 private:
-    void addScriptsToMenu(MenuComponent& menu, const std::string& folderPath);
+    bool addScriptsToMenu(MenuComponent& menu, const std::string& folderPath);
     void launchTool(const std::string& script);
 
     MenuComponent mMenu;
