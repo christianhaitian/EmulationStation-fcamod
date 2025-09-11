@@ -39,7 +39,7 @@ private:
 
 // ------------------- GuiTools -------------------
 GuiTools::GuiTools(Window* window)
-    : GuiComponent(window), mMenu(window, "TOOLS")
+    : GuiComponent(window), mMenu(window, "OPTIONS")
 {
     addChild(&mMenu);
 
