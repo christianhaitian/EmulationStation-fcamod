@@ -1,3 +1,5 @@
+#include "AudioManager.h"
+#include "VolumeControl.h"
 #include "guis/GuiTools.h"
 #include "components/MenuComponent.h"
 #include "Window.h"
@@ -168,6 +170,8 @@ bool GuiTools::addScriptsToMenu(MenuComponent& menu, const std::string& folderPa
 // ------------------- launchTool -------------------
 void GuiTools::launchTool(const std::string& script)
 {
+    AudioManager::getInstance()->deinit();
+    VolumeControl::getInstance()->deinit();
     // Hide ES temporarily
     mWindow->deinit(true);
 
@@ -181,6 +185,8 @@ void GuiTools::launchTool(const std::string& script)
 
     // Restore ES
     mWindow->init(true);
+    VolumeControl::getInstance()->init();
+    AudioManager::getInstance()->init();
 }
 
 // ------------------- input -------------------
