@@ -88,6 +88,18 @@ bool GuiTools::addScriptsToMenu(MenuComponent& menu, const std::string& folderPa
             {
                 SubMenuWrapper* wrapper = new SubMenuWrapper(mWindow, subMenu);
 
+                Vector2f screenSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
+			    Vector2f menuSize = subMenu->getSize();
+
+			    if (screenSize.x() >= 1024 && screenSize.y() >= 600)
+			    {
+			        Vector3f pos;
+			        pos[0] = (screenSize.x() - menuSize.x()) / 2.0f;
+			        pos[1] = (screenSize.y() - menuSize.y()) / 2.0f;
+			        pos[2] = 0;
+			        subMenu->setPosition(pos);
+    			}
+
                 // On-screen BACK button closes submenu
                 subMenu->addButton("BACK", "back", [wrapper] {
                     wrapper->close();
