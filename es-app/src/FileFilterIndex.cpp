@@ -291,7 +291,9 @@ void FileFilterIndex::debugPrintIndexes()
 
 void FileFilterIndex::setTextFilter(const std::string text)
 {
-	mTextFilter = Utils::String::toUpper(text);
+	// keep both raw (for pinyin) and upper (legacy ASCII-insensitive)
+	mTextFilterRaw = text;                       // NEW
+	mTextFilter    = Utils::String::toUpper(text);
 }
 
 bool FileFilterIndex::showFile(FileData* game)
@@ -316,8 +318,16 @@ bool FileFilterIndex::showFile(FileData* game)
 
 	bool keepGoing = false;
 
-	if (!mTextFilter.empty() && Utils::String::toUpper(game->getName()).find(mTextFilter) != std::string::npos)
-		keepGoing = true;
+	if (!mTextFilter.empty())
+	{
+		// 1) original case-insensitive (via upper)
+		if (Utils::String::toUpper(game->getName()).find(mTextFilter) != std::string::npos)
+			keepGoing = true;
+		else
+		// 2) fallback: pinyin-aware search (raw user query)
+		if (Utils::String::containsIgnoreCasePinyin(game->getName(), mTextFilterRaw))
+			keepGoing = true;
+	}
 
 	for (std::vector<FilterDataDecl>::const_iterator it = filterDataDecl.cbegin(); it != filterDataDecl.cend(); ++it ) {
 		FilterDataDecl filterData = (*it);
