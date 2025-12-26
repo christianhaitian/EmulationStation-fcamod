@@ -1625,7 +1625,7 @@ void GuiMenu::openOtherSettings()
 	s->addSaveFunc([es_timezones, this] {
 		if (es_timezones->changed()) {
 			std::string selectedTimezone = es_timezones->getSelected();
-			runSystemCommand("ln -sf /usr/share/zoneinfo/" + selectedTimezone + " /etc/localtime", "", nullptr);
+			runSystemCommand("sudo ln -sf /usr/share/zoneinfo/" + selectedTimezone + " /etc/localtime", "", nullptr);
 			std::string setRepo = std::string(getShOutput(R"(/usr/local/bin/timezones setrepo)"));
 			if (!setRepo.empty())
 			  mWindow->displayNotificationMessage(setRepo);
