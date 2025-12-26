@@ -84,9 +84,9 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 #endif
 
     // Tools Menu
-    mMenu.addEntry("OPTIONS", true, [this, window] {
+    mMenu.addEntry(_("OPTIONS"), true, [this, window] {
         window->pushGui(new GuiTools(window));
-    }, ":/folder/folder.svg");
+    }, "iconOptions");
 
 		addEntry(_("ADVANCED SETTINGS"), true, [this] { openOtherSettings(); }, "iconAdvanced");
 	}
@@ -1804,7 +1804,7 @@ void GuiMenu::openOtherSettings()
 	s->addSaveFunc([es_timezones, this] {
 		if (es_timezones->changed()) {
 			std::string selectedTimezone = es_timezones->getSelected();
-			runSystemCommand("ln -sf /usr/share/zoneinfo/" + selectedTimezone + " /etc/localtime", "", nullptr);
+			runSystemCommand("sudo ln -sf /usr/share/zoneinfo/" + selectedTimezone + " /etc/localtime", "", nullptr);
 			std::string setRepo = std::string(getShOutput(R"(/usr/local/bin/timezones setrepo)"));
 			if (!setRepo.empty())
 			  mWindow->displayNotificationMessage(setRepo);

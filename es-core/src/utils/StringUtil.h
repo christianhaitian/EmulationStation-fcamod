@@ -58,6 +58,9 @@ namespace Utils
 		const std::string convertFromWideString(const std::wstring wstring);
 		const std::wstring convertToWideString(const std::string string);
 #endif
+
+		// Pinyin-aware substring match: allow ASCII/pinyin query to hit Chinese titles.
+		bool containsIgnoreCasePinyin(const std::string& s, const std::string& what);
 	} // String::
 
 } // Utils::
