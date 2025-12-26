@@ -96,6 +96,7 @@ private:
 
 	FileData* mRootFolder;
 	std::string mTextFilter;
+	std::string mTextFilterRaw; // NEW: raw user input for pinyin matching
 };
 
 #endif // ES_APP_FILE_FILTER_INDEX_H
