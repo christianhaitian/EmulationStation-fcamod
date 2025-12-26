@@ -70,9 +70,9 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 #endif
 
     // Tools Menu
-    mMenu.addEntry("OPTIONS", true, [this, window] {
+    mMenu.addEntry(_("OPTIONS"), true, [this, window] {
         window->pushGui(new GuiTools(window));
-    }, ":/folder/folder.svg");
+    }, "iconOptions");
 
 		addEntry(_("ADVANCED SETTINGS"), true, [this] { openOtherSettings(); }, "iconAdvanced");
 	}
