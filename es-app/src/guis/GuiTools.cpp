@@ -27,7 +27,7 @@ public:
 
     bool input(InputConfig* config, Input input) override
     {
-        if (input.value != 0 && config->isMappedTo("b", input))
+        if (input.value != 0 && config->isMappedTo(BUTTON_BACK, input))
         {
             close();
             return true;
@@ -216,7 +216,7 @@ void GuiTools::launchTool(const std::string& script)
 // ------------------- input -------------------
 bool GuiTools::input(InputConfig* config, Input input)
 {
-    if (input.value != 0 && config->isMappedTo("b", input))
+    if (input.value != 0 && config->isMappedTo(BUTTON_BACK, input))
     {
         GuiComponent* top = mWindow->peekGui();
         if (top != this)
