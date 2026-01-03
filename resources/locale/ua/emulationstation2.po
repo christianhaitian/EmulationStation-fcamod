@@ -416,7 +416,7 @@ msgid "CREATE NEW DYNAMIC COLLECTION"
 msgstr "СТВОРИТИ ДИНАМІЧНУ КОЛЕКЦІЮ"
 
 msgid "OPTIONS"
-msgstr " "
+msgstr "НАЛАШТУВАННЯ"
 
 msgid "SORT COLLECTIONS AND SYSTEMS"
 msgstr "СОРТУВАТИ КОЛЕКЦІЇ ТА СИСТЕМИ"
