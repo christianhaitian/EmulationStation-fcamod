@@ -388,7 +388,7 @@ msgid "CREATE NEW DYNAMIC COLLECTION"
 msgstr "СОЗДАТЬ ДИНАМИЧЕСКУЮ КОЛЛЕКЦИЮ"
 
 msgid "OPTIONS"
-msgstr " "
+msgstr "НАСТРОЙКИ"
 
 msgid "SORT COLLECTIONS AND SYSTEMS"
 msgstr "СОРТИРОВКА КОЛЛЕКЦИЙ И СИСТЕМ"
@@ -3486,6 +3486,7 @@ msgstr "ТЕМА ВЕРХНЯЯ И НИЖНЯЯ ПАНЕЛЬ"
 
 msgid "THEME FORCE UPPERCASE"
 msgstr "ТЕМА ВЕРХНИЙ РЕГИСТР НАПИСАНИЯ"
+
 
 
 
