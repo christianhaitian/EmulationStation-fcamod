@@ -73,7 +73,17 @@ jobs:
         run: |
           git checkout ${{ github.event.inputs.target_branch_1 }}
 
-          if git cherry-pick ${{ steps.resolve.outputs.commit_sha }}; then
+          COMMIT=${{ steps.resolve.outputs.commit_sha }}
+          PARENTS=$(git rev-list --parents -n 1 "$COMMIT" | wc -w)
+
+          if [ "$PARENTS" -gt 2 ]; then
+            echo "Merge commit detected, using -m 1"
+            CMD="git cherry-pick -m 1 $COMMIT"
+          else
+            CMD="git cherry-pick $COMMIT"
+          fi
+
+          if eval "$CMD"; then
             git push origin HEAD:${{ github.event.inputs.target_branch_1 }}
           else
             git cherry-pick --abort
@@ -84,7 +94,17 @@ jobs:
         run: |
           git checkout ${{ github.event.inputs.target_branch_2 }}
 
-          if git cherry-pick ${{ steps.resolve.outputs.commit_sha }}; then
+          COMMIT=${{ steps.resolve.outputs.commit_sha }}
+          PARENTS=$(git rev-list --parents -n 1 "$COMMIT" | wc -w)
+
+          if [ "$PARENTS" -gt 2 ]; then
+            echo "Merge commit detected, using -m 1"
+            CMD="git cherry-pick -m 1 $COMMIT"
+          else
+            CMD="git cherry-pick $COMMIT"
+          fi
+
+          if eval "$CMD"; then
             git push origin HEAD:${{ github.event.inputs.target_branch_2 }}
           else
             git cherry-pick --abort
