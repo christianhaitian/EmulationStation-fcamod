@@ -1,0 +1,92 @@
+name: Cherry-pick single commit into two branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Branch to cherry-pick from'
+        required: true
+        type: choice
+        options:
+          - master
+          - 351v
+          - 503noTTS
+
+      target_branch_1:
+        description: 'First target branch'
+        required: true
+        type: choice
+        options:
+          - master
+          - 351v
+          - 503noTTS
+
+      target_branch_2:
+        description: 'Second target branch'
+        required: true
+        type: choice
+        options:
+          - master
+          - 351v
+          - 503noTTS
+
+      commit_sha:
+        description: 'Optional commit SHA (defaults to latest on source branch)'
+        required: false
+
+jobs:
+  cherry-pick:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate branch selection
+        run: |
+          if [ "${{ github.event.inputs.target_branch_1 }}" = "${{ github.event.inputs.target_branch_2 }}" ]; then
+            echo "Error: target branches must be different"
+            exit 1
+          fi
+
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Resolve commit SHA
+        id: resolve
+        run: |
+          if [ -n "${{ github.event.inputs.commit_sha }}" ]; then
+            COMMIT_SHA="${{ github.event.inputs.commit_sha }}"
+          else
+            git fetch origin ${{ github.event.inputs.source_branch }}
+            COMMIT_SHA=$(git rev-parse origin/${{ github.event.inputs.source_branch }})
+          fi
+
+          echo "Using commit: $COMMIT_SHA"
+          echo "commit_sha=$COMMIT_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Cherry-pick into first target branch
+        run: |
+          git checkout ${{ github.event.inputs.target_branch_1 }}
+
+          if git cherry-pick ${{ steps.resolve.outputs.commit_sha }}; then
+            git push origin HEAD:${{ github.event.inputs.target_branch_1 }}
+          else
+            git cherry-pick --abort
+            exit 1
+          fi
+
+      - name: Cherry-pick into second target branch
+        run: |
+          git checkout ${{ github.event.inputs.target_branch_2 }}
+
+          if git cherry-pick ${{ steps.resolve.outputs.commit_sha }}; then
+            git push origin HEAD:${{ github.event.inputs.target_branch_2 }}
+          else
+            git cherry-pick --abort
+            exit 1
+          fi
