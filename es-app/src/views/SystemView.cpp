@@ -385,12 +385,14 @@ bool SystemView::input(InputConfig* config, Input input)
 			}
 			if (config->isMappedTo("pagedown", input))
 			{
-				int cursor = mCursor + 10;
-				if (cursor < 0)
-					cursor += (int)mEntries.size();
+				const int sz = (int)mEntries.size();
+				if (sz <= 1)
+					return true;
 
-				if (cursor >= (int)mEntries.size())
-					cursor -= (int)mEntries.size();
+				const int step = (sz > 10) ? 10 : 1;
+				int cursor = mCursor + step;
+				cursor %= sz;
+				if (cursor < 0) cursor += sz;
 
 				auto sd = mEntries.at(cursor).object;
 				ViewController::get()->goToSystemView(sd, true);
@@ -399,11 +401,14 @@ bool SystemView::input(InputConfig* config, Input input)
 			}
 			if (config->isMappedTo("pageup", input))
 			{
-				int cursor = mCursor - 10;
-				if (cursor < 0)
-					cursor += (int)mEntries.size();
-				if (cursor >= (int)mEntries.size())
-					cursor -= (int)mEntries.size();
+				const int sz = (int)mEntries.size();
+				if (sz <= 1)
+					return true;
+
+				const int step = (sz > 10) ? 10 : 1;
+				int cursor = mCursor - step;
+				cursor %= sz;
+				if (cursor < 0) cursor += sz;
 
 				auto sd = mEntries.at(cursor).object;
 				ViewController::get()->goToSystemView(sd, true);
@@ -427,12 +432,14 @@ bool SystemView::input(InputConfig* config, Input input)
 			}
 			if (config->isMappedTo("pagedown", input) && mEntries.size() > 10)
 			{
-				int cursor = mCursor + 10;
-				if (cursor < 0)
-					cursor += (int)mEntries.size();
+				const int sz = (int)mEntries.size();
+				if (sz <= 1)
+					return true;
 
-				if (cursor >= (int)mEntries.size())
-					cursor -= (int)mEntries.size();
+				const int step = (sz > 10) ? 10 : 1;
+				int cursor = mCursor + step;
+				cursor %= sz;
+				if (cursor < 0) cursor += sz;
 
 				auto sd = mEntries.at(cursor).object;
 				ViewController::get()->goToSystemView(sd, true);
@@ -441,11 +448,14 @@ bool SystemView::input(InputConfig* config, Input input)
 			}
 			if (config->isMappedTo("pageup", input) && mEntries.size() > 10)
 			{
-				int cursor = mCursor - 10;
-				if (cursor < 0)
-					cursor += (int)mEntries.size();
-				if (cursor >= (int)mEntries.size())
-					cursor -= (int)mEntries.size();
+				const int sz = (int)mEntries.size();
+				if (sz <= 1)
+					return true;
+
+				const int step = (sz > 10) ? 10 : 1;
+				int cursor = mCursor - step;
+				cursor %= sz;
+				if (cursor < 0) cursor += sz;
 
 				auto sd = mEntries.at(cursor).object;
 				ViewController::get()->goToSystemView(sd, true);
