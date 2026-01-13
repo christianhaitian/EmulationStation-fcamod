@@ -41,14 +41,14 @@ private:
 
 // ------------------- GuiTools -------------------
 GuiTools::GuiTools(Window* window)
-    : GuiComponent(window), mMenu(window, "OPTIONS")
+    : GuiComponent(window), mMenu(window, _("OPTIONS"))
 {
     addChild(&mMenu);
 
     addScriptsToMenu(mMenu, "/opt/system");
 
     // Root BACK button
-    mMenu.addButton("BACK", "back", [this] { delete this; });
+    mMenu.addButton(_("BACK"), "back", [this] { delete this; });
 
     Vector2f screenSize((float)Renderer::getScreenWidth(), (float)Renderer::getScreenHeight());
     Vector2f menuSize = mMenu.getSize();
@@ -81,6 +81,7 @@ bool GuiTools::addScriptsToMenu(MenuComponent& menu, const std::string& folderPa
 
         if (Utils::FileSystem::isDirectory(fullPath))
         {
+            std::string folderDisplayName = _U("\uF07B ") + name;
             MenuComponent* subMenu = new MenuComponent(mWindow, name);
             bool hasItems = addScriptsToMenu(*subMenu, fullPath);
 
@@ -101,11 +102,11 @@ bool GuiTools::addScriptsToMenu(MenuComponent& menu, const std::string& folderPa
     			}
 
                 // On-screen BACK button closes submenu
-                subMenu->addButton("BACK", "back", [wrapper] {
+                subMenu->addButton(_("BACK"), "back", [wrapper] {
                     wrapper->close();
                 });
 
-                folderWrappers.push_back(std::make_pair(name, wrapper));
+                folderWrappers.push_back(std::make_pair(folderDisplayName, wrapper));
             }
             else
             {
@@ -148,8 +149,8 @@ bool GuiTools::addScriptsToMenu(MenuComponent& menu, const std::string& folderPa
                     }
                 }
             }
-
-            scripts.push_back(std::make_pair(displayName, fullPath));
+            std::string scriptDisplayName = _U("\uF013 ") + displayName;
+            scripts.push_back(std::make_pair(scriptDisplayName, fullPath));
         }
     }
 
@@ -174,7 +175,7 @@ bool GuiTools::addScriptsToMenu(MenuComponent& menu, const std::string& folderPa
 
         menu.addEntry(folderName, true, [this, wrapper] {
             mWindow->pushGui(wrapper);
-        }, ":/folder/folder.svg");
+        }, "");
     }
 
     // Add script entries
@@ -185,7 +186,7 @@ bool GuiTools::addScriptsToMenu(MenuComponent& menu, const std::string& folderPa
 
         menu.addEntry(displayName, false, [this, path] {
             launchTool(path);
-        }, ":/system/advanced.svg");
+        }, "");
     }
 
     return (!folderWrappers.empty() || !scripts.empty());
