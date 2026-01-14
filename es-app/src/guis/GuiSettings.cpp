@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiSettings.h"
 
 #include "views/ViewController.h"

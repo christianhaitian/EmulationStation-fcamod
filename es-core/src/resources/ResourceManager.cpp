@@ -1,3 +1,4 @@
+#include <string>
 #include "ResourceManager.h"
 
 #include "utils/FileSystemUtil.h"

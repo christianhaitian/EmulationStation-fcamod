@@ -1,3 +1,4 @@
+#include <string>
 #include "ApiSystem.h"
 #include "HttpReq.h"
 #include "utils/FileSystemUtil.h"

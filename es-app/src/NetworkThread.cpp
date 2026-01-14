@@ -1,3 +1,4 @@
+#include <string>
 #include "NetworkThread.h"
 #include "ApiSystem.h"
 #include "guis/GuiMsgBox.h"

@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_ANIMATIONS_LAMBDA_ANIMATION_H
 #define ES_CORE_ANIMATIONS_LAMBDA_ANIMATION_H

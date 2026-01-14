@@ -1,3 +1,4 @@
+#include <string>
 #include "GuiGamelistOptions.h"
 
 #include "guis/GuiGamelistFilter.h"

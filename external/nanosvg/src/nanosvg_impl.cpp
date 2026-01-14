@@ -1,3 +1,4 @@
+#include <string>
 #define NANOSVG_IMPLEMENTATION
 #define NANOSVGRAST_IMPLEMENTATION
 

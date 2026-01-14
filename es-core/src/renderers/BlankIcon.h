@@ -1,3 +1,4 @@
+#include <string>
 /* GIMP RGBA C-Source image dump (Untitled.c) */
 
 static const struct {

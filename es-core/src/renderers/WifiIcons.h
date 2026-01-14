@@ -1,3 +1,4 @@
+#include <string>
 /* GIMP RGB C-Source image dump (WifiIcons.c) */
 
 static const struct {

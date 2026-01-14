@@ -1,3 +1,4 @@
+#include <string>
 #include "components/SliderComponent.h"
 
 #include "resources/Font.h"

@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiMsgBox.h"
 
 #include "components/ButtonComponent.h"

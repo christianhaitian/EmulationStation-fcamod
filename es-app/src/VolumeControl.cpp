@@ -1,3 +1,4 @@
+#include <string>
 #include "VolumeControl.h"
 
 #include "math/Misc.h"

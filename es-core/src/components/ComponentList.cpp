@@ -1,3 +1,4 @@
+#include <string>
 #include "components/ComponentList.h"
 #include "components/TextComponent.h"
 

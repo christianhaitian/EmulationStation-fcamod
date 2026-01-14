@@ -1,3 +1,4 @@
+#include <string>
 #include "ContentInstaller.h"
 #include "Window.h"
 #include "components/AsyncNotificationComponent.h"

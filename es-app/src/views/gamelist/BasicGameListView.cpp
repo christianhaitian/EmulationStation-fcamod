@@ -1,3 +1,4 @@
+#include <string>
 #include "views/gamelist/BasicGameListView.h"
 
 #include "utils/FileSystemUtil.h"

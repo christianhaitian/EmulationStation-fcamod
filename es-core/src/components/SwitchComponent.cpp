@@ -1,3 +1,4 @@
+#include <string>
 #include "SwitchComponent.h"
 
 #include "resources/Font.h"

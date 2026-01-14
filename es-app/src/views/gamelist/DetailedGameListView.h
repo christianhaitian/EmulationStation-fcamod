@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_VIEWS_GAME_LIST_DETAILED_GAME_LIST_VIEW_H
 #define ES_APP_VIEWS_GAME_LIST_DETAILED_GAME_LIST_VIEW_H

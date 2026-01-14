@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_COMPONENTS_ASYNC_REQ_COMPONENT_H
 #define ES_APP_COMPONENTS_ASYNC_REQ_COMPONENT_H

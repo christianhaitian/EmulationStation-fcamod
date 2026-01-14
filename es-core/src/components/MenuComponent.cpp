@@ -1,3 +1,4 @@
+#include <string>
 #include "components/MenuComponent.h"
 
 #include "components/ButtonComponent.h"

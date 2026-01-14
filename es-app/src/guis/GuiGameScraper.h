@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_GUIS_GUI_GAME_SCRAPER_H
 #define ES_APP_GUIS_GUI_GAME_SCRAPER_H

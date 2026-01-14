@@ -1,3 +1,4 @@
+#include <string>
 #ifdef _RPI_
 #pragma once
 #ifndef ES_CORE_COMPONENTS_VIDEO_PLAYER_COMPONENT_H

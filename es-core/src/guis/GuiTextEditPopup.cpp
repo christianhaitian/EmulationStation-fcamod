@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiTextEditPopup.h"
 
 #include "components/ButtonComponent.h"

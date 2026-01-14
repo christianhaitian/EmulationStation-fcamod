@@ -1,3 +1,4 @@
+#include <string>
 #include "FileFilterIndex.h"
 
 #include "utils/StringUtil.h"

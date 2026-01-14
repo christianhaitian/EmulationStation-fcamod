@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_RESOURCES_TEXTURE_DATA_MANAGER_H
 #define ES_CORE_RESOURCES_TEXTURE_DATA_MANAGER_H

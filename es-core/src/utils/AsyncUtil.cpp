@@ -1,3 +1,4 @@
+#include <string>
 #include "utils/AsyncUtil.h"
 
 #include <thread>

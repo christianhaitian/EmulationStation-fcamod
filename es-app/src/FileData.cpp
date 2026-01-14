@@ -1,3 +1,4 @@
+#include <string>
 #include "FileData.h"
 
 #include "utils/FileSystemUtil.h"

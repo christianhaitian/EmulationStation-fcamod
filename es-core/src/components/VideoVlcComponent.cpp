@@ -1,3 +1,4 @@
+#include <string>
 #include "components/VideoVlcComponent.h"
 
 #include "renderers/Renderer.h"

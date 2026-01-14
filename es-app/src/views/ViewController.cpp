@@ -1,3 +1,4 @@
+#include <string>
 #include "views/ViewController.h"
 
 #include "animations/Animation.h"

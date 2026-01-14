@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiThemeInstall.h"
 
 #include "ApiSystem.h"

@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_POWER_SAVER_H
 #define ES_CORE_POWER_SAVER_H

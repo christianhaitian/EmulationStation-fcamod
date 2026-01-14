@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_ANIMATIONS_MOVE_CAMERA_ANIMATION_H
 #define ES_APP_ANIMATIONS_MOVE_CAMERA_ANIMATION_H

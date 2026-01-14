@@ -1,3 +1,4 @@
+#include <string>
 #include "resources/Font.h"
 
 #include "renderers/Renderer.h" 

@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiDetectDevice.h"
 
 #include "components/TextComponent.h"

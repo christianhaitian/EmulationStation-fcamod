@@ -1,3 +1,4 @@
+#include <string>
 #include "views/SystemView.h"
 
 #include "animations/LambdaAnimation.h"

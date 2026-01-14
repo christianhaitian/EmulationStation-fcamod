@@ -1,3 +1,4 @@
+#include <string>
 #include "components/RatingComponent.h"
 
 #include "resources/TextureResource.h"

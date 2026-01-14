@@ -1,3 +1,4 @@
+#include <string>
 #include "Scripting.h"
 #include "Log.h"
 #include "platform.h"

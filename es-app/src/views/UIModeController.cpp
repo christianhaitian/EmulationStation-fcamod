@@ -1,3 +1,4 @@
+#include <string>
 #include "UIModeController.h"
 
 #include "utils/StringUtil.h"

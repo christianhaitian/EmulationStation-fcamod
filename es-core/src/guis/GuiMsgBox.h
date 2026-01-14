@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_GUIS_GUI_MSG_BOX_H
 #define ES_CORE_GUIS_GUI_MSG_BOX_H

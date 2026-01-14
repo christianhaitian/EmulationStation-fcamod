@@ -1,3 +1,4 @@
+#include <string>
 #include "components/HelpComponent.h"
 
 #include "components/ComponentGrid.h"

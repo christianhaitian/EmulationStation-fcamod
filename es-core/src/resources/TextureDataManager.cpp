@@ -1,3 +1,4 @@
+#include <string>
 #include "resources/TextureDataManager.h"
 
 #include "resources/TextureData.h"

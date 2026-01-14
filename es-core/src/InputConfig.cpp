@@ -1,3 +1,4 @@
+#include <string>
 #include "InputConfig.h"
 
 #include "Log.h"
