@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_MATH_MISC_H
 #define ES_CORE_MATH_MISC_H

@@ -1,3 +1,4 @@
+#include <string>
 #include "MameNames.h"
 
 #include "resources/ResourceManager.h"

@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_COMPONENTS_TEXT_LIST_COMPONENT_H
 #define ES_APP_COMPONENTS_TEXT_LIST_COMPONENT_H

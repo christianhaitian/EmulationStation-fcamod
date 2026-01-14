@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_IMAGE_IO
 #define ES_CORE_IMAGE_IO

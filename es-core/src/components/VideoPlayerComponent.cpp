@@ -1,3 +1,4 @@
+#include <string>
 #ifdef _RPI_
 #include "components/VideoPlayerComponent.h"
 

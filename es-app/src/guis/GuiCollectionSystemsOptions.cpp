@@ -1,3 +1,4 @@
+#include <string>
 #include <SystemData.h>
 #include "guis/GuiCollectionSystemsOptions.h"
 

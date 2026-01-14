@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_MATH_TRANSFORM4X4F_H
 #define ES_CORE_MATH_TRANSFORM4X4F_H

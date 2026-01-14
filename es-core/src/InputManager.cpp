@@ -1,3 +1,4 @@
+#include <string>
 #include "InputManager.h"
 
 #include "utils/FileSystemUtil.h"

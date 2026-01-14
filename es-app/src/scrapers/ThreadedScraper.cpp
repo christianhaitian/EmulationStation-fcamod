@@ -1,3 +1,4 @@
+#include <string>
 #include "ThreadedScraper.h"
 #include "Window.h"
 #include "FileData.h"

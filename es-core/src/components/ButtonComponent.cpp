@@ -1,3 +1,4 @@
+#include <string>
 #include "components/ButtonComponent.h"
 
 #include "resources/Font.h"

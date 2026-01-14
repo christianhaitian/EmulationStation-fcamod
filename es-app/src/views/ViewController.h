@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_VIEWS_VIEW_CONTROLLER_H
 #define ES_APP_VIEWS_VIEW_CONTROLLER_H

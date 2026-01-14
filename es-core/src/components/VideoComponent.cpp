@@ -1,3 +1,4 @@
+#include <string>
 #include "components/VideoComponent.h"
 
 #include "resources/ResourceManager.h"

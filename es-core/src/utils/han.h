@@ -1,3 +1,4 @@
+#include <string>
 // Pinyin mapping table derived from ROCKNIX/emulationstation-next/commit/6a81dfb3b1015d393d7418136080085313b78e85
 #include <unordered_map>
 

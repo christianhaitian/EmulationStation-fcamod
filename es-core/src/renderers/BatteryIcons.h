@@ -1,3 +1,4 @@
+#include <string>
 /* GIMP RGB C-Source image dump (BatteryIcons.c) */
 
 static const struct {

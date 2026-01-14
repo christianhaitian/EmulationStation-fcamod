@@ -1,3 +1,4 @@
+#include <string>
 #include "Sound.h"
 #include "AudioManager.h"
 #include "Log.h"

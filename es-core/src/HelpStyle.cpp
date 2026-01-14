@@ -1,3 +1,4 @@
+#include <string>
 #include "HelpStyle.h"
 
 #include "resources/Font.h"

@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiScreensaverOptions.h"
 
 #include "guis/GuiTextEditPopupKeyboard.h"

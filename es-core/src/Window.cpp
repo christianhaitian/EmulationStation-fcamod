@@ -1,3 +1,4 @@
+#include <string>
 #include "Window.h"
 
 #include "components/HelpComponent.h"

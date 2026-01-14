@@ -1,3 +1,4 @@
+#include <string>
 #include "GuiComponent.h"
 
 #include "components/NinePatchComponent.h"

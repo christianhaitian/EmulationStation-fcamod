@@ -1,3 +1,4 @@
+#include <string>
 #include "views/gamelist/GridGameListView.h"
 
 #include "animations/LambdaAnimation.h"

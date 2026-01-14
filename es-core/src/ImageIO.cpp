@@ -1,3 +1,4 @@
+#include <string>
 #include "ImageIO.h"
 
 #include "Log.h"

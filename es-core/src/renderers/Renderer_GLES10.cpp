@@ -1,3 +1,4 @@
+#include <string>
 #if defined(USE_OPENGLES_10)
 
 #include "renderers/Renderer.h"

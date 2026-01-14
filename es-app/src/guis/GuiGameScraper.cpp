@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiGameScraper.h"
 
 #include "components/ButtonComponent.h"

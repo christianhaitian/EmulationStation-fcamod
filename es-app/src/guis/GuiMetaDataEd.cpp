@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiMetaDataEd.h"
 
 #include "components/ButtonComponent.h"

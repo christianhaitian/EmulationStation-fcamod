@@ -1,3 +1,4 @@
+#include <string>
 #include "views/gamelist/ISimpleGameListView.h"
 
 #include "views/UIModeController.h"

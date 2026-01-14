@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_FILE_DATA_H
 #define ES_APP_FILE_DATA_H

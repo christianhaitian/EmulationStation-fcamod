@@ -1,3 +1,4 @@
+#include <string>
 #include "ThemeData.h"
 
 #include "components/ImageComponent.h"

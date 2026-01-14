@@ -1,3 +1,4 @@
+#include <string>
 #include "MetaData.h"
 
 #include "utils/FileSystemUtil.h"

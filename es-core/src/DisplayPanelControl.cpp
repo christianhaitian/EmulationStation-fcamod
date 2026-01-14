@@ -1,3 +1,4 @@
+#include <string>
 #include "DisplayPanelControl.h"
 
 #include "Log.h"

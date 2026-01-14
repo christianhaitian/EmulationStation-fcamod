@@ -1,3 +1,4 @@
+#include <string>
 #include "ApiSystem.h"
 #include "DisplayPanelControl.h"
 #include "HttpReq.h"

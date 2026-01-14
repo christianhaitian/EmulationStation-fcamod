@@ -1,3 +1,4 @@
+#include <string>
 #include "EsLocale.h"
 #include "resources/ResourceManager.h"
 #include "Settings.h"

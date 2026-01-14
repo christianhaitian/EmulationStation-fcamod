@@ -1,3 +1,4 @@
+#include <string>
 #include "components/ComponentGrid.h"
 #include "Settings.h"
 #include "ThemeData.h"

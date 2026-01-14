@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_UTILS_ASYNC_UTIL_H
 #define ES_CORE_UTILS_ASYNC_UTIL_H

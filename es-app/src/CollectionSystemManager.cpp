@@ -1,3 +1,4 @@
+#include <string>
 #include "CollectionSystemManager.h"
 
 #include "guis/GuiInfoPopup.h"

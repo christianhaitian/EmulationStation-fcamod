@@ -1,3 +1,4 @@
+#include <string>
 #include "components/AnimatedImageComponent.h"
 
 #include "components/ImageComponent.h"

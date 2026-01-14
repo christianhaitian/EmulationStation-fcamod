@@ -1,3 +1,4 @@
+#include <string>
 #include "animations/AnimationController.h"
 
 #include "animations/Animation.h"

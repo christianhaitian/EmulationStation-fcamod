@@ -1,3 +1,4 @@
+#include <string>
 #include "components/ControllerActivityComponent.h"
 
 #include "resources/TextureResource.h"

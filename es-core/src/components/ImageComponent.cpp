@@ -1,3 +1,4 @@
+#include <string>
 #include "components/ImageComponent.h"
 
 #include "resources/TextureResource.h"

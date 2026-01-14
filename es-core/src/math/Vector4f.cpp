@@ -1,3 +1,4 @@
+#include <string>
 #include "math/Vector4f.h"
 
 Vector4f& Vector4f::round()

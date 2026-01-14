@@ -1,3 +1,4 @@
+#include <string>
 #include "views/gamelist/IGameListView.h"
 
 #include "guis/GuiGamelistOptions.h"

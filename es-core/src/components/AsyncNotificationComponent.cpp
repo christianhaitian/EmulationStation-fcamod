@@ -1,3 +1,4 @@
+#include <string>
 #include "AsyncNotificationComponent.h"
 #include "ThemeData.h"
 #include "PowerSaver.h"

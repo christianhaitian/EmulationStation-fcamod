@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiInfoPopup.h"
 
 #include "components/ComponentGrid.h"

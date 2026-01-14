@@ -1,3 +1,4 @@
+#include <string>
 #include "components/TextEditComponent.h"
 
 #include "resources/Font.h"

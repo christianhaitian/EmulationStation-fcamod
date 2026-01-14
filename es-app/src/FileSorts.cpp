@@ -1,3 +1,4 @@
+#include <string>
 #include <Settings.h>
 #include "FileSorts.h"
 #include "utils/StringUtil.h"
