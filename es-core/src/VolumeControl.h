@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_VOLUME_CONTROL_H
 #define ES_APP_VOLUME_CONTROL_H

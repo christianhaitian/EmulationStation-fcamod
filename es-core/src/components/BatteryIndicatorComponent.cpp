@@ -1,3 +1,4 @@
+#include <string>
 #include "components/BatteryIndicatorComponent.h"
 
 #include "resources/TextureResource.h"

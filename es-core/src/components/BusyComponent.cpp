@@ -1,3 +1,4 @@
+#include <string>
 #include "BusyComponent.h"
 
 #include "components/AnimatedImageComponent.h"

@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_COMPONENTS_MENU_COMPONENT_H
 #define ES_CORE_COMPONENTS_MENU_COMPONENT_H

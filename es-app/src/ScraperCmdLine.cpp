@@ -1,3 +1,4 @@
+#include <string>
 #include "ScraperCmdLine.h"
 
 #include "Log.h"

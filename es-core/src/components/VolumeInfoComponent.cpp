@@ -1,3 +1,4 @@
+#include <string>
 #include "VolumeInfoComponent.h"
 #include "ThemeData.h"
 #include "PowerSaver.h"

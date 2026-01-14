@@ -1,3 +1,4 @@
+#include <string>
 #include "scrapers/ScreenScraper.h"
 
 #include "utils/TimeUtil.h"

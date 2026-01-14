@@ -1,3 +1,4 @@
+#include <string>
 #include "CECInput.h"
 
 #ifdef HAVE_LIBCEC

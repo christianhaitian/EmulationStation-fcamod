@@ -1,3 +1,4 @@
+#include <string>
 #include "utils/StringUtil.h"
 
 #include <algorithm>

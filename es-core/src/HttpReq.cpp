@@ -1,3 +1,4 @@
+#include <string>
 #include "HttpReq.h"
 
 #include "utils/FileSystemUtil.h"

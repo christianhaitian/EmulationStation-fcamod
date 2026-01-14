@@ -1,3 +1,4 @@
+#include <string>
 #include "components/ScraperSearchComponent.h"
 
 #include "components/ComponentList.h"

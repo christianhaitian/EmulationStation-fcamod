@@ -1,3 +1,4 @@
+#include <string>
 #include "AudioManager.h"
 #include "VolumeControl.h"
 #include "guis/GuiTools.h"

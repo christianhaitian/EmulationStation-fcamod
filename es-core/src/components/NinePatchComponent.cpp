@@ -1,3 +1,4 @@
+#include <string>
 #include "components/NinePatchComponent.h"
 
 #include "resources/TextureResource.h"

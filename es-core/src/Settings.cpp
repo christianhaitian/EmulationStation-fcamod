@@ -1,3 +1,4 @@
+#include <string>
 #include "Settings.h"
 
 #include "utils/FileSystemUtil.h"

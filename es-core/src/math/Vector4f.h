@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_CORE_MATH_VECTOR4F_H
 #define ES_CORE_MATH_VECTOR4F_H

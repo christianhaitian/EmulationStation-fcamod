@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiGeneralScreensaverOptions.h"
 
 #include "components/OptionListComponent.h"

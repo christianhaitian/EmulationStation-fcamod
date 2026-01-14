@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_GUIS_GUI_FAST_SELECT_H
 #define ES_APP_GUIS_GUI_FAST_SELECT_H

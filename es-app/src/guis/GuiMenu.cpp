@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiMenu.h"
 #include "guis/GuiTools.h"
 #include "components/OptionListComponent.h"

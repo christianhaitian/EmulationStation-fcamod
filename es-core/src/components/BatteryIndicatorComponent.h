@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 
 #ifndef ES_APP_COMPONENTS_BATTERYINDICATOR_COMPONENT_H

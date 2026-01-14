@@ -1,3 +1,4 @@
+#include <string>
 #include "components/AsyncReqComponent.h"
 
 #include "renderers/Renderer.h"

@@ -1,3 +1,4 @@
+#include <string>
 #include "SystemScreenSaver.h"
 
 #ifdef _RPI_

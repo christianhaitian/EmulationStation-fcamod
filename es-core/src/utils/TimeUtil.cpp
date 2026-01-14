@@ -1,3 +1,4 @@
+#include <string>
 #include "utils/TimeUtil.h"
 
 #include <time.h>

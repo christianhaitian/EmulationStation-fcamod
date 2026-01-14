@@ -1,3 +1,4 @@
+#include <string>
 #include "ThreadPool.h"
 
 #if WIN32

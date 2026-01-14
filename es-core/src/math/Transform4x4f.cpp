@@ -1,3 +1,4 @@
+#include <string>
 #include "math/Transform4x4f.h"
 
 const Transform4x4f Transform4x4f::operator*(const Transform4x4f& _other) const

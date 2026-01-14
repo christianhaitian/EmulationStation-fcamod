@@ -1,3 +1,4 @@
+#include <string>
 #include "BrightnessInfoComponent.h"
 #include "ThemeData.h"
 #include "PowerSaver.h"

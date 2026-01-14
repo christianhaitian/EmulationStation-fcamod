@@ -1,3 +1,4 @@
+#include <string>
 #if defined(USE_OPENGL_21)
 
 #include "renderers/Renderer.h"

@@ -1,3 +1,4 @@
+#include <string>
 #include "GridTileComponent.h"
 
 #include "resources/TextureResource.h"

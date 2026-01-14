@@ -1,3 +1,4 @@
+#include <string>
 #include "Log.h"
 
 #include "utils/FileSystemUtil.h"

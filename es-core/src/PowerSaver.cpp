@@ -1,3 +1,4 @@
+#include <string>
 #include "PowerSaver.h"
 
 #include "AudioManager.h"

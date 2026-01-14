@@ -1,3 +1,4 @@
+#include <string>
 #pragma once
 #ifndef ES_APP_GUIS_GUI_COLLECTION_SYSTEM_OPTIONS_H
 #define ES_APP_GUIS_GUI_COLLECTION_SYSTEM_OPTIONS_H

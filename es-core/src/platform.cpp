@@ -1,3 +1,4 @@
+#include <string>
 #include "platform.h"
 #include <SDL_events.h>
 

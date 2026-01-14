@@ -1,3 +1,4 @@
+#include <string>
 #include "BrightnessControl.h"
 
 #include "Log.h"

@@ -1,3 +1,4 @@
+#include <string>
 #include "ApiSystem.h"
 #include "AudioManager.h"
 #include "VolumeControl.h"

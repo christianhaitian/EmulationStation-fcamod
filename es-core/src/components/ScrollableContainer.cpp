@@ -1,3 +1,4 @@
+#include <string>
 #include "components/ScrollableContainer.h"
 
 #include "math/Vector2i.h"

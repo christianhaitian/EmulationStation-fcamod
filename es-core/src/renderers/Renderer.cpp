@@ -1,3 +1,4 @@
+#include <string>
 #include "renderers/Renderer.h"
 
 #include "math/Transform4x4f.h"

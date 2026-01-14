@@ -1,3 +1,4 @@
+#include <string>
 #include "resources/TextureResource.h"
 
 #include "utils/FileSystemUtil.h"

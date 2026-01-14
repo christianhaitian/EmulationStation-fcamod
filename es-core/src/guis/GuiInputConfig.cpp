@@ -1,3 +1,4 @@
+#include <string>
 #include "guis/GuiInputConfig.h"
 
 #include "components/ButtonComponent.h"
