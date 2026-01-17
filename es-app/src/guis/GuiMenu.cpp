@@ -1511,7 +1511,7 @@ s->addSaveFunc([s, GameLoadingImageMode] {
 });
 
 	// Game Loading Image
-    if (strstr(GameLoadingImageMode->getSelected().c_str(),"pic")){
+    if (strstr(GameLoadingImageMode->getSelected().c_str(),"pic") || strstr(GameLoadingImageMode->getSelected().c_str(),"gif") || strstr(GameLoadingImageMode->getSelected().c_str(),"vid")){
 	 auto GameLoadingImage = std::make_shared<OptionListComponent<std::string> >(mWindow, _("Game Loading Image"), false);
 	 GameLoadingImage->addRange({ { _("DEFAULT"), "default" },{ _("MARQUEE"), "marquee" },{ _("IMAGE"), "image" },{ _("THUMB"), "thumb" } }, Settings::getInstance()->getString("GameLoadingImage"));
 	 s->addWithLabel(_("  GAME LOADING IMAGE"), GameLoadingImage);
