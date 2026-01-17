@@ -1374,8 +1374,8 @@ void GuiMenu::openUISettings()
 
 // Game Loading Image Mode
 auto GameLoadingImageMode = std::make_shared<OptionListComponent<std::string>>(mWindow, "Game Loading Image Mode", false);
-GameLoadingImageMode->addRange({ {"PIC", "pic"}, {"ASCII", "ascii"}, {"GIF", "gif"}, {"VID", "vid"}, {"NONE", "none"} }, Settings::getInstance()->getString("GameLoadingIMode"));
-s->addWithLabel("GAME LOADING IMAGE MODE", GameLoadingImageMode);
+GameLoadingImageMode->addRange({ {_("PIC"), "pic"},{_("ASCII"), "ascii"},{_("GIF"), "gif"},{_("VID"), "vid"},{_("NONE"), "none"} }, Settings::getInstance()->getString("GameLoadingIMode"));
+s->addWithLabel(_("GAME LOADING IMAGE MODE"), GameLoadingImageMode);
 s->addSaveFunc([s, GameLoadingImageMode] {
   std::string oldvalue = Settings::getInstance()->getString("GameLoadingIMode");
   if (oldvalue != GameLoadingImageMode->getSelected()) {
