@@ -1433,7 +1433,7 @@ s->addSaveFunc([s, GameLoadingImageMode] {
 			Settings::getInstance()->setString("GameLoadingImage", GameLoadingImage->getSelected());
 		   }
 	 });
-     )
+	 }
 	// Game Loading Image delay
 	 auto ITime = std::make_shared< OptionListComponent<std::string> >(mWindow, _("Game Loading Image Delay (secs)"), false);
 	 std::vector<std::string> adelay;
