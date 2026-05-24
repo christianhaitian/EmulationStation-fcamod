@@ -116,6 +116,7 @@ void Settings::setDefaults()
 	mBoolMap["EnableRumble"] = false;
 	mBoolMap["EnableKodi"] = true;
 	mBoolMap["ShowBatteryIndicator"] = true;
+	mBoolMap["ShowNetworkIndicator"] = true;
 	mBoolMap["OptimizeVRAM"] = true;	
 	mBoolMap["ThreadedLoading"] = true;	
 	mBoolMap["MusicTitles"] = true;
