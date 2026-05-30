@@ -1307,6 +1307,16 @@ void GuiMenu::openUISettings()
 		});
 	}
 
+	// Network indicator
+	auto networkIndicator = std::make_shared<SwitchComponent>(mWindow);
+	networkIndicator->setState(Settings::getInstance()->getBool("ShowNetworkIndicator"));
+	s->addWithLabel(_("SHOW NETWORK ICON"), networkIndicator);
+	s->addSaveFunc([s, networkIndicator]
+	{
+    		if (Settings::getInstance()->setBool("ShowNetworkIndicator", networkIndicator->getState()))
+        	s->setVariable("reloadAll", true);
+	});
+
 	// filenames
 	auto hidden_files = std::make_shared<SwitchComponent>(mWindow);
 	hidden_files->setState(Settings::getInstance()->getBool("ShowFilenames"));
