@@ -31,6 +31,7 @@ void ControllerActivityComponent::init()
 	mBatteryCheckTime = UPDATE_BATTERY_DELAY;
 
 	mNetworkCheckTime = UPDATE_NETWORK_DELAY;
+	mNetworkConnected = false;
 
 	mColorShift = 0xFFFFFF99;
 	mActivityColor = 0xFF000066;
@@ -47,9 +48,9 @@ void ControllerActivityComponent::init()
 	mPosition = Vector3f(margin, Renderer::getScreenHeight() - mSize.y() - margin, 0.0f);
 
 	/*for (int i = 0; i < MAX_PLAYERS; i++)
-		mPads[i].reset();
+		mPads[i].reset(); */
 
-	updateNetworkInfo();*/
+	updateNetworkInfo();
 	updateBatteryInfo();
 }
 
@@ -124,7 +125,7 @@ void ControllerActivityComponent::update(int deltaTime)
 		mNetworkCheckTime += deltaTime;
 		if (mNetworkCheckTime >= UPDATE_NETWORK_DELAY)
 		{
-			//updateNetworkInfo();
+			updateNetworkInfo();
 			mNetworkCheckTime = 0;
 		}
 	}
@@ -391,10 +392,24 @@ void ControllerActivityComponent::applyTheme(const std::shared_ptr<ThemeData>& t
     mBatteryInfo.level = -1;
 }
 
-/*void ControllerActivityComponent::updateNetworkInfo()
+static std::string queryIPAddress()
+{
+	FILE* pipe = popen("ip -f inet addr show wlan0 | sed -En -e 's/.*inet ([0-9.]+).*/\\1/p'", "r");
+	if (!pipe) return "";
+	char buffer[128];
+	std::string result = "";
+	while (fgets(buffer, sizeof(buffer), pipe) != NULL)
+		result += buffer;
+	pclose(pipe);
+	// trim newline
+	result.erase(result.find_last_not_of(" \n\r\t") + 1);
+	return result;
+}
+
+void ControllerActivityComponent::updateNetworkInfo()
 {
 	mNetworkConnected = Settings::getInstance()->getBool("ShowNetworkIndicator") && !queryIPAddress().empty();
-}*/
+}
 
 void ControllerActivityComponent::updateBatteryInfo()
 {
