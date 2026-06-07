@@ -11,6 +11,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include "Log.h"
+#include "Settings.h"
 
 #ifdef GAMESDB_APIKEY
 using namespace rapidjson;
@@ -52,7 +53,11 @@ std::string getScrapersResouceDir()
 }
 
 
-   std::string TheGamesDBJSONRequestResources::getApiKey() const { return GAMESDB_APIKEY; }
+   std::string TheGamesDBJSONRequestResources::getApiKey() const {
+	std::string userKey = Settings::getInstance()->getString("GamesDBApiKey");
+	if (!userKey.empty()) return userKey;
+	return GAMESDB_APIKEY;
+}
 
 
 void TheGamesDBJSONRequestResources::prepare()
