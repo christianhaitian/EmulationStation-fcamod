@@ -250,6 +250,7 @@ void GuiMenu::openScraperSettings()
 		scrape_ratings->setState(Settings::getInstance()->getBool("ScrapeRatings"));
 		s->addWithLabel(_("SCRAPE RATINGS"), scrape_ratings); // batocera
 		s->addSaveFunc([scrape_ratings] { Settings::getInstance()->setBool("ScrapeRatings", scrape_ratings->getState()); });
+		createInputTextRow(s, _("API KEY"), "GamesDBApiKey", false);
 	}
 
 	// scrape now
