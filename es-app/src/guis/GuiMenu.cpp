@@ -2156,7 +2156,29 @@ void GuiMenu::openOtherSettings()
 		    runSystemCommand("/usr/local/bin/auto_suspend_update.sh", "", nullptr);
 		}
 	});
-	     
+
+        // Battery Reading Mode
+	auto Brmode = std::make_shared< OptionListComponent<std::string> >(mWindow, _("Battery Reading Mode"), false);
+        std::vector<std::string> bBrmode;
+        bBrmode.push_back("Voltage");
+        bBrmode.push_back("PMIC");
+        bBrmode.push_back("Native");
+
+        auto getBrmode = Settings::getInstance()->getString("BrMode");
+        if (getBrmode.empty())
+                getBrmode = "Voltage";
+
+        for (auto it = bBrmode.cbegin(); it != bBrmode.cend(); it++)
+                Brmode->add(_(it->c_str()), *it, getBrmode == *it);
+
+        s->addWithLabel(_("Battery Reading Mode"), Brmode);
+	s->addSaveFunc([this, Brmode] { Settings::getInstance()->setString("BrMode", Brmode->getSelected()); 
+                if (Brmode->changed()) {
+		    runSystemCommand("echo " + Settings::getInstance()->getString("BrMode") + " > /home/ark/.config/.BRMODE", "", nullptr);
+                    runSystemCommand("sudo systemctl restart batteryplus", "", nullptr);
+                }
+        });
+
 
 #ifndef _RPI_
 	// full exit

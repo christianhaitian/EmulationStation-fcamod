@@ -353,9 +353,13 @@ BatteryInformation queryBatteryInformation(bool summary)
 
 int queryBatteryLevel()
 {
-	std::string batteryCapacityPath = queryBatteryRootPath() + "/capacity";
-	if ( Utils::FileSystem::exists(batteryCapacityPath) )
+	std::string batteryCapacityPath = "/tmp/battery.percent";
+	std::string batteryCapacityPath_kernel = queryBatteryRootPath() + "/capacity";
+	if ( Utils::FileSystem::exists(batteryCapacityPath) ) {
 		return std::atoi(Utils::FileSystem::readAllText(batteryCapacityPath).c_str());
+	} else if ( Utils::FileSystem::exists(batteryCapacityPath_kernel) ) {
+		return std::atoi(Utils::FileSystem::readAllText(batteryCapacityPath_kernel).c_str());
+	}
 
 	return 0;
 }
