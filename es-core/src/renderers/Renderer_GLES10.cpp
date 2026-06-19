@@ -1,4 +1,5 @@
 #include <string>
+#include "utils/FileSystemUtil.h"
 #if defined(USE_OPENGLES_10)
 
 #include "renderers/Renderer.h"
@@ -334,7 +335,11 @@ namespace Renderer
 				int batcapacity = 0;
 				int fd;
 				char buffer[10];
-				fd = open("/sys/class/power_supply/battery/capacity", O_RDONLY);
+				if ( Utils::FileSystem::exists("/tmp/battery.percent") ) {
+				  fd = open("/tmp/battery.percent", O_RDONLY);
+				} else {
+				  fd = open("/sys/class/power_supply/battery/capacity", O_RDONLY);
+				}
 				if (fd > 0)
 				{
 					memset(buffer, 0, 10);
