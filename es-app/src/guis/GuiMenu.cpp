@@ -164,43 +164,96 @@ void GuiMenu::openMiniloongLedSettings()
 
     s->addWithLabel(_("LED MODE"), ledMode);
 
-    // LED brightness.  Battery mode also uses this value.
-    auto ledBrightness = std::make_shared<SliderComponent>(mWindow, 1.0f, 100.0f, 1.0f, "%");
+    // Show brightness for all modes except OFF.
+    // Show effect only for fixed color modes.
+    bool showBrightness = currentMode != "off";
+    bool showEffect = currentMode != "battery" && currentMode != "rainbow" && currentMode != "off";
 
-    std::string currentBrightness = Settings::getInstance()->getString("miniloong.ledbrightness");
-    if (currentBrightness.empty())
-        currentBrightness = "80";
+    std::shared_ptr<SliderComponent> ledBrightness;
+    std::shared_ptr<OptionListComponent<std::string>> ledEffect;
 
-    int brightnessValue = atoi(currentBrightness.c_str());
-    if (brightnessValue < 1)
-        brightnessValue = 1;
-    else if (brightnessValue > 100)
-        brightnessValue = 100;
+    if (showBrightness)
+    {
+        auto brightnessComponent = std::make_shared<SliderComponent>(mWindow, 1.0f, 100.0f, 1.0f, "%");
 
-    ledBrightness->setValue((float)brightnessValue);
-    s->addWithLabel(_("BRIGHTNESS"), ledBrightness);
+        std::string currentBrightness = Settings::getInstance()->getString("miniloong.ledbrightness");
+        if (currentBrightness.empty())
+            currentBrightness = "80";
 
-    // LED effect.  This is used by fixed-color modes only; battery mode ignores it.
-    auto ledEffect = std::make_shared<OptionListComponent<std::string>>(
-        mWindow, _("EFFECT"), false);
+        int brightnessValue = atoi(currentBrightness.c_str());
+        if (brightnessValue < 1)
+            brightnessValue = 1;
+        else if (brightnessValue > 100)
+            brightnessValue = 100;
 
-    std::string currentEffect = Settings::getInstance()->getString("miniloong.ledeffect");
-    if (currentEffect.empty())
-        currentEffect = "solid";
+        brightnessComponent->setValue((float)brightnessValue);
+        s->addWithLabel(_("BRIGHTNESS"), brightnessComponent);
+        ledBrightness = brightnessComponent;
+    }
 
-    ledEffect->add(_("SOLID"), "solid", currentEffect == "solid");
-    ledEffect->add(_("BREATHE"), "breathe", currentEffect == "breathe");
-    ledEffect->add(_("BLINK"), "blink", currentEffect == "blink");
+    if (showEffect)
+    {
+        auto effectComponent = std::make_shared<OptionListComponent<std::string>>(
+            mWindow, _("EFFECT"), false);
 
-    if (!ledEffect->hasSelection())
-        ledEffect->selectFirstItem();
+        std::string currentEffect = Settings::getInstance()->getString("miniloong.ledeffect");
+        if (currentEffect.empty())
+            currentEffect = "solid";
 
-    s->addWithLabel(_("EFFECT"), ledEffect);
+        effectComponent->add(_("SOLID"), "solid", currentEffect == "solid");
+        effectComponent->add(_("BREATHE"), "breathe", currentEffect == "breathe");
+        effectComponent->add(_("BLINK"), "blink", currentEffect == "blink");
+
+        if (!effectComponent->hasSelection())
+            effectComponent->selectFirstItem();
+
+        s->addWithLabel(_("EFFECT"), effectComponent);
+        ledEffect = effectComponent;
+    }
+
+    // Rebuild this submenu when the mode changes so Battery/Rainbow hide EFFECT
+    // and Off hides both BRIGHTNESS and EFFECT.
+    ledMode->setSelectedChangedCallback([this, s](std::string selectedMode) {
+        std::string selectedBrightness = Settings::getInstance()->getString("miniloong.ledbrightness");
+        if (selectedBrightness.empty())
+            selectedBrightness = "80";
+
+        std::string selectedEffect = Settings::getInstance()->getString("miniloong.ledeffect");
+        if (selectedEffect.empty())
+            selectedEffect = "solid";
+
+        Settings::getInstance()->setString("miniloong.ledmode", selectedMode);
+        Settings::getInstance()->saveFile();
+
+        std::string cmd =
+            "mkdir -p /home/ark/.config && "
+            "printf '%s\\n%s\\n%s\\n' \"" + selectedMode + "\" \"" +
+            selectedBrightness + "\" \"" + selectedEffect +
+            "\" > /home/ark/.config/miniloong_led_mode && "
+            "/usr/local/bin/miniloong-led-mode.sh &";
+
+        system(cmd.c_str());
+
+        delete s;
+        openMiniloongLedSettings();
+    });
 
     s->addSaveFunc([ledMode, ledBrightness, ledEffect] {
         std::string selectedMode = ledMode->getSelected();
-        std::string selectedBrightness = std::to_string((int)Math::round(ledBrightness->getValue()));
-        std::string selectedEffect = ledEffect->getSelected();
+
+        std::string selectedBrightness = Settings::getInstance()->getString("miniloong.ledbrightness");
+        if (selectedBrightness.empty())
+            selectedBrightness = "80";
+
+        if (ledBrightness)
+            selectedBrightness = std::to_string((int)Math::round(ledBrightness->getValue()));
+
+        std::string selectedEffect = Settings::getInstance()->getString("miniloong.ledeffect");
+        if (selectedEffect.empty())
+            selectedEffect = "solid";
+
+        if (ledEffect)
+            selectedEffect = ledEffect->getSelected();
 
         Settings::getInstance()->setString("miniloong.ledmode", selectedMode);
         Settings::getInstance()->setString("miniloong.ledbrightness", selectedBrightness);
