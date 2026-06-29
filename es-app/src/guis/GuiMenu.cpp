@@ -84,6 +84,16 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 		addEntry(_("DOWNLOADS AND UPDATES"), true, [this] { openUpdateSettings(); }, "iconUpdates");
 #endif
 
+    // Miniloong LED Control
+    if (Utils::FileSystem::exists("/home/ark/.config/.DEVICE") &&
+        !std::string(getShOutput(R"(grep -i miniloong /home/ark/.config/.DEVICE)")).empty())
+    {
+        addEntry(_("LED CONTROL"), true, [this] {
+            openMiniloongLedSettings();
+        }, "iconBrightnessctl");
+    }
+
+
     // Tools Menu
     mMenu.addEntry(_("OPTIONS"), true, [this, window] {
         window->pushGui(new GuiTools(window));
@@ -126,6 +136,48 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 			Vector2f((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2));
 	else
 		setPosition((Renderer::getScreenWidth() - mSize.x()) / 2, (Renderer::getScreenHeight() - mSize.y()) / 2);
+}
+
+void GuiMenu::openMiniloongLedSettings()
+{
+    auto s = new GuiSettings(mWindow, _("LED CONTROL"));
+
+    auto ledMode = std::make_shared<OptionListComponent<std::string>>(
+        mWindow, _("LED MODE"), false);
+
+    std::string currentMode = Settings::getInstance()->getString("miniloong.ledmode");
+    //std::string currentMode = SystemConf::getInstance()->get("miniloong.ledmode");
+
+    if (currentMode.empty())
+        currentMode = "battery";
+
+    ledMode->add(_("BATTERY"), "battery", currentMode == "battery");
+    ledMode->add(_("RED"), "red", currentMode == "red");
+    ledMode->add(_("GREEN"), "green", currentMode == "green");
+    ledMode->add(_("BLUE"), "blue", currentMode == "blue");
+    ledMode->add(_("YELLOW"), "yellow", currentMode == "yellow");
+    ledMode->add(_("CYAN"), "cyan", currentMode == "cyan");
+    ledMode->add(_("MAGENTA"), "magenta", currentMode == "magenta");
+    ledMode->add(_("OFF"), "off", currentMode == "off");
+
+    s->addWithLabel(_("LED MODE"), ledMode);
+
+    s->addSaveFunc([this, ledMode] {Settings::getInstance()->setString("miniloong.ledmode", ledMode->getSelected());
+        if (ledMode->changed()) {
+            std::string selectedMode = ledMode->getSelected();
+
+            //SystemConf::getInstance()->set("miniloong.ledmode", selectedMode);
+            //SystemConf::getInstance()->saveSystemConf();
+
+            std::string cmd =
+                "printf '%s' \"" + selectedMode + "\" > /home/ark/.config/miniloong_led_mode && "
+                "/usr/local/bin/miniloong-led-mode.sh &";
+
+            system(cmd.c_str());
+        }
+    });
+
+    mWindow->pushGui(s);
 }
 
 void GuiMenu::openDisplaySettings()

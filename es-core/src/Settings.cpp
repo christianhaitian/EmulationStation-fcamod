@@ -110,6 +110,7 @@ void Settings::setDefaults()
 	mStringMap["VerbalBatteryThreshold"] = "Default";
 	mStringMap["GlobalPerformanceGovernor"] = "performance";
 	mStringMap["AutoSuspendTimeout"] = "Off";
+	mStringMap["miniloong.ledmode"] = "battery";
 	mStringMap["BrMode"] = "Voltage";
 	mStringMap["GameLoadingImage"] = "default";
 	mStringMap["GameLoadingIMode"] = "pic";
