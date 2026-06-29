@@ -51,6 +51,15 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
     if (Utils::FileSystem::exists("/var/run/drmConn")){
 	  addEntry(_("DISPLAY SETTINGS AND INFO"), true, [this] { openDisplaySettings(); }, "iconBrightnessctl");
     }
+
+    // Miniloong LED Control
+    if (Utils::FileSystem::exists("/home/ark/.config/.DEVICE") &&
+        !std::string(getShOutput(R"(grep -qi MINILOONG /home/ark/.config/.DEVICE && echo MINILOONG)")).empty())
+    {
+        addEntry(_("LED CONTROL"), true, [this] {
+            openMiniloongLedSettings();
+        }, "iconBrightnessctl");
+    }
     
 	auto theme = ThemeData::getMenuTheme();
 
@@ -83,16 +92,6 @@ GuiMenu::GuiMenu(Window* window, bool animate) : GuiComponent(window), mMenu(win
 #if WIN32
 		addEntry(_("DOWNLOADS AND UPDATES"), true, [this] { openUpdateSettings(); }, "iconUpdates");
 #endif
-
-    // Miniloong LED Control
-    if (Utils::FileSystem::exists("/home/ark/.config/.DEVICE") &&
-        !std::string(getShOutput(R"(grep -i miniloong /home/ark/.config/.DEVICE)")).empty())
-    {
-        addEntry(_("LED CONTROL"), true, [this] {
-            openMiniloongLedSettings();
-        }, "iconBrightnessctl");
-    }
-
 
     // Tools Menu
     mMenu.addEntry(_("OPTIONS"), true, [this, window] {
@@ -142,12 +141,11 @@ void GuiMenu::openMiniloongLedSettings()
 {
     auto s = new GuiSettings(mWindow, _("LED CONTROL"));
 
+    // LED mode
     auto ledMode = std::make_shared<OptionListComponent<std::string>>(
         mWindow, _("LED MODE"), false);
 
     std::string currentMode = Settings::getInstance()->getString("miniloong.ledmode");
-    //std::string currentMode = SystemConf::getInstance()->get("miniloong.ledmode");
-
     if (currentMode.empty())
         currentMode = "battery";
 
@@ -158,23 +156,65 @@ void GuiMenu::openMiniloongLedSettings()
     ledMode->add(_("YELLOW"), "yellow", currentMode == "yellow");
     ledMode->add(_("CYAN"), "cyan", currentMode == "cyan");
     ledMode->add(_("MAGENTA"), "magenta", currentMode == "magenta");
+    ledMode->add(_("RAINBOW"), "rainbow", currentMode == "rainbow");
     ledMode->add(_("OFF"), "off", currentMode == "off");
+
+    if (!ledMode->hasSelection())
+        ledMode->selectFirstItem();
 
     s->addWithLabel(_("LED MODE"), ledMode);
 
-    s->addSaveFunc([this, ledMode] {Settings::getInstance()->setString("miniloong.ledmode", ledMode->getSelected());
-        if (ledMode->changed()) {
-            std::string selectedMode = ledMode->getSelected();
+    // LED brightness.  Battery mode also uses this value.
+    auto ledBrightness = std::make_shared<SliderComponent>(mWindow, 1.0f, 100.0f, 1.0f, "%");
 
-            //SystemConf::getInstance()->set("miniloong.ledmode", selectedMode);
-            //SystemConf::getInstance()->saveSystemConf();
+    std::string currentBrightness = Settings::getInstance()->getString("miniloong.ledbrightness");
+    if (currentBrightness.empty())
+        currentBrightness = "80";
 
-            std::string cmd =
-                "printf '%s' \"" + selectedMode + "\" > /home/ark/.config/miniloong_led_mode && "
-                "/usr/local/bin/miniloong-led-mode.sh &";
+    int brightnessValue = atoi(currentBrightness.c_str());
+    if (brightnessValue < 1)
+        brightnessValue = 1;
+    else if (brightnessValue > 100)
+        brightnessValue = 100;
 
-            system(cmd.c_str());
-        }
+    ledBrightness->setValue((float)brightnessValue);
+    s->addWithLabel(_("BRIGHTNESS"), ledBrightness);
+
+    // LED effect.  This is used by fixed-color modes only; battery mode ignores it.
+    auto ledEffect = std::make_shared<OptionListComponent<std::string>>(
+        mWindow, _("EFFECT"), false);
+
+    std::string currentEffect = Settings::getInstance()->getString("miniloong.ledeffect");
+    if (currentEffect.empty())
+        currentEffect = "solid";
+
+    ledEffect->add(_("SOLID"), "solid", currentEffect == "solid");
+    ledEffect->add(_("BREATHE"), "breathe", currentEffect == "breathe");
+    ledEffect->add(_("BLINK"), "blink", currentEffect == "blink");
+
+    if (!ledEffect->hasSelection())
+        ledEffect->selectFirstItem();
+
+    s->addWithLabel(_("EFFECT"), ledEffect);
+
+    s->addSaveFunc([ledMode, ledBrightness, ledEffect] {
+        std::string selectedMode = ledMode->getSelected();
+        std::string selectedBrightness = std::to_string((int)Math::round(ledBrightness->getValue()));
+        std::string selectedEffect = ledEffect->getSelected();
+
+        Settings::getInstance()->setString("miniloong.ledmode", selectedMode);
+        Settings::getInstance()->setString("miniloong.ledbrightness", selectedBrightness);
+        Settings::getInstance()->setString("miniloong.ledeffect", selectedEffect);
+        Settings::getInstance()->saveFile();
+
+        std::string cmd =
+            "mkdir -p /home/ark/.config && "
+            "printf '%s\\n%s\\n%s\\n' \"" + selectedMode + "\" \"" +
+            selectedBrightness + "\" \"" + selectedEffect +
+            "\" > /home/ark/.config/miniloong_led_mode && "
+            "/usr/local/bin/miniloong-led-mode.sh &";
+
+        system(cmd.c_str());
     });
 
     mWindow->pushGui(s);
