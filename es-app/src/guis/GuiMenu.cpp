@@ -379,7 +379,7 @@ void GuiMenu::openDisplaySettings()
 	chz.push_back(_("60"));
 	chz.push_back(_("120"));
 
-	std::string hz = std::string(getShOutput(R"(/usr/local/bin/miniloong_refresh.sh get_refresh)"));
+	std::string hz = std::string(getShOutput(R"(/usr/local/bin/miniloong-refresh.sh get_refresh)"));
 
 	for (auto it = chz.cbegin(); it != chz.cend(); it++)
 		Hz->add(_(it->c_str()), *it, hz == *it);
@@ -390,7 +390,7 @@ void GuiMenu::openDisplaySettings()
 		    Window* window = mWindow;
 		    window->pushGui(new GuiMsgBox(window, _("ARE YOU SURE YOU WANT TO CHANGE THE REFRESH RATE NOW? IF YES, SYSTEM WILL IMMEDIATELY REBOOT AFTER THE CHANGE SO THIS SETTING CAN TAKE EFFECT."), _("YES"),
 					[Hz, window] {
-					runSystemCommand("sudo /usr/local/bin/miniloong_refresh.sh set_refresh " + Hz->getSelected(), "", nullptr);
+					runSystemCommand("sudo /usr/local/bin/miniloong-refresh.sh set_refresh " + Hz->getSelected(), "", nullptr);
 					runSystemCommand("sudo reboot", "", nullptr);
 			}, _("NO"), nullptr)
 			);
