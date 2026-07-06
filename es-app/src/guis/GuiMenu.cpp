@@ -367,11 +367,36 @@ void GuiMenu::openDisplaySettings()
 
     if (!std::string(getShOutput(R"(grep 353 ~/.config/.DEVICE)")).empty())
     {
-        //s->addEntry(_(""), false, [this] {  });
 	    s->addEntry(_("PANEL VERSION") + ": " + std::string(getShOutput(R"(panel_id.sh version)")), false, [this] {  });
 	    s->addEntry(_("PANEL ID") + ": " + std::string(getShOutput(R"(panel_id.sh id)")), false, [this] {  });
     }
 
+    if (!std::string(getShOutput(R"(grep MINILOONG ~/.config/.DEVICE)")).empty())
+    {
+	// Refresh Rate
+	auto Hz = std::make_shared< OptionListComponent<std::string> >(mWindow, _("REFRESH RATE"), false);
+	std::vector<std::string> chz;
+	chz.push_back(_("60"));
+	chz.push_back(_("120"));
+
+	std::string hz = std::string(getShOutput(R"(/usr/local/bin/miniloong_refresh.sh get_refresh)"));
+
+	for (auto it = chz.cbegin(); it != chz.cend(); it++)
+		Hz->add(_(it->c_str()), *it, hz == *it);
+
+	s->addWithLabel(_("REFRESH RATE"), Hz);
+	s->addSaveFunc([Hz, this] {
+		if (Hz->changed()) {
+		    Window* window = mWindow;
+		    window->pushGui(new GuiMsgBox(window, _("ARE YOU SURE YOU WANT TO CHANGE THE REFRESH RATE NOW? IF YES, SYSTEM WILL IMMEDIATELY REBOOT AFTER THE CHANGE SO THIS SETTING CAN TAKE EFFECT."), _("YES"),
+					[Hz, window] {
+					runSystemCommand("sudo /usr/local/bin/miniloong_refresh.sh set_refresh " + Hz->getSelected(), "", nullptr);
+					runSystemCommand("sudo reboot", "", nullptr);
+			}, _("NO"), nullptr)
+			);
+		}
+	});
+    }
   }
 	mWindow->pushGui(s);
 }
