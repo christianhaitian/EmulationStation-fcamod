@@ -377,6 +377,7 @@ void GuiMenu::openDisplaySettings()
 	auto Hz = std::make_shared< OptionListComponent<std::string> >(mWindow, _("REFRESH RATE"), false);
 	std::vector<std::string> chz;
 	chz.push_back(_("60"));
+	chz.push_back(_("90"));
 	chz.push_back(_("120"));
 
 	std::string hz = std::string(getShOutput(R"(/usr/local/bin/miniloong-refresh.sh get_refresh)"));
@@ -388,9 +389,11 @@ void GuiMenu::openDisplaySettings()
 	s->addSaveFunc([Hz, this] {
 		if (Hz->changed()) {
 		    Window* window = mWindow;
-		    window->pushGui(new GuiMsgBox(window, _("ARE YOU SURE YOU WANT TO CHANGE THE REFRESH RATE NOW? IF YES, SYSTEM WILL IMMEDIATELY REBOOT AFTER THE CHANGE SO THIS SETTING CAN TAKE EFFECT."), _("YES"),
+		    window->pushGui(new GuiMsgBox(window, _("ARE YOU SURE YOU WANT TO CHANGE THE REFRESH RATE NOW? IF YES, SYSTEM WILL IMMEDIATELY REBOOT AFTER THE CHANGE SO THIS SETTING CAN TAKE EFFECT.  IF THE SYSTEM JUST DISPLAYS A WHITE SCREEN FOR 10 SECONDS THEN REBOOTS BACK TO THE OS, THIS MEANS YOUR UNIT DOES NOT SUPPORT THE REQUESTED REFRESH RATE."), _("YES"),
 					[Hz, window] {
 					runSystemCommand("sudo /usr/local/bin/miniloong-refresh.sh set_refresh " + Hz->getSelected(), "", nullptr);
+					runSystemCommand("sudo cp -f /usr/local/bin/miniloong-refresh-confirm.sh /boot/firstboot.sh", "", nullptr);
+					runSystemCommand("sudo systemctl enable firstboot", "", nullptr);
 					runSystemCommand("sudo reboot", "", nullptr);
 			}, _("NO"), nullptr)
 			);
