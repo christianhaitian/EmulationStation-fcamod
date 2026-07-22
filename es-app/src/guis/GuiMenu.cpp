@@ -150,6 +150,8 @@ void GuiMenu::openMiniloongLedSettings()
         currentMode = "battery";
 
     ledMode->add(_("BATTERY"), "battery", currentMode == "battery");
+    ledMode->add(_("BATTERY-WARNING"), "battery-warning", currentMode == "battery-warning");
+    ledMode->add(_("BATTERY-CRITICAL"), "battery-critical", currentMode == "battery-critical");
     ledMode->add(_("RED"), "red", currentMode == "red");
     ledMode->add(_("GREEN"), "green", currentMode == "green");
     ledMode->add(_("BLUE"), "blue", currentMode == "blue");
@@ -167,7 +169,7 @@ void GuiMenu::openMiniloongLedSettings()
     // Show brightness for all modes except OFF.
     // Show effect only for fixed color modes.
     bool showBrightness = currentMode != "off";
-    bool showEffect = currentMode != "battery" && currentMode != "rainbow" && currentMode != "off";
+    bool showEffect = currentMode != "battery" && currentMode != "battery-warning" && currentMode != "battery-critical" && currentMode != "rainbow" && currentMode != "off";
 
     std::shared_ptr<SliderComponent> ledBrightness;
     std::shared_ptr<OptionListComponent<std::string>> ledEffect;
