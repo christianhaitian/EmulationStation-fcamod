@@ -2420,3 +2420,10 @@ msgstr "No establecer"
 #:
 msgid "QUICK SEARCH"
 msgstr "BÚSQUEDA RÁPIDA"
+
+
+#: es-app/src/views/SystemView.cpp
+msgid "%i GAME AVAILABLE"
+msgid_plural "%i GAMES AVAILABLE"
+msgstr[0] "%i JUEGO DISPONIBLE"
+msgstr[1] "%i JUEGOS DISPONIBLES"
