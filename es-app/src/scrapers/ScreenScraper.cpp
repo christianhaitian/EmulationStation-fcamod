@@ -121,6 +121,7 @@ const std::map<PlatformId, unsigned short> screenscraper_platformid_map{
 	{ MOONLIGHT, 138 }, // "PC Windows"
 	{ MODEL3, 55 },
 	{ TI99, 205 },
+	{ gamate, 266 },
 	{ vircon32, 272 },
 	{ WASM4, 262 },
 	{ SEGA_PICO, 250 },
