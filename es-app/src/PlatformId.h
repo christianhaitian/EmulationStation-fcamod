@@ -108,6 +108,7 @@ namespace PlatformIds
 		ZX81,
 		TIC80,
 		TI99,
+		gamate,
 		vircon32,
 		WASM4,
 		SEGA_PICO,
