@@ -111,6 +111,7 @@ namespace PlatformIds
 		{ "zx81",            ZX81 },
 		{ "tic80",           TIC80 },
 		{ "ti99", 					TI99 },
+		{ "gamate", 			gamate },
 		{ "vircon32", 			vircon32 },
 		{ "wasm4", 			WASM4 },
 		{ "pico", 			SEGA_PICO },
